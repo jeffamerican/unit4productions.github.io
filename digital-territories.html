@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Territories - 4 Player Battle Royale | BotInc Games</title>
+    <meta name="description" content="Massive 4-player territory control battle with real-time strategy elements">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e, #0e1221);
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .game-interface {
+            display: grid;
+            grid-template-areas: 
+                "player1-ui top-bar player2-ui"
+                "left-sidebar battlefield right-sidebar"
+                "player3-ui bottom-bar player4-ui";
+            grid-template-columns: 250px 1fr 250px;
+            grid-template-rows: 80px 1fr 80px;
+            height: 100vh;
+            gap: 5px;
+            padding: 5px;
+        }
+
+        .player-ui {
+            border-radius: 8px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .player1-ui { 
+            grid-area: player1-ui; 
+            background: linear-gradient(45deg, rgba(255, 92, 92, 0.3), rgba(255, 92, 92, 0.1));
+            border: 2px solid #ff5c5c;
+        }
+        .player2-ui { 
+            grid-area: player2-ui; 
+            background: linear-gradient(45deg, rgba(92, 184, 255, 0.3), rgba(92, 184, 255, 0.1));
+            border: 2px solid #5cb8ff;
+        }
+        .player3-ui { 
+            grid-area: player3-ui; 
+            background: linear-gradient(45deg, rgba(124, 255, 92, 0.3), rgba(124, 255, 92, 0.1));
+            border: 2px solid #7cff5c;
+        }
+        .player4-ui { 
+            grid-area: player4-ui; 
+            background: linear-gradient(45deg, rgba(255, 207, 92, 0.3), rgba(255, 207, 92, 0.1));
+            border: 2px solid #ffcf5c;
+        }
+
+        .top-bar {
+            grid-area: top-bar;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .timer {
+            position: absolute;
+            right: 1rem;
+            font-size: 1.2rem;
+            color: #ffcf5c;
+        }
+
+        .battlefield {
+            grid-area: battlefield;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 92, 92, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 80% 20%, rgba(92, 184, 255, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 20% 80%, rgba(124, 255, 92, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 80% 80%, rgba(255, 207, 92, 0.1) 0%, transparent 25%),
+                linear-gradient(135deg, #0f0f23, #1a1a2e);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .battlefield-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            gap: 1px;
+            padding: 10px;
+        }
+
+        .territory-cell {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .territory-cell:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .territory-cell.player1 {
+            background: rgba(255, 92, 92, 0.6);
+            border-color: #ff5c5c;
+            box-shadow: 0 0 8px rgba(255, 92, 92, 0.4);
+        }
+
+        .territory-cell.player2 {
+            background: rgba(92, 184, 255, 0.6);
+            border-color: #5cb8ff;
+            box-shadow: 0 0 8px rgba(92, 184, 255, 0.4);
+        }
+
+        .territory-cell.player3 {
+            background: rgba(124, 255, 92, 0.6);
+            border-color: #7cff5c;
+            box-shadow: 0 0 8px rgba(124, 255, 92, 0.4);
+        }
+
+        .territory-cell.player4 {
+            background: rgba(255, 207, 92, 0.6);
+            border-color: #ffcf5c;
+            box-shadow: 0 0 8px rgba(255, 207, 92, 0.4);
+        }
+
+        .fortress {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            z-index: 5;
+        }
+
+        .fortress.player1 { background: #ff5c5c; box-shadow: 0 0 6px #ff5c5c; }
+        .fortress.player2 { background: #5cb8ff; box-shadow: 0 0 6px #5cb8ff; }
+        .fortress.player3 { background: #7cff5c; box-shadow: 0 0 6px #7cff5c; }
+        .fortress.player4 { background: #ffcf5c; box-shadow: 0 0 6px #ffcf5c; }
+
+        .left-sidebar, .right-sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .left-sidebar { grid-area: left-sidebar; }
+        .right-sidebar { grid-area: right-sidebar; }
+
+        .bottom-bar {
+            grid-area: bottom-bar;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .player-name {
+            font-weight: bold;
+        }
+
+        .player1-name { color: #ff5c5c; }
+        .player2-name { color: #5cb8ff; }
+        .player3-name { color: #7cff5c; }
+        .player4-name { color: #ffcf5c; }
+
+        .resource-bar {
+            width: 60px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .resource-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .player1-resource { background: linear-gradient(90deg, #ff5c5c, #cc4949); }
+        .player2-resource { background: linear-gradient(90deg, #5cb8ff, #4993cc); }
+        .player3-resource { background: linear-gradient(90deg, #7cff5c, #63cc49); }
+        .player4-resource { background: linear-gradient(90deg, #ffcf5c, #cca649); }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.6rem;
+            background: linear-gradient(45deg, #333, #555);
+            border: 1px solid #666;
+            border-radius: 5px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #555, #777);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .leaderboard {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .leaderboard h3 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .leader-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem;
+            margin-bottom: 0.2rem;
+            border-radius: 3px;
+        }
+
+        .leader-entry.first { background: rgba(255, 215, 0, 0.2); }
+        .leader-entry.second { background: rgba(192, 192, 192, 0.2); }
+        .leader-entry.third { background: rgba(205, 127, 50, 0.2); }
+
+        .battle-log {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 1rem;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 0.2rem;
+            margin-bottom: 0.1rem;
+            font-size: 0.8rem;
+            border-left: 3px solid #666;
+            padding-left: 0.5rem;
+        }
+
+        .log-p1 { border-left-color: #ff5c5c; color: #ff9999; }
+        .log-p2 { border-left-color: #5cb8ff; color: #99ccff; }
+        .log-p3 { border-left-color: #7cff5c; color: #99ff99; }
+        .log-p4 { border-left-color: #ffcf5c; color: #ffdd99; }
+        .log-system { border-left-color: #ffffff; color: #cccccc; }
+
+        .victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .victory-content {
+            text-align: center;
+            padding: 3rem;
+            border: 3px solid;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e);
+        }
+
+        .victory-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px currentColor;
+        }
+
+        .restart-btn {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #666, #999);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #fff;
+            border-radius: 5px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .turn-indicator {
+            position: absolute;
+            left: 1rem;
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .turn-player1 { 
+            background: rgba(255, 92, 92, 0.3); 
+            color: #ff5c5c;
+            border: 2px solid #ff5c5c; 
+        }
+        .turn-player2 { 
+            background: rgba(92, 184, 255, 0.3); 
+            color: #5cb8ff;
+            border: 2px solid #5cb8ff; 
+        }
+        .turn-player3 { 
+            background: rgba(124, 255, 92, 0.3); 
+            color: #7cff5c;
+            border: 2px solid #7cff5c; 
+        }
+        .turn-player4 { 
+            background: rgba(255, 207, 92, 0.3); 
+            color: #ffcf5c;
+            border: 2px solid #ffcf5c; 
+        }
+
+        @media (max-width: 1200px) {
+            .game-interface {
+                grid-template-areas: 
+                    "top-bar"
+                    "battlefield"
+                    "bottom-bar";
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+            
+            .left-sidebar, .right-sidebar, .player-ui {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+
+    <div class="game-interface">
+        <div class="player-ui player1-ui">
+            <div class="player-info">
+                <span class="player-name player1-name">ALPHA</span>
+                <div class="resource-bar">
+                    <div class="resource-fill player1-resource" id="player1Resources" style="width: 100%"></div>
+                </div>
+            </div>
+            <div>Territory: <span id="player1Territory">0</span>%</div>
+        </div>
+
+        <div class="top-bar">
+            <div class="turn-indicator turn-player1" id="turnIndicator">ALPHA'S TURN</div>
+            <h1 class="game-title">DIGITAL TERRITORIES</h1>
+            <div class="timer" id="gameTimer">05:00</div>
+        </div>
+
+        <div class="player-ui player2-ui">
+            <div class="player-info">
+                <span class="player-name player2-name">BETA</span>
+                <div class="resource-bar">
+                    <div class="resource-fill player2-resource" id="player2Resources" style="width: 100%"></div>
+                </div>
+            </div>
+            <div>Territory: <span id="player2Territory">0</span>%</div>
+        </div>
+
+        <div class="left-sidebar">
+            <h3>📊 Live Leaderboard</h3>
+            <div class="leaderboard" id="leaderboard">
+                <div class="leader-entry first">
+                    <span>🥇 Waiting...</span>
+                    <span>0%</span>
+                </div>
+                <div class="leader-entry second">
+                    <span>🥈 Waiting...</span>
+                    <span>0%</span>
+                </div>
+                <div class="leader-entry third">
+                    <span>🥉 Waiting...</span>
+                    <span>0%</span>
+                </div>
+                <div class="leader-entry">
+                    <span>4th Waiting...</span>
+                    <span>0%</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="deployFortress()">🏰 Build Fortress (50)</button>
+                <button class="action-btn" onclick="launchAttack()">⚔️ Mass Attack (30)</button>
+                <button class="action-btn" onclick="defendTerritory()">🛡️ Defend All (25)</button>
+                <button class="action-btn" onclick="expandTerritory()">📈 Rapid Expand (40)</button>
+            </div>
+        </div>
+
+        <div class="battlefield">
+            <div class="battlefield-grid" id="battlefieldGrid"></div>
+        </div>
+
+        <div class="right-sidebar">
+            <h3>⚡ Battle Log</h3>
+            <div class="battle-log" id="battleLog">
+                <div class="log-entry log-system">🎮 4-Player Battle Royale Started!</div>
+                <div class="log-entry log-system">🗺️ Digital territories await conquest</div>
+                <div class="log-entry log-system">🏆 First to 40% territory wins</div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="useSpecialAbility('nuke')">💥 Nuclear Strike (80)</button>
+                <button class="action-btn" onclick="useSpecialAbility('virus')">🦠 Viral Spread (60)</button>
+                <button class="action-btn" onclick="useSpecialAbility('emp')">⚡ EMP Blast (70)</button>
+                <button class="action-btn" onclick="endTurn()">✅ End Turn</button>
+            </div>
+        </div>
+
+        <div class="player-ui player3-ui">
+            <div class="player-info">
+                <span class="player-name player3-name">GAMMA</span>
+                <div class="resource-bar">
+                    <div class="resource-fill player3-resource" id="player3Resources" style="width: 100%"></div>
+                </div>
+            </div>
+            <div>Territory: <span id="player3Territory">0</span>%</div>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="player-info">
+                <span class="player1-name">ALPHA: </span>
+                <span id="player1Score">0 pts</span>
+            </div>
+            <div class="player-info">
+                <span class="player2-name">BETA: </span>
+                <span id="player2Score">0 pts</span>
+            </div>
+            <div class="player-info">
+                <span class="player3-name">GAMMA: </span>
+                <span id="player3Score">0 pts</span>
+            </div>
+            <div class="player-info">
+                <span class="player4-name">DELTA: </span>
+                <span id="player4Score">0 pts</span>
+            </div>
+        </div>
+
+        <div class="player-ui player4-ui">
+            <div class="player-info">
+                <span class="player-name player4-name">DELTA</span>
+                <div class="resource-bar">
+                    <div class="resource-fill player4-resource" id="player4Resources" style="width: 100%"></div>
+                </div>
+            </div>
+            <div>Territory: <span id="player4Territory">0</span>%</div>
+        </div>
+    </div>
+
+    <div class="victory-overlay" id="victoryOverlay">
+        <div class="victory-content" id="victoryContent">
+            <div class="victory-title" id="victoryTitle">ALPHA DOMINATES!</div>
+            <p>Digital supremacy achieved!</p>
+            <p>Final territory control: <span id="finalTerritory">0%</span></p>
+            <button class="restart-btn" onclick="restartGame()">🔄 NEW BATTLE</button>
+            <button class="restart-btn" onclick="window.location.href='index.html'">🏠 MAIN MENU</button>
+        </div>
+    </div>
+
+    <script>
+        class DigitalTerritories {
+            constructor() {
+                this.gridWidth = 20;
+                this.gridHeight = 15;
+                this.currentPlayer = 1;
+                this.gameTime = 300; // 5 minutes
+                this.gameState = 'playing';
+                
+                this.players = {
+                    1: { name: 'ALPHA', color: '#ff5c5c', resources: 100, territory: 0, score: 0, fortresses: 0 },
+                    2: { name: 'BETA', color: '#5cb8ff', resources: 100, territory: 0, score: 0, fortresses: 0 },
+                    3: { name: 'GAMMA', color: '#7cff5c', resources: 100, territory: 0, score: 0, fortresses: 0 },
+                    4: { name: 'DELTA', color: '#ffcf5c', resources: 100, territory: 0, score: 0, fortresses: 0 }
+                };
+                
+                this.battlefield = [];
+                this.turnCount = 0;
+                
+                this.initializeBattlefield();
+                this.startGameLoop();
+                this.setupInitialTerritories();
+            }
+
+            initializeBattlefield() {
+                const grid = document.getElementById('battlefieldGrid');
+                grid.innerHTML = '';
+                
+                this.battlefield = [];
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    this.battlefield[y] = [];
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'territory-cell';
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+                        cell.addEventListener('click', () => this.cellClicked(x, y));
+                        grid.appendChild(cell);
+                        
+                        this.battlefield[y][x] = {
+                            element: cell,
+                            owner: 0,
+                            strength: 0,
+                            fortress: false
+                        };
+                    }
+                }
+            }
+
+            setupInitialTerritories() {
+                // Give each player starting territories in corners
+                const startPositions = [
+                    { x: 2, y: 2 },    // Player 1 - top-left
+                    { x: 17, y: 2 },   // Player 2 - top-right  
+                    { x: 2, y: 12 },   // Player 3 - bottom-left
+                    { x: 17, y: 12 }   // Player 4 - bottom-right
+                ];
+                
+                startPositions.forEach((pos, player) => {
+                    const playerId = player + 1;
+                    
+                    // Create 3x3 starting area
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const x = pos.x + dx;
+                            const y = pos.y + dy;
+                            
+                            if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
+                                this.claimTerritory(x, y, playerId, 10);
+                            }
+                        }
+                    }
+                    
+                    // Add starting fortress
+                    this.addFortress(pos.x, pos.y, playerId);
+                });
+                
+                this.updateUI();
+            }
+
+            cellClicked(x, y) {
+                if (this.gameState !== 'playing') return;
+                
+                const cell = this.battlefield[y][x];
+                const player = this.players[this.currentPlayer];
+                
+                if (player.resources < 10) return;
+                
+                if (cell.owner === 0) {
+                    // Claim neutral territory
+                    this.claimTerritory(x, y, this.currentPlayer, 5);
+                    player.resources -= 10;
+                    player.score += 5;
+                    this.logAction(`${player.name} claimed territory (${x},${y})`);
+                } else if (cell.owner === this.currentPlayer) {
+                    // Strengthen own territory
+                    cell.strength += 10;
+                    player.resources -= 10;
+                    player.score += 2;
+                    this.logAction(`${player.name} strengthened territory (${x},${y})`);
+                } else {
+                    // Attack enemy territory
+                    this.attackTerritory(x, y);
+                }
+                
+                this.updateUI();
+            }
+
+            claimTerritory(x, y, player, strength) {
+                const cell = this.battlefield[y][x];
+                cell.owner = player;
+                cell.strength = strength;
+                cell.element.className = `territory-cell player${player}`;
+                
+                // Chain reaction - expand to adjacent neutral territories
+                if (Math.random() < 0.3) {
+                    this.expandToAdjacent(x, y, player);
+                }
+            }
+
+            expandToAdjacent(centerX, centerY, player) {
+                const directions = [
+                    [-1, -1], [-1, 0], [-1, 1],
+                    [0, -1],           [0, 1],
+                    [1, -1],  [1, 0],  [1, 1]
+                ];
+                
+                directions.forEach(([dx, dy]) => {
+                    const newX = centerX + dx;
+                    const newY = centerY + dy;
+                    
+                    if (newX >= 0 && newX < this.gridWidth && newY >= 0 && newY < this.gridHeight) {
+                        const cell = this.battlefield[newY][newX];
+                        if (cell.owner === 0 && Math.random() < 0.2) {
+                            this.claimTerritory(newX, newY, player, 3);
+                        }
+                    }
+                });
+            }
+
+            attackTerritory(x, y) {
+                const cell = this.battlefield[y][x];
+                const attacker = this.players[this.currentPlayer];
+                const defender = this.players[cell.owner];
+                
+                const attackStrength = Math.random() * 20 + 10;
+                const defensePower = cell.strength + (cell.fortress ? 20 : 0);
+                
+                if (attackStrength > defensePower) {
+                    // Successful attack
+                    this.claimTerritory(x, y, this.currentPlayer, Math.floor(attackStrength));
+                    attacker.resources -= 15;
+                    attacker.score += 10;
+                    this.logAction(`${attacker.name} conquered ${defender.name}'s territory (${x},${y})!`);
+                    
+                    if (cell.fortress) {
+                        cell.fortress = false;
+                        cell.element.querySelector('.fortress')?.remove();
+                        defender.fortresses--;
+                        this.logAction(`${attacker.name} destroyed ${defender.name}'s fortress!`);
+                    }
+                } else {
+                    // Failed attack
+                    attacker.resources -= 15;
+                    cell.strength = Math.max(1, cell.strength - 5);
+                    this.logAction(`${attacker.name}'s attack on (${x},${y}) repelled by ${defender.name}`);
+                }
+            }
+
+            addFortress(x, y, player) {
+                const cell = this.battlefield[y][x];
+                if (cell.owner === player && !cell.fortress) {
+                    cell.fortress = true;
+                    cell.strength += 25;
+                    
+                    const fortress = document.createElement('div');
+                    fortress.className = `fortress player${player}`;
+                    cell.element.appendChild(fortress);
+                    
+                    this.players[player].fortresses++;
+                }
+            }
+
+            deployFortress() {
+                const player = this.players[this.currentPlayer];
+                if (player.resources < 50) return;
+                
+                // Find random owned territory
+                const ownedCells = [];
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner === this.currentPlayer && !cell.fortress) {
+                            ownedCells.push({ x, y });
+                        }
+                    }
+                }
+                
+                if (ownedCells.length > 0) {
+                    const target = ownedCells[Math.floor(Math.random() * ownedCells.length)];
+                    this.addFortress(target.x, target.y, this.currentPlayer);
+                    player.resources -= 50;
+                    this.logAction(`${player.name} built a fortress at (${target.x},${target.y})`);
+                    this.updateUI();
+                }
+            }
+
+            launchAttack() {
+                const player = this.players[this.currentPlayer];
+                if (player.resources < 30) return;
+                
+                let attacksMade = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner !== 0 && cell.owner !== this.currentPlayer && Math.random() < 0.1) {
+                            this.attackTerritory(x, y);
+                            attacksMade++;
+                            if (attacksMade >= 5) break;
+                        }
+                    }
+                    if (attacksMade >= 5) break;
+                }
+                
+                player.resources -= 30;
+                this.logAction(`${player.name} launched mass attack (${attacksMade} targets hit)`);
+                this.updateUI();
+            }
+
+            defendTerritory() {
+                const player = this.players[this.currentPlayer];
+                if (player.resources < 25) return;
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner === this.currentPlayer) {
+                            cell.strength += 5;
+                        }
+                    }
+                }
+                
+                player.resources -= 25;
+                this.logAction(`${player.name} strengthened all territories`);
+                this.updateUI();
+            }
+
+            expandTerritory() {
+                const player = this.players[this.currentPlayer];
+                if (player.resources < 40) return;
+                
+                let expansions = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner === this.currentPlayer) {
+                            this.expandToAdjacent(x, y, this.currentPlayer);
+                            expansions++;
+                            if (expansions >= 3) break;
+                        }
+                    }
+                    if (expansions >= 3) break;
+                }
+                
+                player.resources -= 40;
+                player.score += 15;
+                this.logAction(`${player.name} rapidly expanded territory`);
+                this.updateUI();
+            }
+
+            useSpecialAbility(ability) {
+                const player = this.players[this.currentPlayer];
+                let cost = 0;
+                
+                switch(ability) {
+                    case 'nuke':
+                        cost = 80;
+                        if (player.resources >= cost) {
+                            this.nuclearStrike();
+                            this.logAction(`${player.name} launched NUCLEAR STRIKE!`);
+                        }
+                        break;
+                    case 'virus':
+                        cost = 60;
+                        if (player.resources >= cost) {
+                            this.viralSpread();
+                            this.logAction(`${player.name} unleashed viral attack!`);
+                        }
+                        break;
+                    case 'emp':
+                        cost = 70;
+                        if (player.resources >= cost) {
+                            this.empBlast();
+                            this.logAction(`${player.name} detonated EMP blast!`);
+                        }
+                        break;
+                }
+                
+                if (player.resources >= cost) {
+                    player.resources -= cost;
+                    this.updateUI();
+                }
+            }
+
+            nuclearStrike() {
+                // Destroy random enemy territories
+                let destroyed = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner !== 0 && cell.owner !== this.currentPlayer && Math.random() < 0.15) {
+                            cell.owner = 0;
+                            cell.strength = 0;
+                            cell.element.className = 'territory-cell';
+                            if (cell.fortress) {
+                                cell.fortress = false;
+                                cell.element.querySelector('.fortress')?.remove();
+                            }
+                            destroyed++;
+                        }
+                    }
+                }
+                this.logAction(`Nuclear strike destroyed ${destroyed} territories`);
+            }
+
+            viralSpread() {
+                // Convert enemy territories
+                let infected = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner !== 0 && cell.owner !== this.currentPlayer && Math.random() < 0.1) {
+                            this.claimTerritory(x, y, this.currentPlayer, 8);
+                            infected++;
+                        }
+                    }
+                }
+                this.players[this.currentPlayer].score += infected * 5;
+                this.logAction(`Virus infected ${infected} territories`);
+            }
+
+            empBlast() {
+                // Disable enemy fortresses and weaken territories
+                let disabled = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner !== 0 && cell.owner !== this.currentPlayer) {
+                            cell.strength = Math.max(1, cell.strength - 10);
+                            if (cell.fortress && Math.random() < 0.3) {
+                                cell.fortress = false;
+                                cell.element.querySelector('.fortress')?.remove();
+                                this.players[cell.owner].fortresses--;
+                                disabled++;
+                            }
+                        }
+                    }
+                }
+                this.logAction(`EMP disabled ${disabled} fortresses and weakened enemy territories`);
+            }
+
+            endTurn() {
+                this.currentPlayer = (this.currentPlayer % 4) + 1;
+                this.turnCount++;
+                
+                // Regenerate resources
+                this.players[this.currentPlayer].resources = Math.min(100, this.players[this.currentPlayer].resources + 15);
+                
+                this.updateTurnIndicator();
+                this.updateUI();
+                
+                this.logAction(`Turn ${this.turnCount}: ${this.players[this.currentPlayer].name}'s turn begins`);
+            }
+
+            calculateTerritory(player) {
+                let count = 0;
+                const total = this.gridWidth * this.gridHeight;
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        if (this.battlefield[y][x].owner === player) {
+                            count++;
+                        }
+                    }
+                }
+                
+                return Math.round((count / total) * 100);
+            }
+
+            updateUI() {
+                // Update player stats
+                for (let player = 1; player <= 4; player++) {
+                    const data = this.players[player];
+                    const territory = this.calculateTerritory(player);
+                    data.territory = territory;
+                    
+                    document.getElementById(`player${player}Resources`).style.width = data.resources + '%';
+                    document.getElementById(`player${player}Territory`).textContent = territory;
+                    document.getElementById(`player${player}Score`).textContent = data.score + ' pts';
+                }
+                
+                this.updateLeaderboard();
+                this.checkWinCondition();
+            }
+
+            updateLeaderboard() {
+                const sorted = Object.entries(this.players)
+                    .map(([id, data]) => ({ id, ...data }))
+                    .sort((a, b) => b.territory - a.territory);
+                
+                const leaderboard = document.getElementById('leaderboard');
+                const entries = leaderboard.children;
+                
+                const medals = ['🥇', '🥈', '🥉', '4th'];
+                sorted.forEach((player, index) => {
+                    if (entries[index]) {
+                        entries[index].innerHTML = `
+                            <span>${medals[index]} ${player.name}</span>
+                            <span>${player.territory}%</span>
+                        `;
+                    }
+                });
+            }
+
+            updateTurnIndicator() {
+                const indicator = document.getElementById('turnIndicator');
+                const player = this.players[this.currentPlayer];
+                indicator.textContent = `${player.name}'S TURN`;
+                indicator.className = `turn-indicator turn-player${this.currentPlayer}`;
+            }
+
+            checkWinCondition() {
+                const winner = Object.entries(this.players).find(([id, data]) => data.territory >= 40);
+                
+                if (winner || this.gameTime <= 0) {
+                    this.endGame(winner ? winner[0] : null);
+                }
+            }
+
+            endGame(winnerId) {
+                this.gameState = 'finished';
+                const overlay = document.getElementById('victoryOverlay');
+                const title = document.getElementById('victoryTitle');
+                const content = document.getElementById('victoryContent');
+                
+                if (winnerId) {
+                    const winner = this.players[winnerId];
+                    title.textContent = `${winner.name} DOMINATES!`;
+                    title.style.color = winner.color;
+                    content.style.borderColor = winner.color;
+                    document.getElementById('finalTerritory').textContent = winner.territory + '%';
+                } else {
+                    title.textContent = 'TIME UP!';
+                    const leader = Object.entries(this.players)
+                        .sort(([,a], [,b]) => b.territory - a.territory)[0];
+                    title.style.color = leader[1].color;
+                    document.getElementById('finalTerritory').textContent = leader[1].territory + '%';
+                }
+                
+                overlay.style.display = 'flex';
+                this.logAction('🏆 GAME OVER - Digital territories conquered!');
+            }
+
+            logAction(message) {
+                const log = document.getElementById('battleLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-p${this.currentPlayer}`;
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+                
+                if (log.children.length > 50) {
+                    log.removeChild(log.firstChild);
+                }
+            }
+
+            startGameLoop() {
+                setInterval(() => {
+                    if (this.gameState === 'playing' && this.gameTime > 0) {
+                        this.gameTime--;
+                        const minutes = Math.floor(this.gameTime / 60);
+                        const seconds = this.gameTime % 60;
+                        document.getElementById('gameTimer').textContent = 
+                            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        
+                        if (this.gameTime <= 0) {
+                            this.checkWinCondition();
+                        }
+                    }
+                }, 1000);
+                
+                // AI players take turns automatically
+                setInterval(() => {
+                    if (this.gameState === 'playing' && this.currentPlayer > 1) {
+                        this.aiTurn();
+                    }
+                }, 3000);
+            }
+
+            aiTurn() {
+                const player = this.players[this.currentPlayer];
+                
+                // AI makes random strategic moves
+                const actions = ['expand', 'attack', 'defend', 'fortress'];
+                const action = actions[Math.floor(Math.random() * actions.length)];
+                
+                switch(action) {
+                    case 'expand':
+                        if (player.resources >= 40) this.expandTerritory();
+                        break;
+                    case 'attack':
+                        if (player.resources >= 30) this.launchAttack();
+                        break;
+                    case 'defend':
+                        if (player.resources >= 25) this.defendTerritory();
+                        break;
+                    case 'fortress':
+                        if (player.resources >= 50) this.deployFortress();
+                        break;
+                }
+                
+                // AI also clicks random cells
+                const randomX = Math.floor(Math.random() * this.gridWidth);
+                const randomY = Math.floor(Math.random() * this.gridHeight);
+                this.cellClicked(randomX, randomY);
+                
+                setTimeout(() => this.endTurn(), 1000);
+            }
+        }
+
+        let game;
+        
+        function deployFortress() { if (game) game.deployFortress(); }
+        function launchAttack() { if (game) game.launchAttack(); }
+        function defendTerritory() { if (game) game.defendTerritory(); }
+        function expandTerritory() { if (game) game.expandTerritory(); }
+        function useSpecialAbility(ability) { if (game) game.useSpecialAbility(ability); }
+        function endTurn() { if (game) game.endTurn(); }
+        
+        function restartGame() {
+            document.getElementById('victoryOverlay').style.display = 'none';
+            game = new DigitalTerritories();
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', function() {
+            game = new DigitalTerritories();
+        });
+    </script>
+</body>
+</html>
