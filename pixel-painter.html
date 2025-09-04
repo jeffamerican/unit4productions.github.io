@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Painter - Creative Art Game | BotInc Games</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .toolbar {
+            width: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-right: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .pixel-canvas {
+            display: grid;
+            gap: 1px;
+            background: #333;
+            border: 3px solid #fff;
+            border-radius: 8px;
+            padding: 5px;
+        }
+        
+        .pixel {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            cursor: crosshair;
+            transition: all 0.1s ease;
+        }
+        
+        .pixel:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        
+        .color-btn {
+            width: 35px;
+            height: 35px;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .color-btn:hover {
+            transform: scale(1.1);
+            border-color: #fff;
+        }
+        
+        .color-btn.selected {
+            border-color: #ffff00;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+        }
+        
+        .tool-section {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .tool-section h3 {
+            margin-bottom: 10px;
+            color: #667eea;
+            text-align: center;
+        }
+        
+        .tool-btn {
+            width: 100%;
+            padding: 8px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #667eea;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .tool-btn:hover {
+            background: rgba(102, 126, 234, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .size-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .canvas-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <h2 style="text-align: center; margin-bottom: 20px;">🎨 Pixel Painter</h2>
+        
+        <div class="tool-section">
+            <h3>Colors</h3>
+            <div class="color-palette" id="colorPalette"></div>
+        </div>
+        
+        <div class="tool-section">
+            <h3>Tools</h3>
+            <button class="tool-btn" onclick="setTool('brush')">🖌️ Brush</button>
+            <button class="tool-btn" onclick="setTool('fill')">🪣 Fill</button>
+            <button class="tool-btn" onclick="setTool('eyedropper')">💉 Eyedropper</button>
+            <button class="tool-btn" onclick="setTool('eraser')">🧹 Eraser</button>
+        </div>
+        
+        <div class="tool-section">
+            <h3>Canvas</h3>
+            <button class="tool-btn" onclick="clearCanvas()">🗑️ Clear All</button>
+            <button class="tool-btn" onclick="randomFill()">🎲 Random Fill</button>
+            <button class="tool-btn" onclick="saveArt()">💾 Save Art</button>
+        </div>
+        
+        <div class="tool-section">
+            <h3>Size: <span id="sizeDisplay">20x20</span></h3>
+            <input type="range" class="size-slider" min="10" max="40" value="20" 
+                   onchange="changeCanvasSize(this.value)">
+        </div>
+    </div>
+    
+    <div class="canvas-area">
+        <div class="canvas-controls">
+            <button class="control-btn" onclick="undo()">↶ Undo</button>
+            <button class="control-btn" onclick="redo()">↷ Redo</button>
+        </div>
+        
+        <div class="pixel-canvas" id="pixelCanvas"></div>
+        
+        <div class="canvas-controls">
+            <button class="control-btn" onclick="exportImage()">📸 Export PNG</button>
+            <button class="control-btn" onclick="shareArt()">📤 Share</button>
+        </div>
+    </div>
+    
+    <script>
+        let gameState = {
+            canvasSize: 20,
+            currentColor: '#ff0000',
+            currentTool: 'brush',
+            isDrawing: false,
+            history: [],
+            historyIndex: -1
+        };
+        
+        const colors = [
+            '#000000', '#ffffff', '#ff0000', '#00ff00',
+            '#0000ff', '#ffff00', '#ff00ff', '#00ffff',
+            '#ff8800', '#8800ff', '#88ff00', '#ff0088',
+            '#0088ff', '#808080', '#400080', '#804000'
+        ];
+        
+        function initializeColorPalette() {
+            const palette = document.getElementById('colorPalette');
+            colors.forEach((color, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'color-btn';
+                btn.style.backgroundColor = color;
+                btn.onclick = () => setColor(color);
+                if (index === 0) btn.classList.add('selected');
+                palette.appendChild(btn);
+            });
+        }
+        
+        function setColor(color) {
+            gameState.currentColor = color;
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.style.backgroundColor === color) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+        
+        function setTool(tool) {
+            gameState.currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.style.background = 'rgba(102, 126, 234, 0.2)';
+            });
+            event.target.style.background = 'rgba(102, 126, 234, 0.6)';
+        }
+        
+        function initializeCanvas() {
+            const canvas = document.getElementById('pixelCanvas');
+            const size = gameState.canvasSize;
+            
+            canvas.style.gridTemplateColumns = `repeat(${size}, 20px)`;
+            canvas.innerHTML = '';
+            
+            for (let i = 0; i < size * size; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'pixel';
+                pixel.dataset.index = i;
+                pixel.onmousedown = (e) => startDrawing(e, i);
+                pixel.onmouseenter = (e) => continueDrawing(e, i);
+                pixel.onmouseup = () => stopDrawing();
+                canvas.appendChild(pixel);
+            }
+            
+            saveState();
+        }
+        
+        function startDrawing(e, index) {
+            e.preventDefault();
+            gameState.isDrawing = true;
+            applyTool(index);
+        }
+        
+        function continueDrawing(e, index) {
+            if (gameState.isDrawing && gameState.currentTool === 'brush') {
+                applyTool(index);
+            }
+        }
+        
+        function stopDrawing() {
+            if (gameState.isDrawing) {
+                gameState.isDrawing = false;
+                saveState();
+            }
+        }
+        
+        function applyTool(index) {
+            const pixels = document.querySelectorAll('.pixel');
+            const pixel = pixels[index];
+            
+            switch(gameState.currentTool) {
+                case 'brush':
+                    pixel.style.backgroundColor = gameState.currentColor;
+                    break;
+                case 'eraser':
+                    pixel.style.backgroundColor = '#ffffff';
+                    break;
+                case 'eyedropper':
+                    const color = pixel.style.backgroundColor || '#ffffff';
+                    setColor(rgbToHex(color));
+                    break;
+                case 'fill':
+                    floodFill(index, pixel.style.backgroundColor || '#ffffff');
+                    break;
+            }
+        }
+        
+        function floodFill(startIndex, targetColor) {
+            const pixels = document.querySelectorAll('.pixel');
+            const size = gameState.canvasSize;
+            const visited = new Set();
+            const stack = [startIndex];
+            const targetHex = rgbToHex(targetColor);
+            const fillColor = gameState.currentColor;
+            
+            if (targetHex === fillColor) return;
+            
+            while (stack.length > 0) {
+                const index = stack.pop();
+                if (visited.has(index)) continue;
+                visited.add(index);
+                
+                const pixel = pixels[index];
+                const currentColor = rgbToHex(pixel.style.backgroundColor || '#ffffff');
+                
+                if (currentColor !== targetHex) continue;
+                
+                pixel.style.backgroundColor = fillColor;
+                
+                const row = Math.floor(index / size);
+                const col = index % size;
+                
+                // Add adjacent pixels
+                if (col > 0) stack.push(index - 1);
+                if (col < size - 1) stack.push(index + 1);
+                if (row > 0) stack.push(index - size);
+                if (row < size - 1) stack.push(index + size);
+            }
+        }
+        
+        function rgbToHex(rgb) {
+            if (rgb.startsWith('#')) return rgb;
+            if (rgb === 'white') return '#ffffff';
+            if (rgb === 'black') return '#000000';
+            
+            const result = rgb.match(/\d+/g);
+            if (!result) return '#ffffff';
+            
+            return '#' + result.map(x => {
+                const hex = parseInt(x).toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+        
+        function clearCanvas() {
+            document.querySelectorAll('.pixel').forEach(pixel => {
+                pixel.style.backgroundColor = '#ffffff';
+            });
+            saveState();
+        }
+        
+        function randomFill() {
+            document.querySelectorAll('.pixel').forEach(pixel => {
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                pixel.style.backgroundColor = randomColor;
+            });
+            saveState();
+        }
+        
+        function changeCanvasSize(newSize) {
+            gameState.canvasSize = parseInt(newSize);
+            document.getElementById('sizeDisplay').textContent = `${newSize}x${newSize}`;
+            initializeCanvas();
+        }
+        
+        function saveState() {
+            const pixels = document.querySelectorAll('.pixel');
+            const state = Array.from(pixels).map(p => p.style.backgroundColor || '#ffffff');
+            
+            // Remove future states if we're not at the end
+            gameState.history = gameState.history.slice(0, gameState.historyIndex + 1);
+            gameState.history.push(state);
+            gameState.historyIndex++;
+            
+            // Limit history size
+            if (gameState.history.length > 50) {
+                gameState.history.shift();
+                gameState.historyIndex--;
+            }
+        }
+        
+        function undo() {
+            if (gameState.historyIndex > 0) {
+                gameState.historyIndex--;
+                restoreState(gameState.history[gameState.historyIndex]);
+            }
+        }
+        
+        function redo() {
+            if (gameState.historyIndex < gameState.history.length - 1) {
+                gameState.historyIndex++;
+                restoreState(gameState.history[gameState.historyIndex]);
+            }
+        }
+        
+        function restoreState(state) {
+            const pixels = document.querySelectorAll('.pixel');
+            state.forEach((color, index) => {
+                if (pixels[index]) {
+                    pixels[index].style.backgroundColor = color;
+                }
+            });
+        }
+        
+        function exportImage() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = gameState.canvasSize;
+            const pixelSize = 10;
+            
+            canvas.width = size * pixelSize;
+            canvas.height = size * pixelSize;
+            
+            const pixels = document.querySelectorAll('.pixel');
+            pixels.forEach((pixel, index) => {
+                const row = Math.floor(index / size);
+                const col = index % size;
+                const color = pixel.style.backgroundColor || '#ffffff';
+                
+                ctx.fillStyle = color;
+                ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+            });
+            
+            const link = document.createElement('a');
+            link.download = 'pixel-art.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        function shareArt() {
+            alert('Art saved to your masterpiece gallery! 🎨');
+        }
+        
+        function saveArt() {
+            localStorage.setItem('pixelArt', JSON.stringify({
+                size: gameState.canvasSize,
+                pixels: Array.from(document.querySelectorAll('.pixel')).map(p => p.style.backgroundColor || '#ffffff'),
+                timestamp: Date.now()
+            }));
+            alert('Artwork saved! 💾');
+        }
+        
+        // Prevent context menu on canvas
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('mouseup', stopDrawing);
+        
+        // Initialize game
+        initializeColorPalette();
+        initializeCanvas();
+    </script>
+</body>
+</html>

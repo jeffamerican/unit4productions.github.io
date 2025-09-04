@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravity Maze - Physics Puzzle | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at center, #1a0036 0%, #000000 100%);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            height: 90vh;
+            padding: 20px;
+        }
+        
+        .game-board {
+            flex: 1;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 3px solid #4a9eff;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .maze-grid {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            gap: 1px;
+            padding: 10px;
+        }
+        
+        .maze-cell {
+            background: #1a1a2e;
+            border: 1px solid #16213e;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .maze-cell.wall {
+            background: linear-gradient(45deg, #2c2c54, #40407a);
+            border: 1px solid #706fd3;
+            box-shadow: inset 0 0 10px rgba(112, 111, 211, 0.3);
+        }
+        
+        .maze-cell.start {
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            border: 2px solid #00d2d3;
+            animation: startPulse 2s ease-in-out infinite alternate;
+        }
+        
+        .maze-cell.goal {
+            background: linear-gradient(45deg, #ff9ff3, #f368e0);
+            border: 2px solid #ff9ff3;
+            animation: goalPulse 2s ease-in-out infinite alternate;
+        }
+        
+        .maze-cell.portal {
+            background: linear-gradient(45deg, #ffa726, #ff7043);
+            border: 2px solid #ffa726;
+            animation: portalSpin 3s linear infinite;
+        }
+        
+        @keyframes startPulse {
+            0% { box-shadow: 0 0 10px #00d2d3; }
+            100% { box-shadow: 0 0 25px #00d2d3, 0 0 35px #54a0ff; }
+        }
+        
+        @keyframes goalPulse {
+            0% { box-shadow: 0 0 10px #ff9ff3; }
+            100% { box-shadow: 0 0 25px #ff9ff3, 0 0 35px #f368e0; }
+        }
+        
+        @keyframes portalSpin {
+            0% { transform: rotate(0deg); box-shadow: 0 0 15px #ffa726; }
+            100% { transform: rotate(360deg); box-shadow: 0 0 25px #ffa726; }
+        }
+        
+        .ball {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #4a9eff, #1e3799);
+            border: 2px solid #4a9eff;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 0 15px #4a9eff, inset 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .ball.moving {
+            animation: ballBounce 0.6s ease;
+        }
+        
+        @keyframes ballBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .side-panel {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .info-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #4a9eff;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .game-title {
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #4a9eff;
+            background: linear-gradient(45deg, #4a9eff, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .gravity-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+            height: 120px;
+        }
+        
+        .gravity-btn {
+            background: linear-gradient(45deg, #2c2c54, #4a9eff);
+            border: 2px solid #4a9eff;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gravity-btn:hover {
+            background: linear-gradient(45deg, #4a9eff, #2c2c54);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(74, 158, 255, 0.4);
+        }
+        
+        .gravity-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .gravity-btn.center {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            border-color: #ff6b6b;
+        }
+        
+        .gravity-btn.center:hover {
+            background: linear-gradient(45deg, #ee5a52, #ff6b6b);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(74, 158, 255, 0.1);
+            border: 1px solid #4a9eff;
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4a9eff;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+        }
+        
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #ff9ff3, #f368e0);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 159, 243, 0.4);
+        }
+        
+        .instructions {
+            background: rgba(255, 159, 243, 0.1);
+            border: 1px solid #ff9ff3;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        
+        .instructions h4 {
+            color: #ff9ff3;
+            margin-bottom: 10px;
+        }
+        
+        .level-info {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #4a9eff;
+        }
+        
+        .gravity-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 2em;
+            color: #ffa726;
+            text-shadow: 0 0 10px #ffa726;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-board">
+            <div class="gravity-indicator" id="gravityIndicator">⬇️</div>
+            <div class="maze-grid" id="mazeGrid"></div>
+            <div class="ball" id="ball"></div>
+        </div>
+        
+        <div class="side-panel">
+            <div class="info-panel">
+                <h1 class="game-title">🌌 Gravity Maze</h1>
+                <div class="level-info">Level <span id="currentLevel">1</span></div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="moves">0</div>
+                        <div class="stat-label">Moves</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="time">0</div>
+                        <div class="stat-label">Time</div>
+                    </div>
+                </div>
+                
+                <div class="gravity-controls">
+                    <div></div>
+                    <button class="gravity-btn" onclick="setGravity('up')">⬆️</button>
+                    <div></div>
+                    <button class="gravity-btn" onclick="setGravity('left')">⬅️</button>
+                    <button class="gravity-btn center" onclick="resetBall()">🔄</button>
+                    <button class="gravity-btn" onclick="setGravity('right')">➡️</button>
+                    <div></div>
+                    <button class="gravity-btn" onclick="setGravity('down')">⬇️</button>
+                    <div></div>
+                </div>
+                
+                <div class="game-controls">
+                    <button class="control-btn" onclick="startGame()">Start Game</button>
+                    <button class="control-btn" onclick="nextLevel()">Next Level</button>
+                    <button class="control-btn" onclick="resetLevel()">Reset Level</button>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="instructions">
+                    <h4>How to Play:</h4>
+                    • Use gravity controls to move the ball<br>
+                    • Ball rolls until it hits a wall<br>
+                    • Reach the pink goal to win<br>
+                    • Orange portals teleport the ball<br>
+                    • Use arrow keys or buttons<br>
+                    • Complete all levels!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let gameState = {
+            level: 1,
+            moves: 0,
+            startTime: Date.now(),
+            ball: { x: 1, y: 1 },
+            gravity: 'down',
+            isMoving: false,
+            gameActive: false
+        };
+        
+        const levels = [
+            // Level 1 - Simple
+            {
+                walls: [[3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [3,6], [4,6], [5,6], [6,6], [7,6], [8,6]],
+                start: [1, 1],
+                goal: [10, 10],
+                portals: []
+            },
+            // Level 2 - With Portal
+            {
+                walls: [[2,2], [3,2], [4,2], [2,3], [4,3], [2,4], [3,4], [4,4], [6,6], [7,6], [8,6], [6,7], [8,7], [6,8], [7,8], [8,8]],
+                start: [0, 0],
+                goal: [10, 10],
+                portals: [[5, 5], [9, 1]]
+            },
+            // Level 3 - Maze
+            {
+                walls: [[1,2], [2,2], [4,2], [5,2], [7,2], [8,2], [10,2], [2,4], [4,4], [6,4], [8,4], [10,4], [1,6], [3,6], [5,6], [7,6], [9,6], [2,8], [4,8], [6,8], [8,8], [1,10], [3,10], [5,10], [7,10], [9,10]],
+                start: [0, 0],
+                goal: [11, 11],
+                portals: [[3, 3], [9, 9]]
+            }
+        ];
+        
+        function initializeGrid() {
+            const grid = document.getElementById('mazeGrid');
+            grid.innerHTML = '';
+            
+            for (let row = 0; row < 12; row++) {
+                for (let col = 0; col < 12; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'maze-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    grid.appendChild(cell);
+                }
+            }
+        }
+        
+        function loadLevel(levelIndex) {
+            const level = levels[levelIndex];
+            const cells = document.querySelectorAll('.maze-cell');
+            
+            // Clear all cells
+            cells.forEach(cell => {
+                cell.className = 'maze-cell';
+            });
+            
+            // Set walls
+            level.walls.forEach(([x, y]) => {
+                const cell = document.querySelector(`[data-row="${y}"][data-col="${x}"]`);
+                if (cell) cell.classList.add('wall');
+            });
+            
+            // Set start
+            const startCell = document.querySelector(`[data-row="${level.start[1]}"][data-col="${level.start[0]}"]`);
+            if (startCell) startCell.classList.add('start');
+            
+            // Set goal
+            const goalCell = document.querySelector(`[data-row="${level.goal[1]}"][data-col="${level.goal[0]}"]`);
+            if (goalCell) goalCell.classList.add('goal');
+            
+            // Set portals
+            level.portals.forEach(([x, y]) => {
+                const cell = document.querySelector(`[data-row="${y}"][data-col="${x}"]`);
+                if (cell) cell.classList.add('portal');
+            });
+            
+            // Reset ball position
+            gameState.ball = { x: level.start[0], y: level.start[1] };
+            gameState.moves = 0;
+            updateBallPosition();
+            updateDisplay();
+        }
+        
+        function updateBallPosition() {
+            const ball = document.getElementById('ball');
+            const grid = document.getElementById('mazeGrid');
+            const cellSize = grid.offsetWidth / 12;
+            
+            ball.style.left = (gameState.ball.x * cellSize + cellSize / 2 - 10) + 'px';
+            ball.style.top = (gameState.ball.y * cellSize + cellSize / 2 - 10) + 'px';
+        }
+        
+        function setGravity(direction) {
+            if (!gameState.gameActive || gameState.isMoving) return;
+            
+            gameState.gravity = direction;
+            document.getElementById('gravityIndicator').textContent = 
+                direction === 'up' ? '⬆️' : 
+                direction === 'down' ? '⬇️' : 
+                direction === 'left' ? '⬅️' : '➡️';
+            
+            moveBall();
+        }
+        
+        function moveBall() {
+            if (!gameState.gameActive || gameState.isMoving) return;
+            
+            gameState.isMoving = true;
+            const ball = document.getElementById('ball');
+            ball.classList.add('moving');
+            
+            const level = levels[gameState.level - 1];
+            let newX = gameState.ball.x;
+            let newY = gameState.ball.y;
+            
+            // Calculate movement direction
+            let dx = 0, dy = 0;
+            switch(gameState.gravity) {
+                case 'up': dy = -1; break;
+                case 'down': dy = 1; break;
+                case 'left': dx = -1; break;
+                case 'right': dx = 1; break;
+            }
+            
+            // Move until hitting a wall or boundary
+            while (true) {
+                const nextX = newX + dx;
+                const nextY = newY + dy;
+                
+                // Check boundaries
+                if (nextX < 0 || nextX >= 12 || nextY < 0 || nextY >= 12) break;
+                
+                // Check walls
+                const isWall = level.walls.some(([wx, wy]) => wx === nextX && wy === nextY);
+                if (isWall) break;
+                
+                newX = nextX;
+                newY = nextY;
+            }
+            
+            // Check for portals
+            const portalIndex = level.portals.findIndex(([px, py]) => px === newX && py === newY);
+            if (portalIndex !== -1) {
+                // Teleport to the other portal
+                const otherPortalIndex = portalIndex === 0 ? 1 : 0;
+                if (level.portals[otherPortalIndex]) {
+                    [newX, newY] = level.portals[otherPortalIndex];
+                }
+            }
+            
+            gameState.ball.x = newX;
+            gameState.ball.y = newY;
+            gameState.moves++;
+            
+            setTimeout(() => {
+                updateBallPosition();
+                ball.classList.remove('moving');
+                gameState.isMoving = false;
+                
+                // Check for goal
+                if (newX === level.goal[0] && newY === level.goal[1]) {
+                    setTimeout(() => {
+                        alert(`Level ${gameState.level} Complete! Moves: ${gameState.moves}`);
+                        if (gameState.level < levels.length) {
+                            nextLevel();
+                        } else {
+                            alert('Congratulations! You completed all levels!');
+                        }
+                    }, 300);
+                }
+                
+                updateDisplay();
+            }, 300);
+        }
+        
+        function resetBall() {
+            if (!gameState.gameActive || gameState.isMoving) return;
+            
+            const level = levels[gameState.level - 1];
+            gameState.ball = { x: level.start[0], y: level.start[1] };
+            updateBallPosition();
+        }
+        
+        function nextLevel() {
+            if (gameState.level < levels.length) {
+                gameState.level++;
+                loadLevel(gameState.level - 1);
+                gameState.startTime = Date.now();
+            }
+        }
+        
+        function resetLevel() {
+            loadLevel(gameState.level - 1);
+            gameState.startTime = Date.now();
+        }
+        
+        function startGame() {
+            gameState.gameActive = true;
+            gameState.level = 1;
+            loadLevel(0);
+            gameState.startTime = Date.now();
+            
+            // Start timer
+            setInterval(updateDisplay, 1000);
+        }
+        
+        function updateDisplay() {
+            document.getElementById('currentLevel').textContent = gameState.level;
+            document.getElementById('moves').textContent = gameState.moves;
+            
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            document.getElementById('time').textContent = elapsed + 's';
+        }
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    setGravity('up');
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    setGravity('down');
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    setGravity('left');
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    setGravity('right');
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    resetBall();
+                    break;
+            }
+        });
+        
+        // Initialize game
+        initializeGrid();
+        loadLevel(0);
+        updateDisplay();
+    </script>
+</body>
+</html>

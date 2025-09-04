@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhythm Reactor - Musical Timing Game | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff);
+            background-size: 300% 300%;
+            animation: gradientShift 8s ease infinite;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .game-container {
+            text-align: center;
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .game-title {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #ff006e;
+            animation: titlePulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titlePulse {
+            0% { text-shadow: 0 0 20px #ff006e; }
+            100% { text-shadow: 0 0 30px #8338ec, 0 0 40px #3a86ff; }
+        }
+        
+        .rhythm-track {
+            height: 120px;
+            width: 100%;
+            position: relative;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .target-zone {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.8), rgba(255, 165, 0, 0.8));
+            border: 2px solid #ffd700;
+            animation: zonePulse 1s ease-in-out infinite alternate;
+        }
+        
+        @keyframes zonePulse {
+            0% { box-shadow: 0 0 10px #ffd700; }
+            100% { box-shadow: 0 0 30px #ffd700, inset 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+        
+        .rhythm-note {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            top: 35px;
+            right: -50px;
+            animation: noteMove linear;
+            border: 3px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+        
+        @keyframes noteMove {
+            from { right: -50px; }
+            to { right: calc(100% + 50px); }
+        }
+        
+        .note-fire { background: radial-gradient(circle, #ff4757, #ff3742); color: #fff; }
+        .note-water { background: radial-gradient(circle, #3742ff, #2f3542); color: #fff; }
+        .note-earth { background: radial-gradient(circle, #7bed9f, #5f9ea0); color: #000; }
+        .note-air { background: radial-gradient(circle, #dda0dd, #c71585); color: #000; }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .rhythm-btn {
+            width: 80px;
+            height: 80px;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-fire {
+            background: radial-gradient(circle, #ff4757, #ff3742);
+            color: white;
+        }
+        
+        .btn-water {
+            background: radial-gradient(circle, #3742ff, #2f3542);
+            color: white;
+        }
+        
+        .btn-earth {
+            background: radial-gradient(circle, #7bed9f, #5f9ea0);
+            color: black;
+        }
+        
+        .btn-air {
+            background: radial-gradient(circle, #dda0dd, #c71585);
+            color: black;
+        }
+        
+        .rhythm-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+        
+        .rhythm-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 5px;
+            min-width: 100px;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .game-controls {
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #8338ec, #3a86ff);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(131, 56, 236, 0.4);
+        }
+        
+        .feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+        
+        .feedback.show {
+            animation: feedbackPop 1s ease;
+        }
+        
+        @keyframes feedbackPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .combo-meter {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .combo-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff006e, #8338ec, #3a86ff);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🎵 Rhythm Reactor</h1>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="combo">0</div>
+                <div class="stat-label">Combo</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="level">1</div>
+                <div class="stat-label">Level</div>
+            </div>
+        </div>
+        
+        <div class="combo-meter">
+            <div class="combo-fill" id="comboFill"></div>
+        </div>
+        
+        <div class="rhythm-track" id="rhythmTrack">
+            <div class="target-zone"></div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="rhythm-btn btn-fire" onclick="hitNote('fire')" data-key="KeyD">🔥<br>D</button>
+            <button class="rhythm-btn btn-water" onclick="hitNote('water')" data-key="KeyF">💧<br>F</button>
+            <button class="rhythm-btn btn-earth" onclick="hitNote('earth')" data-key="KeyJ">🌱<br>J</button>
+            <button class="rhythm-btn btn-air" onclick="hitNote('air')" data-key="KeyK">💨<br>K</button>
+        </div>
+        
+        <div class="game-controls">
+            <button class="control-btn" onclick="startGame()">Start Game</button>
+            <button class="control-btn" onclick="pauseGame()">Pause</button>
+            <button class="control-btn" onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+    
+    <script>
+        let gameState = {
+            score: 0,
+            combo: 0,
+            level: 1,
+            totalNotes: 0,
+            hitNotes: 0,
+            isPlaying: false,
+            notes: [],
+            noteSpeed: 3000,
+            spawnRate: 1500,
+            lastSpawn: 0
+        };
+        
+        const noteTypes = ['fire', 'water', 'earth', 'air'];
+        const noteSymbols = { fire: '🔥', water: '💧', earth: '🌱', air: '💨' };
+        
+        function createNote() {
+            const track = document.getElementById('rhythmTrack');
+            const note = document.createElement('div');
+            const type = noteTypes[Math.floor(Math.random() * noteTypes.length)];
+            
+            note.className = `rhythm-note note-${type}`;
+            note.dataset.type = type;
+            note.textContent = noteSymbols[type];
+            note.style.animationDuration = gameState.noteSpeed + 'ms';
+            
+            track.appendChild(note);
+            gameState.notes.push({ element: note, type: type });
+            
+            // Remove note after animation
+            setTimeout(() => {
+                if (note.parentNode) {
+                    note.remove();
+                    gameState.notes = gameState.notes.filter(n => n.element !== note);
+                    // Missed note
+                    gameState.combo = 0;
+                    updateDisplay();
+                    showFeedback('Miss!', '#ff4757');
+                }
+            }, gameState.noteSpeed + 1000);
+        }
+        
+        function hitNote(type) {
+            const targetZone = document.querySelector('.target-zone');
+            const targetRect = targetZone.getBoundingClientRect();
+            const targetCenter = targetRect.left + targetRect.width / 2;
+            
+            let bestNote = null;
+            let bestDistance = Infinity;
+            
+            // Find the closest note of the right type
+            gameState.notes.forEach(noteObj => {
+                if (noteObj.type === type) {
+                    const noteRect = noteObj.element.getBoundingClientRect();
+                    const noteCenter = noteRect.left + noteRect.width / 2;
+                    const distance = Math.abs(noteCenter - targetCenter);
+                    
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestNote = noteObj;
+                    }
+                }
+            });
+            
+            if (bestNote && bestDistance < 100) { // Hit tolerance
+                // Remove the note
+                bestNote.element.remove();
+                gameState.notes = gameState.notes.filter(n => n !== bestNote);
+                
+                // Score based on accuracy
+                let points = 100;
+                let feedback = 'Good!';
+                let color = '#3a86ff';
+                
+                if (bestDistance < 30) {
+                    points = 300;
+                    feedback = 'Perfect!';
+                    color = '#7bed9f';
+                } else if (bestDistance < 60) {
+                    points = 200;
+                    feedback = 'Great!';
+                    color = '#8338ec';
+                }
+                
+                gameState.score += points * (gameState.combo + 1);
+                gameState.combo++;
+                gameState.hitNotes++;
+                
+                showFeedback(feedback, color);
+                
+                // Level up every 20 successful hits
+                if (gameState.hitNotes % 20 === 0) {
+                    gameState.level++;
+                    gameState.noteSpeed = Math.max(1500, gameState.noteSpeed - 200);
+                    gameState.spawnRate = Math.max(800, gameState.spawnRate - 100);
+                    showFeedback(`Level ${gameState.level}!`, '#ffd700');
+                }
+            } else {
+                gameState.combo = 0;
+                showFeedback('Miss!', '#ff4757');
+            }
+            
+            gameState.totalNotes++;
+            updateDisplay();
+        }
+        
+        function showFeedback(text, color) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = text;
+            feedback.style.color = color;
+            feedback.classList.remove('show');
+            setTimeout(() => feedback.classList.add('show'), 10);
+        }
+        
+        function updateDisplay() {
+            document.getElementById('score').textContent = gameState.score.toLocaleString();
+            document.getElementById('combo').textContent = gameState.combo;
+            document.getElementById('level').textContent = gameState.level;
+            
+            const accuracy = gameState.totalNotes > 0 ? 
+                Math.round((gameState.hitNotes / gameState.totalNotes) * 100) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            // Update combo meter
+            const comboFill = document.getElementById('comboFill');
+            const comboPercent = Math.min((gameState.combo / 10) * 100, 100);
+            comboFill.style.width = comboPercent + '%';
+        }
+        
+        function gameLoop() {
+            if (!gameState.isPlaying) return;
+            
+            const now = Date.now();
+            if (now - gameState.lastSpawn > gameState.spawnRate) {
+                createNote();
+                gameState.lastSpawn = now;
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function startGame() {
+            if (gameState.isPlaying) return;
+            
+            gameState.isPlaying = true;
+            gameState.lastSpawn = Date.now();
+            gameLoop();
+        }
+        
+        function pauseGame() {
+            gameState.isPlaying = !gameState.isPlaying;
+            if (gameState.isPlaying) {
+                gameLoop();
+            }
+        }
+        
+        function resetGame() {
+            gameState.isPlaying = false;
+            gameState.score = 0;
+            gameState.combo = 0;
+            gameState.level = 1;
+            gameState.totalNotes = 0;
+            gameState.hitNotes = 0;
+            gameState.noteSpeed = 3000;
+            gameState.spawnRate = 1500;
+            gameState.notes = [];
+            
+            // Clear all notes
+            document.querySelectorAll('.rhythm-note').forEach(note => note.remove());
+            
+            updateDisplay();
+        }
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'KeyD':
+                    hitNote('fire');
+                    break;
+                case 'KeyF':
+                    hitNote('water');
+                    break;
+                case 'KeyJ':
+                    hitNote('earth');
+                    break;
+                case 'KeyK':
+                    hitNote('air');
+                    break;
+            }
+        });
+        
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>

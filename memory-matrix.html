@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Matrix - Brain Training | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #2c1810, #8b4513, #2f4f4f);
+            color: #ffd700;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ffd700;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+        
+        .game-title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #ffd700;
+        }
+        
+        .game-info {
+            margin-bottom: 20px;
+            color: #daa520;
+        }
+        
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .memory-cell {
+            width: 80px;
+            height: 80px;
+            background: #333;
+            border: 2px solid #666;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .memory-cell:hover {
+            border-color: #ffd700;
+            transform: scale(1.05);
+        }
+        
+        .memory-cell.highlight {
+            background: linear-gradient(45deg, #ffd700, #ffb347);
+            color: #000;
+            animation: pulse 0.5s ease;
+        }
+        
+        .memory-cell.correct {
+            background: linear-gradient(45deg, #32cd32, #90ee90);
+            color: #000;
+            animation: success 0.5s ease;
+        }
+        
+        .memory-cell.wrong {
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            color: #fff;
+            animation: error 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes success {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes error {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #8b4513, #daa520);
+            border: none;
+            color: #000;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .sequence-display {
+            font-size: 1.5em;
+            margin: 20px 0;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .level-indicator {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .instructions {
+            background: rgba(139, 69, 19, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffd700;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🧠 Memory Matrix</h1>
+        <div class="game-info">Train your memory with pattern sequences</div>
+        
+        <div class="level-indicator">
+            Level <span id="level">1</span> - Sequence Length: <span id="sequenceLength">3</span>
+        </div>
+        
+        <div class="instructions">
+            <strong>How to Play:</strong><br>
+            • Watch the highlighted pattern<br>
+            • Repeat the sequence by clicking tiles<br>
+            • Sequences get longer each level<br>
+            • Miss 3 sequences and it's game over!
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Score</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Streak</span>
+                <span class="stat-value" id="streak">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Lives</span>
+                <span class="stat-value" id="lives">3</span>
+            </div>
+        </div>
+        
+        <div class="sequence-display" id="sequenceDisplay">
+            Ready to start?
+        </div>
+        
+        <div class="memory-grid" id="memoryGrid"></div>
+        
+        <div class="controls">
+            <button class="btn" onclick="startGame()" id="startBtn">Start Game</button>
+            <button class="btn" onclick="showSequence()" id="showBtn" disabled>Show Sequence</button>
+            <button class="btn" onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+    
+    <script>
+        let gameState = {
+            level: 1,
+            score: 0,
+            streak: 0,
+            lives: 3,
+            sequence: [],
+            playerSequence: [],
+            showing: false,
+            gameActive: false,
+            gridSize: 16
+        };
+        
+        function initializeGrid() {
+            const grid = document.getElementById('memoryGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < gameState.gridSize; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'memory-cell';
+                cell.dataset.index = i;
+                cell.onclick = () => cellClicked(i);
+                grid.appendChild(cell);
+            }
+        }
+        
+        function generateSequence() {
+            const length = Math.min(2 + gameState.level, 12);
+            gameState.sequence = [];
+            for (let i = 0; i < length; i++) {
+                gameState.sequence.push(Math.floor(Math.random() * gameState.gridSize));
+            }
+            gameState.playerSequence = [];
+            document.getElementById('sequenceLength').textContent = length;
+        }
+        
+        function showSequence() {
+            if (gameState.showing) return;
+            
+            gameState.showing = true;
+            document.getElementById('showBtn').disabled = true;
+            document.getElementById('sequenceDisplay').textContent = 'Watch the pattern...';
+            
+            let index = 0;
+            const interval = setInterval(() => {
+                // Clear previous highlights
+                document.querySelectorAll('.memory-cell').forEach(cell => {
+                    cell.classList.remove('highlight');
+                });
+                
+                if (index < gameState.sequence.length) {
+                    const cellIndex = gameState.sequence[index];
+                    const cell = document.querySelector(`[data-index="${cellIndex}"]`);
+                    cell.classList.add('highlight');
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.querySelectorAll('.memory-cell').forEach(cell => {
+                            cell.classList.remove('highlight');
+                        });
+                        gameState.showing = false;
+                        document.getElementById('sequenceDisplay').textContent = 
+                            `Repeat the sequence (${gameState.sequence.length} tiles)`;
+                    }, 600);
+                }
+            }, 800);
+        }
+        
+        function cellClicked(index) {
+            if (gameState.showing || !gameState.gameActive) return;
+            
+            gameState.playerSequence.push(index);
+            const cell = document.querySelector(`[data-index="${index}"]`);
+            
+            // Check if this click is correct
+            const currentIndex = gameState.playerSequence.length - 1;
+            const isCorrect = gameState.sequence[currentIndex] === index;
+            
+            if (isCorrect) {
+                cell.classList.add('correct');
+                setTimeout(() => cell.classList.remove('correct'), 300);
+                
+                // Check if sequence is complete
+                if (gameState.playerSequence.length === gameState.sequence.length) {
+                    // Sequence completed successfully
+                    gameState.score += gameState.level * 100;
+                    gameState.streak++;
+                    gameState.level++;
+                    
+                    document.getElementById('sequenceDisplay').textContent = 'Perfect! Get ready for next level...';
+                    
+                    setTimeout(() => {
+                        generateSequence();
+                        updateDisplay();
+                        showSequence();
+                    }, 1500);
+                }
+            } else {
+                // Wrong click
+                cell.classList.add('wrong');
+                setTimeout(() => cell.classList.remove('wrong'), 300);
+                
+                gameState.lives--;
+                gameState.streak = 0;
+                
+                if (gameState.lives <= 0) {
+                    endGame();
+                } else {
+                    document.getElementById('sequenceDisplay').textContent = 
+                        `Wrong! ${gameState.lives} lives left. Try again...`;
+                    setTimeout(() => {
+                        gameState.playerSequence = [];
+                        showSequence();
+                    }, 1500);
+                }
+            }
+            
+            updateDisplay();
+        }
+        
+        function startGame() {
+            gameState.level = 1;
+            gameState.score = 0;
+            gameState.streak = 0;
+            gameState.lives = 3;
+            gameState.gameActive = true;
+            
+            document.getElementById('startBtn').textContent = 'Game Active';
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('showBtn').disabled = false;
+            
+            generateSequence();
+            updateDisplay();
+            showSequence();
+        }
+        
+        function resetGame() {
+            gameState.gameActive = false;
+            gameState.showing = false;
+            gameState.level = 1;
+            gameState.score = 0;
+            gameState.streak = 0;
+            gameState.lives = 3;
+            gameState.sequence = [];
+            gameState.playerSequence = [];
+            
+            document.getElementById('startBtn').textContent = 'Start Game';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('showBtn').disabled = true;
+            document.getElementById('sequenceDisplay').textContent = 'Ready to start?';
+            
+            document.querySelectorAll('.memory-cell').forEach(cell => {
+                cell.classList.remove('highlight', 'correct', 'wrong');
+            });
+            
+            updateDisplay();
+        }
+        
+        function endGame() {
+            gameState.gameActive = false;
+            document.getElementById('sequenceDisplay').textContent = 
+                `Game Over! Final Score: ${gameState.score}`;
+            document.getElementById('startBtn').textContent = 'Start New Game';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('showBtn').disabled = true;
+        }
+        
+        function updateDisplay() {
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('streak').textContent = gameState.streak;
+            document.getElementById('lives').textContent = gameState.lives;
+        }
+        
+        // Initialize the game
+        initializeGrid();
+        updateDisplay();
+    </script>
+</body>
+</html>
