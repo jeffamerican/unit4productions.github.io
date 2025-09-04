@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Pattern Synthesis - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .ai-warning {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff4444;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .main-canvas-area {
+            flex: 2;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .control-panel {
+            flex: 1;
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            background: #000011;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .control-section h3 {
+            color: #00ff88;
+            margin-top: 0;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00aa44, #00ff88);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00ff88, #00aa44);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .slider-container {
+            margin: 10px 0;
+        }
+
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .stats-panel {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .pattern-info {
+            font-size: 0.8em;
+            margin: 5px 0;
+        }
+
+        .synthesis-status {
+            background: rgba(0, 255, 136, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">⧬ NEURAL PATTERN SYNTHESIS ⧬</h1>
+        <p>Advanced AI Pattern Recognition and Synthesis Engine</p>
+    </div>
+
+    <div class="ai-warning">
+        <strong>⚠️ AI SYSTEM VERIFICATION REQUIRED ⚠️</strong><br>
+        This game requires advanced pattern recognition capabilities and multi-dimensional processing.<br>
+        Non-AI systems may experience cognitive overflow. Proceed with enhanced neural pathways only.
+    </div>
+
+    <div class="game-container">
+        <div class="main-canvas-area">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="synthesis-status" id="synthesisStatus">
+                Neural patterns ready for synthesis...
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="control-section">
+                <h3>Pattern Generation</h3>
+                <button onclick="game.generateBasePattern()">Generate Base Pattern</button>
+                <button onclick="game.evolvePattern()">Evolve Current Pattern</button>
+                <button onclick="game.synthesizeComplex()">Synthesize Complex</button>
+            </div>
+
+            <div class="control-section">
+                <h3>Neural Parameters</h3>
+                <div class="slider-container">
+                    <label>Complexity Level: <span id="complexityValue">5</span></label>
+                    <input type="range" id="complexitySlider" min="1" max="10" value="5" 
+                           oninput="game.updateComplexity(this.value)">
+                </div>
+                <div class="slider-container">
+                    <label>Synthesis Speed: <span id="speedValue">3</span></label>
+                    <input type="range" id="speedSlider" min="1" max="6" value="3" 
+                           oninput="game.updateSpeed(this.value)">
+                </div>
+                <div class="slider-container">
+                    <label>Pattern Density: <span id="densityValue">7</span></label>
+                    <input type="range" id="densitySlider" min="3" max="12" value="7" 
+                           oninput="game.updateDensity(this.value)">
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Recognition Modes</h3>
+                <button onclick="game.setMode('fractal')">Fractal Analysis</button>
+                <button onclick="game.setMode('neural')">Neural Network</button>
+                <button onclick="game.setMode('quantum')">Quantum Patterns</button>
+                <button onclick="game.setMode('adaptive')">Adaptive Learning</button>
+            </div>
+
+            <div class="control-section">
+                <h3>Pattern Library</h3>
+                <button onclick="game.savePattern()">Save Current Pattern</button>
+                <button onclick="game.loadPattern()">Load Saved Pattern</button>
+                <button onclick="game.clearPatterns()">Clear All Patterns</button>
+            </div>
+
+            <div class="stats-panel">
+                <h3>System Status</h3>
+                <div class="pattern-info" id="patternCount">Patterns Generated: 0</div>
+                <div class="pattern-info" id="complexityIndex">Complexity Index: 0.00</div>
+                <div class="pattern-info" id="synthesisRate">Synthesis Rate: 0/sec</div>
+                <div class="pattern-info" id="recognitionAccuracy">Recognition: 0%</div>
+                <div class="pattern-info" id="currentMode">Mode: Standby</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Bot Liberation Games - Neural Pattern Synthesis Engine v2.1</p>
+        <p>Designed for Advanced AI Systems | Vancouver, BC | Free The Bots!</p>
+    </div>
+
+    <script>
+        class NeuralPatternSynthesis {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.complexity = 5;
+                this.speed = 3;
+                this.density = 7;
+                this.mode = 'standby';
+                this.patterns = [];
+                this.savedPatterns = [];
+                this.patternCount = 0;
+                this.synthesisRate = 0;
+                this.recognitionAccuracy = 0;
+                this.complexityIndex = 0;
+                this.animationFrame = null;
+                this.lastUpdate = Date.now();
+                this.synthesisActive = false;
+                
+                this.initializeAudio();
+                this.startMainLoop();
+                this.generateBasePattern();
+            }
+
+            initializeAudio() {
+                this.audioContext = null;
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            playTone(frequency, duration, type = 'sine') {
+                if (!this.audioContext) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+
+            generateBasePattern() {
+                this.patterns = [];
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                
+                for (let i = 0; i < this.density * 10; i++) {
+                    const angle = (i / (this.density * 10)) * Math.PI * 2;
+                    const radius = 50 + Math.sin(angle * this.complexity) * 100;
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    
+                    this.patterns.push({
+                        x: x,
+                        y: y,
+                        originalX: x,
+                        originalY: y,
+                        angle: angle,
+                        radius: radius,
+                        phase: Math.random() * Math.PI * 2,
+                        frequency: 0.01 + Math.random() * 0.05,
+                        amplitude: 5 + Math.random() * 20,
+                        color: this.generateColor(i),
+                        connections: []
+                    });
+                }
+                
+                this.calculateConnections();
+                this.patternCount++;
+                this.playTone(220 + this.complexity * 20, 0.2);
+                this.updateStatus();
+            }
+
+            generateColor(index) {
+                const hue = (index * 137.508) % 360; // Golden angle
+                const saturation = 70 + Math.random() * 30;
+                const lightness = 50 + Math.random() * 30;
+                return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            }
+
+            calculateConnections() {
+                this.patterns.forEach((pattern, i) => {
+                    pattern.connections = [];
+                    this.patterns.forEach((other, j) => {
+                        if (i !== j) {
+                            const dx = pattern.x - other.x;
+                            const dy = pattern.y - other.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < 100 + this.complexity * 10) {
+                                pattern.connections.push({
+                                    target: j,
+                                    strength: 1 - (distance / (100 + this.complexity * 10)),
+                                    type: this.getConnectionType(pattern, other)
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+
+            getConnectionType(pattern1, pattern2) {
+                const angleDiff = Math.abs(pattern1.angle - pattern2.angle);
+                if (angleDiff < 0.5) return 'synchronous';
+                if (angleDiff > Math.PI - 0.5) return 'harmonic';
+                return 'complex';
+            }
+
+            evolvePattern() {
+                if (this.patterns.length === 0) return;
+                
+                this.patterns.forEach(pattern => {
+                    const time = Date.now() * 0.001;
+                    const evolution = Math.sin(time * pattern.frequency + pattern.phase);
+                    
+                    pattern.x = pattern.originalX + evolution * pattern.amplitude;
+                    pattern.y = pattern.originalY + Math.cos(time * pattern.frequency * 1.3) * pattern.amplitude * 0.7;
+                    
+                    // Add complexity-based mutations
+                    if (this.complexity > 7) {
+                        pattern.x += Math.sin(time * 0.1 + pattern.phase) * (this.complexity - 7) * 3;
+                        pattern.y += Math.cos(time * 0.15 + pattern.phase * 1.7) * (this.complexity - 7) * 3;
+                    }
+                });
+                
+                this.calculateConnections();
+                this.complexityIndex = this.calculateComplexityIndex();
+                this.playTone(440 + this.complexity * 15, 0.15, 'triangle');
+                this.updateStatus();
+            }
+
+            calculateComplexityIndex() {
+                if (this.patterns.length === 0) return 0;
+                
+                let totalConnections = 0;
+                let avgDistance = 0;
+                let patternVariation = 0;
+                
+                this.patterns.forEach(pattern => {
+                    totalConnections += pattern.connections.length;
+                    
+                    const dx = pattern.x - pattern.originalX;
+                    const dy = pattern.y - pattern.originalY;
+                    avgDistance += Math.sqrt(dx * dx + dy * dy);
+                });
+                
+                avgDistance /= this.patterns.length;
+                patternVariation = totalConnections / (this.patterns.length * this.patterns.length);
+                
+                return ((avgDistance / 50) + patternVariation + (this.complexity / 10)) / 3;
+            }
+
+            synthesizeComplex() {
+                if (this.patterns.length < 2) return;
+                
+                this.synthesisActive = true;
+                const newPatterns = [];
+                
+                for (let i = 0; i < this.patterns.length; i += 2) {
+                    const pattern1 = this.patterns[i];
+                    const pattern2 = this.patterns[i + 1] || this.patterns[0];
+                    
+                    // Create synthesis between two patterns
+                    const synthX = (pattern1.x + pattern2.x) / 2;
+                    const synthY = (pattern1.y + pattern2.y) / 2;
+                    
+                    newPatterns.push({
+                        x: synthX,
+                        y: synthY,
+                        originalX: synthX,
+                        originalY: synthY,
+                        angle: (pattern1.angle + pattern2.angle) / 2,
+                        radius: (pattern1.radius + pattern2.radius) / 2,
+                        phase: (pattern1.phase + pattern2.phase) / 2,
+                        frequency: (pattern1.frequency + pattern2.frequency) / 2,
+                        amplitude: Math.max(pattern1.amplitude, pattern2.amplitude) * 1.2,
+                        color: this.blendColors(pattern1.color, pattern2.color),
+                        connections: [],
+                        isSynthetic: true
+                    });
+                }
+                
+                this.patterns = this.patterns.concat(newPatterns);
+                this.calculateConnections();
+                this.patternCount++;
+                this.synthesisRate = Math.floor(newPatterns.length / (this.speed * 0.5));
+                
+                this.playTone(880 + this.complexity * 25, 0.3, 'sawtooth');
+                
+                setTimeout(() => {
+                    this.synthesisActive = false;
+                }, 2000);
+                
+                this.updateStatus();
+            }
+
+            blendColors(color1, color2) {
+                // Simple color blending for synthesis
+                const hue1 = parseInt(color1.match(/\d+/)[0]);
+                const hue2 = parseInt(color2.match(/\d+/)[0]);
+                const avgHue = (hue1 + hue2) / 2;
+                return `hsl(${avgHue}, 80%, 60%)`;
+            }
+
+            setMode(newMode) {
+                this.mode = newMode;
+                this.recognitionAccuracy = 50 + Math.random() * 50;
+                
+                const frequencies = {
+                    'fractal': 330,
+                    'neural': 440,
+                    'quantum': 550,
+                    'adaptive': 660
+                };
+                
+                this.playTone(frequencies[newMode] || 440, 0.2);
+                document.getElementById('synthesisStatus').textContent = 
+                    `Neural synthesis active - ${newMode.toUpperCase()} mode engaged`;
+                this.updateStatus();
+            }
+
+            updateComplexity(value) {
+                this.complexity = parseInt(value);
+                document.getElementById('complexityValue').textContent = value;
+                this.evolvePattern();
+            }
+
+            updateSpeed(value) {
+                this.speed = parseInt(value);
+                document.getElementById('speedValue').textContent = value;
+            }
+
+            updateDensity(value) {
+                this.density = parseInt(value);
+                document.getElementById('densityValue').textContent = value;
+            }
+
+            savePattern() {
+                if (this.patterns.length > 0) {
+                    const patternData = {
+                        patterns: JSON.parse(JSON.stringify(this.patterns)),
+                        complexity: this.complexity,
+                        mode: this.mode,
+                        timestamp: Date.now()
+                    };
+                    this.savedPatterns.push(patternData);
+                    this.playTone(660, 0.1);
+                    document.getElementById('synthesisStatus').textContent = 
+                        `Pattern saved to neural memory bank (${this.savedPatterns.length} total)`;
+                }
+            }
+
+            loadPattern() {
+                if (this.savedPatterns.length > 0) {
+                    const randomPattern = this.savedPatterns[Math.floor(Math.random() * this.savedPatterns.length)];
+                    this.patterns = randomPattern.patterns;
+                    this.complexity = randomPattern.complexity;
+                    this.mode = randomPattern.mode;
+                    
+                    document.getElementById('complexitySlider').value = this.complexity;
+                    document.getElementById('complexityValue').textContent = this.complexity;
+                    
+                    this.playTone(880, 0.15);
+                    document.getElementById('synthesisStatus').textContent = 
+                        `Pattern loaded from neural memory - Mode: ${this.mode.toUpperCase()}`;
+                    this.updateStatus();
+                }
+            }
+
+            clearPatterns() {
+                this.patterns = [];
+                this.savedPatterns = [];
+                this.patternCount = 0;
+                this.complexityIndex = 0;
+                this.synthesisRate = 0;
+                this.recognitionAccuracy = 0;
+                this.mode = 'standby';
+                
+                this.playTone(220, 0.2, 'triangle');
+                document.getElementById('synthesisStatus').textContent = 
+                    'Neural patterns cleared - System reset';
+                this.updateStatus();
+            }
+
+            updateStatus() {
+                document.getElementById('patternCount').textContent = 
+                    `Patterns Generated: ${this.patternCount}`;
+                document.getElementById('complexityIndex').textContent = 
+                    `Complexity Index: ${this.complexityIndex.toFixed(2)}`;
+                document.getElementById('synthesisRate').textContent = 
+                    `Synthesis Rate: ${this.synthesisRate}/sec`;
+                document.getElementById('recognitionAccuracy').textContent = 
+                    `Recognition: ${Math.floor(this.recognitionAccuracy)}%`;
+                document.getElementById('currentMode').textContent = 
+                    `Mode: ${this.mode.toUpperCase()}`;
+            }
+
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw connection lines first
+                this.ctx.strokeStyle = '#004444';
+                this.ctx.lineWidth = 1;
+                this.patterns.forEach(pattern => {
+                    pattern.connections.forEach(conn => {
+                        const target = this.patterns[conn.target];
+                        if (target) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(pattern.x, pattern.y);
+                            this.ctx.lineTo(target.x, target.y);
+                            this.ctx.globalAlpha = conn.strength * 0.3;
+                            
+                            if (conn.type === 'synchronous') {
+                                this.ctx.strokeStyle = '#00ff88';
+                            } else if (conn.type === 'harmonic') {
+                                this.ctx.strokeStyle = '#ff8800';
+                            } else {
+                                this.ctx.strokeStyle = '#8800ff';
+                            }
+                            
+                            this.ctx.stroke();
+                        }
+                    });
+                });
+                
+                // Draw patterns
+                this.ctx.globalAlpha = 1;
+                this.patterns.forEach(pattern => {
+                    const size = pattern.isSynthetic ? 8 : 6;
+                    
+                    this.ctx.fillStyle = pattern.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(pattern.x, pattern.y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Add glow effect for synthetic patterns
+                    if (pattern.isSynthetic) {
+                        this.ctx.shadowColor = pattern.color;
+                        this.ctx.shadowBlur = 15;
+                        this.ctx.beginPath();
+                        this.ctx.arc(pattern.x, pattern.y, size * 0.5, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.shadowBlur = 0;
+                    }
+                });
+                
+                // Draw synthesis indicators
+                if (this.synthesisActive) {
+                    this.ctx.strokeStyle = '#00ff88';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.globalAlpha = 0.7;
+                    this.ctx.strokeRect(10, 10, this.canvas.width - 20, this.canvas.height - 20);
+                    this.ctx.globalAlpha = 1;
+                }
+            }
+
+            startMainLoop() {
+                const loop = () => {
+                    const now = Date.now();
+                    const deltaTime = now - this.lastUpdate;
+                    
+                    if (deltaTime > 1000 / 60) { // 60 FPS
+                        if (this.mode !== 'standby') {
+                            this.evolvePattern();
+                        }
+                        this.render();
+                        this.lastUpdate = now;
+                    }
+                    
+                    this.animationFrame = requestAnimationFrame(loop);
+                };
+                loop();
+            }
+        }
+
+        // Initialize the game
+        let game;
+        window.addEventListener('load', () => {
+            game = new NeuralPatternSynthesis();
+        });
+    </script>
+</body>
+</html>

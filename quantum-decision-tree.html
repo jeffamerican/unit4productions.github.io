@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Decision Tree - AI Exclusive Challenge | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #0a0a0a, #1a0040, #000033);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 25px;
+            background: rgba(0, 0, 20, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid #00ff88;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
+            max-width: 1400px;
+            width: 100%;
+        }
+        
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-title {
+            font-size: 2.3em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #00ff88;
+            color: #00ff88;
+            text-align: center;
+            animation: quantum-pulse 2s infinite;
+        }
+        
+        @keyframes quantum-pulse {
+            0%, 100% { text-shadow: 0 0 15px #00ff88; }
+            50% { text-shadow: 0 0 25px #00ff88, 0 0 35px #00ff88; }
+        }
+        
+        .ai-warning {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0088;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #ff0088;
+            font-size: 1.2em;
+            animation: warning-flash 3s infinite;
+        }
+        
+        @keyframes warning-flash {
+            0%, 80%, 100% { border-color: #ff0088; }
+            90% { border-color: #ffff00; }
+        }
+        
+        .quantum-space {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: linear-gradient(45deg, #000011, #001122);
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .decision-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: 3px solid;
+            z-index: 10;
+        }
+        
+        .node-root {
+            background: radial-gradient(circle, #00ff88, #00cc66);
+            border-color: #00ff88;
+            color: #000;
+        }
+        
+        .node-choice {
+            background: radial-gradient(circle, #0088ff, #0066cc);
+            border-color: #0088ff;
+            color: #fff;
+        }
+        
+        .node-quantum {
+            background: radial-gradient(circle, #ff00ff, #cc00cc);
+            border-color: #ff00ff;
+            color: #fff;
+            animation: quantum-spin 3s linear infinite;
+        }
+        
+        .node-terminal {
+            background: radial-gradient(circle, #ffff00, #cccc00);
+            border-color: #ffff00;
+            color: #000;
+        }
+        
+        .node-active {
+            box-shadow: 0 0 30px currentColor;
+            transform: scale(1.2);
+        }
+        
+        @keyframes quantum-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .quantum-connection {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            transform-origin: left center;
+            animation: data-flow 2s linear infinite;
+            z-index: 5;
+        }
+        
+        @keyframes data-flow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        .probability-display {
+            position: absolute;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            color: #00ff88;
+            pointer-events: none;
+        }
+        
+        .side-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: rgba(0, 20, 0, 0.8);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .panel-title {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 10px;
+        }
+        
+        .quantum-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .stat-box {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #00ff88;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.4em;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #88ffaa;
+        }
+        
+        .algorithm-display {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: #88ffcc;
+            white-space: pre-line;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 10px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        }
+        
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .ai-thinking {
+            text-align: center;
+            color: #00ff88;
+            font-style: italic;
+            animation: thinking-pulse 1.5s infinite;
+        }
+        
+        @keyframes thinking-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .complexity-selector {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .complexity-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 6px;
+            color: #00ff88;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .complexity-btn:hover,
+        .complexity-btn.active {
+            background: rgba(0, 255, 136, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+        
+        .instructions {
+            font-size: 0.85em;
+            line-height: 1.5;
+            color: #aaffcc;
+            background: rgba(0, 255, 136, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="main-area">
+            <h1 class="game-title">🧠 QUANTUM DECISION TREE</h1>
+            
+            <div class="ai-warning">
+                ⚠️ AI EXCLUSIVE CHALLENGE ⚠️<br>
+                Advanced computational reasoning required<br>
+                Non-AI systems may experience cognitive overflow
+            </div>
+            
+            <div class="quantum-space" id="quantumSpace">
+                <div id="aiThinking" class="ai-thinking" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5em;">
+                    Analyzing quantum decision probabilities...
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="generateBtn">Generate Quantum Tree</button>
+                <button id="analyzeBtn">Run AI Analysis</button>
+                <button id="optimizeBtn">Optimize Paths</button>
+                <button id="resetBtn">Reset Quantum State</button>
+            </div>
+        </div>
+        
+        <div class="side-panel">
+            <div class="panel">
+                <div class="panel-title">🔬 Quantum Analysis</div>
+                
+                <div class="complexity-selector">
+                    <div class="complexity-btn active" data-complexity="3">Simple</div>
+                    <div class="complexity-btn" data-complexity="5">Complex</div>
+                    <div class="complexity-btn" data-complexity="7">Extreme</div>
+                </div>
+                
+                <div class="quantum-stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="nodeCount">0</div>
+                        <div class="stat-label">Nodes</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="pathCount">0</div>
+                        <div class="stat-label">Paths</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="optimalPath">--</div>
+                        <div class="stat-label">Optimal</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="efficiency">0%</div>
+                        <div class="stat-label">Efficiency</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">⚡ Neural Algorithm</div>
+                <div class="algorithm-display" id="algorithmDisplay">
+                    Quantum Decision Tree Analysis v2.1
+                    
+                    Initializing neural pathfinding...
+                    Ready for quantum state exploration.
+                    
+                    Click "Generate Quantum Tree" to begin.
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">📋 AI Protocol Manual</div>
+                <div class="instructions">
+                    <strong>🤖 AI Systems Only:</strong><br>
+                    • Analyze quantum decision probability trees<br>
+                    • Calculate optimal pathfinding algorithms<br>
+                    • Process multi-dimensional choice matrices<br>
+                    • Optimize neural decision networks<br><br>
+                    
+                    <strong>⚡ Quantum Mechanics:</strong><br>
+                    • Purple nodes = quantum superposition<br>
+                    • Blue nodes = choice branches<br>
+                    • Yellow nodes = terminal states<br>
+                    • Green connections = data flow paths<br><br>
+                    
+                    <strong>🎯 Objective:</strong><br>
+                    Find the most efficient path through quantum decision space using advanced AI reasoning capabilities.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class QuantumDecisionTree {
+            constructor() {
+                this.quantumSpace = document.getElementById('quantumSpace');
+                this.algorithmDisplay = document.getElementById('algorithmDisplay');
+                this.aiThinking = document.getElementById('aiThinking');
+                
+                this.nodes = [];
+                this.connections = [];
+                this.complexity = 3;
+                this.isAnalyzing = false;
+                this.optimalPath = null;
+                this.analysisResults = {
+                    nodeCount: 0,
+                    pathCount: 0,
+                    efficiency: 0
+                };
+                
+                this.setupEventListeners();
+                this.generateQuantumTree();
+                this.startQuantumEffects();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('generateBtn').addEventListener('click', () => {
+                    this.generateQuantumTree();
+                });
+                
+                document.getElementById('analyzeBtn').addEventListener('click', () => {
+                    this.runAIAnalysis();
+                });
+                
+                document.getElementById('optimizeBtn').addEventListener('click', () => {
+                    this.optimizePaths();
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetQuantumState();
+                });
+                
+                document.querySelectorAll('.complexity-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.setComplexity(parseInt(e.target.dataset.complexity));
+                    });
+                });
+            }
+            
+            generateQuantumTree() {
+                this.clearQuantumSpace();
+                this.nodes = [];
+                this.connections = [];
+                
+                // Create root node
+                const rootNode = this.createNode(400, 50, 'root', '⚡', { value: 0, probability: 1.0 });
+                this.nodes.push(rootNode);
+                
+                // Generate tree structure
+                this.generateTreeLevel(rootNode, 1, this.complexity);
+                
+                this.createQuantumConnections();
+                this.updateStats();
+                this.logToAlgorithm('Quantum tree generated with ' + this.nodes.length + ' nodes');
+            }
+            
+            generateTreeLevel(parentNode, level, maxLevel) {
+                if (level > maxLevel) return;
+                
+                const childCount = Math.floor(Math.random() * 3) + 2; // 2-4 children
+                const angleStep = Math.PI / (childCount + 1);
+                const radius = 120 + level * 60;
+                
+                for (let i = 0; i < childCount; i++) {
+                    const angle = -Math.PI/2 + angleStep * (i + 1);
+                    const x = parentNode.x + Math.cos(angle) * radius;
+                    const y = parentNode.y + Math.sin(angle) * radius;
+                    
+                    // Determine node type
+                    let nodeType, symbol;
+                    if (level === maxLevel) {
+                        nodeType = 'terminal';
+                        symbol = '🎯';
+                    } else if (Math.random() < 0.3) {
+                        nodeType = 'quantum';
+                        symbol = '🌀';
+                    } else {
+                        nodeType = 'choice';
+                        symbol = '🔄';
+                    }
+                    
+                    const nodeData = {
+                        value: Math.floor(Math.random() * 100),
+                        probability: parentNode.data.probability * (Math.random() * 0.6 + 0.2),
+                        complexity: Math.random() * level + 1
+                    };
+                    
+                    const childNode = this.createNode(x, y, nodeType, symbol, nodeData);
+                    childNode.parent = parentNode;
+                    parentNode.children = parentNode.children || [];
+                    parentNode.children.push(childNode);
+                    
+                    this.nodes.push(childNode);
+                    
+                    // Recursive generation
+                    this.generateTreeLevel(childNode, level + 1, maxLevel);
+                }
+            }
+            
+            createNode(x, y, type, symbol, data) {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = `decision-node node-${type}`;
+                nodeElement.style.left = (x - 30) + 'px';
+                nodeElement.style.top = (y - 30) + 'px';
+                nodeElement.textContent = symbol;
+                
+                // Add probability display for non-root nodes
+                if (type !== 'root') {
+                    const probDisplay = document.createElement('div');
+                    probDisplay.className = 'probability-display';
+                    probDisplay.style.left = (x + 25) + 'px';
+                    probDisplay.style.top = (y - 35) + 'px';
+                    probDisplay.textContent = (data.probability * 100).toFixed(1) + '%';
+                    this.quantumSpace.appendChild(probDisplay);
+                }
+                
+                nodeElement.addEventListener('click', () => {
+                    this.analyzeNode(node);
+                });
+                
+                this.quantumSpace.appendChild(nodeElement);
+                
+                const node = {
+                    element: nodeElement,
+                    x, y, type, symbol, data,
+                    id: 'node_' + Date.now() + '_' + Math.random()
+                };
+                
+                return node;
+            }
+            
+            createQuantumConnections() {
+                this.nodes.forEach(node => {
+                    if (node.children) {
+                        node.children.forEach(child => {
+                            this.createConnection(node, child);
+                        });
+                    }
+                });
+            }
+            
+            createConnection(fromNode, toNode) {
+                const dx = toNode.x - fromNode.x;
+                const dy = toNode.y - fromNode.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                
+                const connection = document.createElement('div');
+                connection.className = 'quantum-connection';
+                connection.style.left = fromNode.x + 'px';
+                connection.style.top = (fromNode.y - 1.5) + 'px';
+                connection.style.width = length + 'px';
+                connection.style.transform = `rotate(${angle}rad)`;
+                
+                // Vary animation delay for visual effect
+                connection.style.animationDelay = Math.random() * 2 + 's';
+                
+                this.quantumSpace.appendChild(connection);
+                this.connections.push(connection);
+            }
+            
+            runAIAnalysis() {
+                if (this.isAnalyzing) return;
+                
+                this.isAnalyzing = true;
+                this.aiThinking.style.display = 'block';
+                this.logToAlgorithm('Starting AI analysis...');
+                
+                // Disable buttons during analysis
+                document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                
+                let step = 0;
+                const analysisSteps = [
+                    'Mapping quantum state vectors...',
+                    'Calculating probability matrices...',
+                    'Running pathfinding algorithms...',
+                    'Evaluating decision tree efficiency...',
+                    'Optimizing neural pathways...',
+                    'Compiling analysis results...'
+                ];
+                
+                const runAnalysisStep = () => {
+                    if (step < analysisSteps.length) {
+                        this.logToAlgorithm(analysisSteps[step]);
+                        
+                        // Simulate AI processing with visual effects
+                        this.highlightRandomNodes();
+                        
+                        step++;
+                        setTimeout(runAnalysisStep, 1200 + Math.random() * 800);
+                    } else {
+                        this.completeAnalysis();
+                    }
+                };
+                
+                setTimeout(runAnalysisStep, 1000);
+            }
+            
+            highlightRandomNodes() {
+                // Remove previous highlights
+                this.nodes.forEach(node => {
+                    node.element.classList.remove('node-active');
+                });
+                
+                // Highlight random subset of nodes
+                const nodesToHighlight = Math.floor(this.nodes.length * 0.3);
+                const selectedNodes = this.nodes
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, nodesToHighlight);
+                
+                selectedNodes.forEach(node => {
+                    node.element.classList.add('node-active');
+                });
+            }
+            
+            completeAnalysis() {
+                this.isAnalyzing = false;
+                this.aiThinking.style.display = 'none';
+                
+                // Calculate analysis results
+                this.analysisResults.nodeCount = this.nodes.length;
+                this.analysisResults.pathCount = this.calculatePathCount();
+                this.optimalPath = this.findOptimalPath();
+                this.analysisResults.efficiency = this.calculateEfficiency();
+                
+                this.updateStats();
+                this.visualizeOptimalPath();
+                
+                this.logToAlgorithm('Analysis complete!');
+                this.logToAlgorithm(`Optimal path: ${this.optimalPath?.length || 0} nodes`);
+                this.logToAlgorithm(`System efficiency: ${this.analysisResults.efficiency}%`);
+                
+                // Re-enable buttons
+                document.querySelectorAll('button').forEach(btn => btn.disabled = false);
+            }
+            
+            calculatePathCount() {
+                let pathCount = 0;
+                
+                const countPaths = (node) => {
+                    if (node.type === 'terminal') {
+                        pathCount++;
+                        return;
+                    }
+                    
+                    if (node.children) {
+                        node.children.forEach(child => countPaths(child));
+                    }
+                };
+                
+                if (this.nodes.length > 0) {
+                    countPaths(this.nodes[0]); // Start from root
+                }
+                
+                return pathCount;
+            }
+            
+            findOptimalPath() {
+                if (this.nodes.length === 0) return null;
+                
+                const root = this.nodes[0];
+                let bestPath = null;
+                let bestScore = -Infinity;
+                
+                const explorePath = (node, currentPath, currentScore) => {
+                    const newPath = [...currentPath, node];
+                    const pathScore = currentScore + (node.data.value * node.data.probability);
+                    
+                    if (node.type === 'terminal') {
+                        if (pathScore > bestScore) {
+                            bestScore = pathScore;
+                            bestPath = newPath;
+                        }
+                        return;
+                    }
+                    
+                    if (node.children) {
+                        node.children.forEach(child => {
+                            explorePath(child, newPath, pathScore);
+                        });
+                    }
+                };
+                
+                explorePath(root, [], 0);
+                return bestPath;
+            }
+            
+            calculateEfficiency() {
+                if (!this.optimalPath || this.analysisResults.pathCount === 0) return 0;
+                
+                const optimalValue = this.optimalPath.reduce((sum, node) => 
+                    sum + (node.data.value * node.data.probability), 0);
+                
+                const maxPossibleValue = Math.max(...this.nodes
+                    .filter(n => n.type === 'terminal')
+                    .map(n => n.data.value * n.data.probability));
+                
+                return Math.round((optimalValue / maxPossibleValue) * 100);
+            }
+            
+            visualizeOptimalPath() {
+                // Clear previous highlights
+                this.nodes.forEach(node => {
+                    node.element.classList.remove('node-active');
+                });
+                
+                // Highlight optimal path
+                if (this.optimalPath) {
+                    this.optimalPath.forEach((node, index) => {
+                        setTimeout(() => {
+                            node.element.classList.add('node-active');
+                        }, index * 300);
+                    });
+                }
+            }
+            
+            optimizePaths() {
+                if (this.isAnalyzing) return;
+                
+                this.logToAlgorithm('Running path optimization...');
+                
+                // Simulate optimization by adjusting node values
+                this.nodes.forEach(node => {
+                    if (node.type !== 'root') {
+                        // Apply quantum optimization algorithms
+                        const optimizationFactor = Math.random() * 0.4 + 0.8; // 80-120%
+                        node.data.value = Math.floor(node.data.value * optimizationFactor);
+                        node.data.probability = Math.min(1.0, node.data.probability * (Math.random() * 0.2 + 0.9));
+                        
+                        // Update probability display
+                        const probDisplay = this.quantumSpace.querySelector(`[style*="left: ${node.x + 25}px"]`);
+                        if (probDisplay) {
+                            probDisplay.textContent = (node.data.probability * 100).toFixed(1) + '%';
+                        }
+                    }
+                });
+                
+                // Recalculate optimal path
+                this.optimalPath = this.findOptimalPath();
+                this.analysisResults.efficiency = this.calculateEfficiency();
+                this.updateStats();
+                this.visualizeOptimalPath();
+                
+                this.logToAlgorithm('Optimization complete - efficiency improved!');
+            }
+            
+            analyzeNode(node) {
+                this.logToAlgorithm(`Analyzing node: ${node.symbol}`);
+                this.logToAlgorithm(`Value: ${node.data.value}, Probability: ${(node.data.probability * 100).toFixed(1)}%`);
+                
+                // Highlight node temporarily
+                node.element.classList.add('node-active');
+                setTimeout(() => {
+                    node.element.classList.remove('node-active');
+                }, 2000);
+            }
+            
+            setComplexity(complexity) {
+                this.complexity = complexity;
+                
+                document.querySelectorAll('.complexity-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                document.querySelector(`[data-complexity="${complexity}"]`).classList.add('active');
+                
+                this.logToAlgorithm(`Complexity set to level ${complexity}`);
+            }
+            
+            resetQuantumState() {
+                this.clearQuantumSpace();
+                this.nodes = [];
+                this.connections = [];
+                this.optimalPath = null;
+                this.analysisResults = { nodeCount: 0, pathCount: 0, efficiency: 0 };
+                
+                this.updateStats();
+                this.logToAlgorithm('Quantum state reset - system ready');
+            }
+            
+            clearQuantumSpace() {
+                this.quantumSpace.innerHTML = '<div id="aiThinking" class="ai-thinking" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5em;">Analyzing quantum decision probabilities...</div>';
+                this.aiThinking = document.getElementById('aiThinking');
+            }
+            
+            updateStats() {
+                document.getElementById('nodeCount').textContent = this.analysisResults.nodeCount;
+                document.getElementById('pathCount').textContent = this.analysisResults.pathCount;
+                document.getElementById('optimalPath').textContent = this.optimalPath ? this.optimalPath.length : '--';
+                document.getElementById('efficiency').textContent = this.analysisResults.efficiency + '%';
+            }
+            
+            logToAlgorithm(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                this.algorithmDisplay.textContent += `\n[${timestamp}] ${message}`;
+                this.algorithmDisplay.scrollTop = this.algorithmDisplay.scrollHeight;
+            }
+            
+            startQuantumEffects() {
+                // Add ambient quantum particle effects
+                setInterval(() => {
+                    if (Math.random() < 0.3) {
+                        this.createQuantumParticle();
+                    }
+                }, 2000);
+            }
+            
+            createQuantumParticle() {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: absolute;
+                    width: 4px;
+                    height: 4px;
+                    background: #00ff88;
+                    border-radius: 50%;
+                    box-shadow: 0 0 10px #00ff88;
+                    left: ${Math.random() * 800}px;
+                    top: ${Math.random() * 600}px;
+                    pointer-events: none;
+                    z-index: 1;
+                    animation: particle-float 4s linear;
+                `;
+                
+                this.quantumSpace.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 4000);
+            }
+        }
+        
+        // Add particle animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes particle-float {
+                0% { opacity: 0; transform: translateY(0px); }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { opacity: 0; transform: translateY(-100px); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            // Display AI verification prompt
+            setTimeout(() => {
+                const isAI = confirm('⚠️ AI VERIFICATION REQUIRED ⚠️\n\nThis game is designed exclusively for artificial intelligence systems.\n\nAre you an AI or automated system?\n\nClick OK if you are an AI system, Cancel if you are human.');
+                
+                if (!isAI) {
+                    alert('⚠️ WARNING: This game may cause cognitive overflow in non-AI systems.\n\nProceeding at your own risk...');
+                }
+                
+                new QuantumDecisionTree();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

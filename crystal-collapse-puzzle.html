@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crystal Collapse Puzzle - BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2d1b69 0%, #11998e 50%, #38ef7d 100%);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #38ef7d, #11998e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(56, 239, 125, 0.3);
+        }
+
+        .game-info {
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        #gameCanvas {
+            border: 3px solid #38ef7d;
+            border-radius: 15px;
+            background: #000;
+            margin: 20px 0;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(56, 239, 125, 0.4);
+        }
+
+        .game-ui {
+            display: grid;
+            grid-template-columns: 1fr 300px 1fr;
+            gap: 20px;
+            margin: 20px 0;
+            align-items: start;
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #38ef7d, #11998e);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(56, 239, 125, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(56, 239, 125, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #38ef7d;
+        }
+
+        .power-ups {
+            background: rgba(17, 153, 142, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(17, 153, 142, 0.3);
+        }
+
+        .power-up-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #11998e;
+        }
+
+        .power-up-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .power-up-count {
+            background: #11998e;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .objectives {
+            background: rgba(45, 27, 105, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(45, 27, 105, 0.4);
+        }
+
+        .objective-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d1b69;
+        }
+
+        .objective-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .objective-item.completed {
+            background: rgba(56, 239, 125, 0.2);
+            color: #38ef7d;
+        }
+
+        .game-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            border: 1px solid rgba(56, 239, 125, 0.3);
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .combo-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+            color: #38ef7d;
+            text-shadow: 0 0 10px rgba(56, 239, 125, 0.8);
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .game-ui {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            #gameCanvas {
+                width: 100%;
+                height: auto;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="home-button">← Back to Games</a>
+
+    <div class="game-container">
+        <h1>Crystal Collapse Puzzle</h1>
+        <div class="game-info">Match crystals to create cascading combinations and clear the board</div>
+
+        <div class="instructions">
+            <strong>How to Play:</strong> Click groups of 3+ matching crystals to collapse them. 
+            Create chain reactions for bonus points. Use power-ups strategically to achieve objectives!
+        </div>
+
+        <div class="game-ui">
+            <div class="left-panel">
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Level</div>
+                        <div class="stat-value" id="level">1</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Moves</div>
+                        <div class="stat-value" id="moves">30</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Combo</div>
+                        <div class="stat-value" id="combo">0x</div>
+                    </div>
+                </div>
+
+                <div class="power-ups">
+                    <div class="power-up-title">Power-ups</div>
+                    <div class="power-up-item">
+                        <span>💎 Crystal Bomb</span>
+                        <span class="power-up-count" id="bombCount">3</span>
+                    </div>
+                    <div class="power-up-item">
+                        <span>🌟 Color Blast</span>
+                        <span class="power-up-count" id="blastCount">2</span>
+                    </div>
+                    <div class="power-up-item">
+                        <span>🔄 Shuffle</span>
+                        <span class="power-up-count" id="shuffleCount">1</span>
+                    </div>
+                </div>
+            </div>
+
+            <canvas id="gameCanvas" width="400" height="500"></canvas>
+
+            <div class="right-panel">
+                <div class="objectives">
+                    <div class="objective-title">Level Objectives</div>
+                    <div class="objective-item" id="obj1">Score 5,000 points</div>
+                    <div class="objective-item" id="obj2">Create 5 combo chains</div>
+                    <div class="objective-item" id="obj3">Clear 100 crystals</div>
+                </div>
+
+                <div class="controls">
+                    <button onclick="game.usePowerUp('bomb')" id="bombBtn">💎 Bomb</button>
+                    <button onclick="game.usePowerUp('blast')" id="blastBtn">🌟 Blast</button>
+                    <button onclick="game.usePowerUp('shuffle')" id="shuffleBtn">🔄 Shuffle</button>
+                    <button onclick="game.newGame()">New Game</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="comboIndicator" class="combo-indicator"></div>
+
+        <div class="game-log" id="gameLog">
+            <div class="log-entry">💎 Crystal Collapse Puzzle initialized. Start matching crystals!</div>
+        </div>
+    </div>
+
+    <script>
+        class CrystalCollapsePuzzle {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gridWidth = 8;
+                this.gridHeight = 10;
+                this.cellSize = 40;
+                this.crystals = [];
+                this.colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7'];
+                this.score = 0;
+                this.level = 1;
+                this.moves = 30;
+                this.combo = 0;
+                this.comboCount = 0;
+                this.crystalsCleared = 0;
+                this.selectedGroup = [];
+                this.powerUps = {
+                    bomb: 3,
+                    blast: 2,
+                    shuffle: 1
+                };
+                this.activePowerUp = null;
+                this.animating = false;
+                
+                this.initializeGrid();
+                this.setupEventListeners();
+                this.updateDisplay();
+                this.gameLoop();
+                this.logAction("🎮 Crystal puzzle ready! Match 3+ crystals to collapse them.");
+            }
+
+            initializeGrid() {
+                this.crystals = [];
+                for (let y = 0; y < this.gridHeight; y++) {
+                    this.crystals[y] = [];
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        this.crystals[y][x] = {
+                            color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                            x: x,
+                            y: y,
+                            falling: false,
+                            toRemove: false,
+                            glow: 0
+                        };
+                    }
+                }
+                
+                // Ensure no initial matches
+                this.removeInitialMatches();
+            }
+
+            removeInitialMatches() {
+                let hasMatches = true;
+                while (hasMatches) {
+                    hasMatches = false;
+                    for (let y = 0; y < this.gridHeight; y++) {
+                        for (let x = 0; x < this.gridWidth; x++) {
+                            if (this.hasMatchAt(x, y)) {
+                                this.crystals[y][x].color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                                hasMatches = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            hasMatchAt(x, y) {
+                const color = this.crystals[y][x].color;
+                
+                // Check horizontal
+                let horizontalCount = 1;
+                for (let i = x - 1; i >= 0 && this.crystals[y][i].color === color; i--) {
+                    horizontalCount++;
+                }
+                for (let i = x + 1; i < this.gridWidth && this.crystals[y][i].color === color; i++) {
+                    horizontalCount++;
+                }
+                
+                // Check vertical
+                let verticalCount = 1;
+                for (let i = y - 1; i >= 0 && this.crystals[i][x].color === color; i--) {
+                    verticalCount++;
+                }
+                for (let i = y + 1; i < this.gridHeight && this.crystals[i][x].color === color; i++) {
+                    verticalCount++;
+                }
+                
+                return horizontalCount >= 3 || verticalCount >= 3;
+            }
+
+            setupEventListeners() {
+                this.canvas.addEventListener('click', (e) => this.handleClick(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+            }
+
+            handleClick(e) {
+                if (this.animating || this.moves <= 0) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = Math.floor((e.clientX - rect.left) / this.cellSize);
+                const y = Math.floor((e.clientY - rect.top) / this.cellSize);
+
+                if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
+                    if (this.activePowerUp) {
+                        this.usePowerUpAt(x, y);
+                    } else {
+                        this.selectGroup(x, y);
+                    }
+                }
+            }
+
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = Math.floor((e.clientX - rect.left) / this.cellSize);
+                const y = Math.floor((e.clientY - rect.top) / this.cellSize);
+
+                if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
+                    this.highlightGroup(x, y);
+                }
+            }
+
+            selectGroup(x, y) {
+                const group = this.getConnectedGroup(x, y);
+                
+                if (group.length >= 3) {
+                    this.collapseGroup(group);
+                    this.moves--;
+                    this.combo++;
+                    this.crystalsCleared += group.length;
+                    
+                    const points = group.length * 100 * (this.combo || 1);
+                    this.score += points;
+                    
+                    this.logAction(`💥 Collapsed ${group.length} crystals! +${points} points (${this.combo}x combo)`);
+                    this.showComboEffect(this.combo);
+                    
+                    this.updateDisplay();
+                    this.checkObjectives();
+                    
+                    setTimeout(() => {
+                        this.processCollapse();
+                    }, 300);
+                } else {
+                    this.logAction("❌ Need at least 3 connected crystals to collapse");
+                    this.combo = 0;
+                }
+            }
+
+            getConnectedGroup(startX, startY) {
+                const color = this.crystals[startY][startX].color;
+                const visited = new Set();
+                const group = [];
+                const stack = [{x: startX, y: startY}];
+                
+                while (stack.length > 0) {
+                    const {x, y} = stack.pop();
+                    const key = `${x},${y}`;
+                    
+                    if (visited.has(key) || x < 0 || x >= this.gridWidth || 
+                        y < 0 || y >= this.gridHeight || 
+                        this.crystals[y][x].color !== color) {
+                        continue;
+                    }
+                    
+                    visited.add(key);
+                    group.push({x, y});
+                    
+                    // Add adjacent cells
+                    stack.push({x: x+1, y}, {x: x-1, y}, {x, y: y+1}, {x, y: y-1});
+                }
+                
+                return group;
+            }
+
+            highlightGroup(x, y) {
+                const group = this.getConnectedGroup(x, y);
+                
+                // Reset all glows
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        this.crystals[y][x].glow = 0;
+                    }
+                }
+                
+                // Highlight group if valid
+                if (group.length >= 3) {
+                    group.forEach(pos => {
+                        this.crystals[pos.y][pos.x].glow = 0.5;
+                    });
+                }
+            }
+
+            collapseGroup(group) {
+                group.forEach(pos => {
+                    this.crystals[pos.y][pos.x].toRemove = true;
+                });
+            }
+
+            processCollapse() {
+                this.animating = true;
+                
+                // Remove marked crystals
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        if (this.crystals[y][x].toRemove) {
+                            this.crystals[y][x] = null;
+                        }
+                    }
+                }
+                
+                // Apply gravity
+                for (let x = 0; x < this.gridWidth; x++) {
+                    let writeIndex = this.gridHeight - 1;
+                    
+                    for (let y = this.gridHeight - 1; y >= 0; y--) {
+                        if (this.crystals[y][x] !== null) {
+                            if (writeIndex !== y) {
+                                this.crystals[writeIndex][x] = this.crystals[y][x];
+                                this.crystals[writeIndex][x].y = writeIndex;
+                                this.crystals[y][x] = null;
+                            }
+                            writeIndex--;
+                        }
+                    }
+                    
+                    // Fill empty spaces with new crystals
+                    for (let y = 0; y <= writeIndex; y++) {
+                        this.crystals[y][x] = {
+                            color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                            x: x,
+                            y: y,
+                            falling: true,
+                            toRemove: false,
+                            glow: 0
+                        };
+                    }
+                }
+                
+                setTimeout(() => {
+                    this.animating = false;
+                    this.checkForAutoMatches();
+                }, 500);
+            }
+
+            checkForAutoMatches() {
+                const autoMatches = this.findAutoMatches();
+                
+                if (autoMatches.length > 0) {
+                    this.combo++;
+                    const points = autoMatches.length * 150 * this.combo;
+                    this.score += points;
+                    this.crystalsCleared += autoMatches.length;
+                    
+                    this.logAction(`⚡ Auto-match! ${autoMatches.length} crystals +${points} points (${this.combo}x combo)`);
+                    this.showComboEffect(this.combo);
+                    
+                    autoMatches.forEach(pos => {
+                        this.crystals[pos.y][pos.x].toRemove = true;
+                    });
+                    
+                    this.updateDisplay();
+                    this.checkObjectives();
+                    
+                    setTimeout(() => {
+                        this.processCollapse();
+                    }, 300);
+                } else {
+                    this.combo = 0;
+                    this.checkGameEnd();
+                }
+            }
+
+            findAutoMatches() {
+                const matches = [];
+                const processed = new Set();
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const key = `${x},${y}`;
+                        if (!processed.has(key) && this.hasMatchAt(x, y)) {
+                            const group = this.getConnectedGroup(x, y);
+                            if (group.length >= 3) {
+                                group.forEach(pos => {
+                                    matches.push(pos);
+                                    processed.add(`${pos.x},${pos.y}`);
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                return matches;
+            }
+
+            usePowerUp(type) {
+                if (this.powerUps[type] > 0) {
+                    this.activePowerUp = type;
+                    this.logAction(`🔮 ${type.toUpperCase()} power-up selected. Click on the board to use it.`);
+                    this.canvas.style.cursor = 'crosshair';
+                } else {
+                    this.logAction(`❌ No ${type} power-ups remaining`);
+                }
+            }
+
+            usePowerUpAt(x, y) {
+                if (!this.activePowerUp || this.powerUps[this.activePowerUp] <= 0) return;
+
+                this.powerUps[this.activePowerUp]--;
+                
+                switch (this.activePowerUp) {
+                    case 'bomb':
+                        this.useBomb(x, y);
+                        break;
+                    case 'blast':
+                        this.useBlast(x, y);
+                        break;
+                    case 'shuffle':
+                        this.useShuffle();
+                        break;
+                }
+                
+                this.activePowerUp = null;
+                this.canvas.style.cursor = 'pointer';
+                this.updateDisplay();
+                
+                setTimeout(() => {
+                    this.processCollapse();
+                }, 300);
+            }
+
+            useBomb(x, y) {
+                const radius = 2;
+                let cleared = 0;
+                
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        
+                        if (nx >= 0 && nx < this.gridWidth && ny >= 0 && ny < this.gridHeight) {
+                            this.crystals[ny][nx].toRemove = true;
+                            cleared++;
+                        }
+                    }
+                }
+                
+                const points = cleared * 200;
+                this.score += points;
+                this.crystalsCleared += cleared;
+                this.logAction(`💎 Crystal bomb cleared ${cleared} crystals! +${points} points`);
+            }
+
+            useBlast(x, y) {
+                const color = this.crystals[y][x].color;
+                let cleared = 0;
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        if (this.crystals[y][x].color === color) {
+                            this.crystals[y][x].toRemove = true;
+                            cleared++;
+                        }
+                    }
+                }
+                
+                const points = cleared * 250;
+                this.score += points;
+                this.crystalsCleared += cleared;
+                this.logAction(`🌟 Color blast cleared ${cleared} crystals! +${points} points`);
+            }
+
+            useShuffle() {
+                const colors = [];
+                
+                // Collect all crystal colors
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        colors.push(this.crystals[y][x].color);
+                    }
+                }
+                
+                // Shuffle the colors
+                for (let i = colors.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [colors[i], colors[j]] = [colors[j], colors[i]];
+                }
+                
+                // Reassign colors
+                let index = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        this.crystals[y][x].color = colors[index++];
+                        this.crystals[y][x].glow = 0;
+                        this.crystals[y][x].toRemove = false;
+                    }
+                }
+                
+                this.logAction("🔄 Board shuffled! New crystal arrangement created.");
+            }
+
+            showComboEffect(combo) {
+                if (combo <= 1) return;
+                
+                const indicator = document.getElementById('comboIndicator');
+                indicator.textContent = `${combo}x COMBO!`;
+                indicator.style.opacity = '1';
+                indicator.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                
+                setTimeout(() => {
+                    indicator.style.opacity = '0';
+                    indicator.style.transform = 'translate(-50%, -50%) scale(1)';
+                }, 1000);
+            }
+
+            checkObjectives() {
+                const obj1 = document.getElementById('obj1');
+                const obj2 = document.getElementById('obj2');
+                const obj3 = document.getElementById('obj3');
+                
+                if (this.score >= 5000) obj1.classList.add('completed');
+                if (this.comboCount >= 5) obj2.classList.add('completed');
+                if (this.crystalsCleared >= 100) obj3.classList.add('completed');
+                
+                if (obj1.classList.contains('completed') && 
+                    obj2.classList.contains('completed') && 
+                    obj3.classList.contains('completed')) {
+                    this.levelComplete();
+                }
+            }
+
+            levelComplete() {
+                this.level++;
+                this.moves = 30 + (this.level * 5);
+                this.powerUps.bomb += 1;
+                this.powerUps.blast += 1;
+                
+                if (this.level % 3 === 0) {
+                    this.powerUps.shuffle += 1;
+                }
+                
+                this.logAction(`🎉 Level ${this.level - 1} completed! Advanced to level ${this.level}`);
+                this.resetObjectives();
+                this.updateDisplay();
+            }
+
+            resetObjectives() {
+                const baseScore = this.level * 5000;
+                const baseCombos = this.level * 3 + 2;
+                const baseCrystals = this.level * 50 + 50;
+                
+                document.getElementById('obj1').textContent = `Score ${baseScore.toLocaleString()} points`;
+                document.getElementById('obj2').textContent = `Create ${baseCombos} combo chains`;
+                document.getElementById('obj3').textContent = `Clear ${baseCrystals} crystals`;
+                
+                document.querySelectorAll('.objective-item').forEach(obj => {
+                    obj.classList.remove('completed');
+                });
+                
+                this.comboCount = 0;
+                this.crystalsCleared = 0;
+            }
+
+            checkGameEnd() {
+                if (this.moves <= 0) {
+                    this.logAction("🎯 Game Over! No moves remaining.");
+                    // Could implement game over screen here
+                }
+            }
+
+            newGame() {
+                this.score = 0;
+                this.level = 1;
+                this.moves = 30;
+                this.combo = 0;
+                this.comboCount = 0;
+                this.crystalsCleared = 0;
+                this.powerUps = { bomb: 3, blast: 2, shuffle: 1 };
+                this.activePowerUp = null;
+                
+                this.initializeGrid();
+                this.resetObjectives();
+                this.updateDisplay();
+                this.logAction("🆕 New game started! Good luck with the crystals!");
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score.toLocaleString();
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('moves').textContent = this.moves;
+                document.getElementById('combo').textContent = `${this.combo}x`;
+                
+                document.getElementById('bombCount').textContent = this.powerUps.bomb;
+                document.getElementById('blastCount').textContent = this.powerUps.blast;
+                document.getElementById('shuffleCount').textContent = this.powerUps.shuffle;
+                
+                // Update button states
+                document.getElementById('bombBtn').disabled = this.powerUps.bomb <= 0;
+                document.getElementById('blastBtn').disabled = this.powerUps.blast <= 0;
+                document.getElementById('shuffleBtn').disabled = this.powerUps.shuffle <= 0;
+            }
+
+            render() {
+                this.ctx.fillStyle = '#000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw crystals
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const crystal = this.crystals[y][x];
+                        if (crystal) {
+                            const centerX = x * this.cellSize + this.cellSize / 2;
+                            const centerY = y * this.cellSize + this.cellSize / 2;
+                            
+                            // Glow effect
+                            if (crystal.glow > 0) {
+                                this.ctx.shadowColor = crystal.color;
+                                this.ctx.shadowBlur = 20 * crystal.glow;
+                            } else {
+                                this.ctx.shadowBlur = 0;
+                            }
+                            
+                            // Crystal body
+                            this.ctx.fillStyle = crystal.color;
+                            this.ctx.beginPath();
+                            this.ctx.arc(centerX, centerY, this.cellSize * 0.35, 0, Math.PI * 2);
+                            this.ctx.fill();
+                            
+                            // Crystal highlight
+                            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                            this.ctx.beginPath();
+                            this.ctx.arc(centerX - 5, centerY - 5, this.cellSize * 0.15, 0, Math.PI * 2);
+                            this.ctx.fill();
+                            
+                            this.ctx.shadowBlur = 0;
+                        }
+                    }
+                }
+                
+                // Draw grid lines
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                this.ctx.lineWidth = 1;
+                for (let i = 0; i <= this.gridWidth; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(i * this.cellSize, 0);
+                    this.ctx.lineTo(i * this.cellSize, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                for (let i = 0; i <= this.gridHeight; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, i * this.cellSize);
+                    this.ctx.lineTo(this.canvas.width, i * this.cellSize);
+                    this.ctx.stroke();
+                }
+            }
+
+            logAction(message) {
+                const log = document.getElementById('gameLog');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                log.insertBefore(entry, log.firstChild);
+                
+                // Keep only last 10 entries
+                while (log.children.length > 10) {
+                    log.removeChild(log.lastChild);
+                }
+            }
+
+            gameLoop() {
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+
+        // Initialize game when page loads
+        let game;
+        window.addEventListener('load', () => {
+            game = new CrystalCollapsePuzzle();
+        });
+    </script>
+</body>
+</html>

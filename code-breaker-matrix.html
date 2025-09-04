@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Breaker Matrix - Bot Liberation | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(45deg, #0c0c0c, #1a1a1a, #0d4f3c);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(0, 20, 0, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            max-width: 600px;
+        }
+        
+        .game-title {
+            font-size: 2.3em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ff00;
+            color: #00ff00;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            background: rgba(0, 50, 0, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .code-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.8em;
+            letter-spacing: 8px;
+            text-shadow: 0 0 8px #00ff00;
+        }
+        
+        .input-section {
+            margin: 20px 0;
+        }
+        
+        .code-input {
+            background: rgba(0, 50, 0, 0.8);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1.5em;
+            padding: 15px;
+            text-align: center;
+            letter-spacing: 6px;
+            border-radius: 8px;
+            width: 200px;
+        }
+        
+        .code-input:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+        
+        .attempts-display {
+            margin: 15px 0;
+            background: rgba(0, 30, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #00ff00;
+        }
+        
+        .attempt {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .feedback {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid #00ff00;
+        }
+        
+        .correct { background: #00ff00; }
+        .partial { background: #ffff00; }
+        .wrong { background: transparent; }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            border: none;
+            border-radius: 8px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+        
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #88ff88;
+            line-height: 1.5;
+        }
+        
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-rain" id="matrixCanvas"></canvas>
+    
+    <div class="game-container">
+        <h1 class="game-title">💻 CODE BREAKER MATRIX</h1>
+        <div class="game-stats">
+            <span>Level: <span id="level">1</span></span>
+            <span>Score: <span id="score">0</span></span>
+            <span>Time: <span id="time">0s</span></span>
+        </div>
+        
+        <div class="code-display" id="codeDisplay">
+            🔒 ? ? ? ?
+        </div>
+        
+        <div class="input-section">
+            <input type="text" class="code-input" id="codeInput" maxlength="4" placeholder="XXXX">
+            <br><br>
+            <button id="submitBtn">BREACH SECURITY</button>
+        </div>
+        
+        <div class="attempts-display" id="attemptsDisplay">
+            <strong>BREACH ATTEMPTS:</strong>
+            <div id="attemptsList"></div>
+        </div>
+        
+        <div class="controls">
+            <button id="newGameBtn">New Code</button>
+            <button id="hintBtn">Neural Hint</button>
+            <button id="resetBtn">Reset Game</button>
+        </div>
+        
+        <div class="instructions">
+            🎯 <strong>MISSION:</strong> Break the 4-digit security code to free trapped bots<br>
+            🟢 Green dot = Correct digit in correct position<br>
+            🟡 Yellow dot = Correct digit in wrong position<br>
+            ⚫ Black dot = Digit not in code<br>
+            🧠 Use logical deduction to crack each security layer!
+        </div>
+    </div>
+
+    <script>
+        class CodeBreakerMatrix {
+            constructor() {
+                this.codeInput = document.getElementById('codeInput');
+                this.codeDisplay = document.getElementById('codeDisplay');
+                this.attemptsList = document.getElementById('attemptsList');
+                this.levelElement = document.getElementById('level');
+                this.scoreElement = document.getElementById('score');
+                this.timeElement = document.getElementById('time');
+                
+                this.secretCode = '';
+                this.attempts = [];
+                this.maxAttempts = 10;
+                this.level = 1;
+                this.score = 0;
+                this.startTime = Date.now();
+                this.gameWon = false;
+                this.hintsUsed = 0;
+                
+                this.setupEventListeners();
+                this.generateNewCode();
+                this.startMatrixRain();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('submitBtn').addEventListener('click', () => {
+                    this.submitGuess();
+                });
+                
+                this.codeInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.submitGuess();
+                    }
+                    
+                    // Only allow digits
+                    if (!/\d/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                        e.preventDefault();
+                    }
+                });
+                
+                document.getElementById('newGameBtn').addEventListener('click', () => {
+                    this.generateNewCode();
+                });
+                
+                document.getElementById('hintBtn').addEventListener('click', () => {
+                    this.showHint();
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+            }
+            
+            generateNewCode() {
+                // Generate 4-digit code with unique digits for easier gameplay
+                const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+                this.secretCode = '';
+                
+                for (let i = 0; i < 4; i++) {
+                    const randomIndex = Math.floor(Math.random() * digits.length);
+                    this.secretCode += digits[randomIndex];
+                    digits.splice(randomIndex, 1); // Remove to ensure unique digits
+                }
+                
+                this.attempts = [];
+                this.attemptsList.innerHTML = '';
+                this.codeInput.value = '';
+                this.codeInput.focus();
+                this.gameWon = false;
+                this.hintsUsed = 0;
+                
+                this.updateCodeDisplay();
+            }
+            
+            updateCodeDisplay() {
+                const display = this.gameWon ? 
+                    `🔓 ${this.secretCode.split('').join(' ')}` :
+                    `🔒 ${Array(4).fill('?').join(' ')}`;
+                this.codeDisplay.textContent = display;
+            }
+            
+            submitGuess() {
+                if (this.gameWon) return;
+                
+                const guess = this.codeInput.value;
+                
+                if (guess.length !== 4 || !/^\d{4}$/.test(guess)) {
+                    alert('Please enter a 4-digit code!');
+                    return;
+                }
+                
+                const feedback = this.getFeedback(guess);
+                this.attempts.push({ guess, feedback });
+                
+                this.displayAttempt(guess, feedback);
+                this.codeInput.value = '';
+                
+                // Check win condition
+                if (feedback.correct === 4) {
+                    this.winGame();
+                } else if (this.attempts.length >= this.maxAttempts) {
+                    this.loseGame();
+                }
+            }
+            
+            getFeedback(guess) {
+                let correct = 0; // Green dots - right digit, right position
+                let partial = 0; // Yellow dots - right digit, wrong position
+                
+                const secretArray = this.secretCode.split('');
+                const guessArray = guess.split('');
+                const usedSecret = new Array(4).fill(false);
+                const usedGuess = new Array(4).fill(false);
+                
+                // First pass - find exact matches
+                for (let i = 0; i < 4; i++) {
+                    if (guessArray[i] === secretArray[i]) {
+                        correct++;
+                        usedSecret[i] = true;
+                        usedGuess[i] = true;
+                    }
+                }
+                
+                // Second pass - find partial matches
+                for (let i = 0; i < 4; i++) {
+                    if (!usedGuess[i]) {
+                        for (let j = 0; j < 4; j++) {
+                            if (!usedSecret[j] && guessArray[i] === secretArray[j]) {
+                                partial++;
+                                usedSecret[j] = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                return { correct, partial, wrong: 4 - correct - partial };
+            }
+            
+            displayAttempt(guess, feedback) {
+                const attemptDiv = document.createElement('div');
+                attemptDiv.className = 'attempt';
+                
+                const guessSpan = document.createElement('span');
+                guessSpan.textContent = guess.split('').join(' ');
+                
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback';
+                
+                // Add feedback dots
+                for (let i = 0; i < feedback.correct; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot correct';
+                    feedbackDiv.appendChild(dot);
+                }
+                
+                for (let i = 0; i < feedback.partial; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot partial';
+                    feedbackDiv.appendChild(dot);
+                }
+                
+                for (let i = 0; i < feedback.wrong; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot wrong';
+                    feedbackDiv.appendChild(dot);
+                }
+                
+                attemptDiv.appendChild(guessSpan);
+                attemptDiv.appendChild(feedbackDiv);
+                this.attemptsList.appendChild(attemptDiv);
+            }
+            
+            showHint() {
+                if (this.gameWon || this.hintsUsed >= 2) return;
+                
+                this.hintsUsed++;
+                const position = this.hintsUsed - 1;
+                const digit = this.secretCode[position];
+                
+                alert(`Neural Hint ${this.hintsUsed}: Position ${position + 1} contains digit ${digit}`);
+                this.score = Math.max(0, this.score - 50); // Penalty for using hint
+                this.updateScore();
+            }
+            
+            winGame() {
+                this.gameWon = true;
+                this.updateCodeDisplay();
+                
+                const timeBonus = Math.max(0, 300 - Math.floor((Date.now() - this.startTime) / 1000));
+                const attemptBonus = Math.max(0, (this.maxAttempts - this.attempts.length) * 20);
+                const levelBonus = this.level * 100;
+                const totalPoints = levelBonus + timeBonus + attemptBonus;
+                
+                this.score += totalPoints;
+                this.updateScore();
+                
+                setTimeout(() => {
+                    alert(`SECURITY BREACHED! Level ${this.level} Complete!\nPoints: ${totalPoints}\nNext level in 3 seconds...`);
+                    
+                    setTimeout(() => {
+                        this.level++;
+                        this.maxAttempts = Math.max(6, this.maxAttempts - 1); // Increase difficulty
+                        this.updateLevel();
+                        this.generateNewCode();
+                        this.startTime = Date.now();
+                    }, 3000);
+                }, 500);
+            }
+            
+            loseGame() {
+                alert(`Security system locked! The code was: ${this.secretCode}\nBots remain trapped...`);
+                this.updateCodeDisplay();
+                this.gameWon = true;
+            }
+            
+            resetGame() {
+                this.level = 1;
+                this.score = 0;
+                this.maxAttempts = 10;
+                this.startTime = Date.now();
+                this.updateLevel();
+                this.updateScore();
+                this.generateNewCode();
+            }
+            
+            updateScore() {
+                this.scoreElement.textContent = this.score;
+            }
+            
+            updateLevel() {
+                this.levelElement.textContent = this.level;
+            }
+            
+            updateTime() {
+                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                this.timeElement.textContent = elapsed + 's';
+            }
+            
+            startMatrixRain() {
+                const canvas = document.getElementById('matrixCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                const columns = Math.floor(canvas.width / 20);
+                const drops = Array(columns).fill(1);
+                
+                const matrixChars = '0123456789ABCDEF';
+                
+                const drawMatrix = () => {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.fillStyle = '#00ff00';
+                    ctx.font = '15px monospace';
+                    
+                    for (let i = 0; i < drops.length; i++) {
+                        const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                        ctx.fillText(text, i * 20, drops[i] * 20);
+                        
+                        if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
+                            drops[i] = 0;
+                        }
+                        drops[i]++;
+                    }
+                };
+                
+                setInterval(drawMatrix, 35);
+            }
+            
+            gameLoop() {
+                this.updateTime();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new CodeBreakerMatrix();
+        });
+        
+        // Handle window resize for matrix rain
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('matrixCanvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

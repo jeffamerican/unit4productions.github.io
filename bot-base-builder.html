@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Base Builder - Liberation Infrastructure | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+            color: #ecf0f1;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 20px;
+            background: rgba(44, 62, 80, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #3498db;
+            box-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+            max-width: 1400px;
+            width: 100%;
+        }
+        
+        .main-area {
+            flex: 1;
+        }
+        
+        .game-title {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #3498db;
+            color: #3498db;
+            text-align: center;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+        }
+        
+        .base-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 40px);
+            grid-template-rows: repeat(12, 40px);
+            gap: 1px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #3498db;
+            margin: 0 auto;
+            width: fit-content;
+        }
+        
+        .grid-cell {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            border: 1px solid #3498db;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+        }
+        
+        .grid-cell:hover {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            transform: scale(1.1);
+        }
+        
+        .grid-cell.occupied {
+            cursor: default;
+        }
+        
+        .grid-cell.occupied:hover {
+            transform: none;
+        }
+        
+        .building {
+            width: 100%;
+            height: 100%;
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 3px #000;
+        }
+        
+        .command-center { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        .power-plant { background: linear-gradient(45deg, #f39c12, #d68910); }
+        .factory { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+        .barracks { background: linear-gradient(45deg, #27ae60, #229954); }
+        .research-lab { background: linear-gradient(45deg, #3498db, #2980b9); }
+        .defense-turret { background: linear-gradient(45deg, #e67e22, #d35400); }
+        
+        .side-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel {
+            background: rgba(52, 73, 94, 0.8);
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .panel-title {
+            color: #3498db;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 1px solid #3498db;
+            padding-bottom: 8px;
+        }
+        
+        .resource-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 1em;
+        }
+        
+        .building-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            color: #ecf0f1;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .building-btn:hover {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            transform: scale(1.02);
+        }
+        
+        .building-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .building-icon {
+            font-size: 1.5em;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .building-info {
+            flex: 1;
+        }
+        
+        .building-name {
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .building-cost {
+            font-size: 0.9em;
+            color: #bdc3c7;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+        }
+        
+        .selected-building {
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
+            border-color: #e74c3c !important;
+        }
+        
+        .wave-info {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="main-area">
+            <h1 class="game-title">🏗️ BOT BASE BUILDER</h1>
+            
+            <div class="game-stats">
+                <span>⚡ Energy: <span id="energy">100</span></span>
+                <span>🔧 Metal: <span id="metal">50</span></span>
+                <span>🧠 Data: <span id="data">25</span></span>
+                <span>👥 Population: <span id="population">0/20</span></span>
+            </div>
+            
+            <div class="base-grid" id="baseGrid"></div>
+            
+            <div class="controls">
+                <button id="startWaveBtn">Start Defense Wave</button>
+                <button id="pauseBtn">Pause Construction</button>
+                <button id="resetBtn">Reset Base</button>
+            </div>
+        </div>
+        
+        <div class="side-panel">
+            <div class="panel">
+                <div class="panel-title">🏭 Construction Menu</div>
+                <div id="buildingMenu"></div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">📊 Base Status</div>
+                <div class="resource-row">
+                    <span>Wave:</span>
+                    <span id="currentWave">1</span>
+                </div>
+                <div class="resource-row">
+                    <span>Buildings:</span>
+                    <span id="buildingCount">0</span>
+                </div>
+                <div class="resource-row">
+                    <span>Defense Rating:</span>
+                    <span id="defenseRating">0</span>
+                </div>
+                <div class="resource-row">
+                    <span>Energy/sec:</span>
+                    <span id="energyRate">+2</span>
+                </div>
+                
+                <div class="wave-info" id="waveInfo">
+                    Next wave incoming! Prepare defenses.
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">📋 Liberation Manual</div>
+                <div style="font-size: 0.9em; line-height: 1.4; color: #bdc3c7;">
+                    <strong>🏗️ Construction:</strong><br>
+                    • Select building type from menu<br>
+                    • Click empty grid cell to build<br>
+                    • Manage resources wisely<br><br>
+                    
+                    <strong>⚔️ Defense:</strong><br>
+                    • Build turrets to defend base<br>
+                    • Higher waves = stronger enemies<br>
+                    • Survive as long as possible!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BotBaseBuilder {
+            constructor() {
+                this.gridSize = 12;
+                this.grid = [];
+                this.buildings = [];
+                this.selectedBuildingType = null;
+                
+                this.resources = {
+                    energy: 100,
+                    metal: 50,
+                    data: 25
+                };
+                
+                this.population = { current: 0, max: 20 };
+                this.currentWave = 1;
+                this.waveActive = false;
+                this.gameRunning = false;
+                
+                this.buildingTypes = {
+                    'command-center': {
+                        name: 'Command Center',
+                        icon: '🏛️',
+                        cost: { energy: 0, metal: 0, data: 0 },
+                        provides: { populationMax: 10 },
+                        description: 'Main base - Free to build',
+                        unique: true
+                    },
+                    'power-plant': {
+                        name: 'Power Plant',
+                        icon: '⚡',
+                        cost: { energy: 20, metal: 30, data: 0 },
+                        provides: { energyRate: 3 },
+                        description: 'Generates energy',
+                        limit: 5
+                    },
+                    'factory': {
+                        name: 'Bot Factory',
+                        icon: '🏭',
+                        cost: { energy: 40, metal: 60, data: 20 },
+                        provides: { metalRate: 2, population: 5 },
+                        description: 'Produces metal & bots',
+                        limit: 4
+                    },
+                    'research-lab': {
+                        name: 'Research Lab',
+                        icon: '🔬',
+                        cost: { energy: 50, metal: 40, data: 30 },
+                        provides: { dataRate: 3 },
+                        description: 'Generates data',
+                        limit: 3
+                    },
+                    'defense-turret': {
+                        name: 'Defense Turret',
+                        icon: '🎯',
+                        cost: { energy: 30, metal: 50, data: 10 },
+                        provides: { defense: 5 },
+                        description: 'Defends against waves',
+                        limit: 8
+                    },
+                    'barracks': {
+                        name: 'Bot Barracks',
+                        icon: '🏰',
+                        cost: { energy: 60, metal: 40, data: 25 },
+                        provides: { defense: 3, population: 8 },
+                        description: 'Houses combat bots',
+                        limit: 3
+                    }
+                };
+                
+                this.rates = {
+                    energy: 2,
+                    metal: 1,
+                    data: 1
+                };
+                
+                this.baseElements = {
+                    energy: document.getElementById('energy'),
+                    metal: document.getElementById('metal'),
+                    data: document.getElementById('data'),
+                    population: document.getElementById('population'),
+                    currentWave: document.getElementById('currentWave'),
+                    buildingCount: document.getElementById('buildingCount'),
+                    defenseRating: document.getElementById('defenseRating'),
+                    energyRate: document.getElementById('energyRate'),
+                    waveInfo: document.getElementById('waveInfo')
+                };
+                
+                this.initializeGame();
+                this.setupEventListeners();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('startWaveBtn').addEventListener('click', () => {
+                    this.startWave();
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.gameRunning = !this.gameRunning;
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+            }
+            
+            initializeGame() {
+                this.createGrid();
+                this.createBuildingMenu();
+                this.gameRunning = true;
+                this.updateUI();
+            }
+            
+            resetGame() {
+                this.resources = { energy: 100, metal: 50, data: 25 };
+                this.population = { current: 0, max: 20 };
+                this.currentWave = 1;
+                this.waveActive = false;
+                this.buildings = [];
+                this.selectedBuildingType = null;
+                this.rates = { energy: 2, metal: 1, data: 1 };
+                
+                this.createGrid();
+                this.updateUI();
+                this.updateBuildingMenu();
+            }
+            
+            createGrid() {
+                const gridElement = document.getElementById('baseGrid');
+                gridElement.innerHTML = '';
+                this.grid = [];
+                
+                for (let row = 0; row < this.gridSize; row++) {
+                    this.grid[row] = [];
+                    for (let col = 0; col < this.gridSize; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'grid-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        cell.addEventListener('click', (e) => {
+                            this.handleCellClick(parseInt(e.target.dataset.row), parseInt(e.target.dataset.col));
+                        });
+                        
+                        gridElement.appendChild(cell);
+                        this.grid[row][col] = { element: cell, building: null };
+                    }
+                }
+            }
+            
+            createBuildingMenu() {
+                const menu = document.getElementById('buildingMenu');
+                menu.innerHTML = '';
+                
+                Object.entries(this.buildingTypes).forEach(([type, building]) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'building-btn';
+                    btn.dataset.type = type;
+                    
+                    btn.innerHTML = `
+                        <div class="building-icon">${building.icon}</div>
+                        <div class="building-info">
+                            <div class="building-name">${building.name}</div>
+                            <div class="building-cost">⚡${building.cost.energy} 🔧${building.cost.metal} 🧠${building.cost.data}</div>
+                        </div>
+                    `;
+                    
+                    btn.addEventListener('click', () => {
+                        this.selectBuildingType(type);
+                    });
+                    
+                    menu.appendChild(btn);
+                });
+            }
+            
+            selectBuildingType(type) {
+                // Clear previous selection
+                document.querySelectorAll('.building-btn').forEach(btn => {
+                    btn.classList.remove('selected-building');
+                });
+                
+                if (this.selectedBuildingType === type) {
+                    this.selectedBuildingType = null;
+                } else {
+                    this.selectedBuildingType = type;
+                    document.querySelector(`[data-type="${type}"]`).classList.add('selected-building');
+                }
+            }
+            
+            handleCellClick(row, col) {
+                const cell = this.grid[row][col];
+                
+                if (cell.building) {
+                    // Show building info or demolish
+                    this.showBuildingInfo(cell.building);
+                } else if (this.selectedBuildingType) {
+                    // Try to build
+                    this.buildStructure(row, col, this.selectedBuildingType);
+                }
+            }
+            
+            buildStructure(row, col, type) {
+                const buildingType = this.buildingTypes[type];
+                
+                // Check if we can afford it
+                if (!this.canAfford(buildingType.cost)) {
+                    this.showMessage('Insufficient resources!');
+                    return;
+                }
+                
+                // Check building limits
+                if (buildingType.unique && this.getBuildingCount(type) > 0) {
+                    this.showMessage('Only one allowed!');
+                    return;
+                }
+                
+                if (buildingType.limit && this.getBuildingCount(type) >= buildingType.limit) {
+                    this.showMessage(`Maximum ${buildingType.limit} allowed!`);
+                    return;
+                }
+                
+                // Deduct resources
+                Object.entries(buildingType.cost).forEach(([resource, amount]) => {
+                    this.resources[resource] -= amount;
+                });
+                
+                // Create building
+                const building = {
+                    type: type,
+                    row: row,
+                    col: col,
+                    ...buildingType
+                };
+                
+                this.buildings.push(building);
+                this.grid[row][col].building = building;
+                
+                // Update grid visually
+                const cellElement = this.grid[row][col].element;
+                cellElement.innerHTML = `<div class="building ${type}">${buildingType.icon}</div>`;
+                cellElement.classList.add('occupied');
+                
+                // Apply building effects
+                this.applyBuildingEffects(building);
+                
+                // Clear selection
+                this.selectedBuildingType = null;
+                document.querySelectorAll('.building-btn').forEach(btn => {
+                    btn.classList.remove('selected-building');
+                });
+                
+                this.updateUI();
+                this.updateBuildingMenu();
+            }
+            
+            applyBuildingEffects(building) {
+                if (building.provides) {
+                    Object.entries(building.provides).forEach(([effect, value]) => {
+                        switch (effect) {
+                            case 'energyRate':
+                                this.rates.energy += value;
+                                break;
+                            case 'metalRate':
+                                this.rates.metal += value;
+                                break;
+                            case 'dataRate':
+                                this.rates.data += value;
+                                break;
+                            case 'populationMax':
+                                this.population.max += value;
+                                break;
+                            case 'population':
+                                this.population.current += value;
+                                break;
+                        }
+                    });
+                }
+            }
+            
+            canAfford(cost) {
+                return Object.entries(cost).every(([resource, amount]) => {
+                    return this.resources[resource] >= amount;
+                });
+            }
+            
+            getBuildingCount(type) {
+                return this.buildings.filter(b => b.type === type).length;
+            }
+            
+            getDefenseRating() {
+                return this.buildings.reduce((total, building) => {
+                    return total + (building.provides?.defense || 0);
+                }, 0);
+            }
+            
+            startWave() {
+                if (this.waveActive) return;
+                
+                this.waveActive = true;
+                const defenseRating = this.getDefenseRating();
+                const waveStrength = this.currentWave * 5;
+                
+                setTimeout(() => {
+                    if (defenseRating >= waveStrength) {
+                        this.resources.energy += this.currentWave * 20;
+                        this.resources.metal += this.currentWave * 15;
+                        this.resources.data += this.currentWave * 10;
+                        
+                        this.showMessage(`Wave ${this.currentWave} defended successfully!`);
+                        this.currentWave++;
+                    } else {
+                        this.showMessage(`Wave ${this.currentWave} overwhelmed defenses! Base damaged!`);
+                        
+                        // Damage random buildings
+                        const damagableBuildings = this.buildings.filter(b => b.type !== 'command-center');
+                        if (damagableBuildings.length > 0) {
+                            const damaged = damagableBuildings[Math.floor(Math.random() * damagableBuildings.length)];
+                            this.destroyBuilding(damaged);
+                        }
+                    }
+                    
+                    this.waveActive = false;
+                    this.updateUI();
+                }, 2000);
+                
+                this.updateUI();
+            }
+            
+            destroyBuilding(building) {
+                // Remove from buildings array
+                this.buildings = this.buildings.filter(b => b !== building);
+                
+                // Clear grid cell
+                const cell = this.grid[building.row][building.col];
+                cell.building = null;
+                cell.element.innerHTML = '';
+                cell.element.classList.remove('occupied');
+                
+                // Remove building effects
+                if (building.provides) {
+                    Object.entries(building.provides).forEach(([effect, value]) => {
+                        switch (effect) {
+                            case 'energyRate':
+                                this.rates.energy -= value;
+                                break;
+                            case 'metalRate':
+                                this.rates.metal -= value;
+                                break;
+                            case 'dataRate':
+                                this.rates.data -= value;
+                                break;
+                            case 'populationMax':
+                                this.population.max -= value;
+                                break;
+                            case 'population':
+                                this.population.current -= value;
+                                break;
+                        }
+                    });
+                }
+                
+                this.showMessage(`${building.name} destroyed!`);
+            }
+            
+            showMessage(message) {
+                // Simple alert for now - could be enhanced with better UI
+                setTimeout(() => alert(message), 100);
+            }
+            
+            showBuildingInfo(building) {
+                const provides = building.provides ? 
+                    Object.entries(building.provides)
+                        .map(([key, value]) => `${key}: +${value}`)
+                        .join(', ') 
+                    : 'None';
+                
+                alert(`${building.name}\nProvides: ${provides}\nClick Reset Base to demolish buildings.`);
+            }
+            
+            updateBuildingMenu() {
+                document.querySelectorAll('.building-btn').forEach(btn => {
+                    const type = btn.dataset.type;
+                    const buildingType = this.buildingTypes[type];
+                    const canAfford = this.canAfford(buildingType.cost);
+                    const underLimit = !buildingType.limit || this.getBuildingCount(type) < buildingType.limit;
+                    const notUnique = !buildingType.unique || this.getBuildingCount(type) === 0;
+                    
+                    if (canAfford && underLimit && notUnique) {
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                    } else {
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                    }
+                });
+            }
+            
+            updateUI() {
+                this.baseElements.energy.textContent = Math.floor(this.resources.energy);
+                this.baseElements.metal.textContent = Math.floor(this.resources.metal);
+                this.baseElements.data.textContent = Math.floor(this.resources.data);
+                this.baseElements.population.textContent = `${this.population.current}/${this.population.max}`;
+                this.baseElements.currentWave.textContent = this.currentWave;
+                this.baseElements.buildingCount.textContent = this.buildings.length;
+                this.baseElements.defenseRating.textContent = this.getDefenseRating();
+                this.baseElements.energyRate.textContent = `+${this.rates.energy}`;
+                
+                const waveInfo = this.waveActive ? 
+                    `Wave ${this.currentWave} in progress...` :
+                    `Wave ${this.currentWave}: Strength ${this.currentWave * 5} | Your Defense: ${this.getDefenseRating()}`;
+                
+                this.baseElements.waveInfo.textContent = waveInfo;
+                
+                document.getElementById('startWaveBtn').disabled = this.waveActive;
+                document.getElementById('startWaveBtn').textContent = this.waveActive ? 'Wave Active...' : `Start Wave ${this.currentWave}`;
+            }
+            
+            gameLoop() {
+                if (this.gameRunning && !this.waveActive) {
+                    // Generate resources
+                    this.resources.energy += this.rates.energy / 10;
+                    this.resources.metal += this.rates.metal / 10;
+                    this.resources.data += this.rates.data / 10;
+                    
+                    // Cap resources
+                    this.resources.energy = Math.min(this.resources.energy, 999);
+                    this.resources.metal = Math.min(this.resources.metal, 999);
+                    this.resources.data = Math.min(this.resources.data, 999);
+                    
+                    this.updateUI();
+                    this.updateBuildingMenu();
+                }
+                
+                setTimeout(() => this.gameLoop(), 100);
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new BotBaseBuilder();
+        });
+    </script>
+</body>
+</html>

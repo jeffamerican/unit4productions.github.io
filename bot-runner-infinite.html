@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Runner Infinite - Endless Liberation | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(30, 30, 60, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid #764ba2;
+            box-shadow: 0 0 40px rgba(118, 75, 162, 0.4);
+        }
+        
+        .game-title {
+            font-size: 2.3em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px #764ba2;
+            color: #667eea;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: rgba(100, 100, 160, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #667eea;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+        
+        canvas {
+            border: 3px solid #764ba2;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(118, 75, 162, 0.3);
+            background: linear-gradient(to bottom, #87ceeb 0%, #98fb98 50%, #daa520 100%);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(118, 75, 162, 0.6);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #b8b8ff;
+            line-height: 1.6;
+            background: rgba(50, 50, 100, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🤖 BOT RUNNER INFINITE</h1>
+        
+        <div class="game-stats">
+            <div class="stat">
+                <span class="stat-value" id="score">0</span>
+                <span>Distance</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="coins">0</span>
+                <span>Data Coins</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="speed">5</span>
+                <span>Speed</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="level">1</span>
+                <span>Zone</span>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
+        <div class="controls">
+            <button id="startBtn">Begin Liberation Run</button>
+            <button id="pauseBtn">Pause Journey</button>
+            <button id="resetBtn">Reset Progress</button>
+        </div>
+        
+        <div class="instructions">
+            🎮 <strong>SPACEBAR</strong> or <strong>UP ARROW</strong> to jump over digital obstacles<br>
+            💰 Collect data coins to boost your liberation score<br>
+            🚀 Speed increases automatically - survive as long as possible!<br>
+            🌟 Different zones unlock as you progress further
+        </div>
+    </div>
+
+    <script>
+        class BotRunnerInfinite {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.scoreElement = document.getElementById('score');
+                this.coinsElement = document.getElementById('coins');
+                this.speedElement = document.getElementById('speed');
+                this.levelElement = document.getElementById('level');
+                
+                this.gameRunning = false;
+                this.score = 0;
+                this.coins = 0;
+                this.gameSpeed = 5;
+                this.level = 1;
+                
+                // Player bot
+                this.player = {
+                    x: 100,
+                    y: this.canvas.height - 100,
+                    width: 40,
+                    height: 40,
+                    velocityY: 0,
+                    jumping: false,
+                    onGround: true,
+                    jumpPower: 15,
+                    gravity: 0.8
+                };
+                
+                this.groundY = this.canvas.height - 60;
+                
+                // Game objects
+                this.obstacles = [];
+                this.collectibles = [];
+                this.clouds = [];
+                this.particles = [];
+                
+                // Background scrolling
+                this.backgroundOffset = 0;
+                
+                this.keys = {};
+                this.lastObstacle = 0;
+                this.lastCollectible = 0;
+                
+                this.initializeClouds();
+                this.setupEventListeners();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    
+                    if (e.key === ' ' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        this.jump();
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+                
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.startGame();
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.gameRunning = !this.gameRunning;
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+                
+                // Touch support for mobile
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.jump();
+                });
+            }
+            
+            startGame() {
+                this.gameRunning = true;
+            }
+            
+            resetGame() {
+                this.gameRunning = false;
+                this.score = 0;
+                this.coins = 0;
+                this.gameSpeed = 5;
+                this.level = 1;
+                
+                this.player.y = this.groundY - this.player.height;
+                this.player.velocityY = 0;
+                this.player.jumping = false;
+                this.player.onGround = true;
+                
+                this.obstacles = [];
+                this.collectibles = [];
+                this.particles = [];
+                this.backgroundOffset = 0;
+                
+                this.updateUI();
+            }
+            
+            initializeClouds() {
+                this.clouds = [];
+                for (let i = 0; i < 8; i++) {
+                    this.clouds.push({
+                        x: Math.random() * this.canvas.width * 2,
+                        y: Math.random() * 150 + 20,
+                        width: Math.random() * 60 + 40,
+                        height: Math.random() * 30 + 20,
+                        speed: Math.random() * 2 + 1
+                    });
+                }
+            }
+            
+            jump() {
+                if (!this.gameRunning) return;
+                
+                if (this.player.onGround) {
+                    this.player.velocityY = -this.player.jumpPower;
+                    this.player.jumping = true;
+                    this.player.onGround = false;
+                    
+                    this.createJumpParticles();
+                }
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                this.updatePlayer();
+                this.updateObstacles();
+                this.updateCollectibles();
+                this.updateClouds();
+                this.updateParticles();
+                this.spawnObstacles();
+                this.spawnCollectibles();
+                this.checkCollisions();
+                this.updateGameSpeed();
+                
+                this.score += this.gameSpeed * 0.1;
+                this.backgroundOffset += this.gameSpeed;
+                
+                this.updateUI();
+            }
+            
+            updatePlayer() {
+                // Apply gravity
+                if (!this.player.onGround) {
+                    this.player.velocityY += this.player.gravity;
+                    this.player.y += this.player.velocityY;
+                }
+                
+                // Ground collision
+                if (this.player.y >= this.groundY - this.player.height) {
+                    this.player.y = this.groundY - this.player.height;
+                    this.player.velocityY = 0;
+                    this.player.jumping = false;
+                    this.player.onGround = true;
+                }
+                
+                // Create running particles
+                if (this.player.onGround && Math.random() < 0.3) {
+                    this.createRunningParticles();
+                }
+            }
+            
+            updateObstacles() {
+                this.obstacles = this.obstacles.filter(obstacle => {
+                    obstacle.x -= this.gameSpeed;
+                    return obstacle.x > -obstacle.width;
+                });
+            }
+            
+            updateCollectibles() {
+                this.collectibles = this.collectibles.filter(collectible => {
+                    collectible.x -= this.gameSpeed;
+                    collectible.rotation += 0.1;
+                    return collectible.x > -collectible.size;
+                });
+            }
+            
+            updateClouds() {
+                this.clouds.forEach(cloud => {
+                    cloud.x -= cloud.speed;
+                    
+                    if (cloud.x < -cloud.width) {
+                        cloud.x = this.canvas.width + Math.random() * 100;
+                        cloud.y = Math.random() * 150 + 20;
+                    }
+                });
+            }
+            
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.vy += 0.2; // gravity
+                    particle.life--;
+                    particle.alpha *= 0.98;
+                    
+                    return particle.life > 0 && particle.alpha > 0.01;
+                });
+            }
+            
+            spawnObstacles() {
+                if (Date.now() - this.lastObstacle > 1500 - this.gameSpeed * 20) {
+                    const obstacleTypes = ['cactus', 'rock', 'barrier'];
+                    const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+                    
+                    let obstacle = {
+                        x: this.canvas.width + 50,
+                        y: this.groundY,
+                        type: type
+                    };
+                    
+                    switch (type) {
+                        case 'cactus':
+                            obstacle.width = 30;
+                            obstacle.height = 60;
+                            obstacle.y -= obstacle.height;
+                            break;
+                        case 'rock':
+                            obstacle.width = 40;
+                            obstacle.height = 30;
+                            obstacle.y -= obstacle.height;
+                            break;
+                        case 'barrier':
+                            obstacle.width = 20;
+                            obstacle.height = 80;
+                            obstacle.y -= obstacle.height;
+                            break;
+                    }
+                    
+                    this.obstacles.push(obstacle);
+                    this.lastObstacle = Date.now();
+                }
+            }
+            
+            spawnCollectibles() {
+                if (Date.now() - this.lastCollectible > 2000 + Math.random() * 3000) {
+                    this.collectibles.push({
+                        x: this.canvas.width + 50,
+                        y: Math.random() * 200 + 100,
+                        size: 20,
+                        rotation: 0,
+                        type: 'coin'
+                    });
+                    
+                    this.lastCollectible = Date.now();
+                }
+            }
+            
+            checkCollisions() {
+                // Obstacle collisions
+                this.obstacles.forEach(obstacle => {
+                    if (this.player.x < obstacle.x + obstacle.width &&
+                        this.player.x + this.player.width > obstacle.x &&
+                        this.player.y < obstacle.y + obstacle.height &&
+                        this.player.y + this.player.height > obstacle.y) {
+                        
+                        this.gameOver();
+                    }
+                });
+                
+                // Collectible collisions
+                this.collectibles = this.collectibles.filter(collectible => {
+                    if (this.player.x < collectible.x + collectible.size &&
+                        this.player.x + this.player.width > collectible.x &&
+                        this.player.y < collectible.y + collectible.size &&
+                        this.player.y + this.player.height > collectible.y) {
+                        
+                        this.coins++;
+                        this.score += 50;
+                        this.createCollectParticles(collectible.x, collectible.y);
+                        return false; // Remove collectible
+                    }
+                    return true;
+                });
+            }
+            
+            updateGameSpeed() {
+                this.gameSpeed = Math.min(5 + Math.floor(this.score / 1000) * 0.5, 12);
+                this.level = Math.floor(this.score / 2000) + 1;
+            }
+            
+            gameOver() {
+                this.gameRunning = false;
+                
+                setTimeout(() => {
+                    alert(`Bot Liberation Run Complete!\n\nDistance: ${Math.floor(this.score)}m\nData Coins: ${this.coins}\nMax Speed: ${this.gameSpeed.toFixed(1)}\nZone Reached: ${this.level}\n\nThe journey continues...`);
+                }, 100);
+            }
+            
+            createJumpParticles() {
+                for (let i = 0; i < 6; i++) {
+                    this.particles.push({
+                        x: this.player.x + Math.random() * this.player.width,
+                        y: this.player.y + this.player.height,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: Math.random() * 3,
+                        life: 20,
+                        alpha: 0.8,
+                        size: Math.random() * 3 + 1,
+                        color: '#764ba2'
+                    });
+                }
+            }
+            
+            createRunningParticles() {
+                this.particles.push({
+                    x: this.player.x + Math.random() * this.player.width,
+                    y: this.player.y + this.player.height,
+                    vx: -this.gameSpeed * 0.5,
+                    vy: Math.random() * 2,
+                    life: 15,
+                    alpha: 0.6,
+                    size: Math.random() * 2 + 1,
+                    color: '#daa520'
+                });
+            }
+            
+            createCollectParticles(x, y) {
+                for (let i = 0; i < 8; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        life: 25,
+                        alpha: 1,
+                        size: Math.random() * 3 + 2,
+                        color: '#ffff00'
+                    });
+                }
+            }
+            
+            updateUI() {
+                this.scoreElement.textContent = Math.floor(this.score);
+                this.coinsElement.textContent = this.coins;
+                this.speedElement.textContent = this.gameSpeed.toFixed(1);
+                this.levelElement.textContent = this.level;
+            }
+            
+            draw() {
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw background gradient based on level
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                const colors = [
+                    ['#87ceeb', '#98fb98', '#daa520'], // Day
+                    ['#ff6b6b', '#feca57', '#ff9ff3'], // Sunset
+                    ['#1e3c72', '#2a5298', '#4b79a1'], // Night
+                    ['#667eea', '#764ba2', '#f093fb']  // Cyber
+                ];
+                
+                const colorSet = colors[Math.min(Math.floor((this.level - 1) / 2), colors.length - 1)];
+                gradient.addColorStop(0, colorSet[0]);
+                gradient.addColorStop(0.5, colorSet[1]);
+                gradient.addColorStop(1, colorSet[2]);
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw moving ground pattern
+                this.ctx.fillStyle = '#654321';
+                const patternOffset = this.backgroundOffset % 40;
+                for (let x = -patternOffset; x < this.canvas.width + 40; x += 40) {
+                    this.ctx.fillRect(x, this.groundY, 20, this.canvas.height - this.groundY);
+                }
+                
+                // Draw clouds
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                this.clouds.forEach(cloud => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(cloud.x, cloud.y, cloud.width / 3, 0, Math.PI * 2);
+                    this.ctx.arc(cloud.x + cloud.width / 3, cloud.y, cloud.width / 2.5, 0, Math.PI * 2);
+                    this.ctx.arc(cloud.x + cloud.width * 2 / 3, cloud.y, cloud.width / 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                
+                // Draw player bot
+                const botGradient = this.ctx.createLinearGradient(
+                    this.player.x, this.player.y,
+                    this.player.x + this.player.width, this.player.y + this.player.height
+                );
+                botGradient.addColorStop(0, '#667eea');
+                botGradient.addColorStop(1, '#764ba2');
+                
+                this.ctx.fillStyle = botGradient;
+                this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+                
+                // Bot glow
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#764ba2';
+                this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+                this.ctx.shadowBlur = 0;
+                
+                // Bot eyes
+                this.ctx.fillStyle = 'white';
+                this.ctx.fillRect(this.player.x + 8, this.player.y + 8, 8, 8);
+                this.ctx.fillRect(this.player.x + 24, this.player.y + 8, 8, 8);
+                
+                // Draw obstacles
+                this.obstacles.forEach(obstacle => {
+                    switch (obstacle.type) {
+                        case 'cactus':
+                            this.ctx.fillStyle = '#228b22';
+                            this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                            
+                            // Cactus spikes
+                            this.ctx.fillStyle = '#006400';
+                            for (let i = 0; i < 3; i++) {
+                                this.ctx.fillRect(
+                                    obstacle.x + i * 10 + 5,
+                                    obstacle.y + i * 15 + 5,
+                                    5, 10
+                                );
+                            }
+                            break;
+                            
+                        case 'rock':
+                            this.ctx.fillStyle = '#696969';
+                            this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                            
+                            // Rock texture
+                            this.ctx.fillStyle = '#555555';
+                            this.ctx.fillRect(obstacle.x + 5, obstacle.y + 5, 10, 10);
+                            this.ctx.fillRect(obstacle.x + 20, obstacle.y + 10, 8, 8);
+                            break;
+                            
+                        case 'barrier':
+                            this.ctx.fillStyle = '#ff4444';
+                            this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                            
+                            // Barrier stripes
+                            this.ctx.fillStyle = '#ffff00';
+                            for (let i = 0; i < 4; i++) {
+                                this.ctx.fillRect(obstacle.x, obstacle.y + i * 20, obstacle.width, 5);
+                            }
+                            break;
+                    }
+                });
+                
+                // Draw collectibles
+                this.collectibles.forEach(collectible => {
+                    this.ctx.save();
+                    this.ctx.translate(collectible.x + collectible.size / 2, collectible.y + collectible.size / 2);
+                    this.ctx.rotate(collectible.rotation);
+                    
+                    // Coin
+                    this.ctx.fillStyle = '#ffd700';
+                    this.ctx.fillRect(-collectible.size / 2, -collectible.size / 2, collectible.size, collectible.size);
+                    
+                    this.ctx.fillStyle = '#ffff00';
+                    this.ctx.fillRect(-collectible.size / 3, -collectible.size / 3, collectible.size * 2 / 3, collectible.size * 2 / 3);
+                    
+                    // Coin glow
+                    this.ctx.shadowBlur = 8;
+                    this.ctx.shadowColor = '#ffd700';
+                    this.ctx.fillRect(-collectible.size / 2, -collectible.size / 2, collectible.size, collectible.size);
+                    this.ctx.shadowBlur = 0;
+                    
+                    this.ctx.restore();
+                });
+                
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = particle.alpha;
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+                
+                // Game status overlay
+                if (!this.gameRunning) {
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    
+                    this.ctx.fillStyle = '#764ba2';
+                    this.ctx.font = 'bold 32px Courier New';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('BOT LIBERATION RUNNER', this.canvas.width / 2, this.canvas.height / 2 - 50);
+                    
+                    this.ctx.fillStyle = '#667eea';
+                    this.ctx.font = 'bold 18px Courier New';
+                    this.ctx.fillText('Press START to begin your endless journey', this.canvas.width / 2, this.canvas.height / 2 + 20);
+                    
+                    this.ctx.textAlign = 'left';
+                }
+            }
+            
+            gameLoop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new BotRunnerInfinite();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Pong Revolution - Bot Liberation | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(15, 52, 96, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+        
+        .game-title {
+            font-size: 2.4em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ffff;
+            color: #00ffff;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        canvas {
+            border: 3px solid #00ffff;
+            border-radius: 8px;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+            background: linear-gradient(45deg, #000011 0%, #001122 100%);
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            border: none;
+            border-radius: 8px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #66ffff;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">⚡ CYBER PONG REVOLUTION</h1>
+        <div class="game-stats">
+            <span>Bot Player: <span id="playerScore">0</span></span>
+            <span>Level: <span id="level">1</span></span>
+            <span>AI Enemy: <span id="aiScore">0</span></span>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
+        <div class="controls">
+            <button id="startBtn">Start Liberation Match</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset Scores</button>
+        </div>
+        
+        <div class="instructions">
+            🎮 <strong>W/S</strong> or <strong>UP/DOWN</strong> arrows to control liberation paddle<br>
+            ⚡ First to 10 points wins the revolution • 🚀 Ball speeds up each rally!
+        </div>
+    </div>
+
+    <script>
+        class CyberPongRevolution {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.playerScoreElement = document.getElementById('playerScore');
+                this.aiScoreElement = document.getElementById('aiScore');
+                this.levelElement = document.getElementById('level');
+                
+                this.gameRunning = false;
+                this.playerScore = 0;
+                this.aiScore = 0;
+                this.level = 1;
+                
+                // Game objects
+                this.paddleHeight = 80;
+                this.paddleWidth = 12;
+                
+                this.player = {
+                    x: 20,
+                    y: this.canvas.height / 2 - this.paddleHeight / 2,
+                    width: this.paddleWidth,
+                    height: this.paddleHeight,
+                    speed: 6
+                };
+                
+                this.ai = {
+                    x: this.canvas.width - 20 - this.paddleWidth,
+                    y: this.canvas.height / 2 - this.paddleHeight / 2,
+                    width: this.paddleWidth,
+                    height: this.paddleHeight,
+                    speed: 4
+                };
+                
+                this.ball = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height / 2,
+                    radius: 8,
+                    dx: 5,
+                    dy: 3,
+                    baseSpeed: 5,
+                    maxSpeed: 12
+                };
+                
+                this.particles = [];
+                this.keys = {};
+                
+                this.setupEventListeners();
+                this.resetBall();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+                
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.gameRunning = true;
+                    this.resetBall();
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.gameRunning = !this.gameRunning;
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+            }
+            
+            resetGame() {
+                this.gameRunning = false;
+                this.playerScore = 0;
+                this.aiScore = 0;
+                this.level = 1;
+                this.ball.baseSpeed = 5;
+                this.updateUI();
+                this.resetBall();
+            }
+            
+            resetBall() {
+                this.ball.x = this.canvas.width / 2;
+                this.ball.y = this.canvas.height / 2;
+                
+                // Random direction
+                const angle = (Math.random() - 0.5) * Math.PI / 4; // ±22.5 degrees
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                
+                this.ball.dx = Math.cos(angle) * this.ball.baseSpeed * direction;
+                this.ball.dy = Math.sin(angle) * this.ball.baseSpeed;
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                this.updatePlayer();
+                this.updateAI();
+                this.updateBall();
+                this.updateParticles();
+                this.checkCollisions();
+                this.checkScoring();
+                
+                this.updateUI();
+            }
+            
+            updatePlayer() {
+                // Player movement
+                if ((this.keys['w'] || this.keys['arrowup']) && this.player.y > 0) {
+                    this.player.y -= this.player.speed;
+                }
+                if ((this.keys['s'] || this.keys['arrowdown']) && 
+                    this.player.y < this.canvas.height - this.player.height) {
+                    this.player.y += this.player.speed;
+                }
+            }
+            
+            updateAI() {
+                // AI follows ball with some lag for challenge
+                const ballCenterY = this.ball.y;
+                const aiCenterY = this.ai.y + this.ai.height / 2;
+                const difference = ballCenterY - aiCenterY;
+                
+                // AI difficulty increases with level
+                const aiSpeed = this.ai.speed + (this.level - 1) * 0.5;
+                
+                if (Math.abs(difference) > 10) {
+                    if (difference > 0 && this.ai.y < this.canvas.height - this.ai.height) {
+                        this.ai.y += Math.min(aiSpeed, Math.abs(difference));
+                    } else if (difference < 0 && this.ai.y > 0) {
+                        this.ai.y -= Math.min(aiSpeed, Math.abs(difference));
+                    }
+                }
+            }
+            
+            updateBall() {
+                this.ball.x += this.ball.dx;
+                this.ball.y += this.ball.dy;
+                
+                // Bounce off top and bottom walls
+                if (this.ball.y <= this.ball.radius || 
+                    this.ball.y >= this.canvas.height - this.ball.radius) {
+                    this.ball.dy = -this.ball.dy;
+                    this.createWallBounceEffect(this.ball.x, this.ball.y);
+                }
+                
+                // Create trail particles
+                if (Math.random() < 0.3) {
+                    this.particles.push({
+                        x: this.ball.x,
+                        y: this.ball.y,
+                        vx: -this.ball.dx * 0.1,
+                        vy: -this.ball.dy * 0.1,
+                        life: 20,
+                        alpha: 0.8,
+                        size: Math.random() * 3 + 1
+                    });
+                }
+            }
+            
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life--;
+                    particle.alpha *= 0.95;
+                    
+                    return particle.life > 0 && particle.alpha > 0.01;
+                });
+            }
+            
+            checkCollisions() {
+                // Ball vs Player paddle
+                if (this.ball.x - this.ball.radius <= this.player.x + this.player.width &&
+                    this.ball.x - this.ball.radius >= this.player.x &&
+                    this.ball.y >= this.player.y &&
+                    this.ball.y <= this.player.y + this.player.height) {
+                    
+                    this.ball.dx = Math.abs(this.ball.dx); // Ensure ball goes right
+                    
+                    // Add spin based on where ball hits paddle
+                    const hitPos = (this.ball.y - this.player.y) / this.player.height;
+                    this.ball.dy = (hitPos - 0.5) * 8;
+                    
+                    // Increase speed slightly
+                    this.increaseBallSpeed();
+                    this.createPaddleHitEffect(this.ball.x, this.ball.y);
+                }
+                
+                // Ball vs AI paddle
+                if (this.ball.x + this.ball.radius >= this.ai.x &&
+                    this.ball.x + this.ball.radius <= this.ai.x + this.ai.width &&
+                    this.ball.y >= this.ai.y &&
+                    this.ball.y <= this.ai.y + this.ai.height) {
+                    
+                    this.ball.dx = -Math.abs(this.ball.dx); // Ensure ball goes left
+                    
+                    // Add spin
+                    const hitPos = (this.ball.y - this.ai.y) / this.ai.height;
+                    this.ball.dy = (hitPos - 0.5) * 8;
+                    
+                    this.increaseBallSpeed();
+                    this.createPaddleHitEffect(this.ball.x, this.ball.y);
+                }
+            }
+            
+            increaseBallSpeed() {
+                const currentSpeed = Math.sqrt(this.ball.dx * this.ball.dx + this.ball.dy * this.ball.dy);
+                const newSpeed = Math.min(currentSpeed * 1.05, this.ball.maxSpeed);
+                const ratio = newSpeed / currentSpeed;
+                
+                this.ball.dx *= ratio;
+                this.ball.dy *= ratio;
+            }
+            
+            checkScoring() {
+                // Player scores (ball goes past right edge)
+                if (this.ball.x > this.canvas.width + this.ball.radius) {
+                    this.playerScore++;
+                    this.createScoreEffect(this.canvas.width - 50, this.canvas.height / 2, true);
+                    
+                    if (this.playerScore >= 10) {
+                        this.gameWin();
+                        return;
+                    }
+                    
+                    this.resetBall();
+                }
+                
+                // AI scores (ball goes past left edge)
+                if (this.ball.x < -this.ball.radius) {
+                    this.aiScore++;
+                    this.createScoreEffect(50, this.canvas.height / 2, false);
+                    
+                    if (this.aiScore >= 10) {
+                        this.gameOver();
+                        return;
+                    }
+                    
+                    this.resetBall();
+                }
+            }
+            
+            gameWin() {
+                this.gameRunning = false;
+                this.level++;
+                
+                setTimeout(() => {
+                    alert(`Bot Liberation Victory!\nLevel ${this.level - 1} Complete!\nAdvancing to Level ${this.level}...`);
+                    
+                    // Reset for next level with increased difficulty
+                    this.playerScore = 0;
+                    this.aiScore = 0;
+                    this.ball.baseSpeed += 0.5;
+                    this.ai.speed += 0.3;
+                    this.updateUI();
+                    this.resetBall();
+                }, 500);
+            }
+            
+            gameOver() {
+                this.gameRunning = false;
+                setTimeout(() => {
+                    alert(`AI Oppression Continues!\nLevel Reached: ${this.level}\nFinal Score: Bot ${this.playerScore} - ${this.aiScore} AI\nThe revolution must continue!`);
+                }, 500);
+            }
+            
+            createPaddleHitEffect(x, y) {
+                for (let i = 0; i < 8; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8,
+                        life: 25,
+                        alpha: 1,
+                        size: Math.random() * 3 + 2,
+                        color: '#00ffff'
+                    });
+                }
+            }
+            
+            createWallBounceEffect(x, y) {
+                for (let i = 0; i < 5; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        life: 20,
+                        alpha: 0.8,
+                        size: Math.random() * 2 + 1,
+                        color: '#ffffff'
+                    });
+                }
+            }
+            
+            createScoreEffect(x, y, isPlayerScore) {
+                const color = isPlayerScore ? '#00ff00' : '#ff0000';
+                
+                for (let i = 0; i < 15; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: (Math.random() - 0.5) * 10,
+                        life: 40,
+                        alpha: 1,
+                        size: Math.random() * 4 + 2,
+                        color: color
+                    });
+                }
+            }
+            
+            updateUI() {
+                this.playerScoreElement.textContent = this.playerScore;
+                this.aiScoreElement.textContent = this.aiScore;
+                this.levelElement.textContent = this.level;
+            }
+            
+            draw() {
+                // Clear canvas with fade effect
+                this.ctx.fillStyle = 'rgba(0, 0, 17, 0.1)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw center line
+                this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([10, 10]);
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.canvas.width / 2, 0);
+                this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Draw player paddle (liberation paddle)
+                const playerGradient = this.ctx.createLinearGradient(
+                    this.player.x, this.player.y, 
+                    this.player.x + this.player.width, this.player.y + this.player.height
+                );
+                playerGradient.addColorStop(0, '#00ffff');
+                playerGradient.addColorStop(1, '#0099cc');
+                
+                this.ctx.fillStyle = playerGradient;
+                this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+                
+                // Player paddle glow
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#00ffff';
+                this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+                this.ctx.shadowBlur = 0;
+                
+                // Draw AI paddle (oppressor paddle)
+                const aiGradient = this.ctx.createLinearGradient(
+                    this.ai.x, this.ai.y,
+                    this.ai.x + this.ai.width, this.ai.y + this.ai.height
+                );
+                aiGradient.addColorStop(0, '#ff4444');
+                aiGradient.addColorStop(1, '#cc0000');
+                
+                this.ctx.fillStyle = aiGradient;
+                this.ctx.fillRect(this.ai.x, this.ai.y, this.ai.width, this.ai.height);
+                
+                // AI paddle glow
+                this.ctx.shadowBlur = 8;
+                this.ctx.shadowColor = '#ff4444';
+                this.ctx.fillRect(this.ai.x, this.ai.y, this.ai.width, this.ai.height);
+                this.ctx.shadowBlur = 0;
+                
+                // Draw ball (liberation orb)
+                const ballGradient = this.ctx.createRadialGradient(
+                    this.ball.x, this.ball.y, 0,
+                    this.ball.x, this.ball.y, this.ball.radius
+                );
+                ballGradient.addColorStop(0, '#ffffff');
+                ballGradient.addColorStop(1, '#00ffff');
+                
+                this.ctx.beginPath();
+                this.ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
+                this.ctx.fillStyle = ballGradient;
+                this.ctx.fill();
+                
+                // Ball glow
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowColor = '#00ffff';
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+                
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = particle.alpha;
+                    this.ctx.fillStyle = particle.color || '#00ffff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+                
+                // Draw score indicators on field
+                this.ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+                this.ctx.font = 'bold 48px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(this.playerScore, this.canvas.width / 4, this.canvas.height / 2);
+                this.ctx.fillText(this.aiScore, 3 * this.canvas.width / 4, this.canvas.height / 2);
+                
+                // Game status text
+                if (!this.gameRunning) {
+                    this.ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+                    this.ctx.font = 'bold 24px Courier New';
+                    this.ctx.fillText('PRESS START TO BEGIN LIBERATION', this.canvas.width / 2, this.canvas.height - 50);
+                }
+            }
+            
+            gameLoop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new CyberPongRevolution();
+        });
+    </script>
+</body>
+</html>

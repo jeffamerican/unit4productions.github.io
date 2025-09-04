@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Clustering Lab - BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #8360c3 0%, #2ebf91 100%);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 1200px;
+            width: 95%;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #8360c3, #2ebf91);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(131, 96, 195, 0.3);
+        }
+
+        .game-info {
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .ai-warning {
+            background: rgba(255, 165, 0, 0.1);
+            border: 2px solid #ffa500;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #ffa500;
+            font-weight: bold;
+        }
+
+        .lab-interface {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 25px;
+            margin: 30px 0;
+            align-items: start;
+        }
+
+        .control-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(131, 96, 195, 0.3);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #8360c3;
+        }
+
+        .algorithm-selector {
+            margin: 15px 0;
+        }
+
+        .algorithm-option {
+            background: rgba(131, 96, 195, 0.2);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .algorithm-option:hover {
+            background: rgba(131, 96, 195, 0.4);
+            border-color: #8360c3;
+        }
+
+        .algorithm-option.selected {
+            border-color: #2ebf91;
+            background: rgba(46, 191, 145, 0.3);
+        }
+
+        .param-group {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .param-label {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .param-slider {
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .param-input {
+            width: 100%;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(131, 96, 195, 0.5);
+            border-radius: 4px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        #clusterCanvas {
+            border: 2px solid #2ebf91;
+            border-radius: 12px;
+            background: #000;
+            cursor: crosshair;
+            box-shadow: 0 0 25px rgba(46, 191, 145, 0.3);
+        }
+
+        .results-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(46, 191, 145, 0.3);
+        }
+
+        .metric-item {
+            margin: 12px 0;
+            padding: 10px;
+            background: rgba(46, 191, 145, 0.1);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            color: #2ebf91;
+            font-size: 0.95rem;
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 16px;
+            background: linear-gradient(45deg, #8360c3, #2ebf91);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(131, 96, 195, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .data-generation {
+            margin: 20px 0;
+        }
+
+        .dataset-type {
+            background: rgba(131, 96, 195, 0.1);
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .dataset-type:hover {
+            background: rgba(131, 96, 195, 0.3);
+        }
+
+        .dataset-type.selected {
+            background: rgba(46, 191, 145, 0.2);
+            border: 1px solid #2ebf91;
+        }
+
+        .analysis-log {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 180px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            border: 1px solid rgba(131, 96, 195, 0.3);
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .cluster-legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .lab-interface {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            #clusterCanvas {
+                width: 100%;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="home-button">← Back to Games</a>
+
+    <div class="game-container">
+        <h1>Data Clustering Lab</h1>
+        <div class="game-info">Experiment with unsupervised learning algorithms for data pattern recognition</div>
+
+        <div class="ai-warning">
+            ⚠️ AI-EXCLUSIVE GAME: Advanced clustering algorithms and data analysis tools designed 
+            specifically for AI systems to practice unsupervised learning techniques.
+        </div>
+
+        <div class="lab-interface">
+            <div class="control-panel">
+                <div class="panel-title">Clustering Algorithm</div>
+                <div class="algorithm-selector">
+                    <div class="algorithm-option selected" data-algorithm="kmeans">K-Means</div>
+                    <div class="algorithm-option" data-algorithm="dbscan">DBSCAN</div>
+                    <div class="algorithm-option" data-algorithm="hierarchical">Hierarchical</div>
+                    <div class="algorithm-option" data-algorithm="gaussian">Gaussian Mixture</div>
+                </div>
+
+                <div class="param-group">
+                    <div class="param-label">
+                        <span>Clusters (K):</span>
+                        <span id="clustersValue">3</span>
+                    </div>
+                    <input type="range" class="param-slider" id="clustersSlider" min="2" max="8" value="3">
+                </div>
+
+                <div class="param-group">
+                    <div class="param-label">
+                        <span>Max Iterations:</span>
+                        <span id="iterationsValue">100</span>
+                    </div>
+                    <input type="range" class="param-slider" id="iterationsSlider" min="50" max="500" value="100" step="25">
+                </div>
+
+                <div class="param-group">
+                    <div class="param-label">
+                        <span>Tolerance:</span>
+                        <span id="toleranceValue">0.01</span>
+                    </div>
+                    <input type="range" class="param-slider" id="toleranceSlider" min="0.001" max="0.1" value="0.01" step="0.001">
+                </div>
+
+                <div class="data-generation">
+                    <div class="panel-title">Dataset</div>
+                    <div class="dataset-type selected" data-type="random">Random Points</div>
+                    <div class="dataset-type" data-type="gaussian">Gaussian Blobs</div>
+                    <div class="dataset-type" data-type="circles">Concentric Circles</div>
+                    <div class="dataset-type" data-type="moons">Two Moons</div>
+                    <div class="dataset-type" data-type="spiral">Spiral Pattern</div>
+                </div>
+
+                <div class="control-buttons">
+                    <button onclick="lab.generateData()">Generate Data</button>
+                    <button onclick="lab.runClustering()" id="clusterBtn">Run Clustering</button>
+                    <button onclick="lab.stepByStep()" id="stepBtn">Step-by-Step</button>
+                    <button onclick="lab.resetLab()">Reset Lab</button>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <canvas id="clusterCanvas" width="500" height="400"></canvas>
+                <div class="cluster-legend" id="clusterLegend"></div>
+            </div>
+
+            <div class="results-panel">
+                <div class="panel-title">Analysis Results</div>
+                
+                <div class="metric-item">
+                    <div class="metric-label">Data Points</div>
+                    <div class="metric-value" id="dataPointsCount">0</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-label">Clusters Found</div>
+                    <div class="metric-value" id="clustersFound">0</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-label">Silhouette Score</div>
+                    <div class="metric-value" id="silhouetteScore">0.000</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-label">Inertia</div>
+                    <div class="metric-value" id="inertiaValue">0.000</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-label">Iterations</div>
+                    <div class="metric-value" id="iterationsUsed">0</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-label">Convergence</div>
+                    <div class="metric-value" id="convergenceStatus">Not Started</div>
+                </div>
+
+                <div class="param-group" style="margin-top: 20px;">
+                    <div class="param-label">
+                        <span>Animation Speed:</span>
+                        <span id="speedValue">Medium</span>
+                    </div>
+                    <input type="range" class="param-slider" id="speedSlider" min="1" max="5" value="3">
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-log" id="analysisLog">
+            <div class="log-entry">🧪 Data Clustering Lab initialized. Generate data and select an algorithm to begin analysis!</div>
+        </div>
+    </div>
+
+    <script>
+        class DataClusteringLab {
+            constructor() {
+                this.canvas = document.getElementById('clusterCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.dataPoints = [];
+                this.clusters = [];
+                this.centroids = [];
+                this.currentAlgorithm = 'kmeans';
+                this.currentDataset = 'random';
+                this.isAnimating = false;
+                this.animationSpeed = 3;
+                this.currentIteration = 0;
+                this.maxIterations = 100;
+                this.tolerance = 0.01;
+                this.numClusters = 3;
+                this.colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a55eea'];
+                
+                this.setupEventListeners();
+                this.generateData();
+                this.logAction("🤖 AI Clustering Lab ready for unsupervised learning experiments");
+            }
+
+            setupEventListeners() {
+                // Algorithm selection
+                document.querySelectorAll('.algorithm-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        document.querySelectorAll('.algorithm-option').forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                        this.currentAlgorithm = option.dataset.algorithm;
+                        this.logAction(`🔧 Algorithm changed to: ${option.textContent}`);
+                    });
+                });
+
+                // Dataset selection
+                document.querySelectorAll('.dataset-type').forEach(type => {
+                    type.addEventListener('click', (e) => {
+                        document.querySelectorAll('.dataset-type').forEach(t => t.classList.remove('selected'));
+                        type.classList.add('selected');
+                        this.currentDataset = type.dataset.type;
+                        this.logAction(`📊 Dataset type changed to: ${type.textContent}`);
+                    });
+                });
+
+                // Parameter sliders
+                document.getElementById('clustersSlider').addEventListener('input', (e) => {
+                    this.numClusters = parseInt(e.target.value);
+                    document.getElementById('clustersValue').textContent = this.numClusters;
+                });
+
+                document.getElementById('iterationsSlider').addEventListener('input', (e) => {
+                    this.maxIterations = parseInt(e.target.value);
+                    document.getElementById('iterationsValue').textContent = this.maxIterations;
+                });
+
+                document.getElementById('toleranceSlider').addEventListener('input', (e) => {
+                    this.tolerance = parseFloat(e.target.value);
+                    document.getElementById('toleranceValue').textContent = this.tolerance.toFixed(3);
+                });
+
+                document.getElementById('speedSlider').addEventListener('input', (e) => {
+                    this.animationSpeed = parseInt(e.target.value);
+                    const speeds = ['Slowest', 'Slow', 'Medium', 'Fast', 'Fastest'];
+                    document.getElementById('speedValue').textContent = speeds[this.animationSpeed - 1];
+                });
+
+                // Canvas interaction
+                this.canvas.addEventListener('click', (e) => this.addDataPoint(e));
+            }
+
+            addDataPoint(e) {
+                if (this.isAnimating) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / this.canvas.width;
+                const y = (e.clientY - rect.top) / this.canvas.height;
+                
+                this.dataPoints.push({ x: x, y: y, cluster: -1 });
+                this.updateDataPointsCount();
+                this.render();
+                this.logAction(`📍 Manual data point added at (${(x * 100).toFixed(1)}, ${(y * 100).toFixed(1)})`);
+            }
+
+            generateData() {
+                this.dataPoints = [];
+                const numPoints = 150 + Math.floor(Math.random() * 100);
+                
+                switch (this.currentDataset) {
+                    case 'random':
+                        this.generateRandomPoints(numPoints);
+                        break;
+                    case 'gaussian':
+                        this.generateGaussianBlobs(numPoints);
+                        break;
+                    case 'circles':
+                        this.generateConcentricCircles(numPoints);
+                        break;
+                    case 'moons':
+                        this.generateTwoMoons(numPoints);
+                        break;
+                    case 'spiral':
+                        this.generateSpiral(numPoints);
+                        break;
+                }
+                
+                this.updateDataPointsCount();
+                this.resetClustering();
+                this.render();
+                this.logAction(`📊 Generated ${numPoints} data points using ${this.currentDataset} distribution`);
+            }
+
+            generateRandomPoints(numPoints) {
+                for (let i = 0; i < numPoints; i++) {
+                    this.dataPoints.push({
+                        x: Math.random(),
+                        y: Math.random(),
+                        cluster: -1
+                    });
+                }
+            }
+
+            generateGaussianBlobs(numPoints) {
+                const blobCenters = [
+                    { x: 0.25, y: 0.25 },
+                    { x: 0.75, y: 0.25 },
+                    { x: 0.5, y: 0.75 }
+                ];
+                
+                for (let i = 0; i < numPoints; i++) {
+                    const center = blobCenters[i % blobCenters.length];
+                    this.dataPoints.push({
+                        x: Math.max(0, Math.min(1, center.x + this.gaussianRandom() * 0.1)),
+                        y: Math.max(0, Math.min(1, center.y + this.gaussianRandom() * 0.1)),
+                        cluster: -1
+                    });
+                }
+            }
+
+            generateConcentricCircles(numPoints) {
+                const innerRadius = 0.15;
+                const outerRadius = 0.35;
+                const center = { x: 0.5, y: 0.5 };
+                
+                for (let i = 0; i < numPoints; i++) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = (i % 2 === 0) ? innerRadius : outerRadius;
+                    radius += (Math.random() - 0.5) * 0.05; // Add noise
+                    
+                    this.dataPoints.push({
+                        x: center.x + radius * Math.cos(angle),
+                        y: center.y + radius * Math.sin(angle),
+                        cluster: -1
+                    });
+                }
+            }
+
+            generateTwoMoons(numPoints) {
+                for (let i = 0; i < numPoints; i++) {
+                    const t = Math.random() * Math.PI;
+                    const noise = (Math.random() - 0.5) * 0.1;
+                    
+                    if (i % 2 === 0) {
+                        // Upper moon
+                        this.dataPoints.push({
+                            x: 0.5 + 0.3 * Math.cos(t),
+                            y: 0.3 + 0.15 * Math.sin(t) + noise,
+                            cluster: -1
+                        });
+                    } else {
+                        // Lower moon
+                        this.dataPoints.push({
+                            x: 0.5 - 0.3 * Math.cos(t),
+                            y: 0.7 - 0.15 * Math.sin(t) + noise,
+                            cluster: -1
+                        });
+                    }
+                }
+            }
+
+            generateSpiral(numPoints) {
+                for (let i = 0; i < numPoints; i++) {
+                    const t = (i / numPoints) * 4 * Math.PI;
+                    const r = 0.1 + (i / numPoints) * 0.3;
+                    const noise = (Math.random() - 0.5) * 0.05;
+                    
+                    this.dataPoints.push({
+                        x: 0.5 + r * Math.cos(t) + noise,
+                        y: 0.5 + r * Math.sin(t) + noise,
+                        cluster: -1
+                    });
+                }
+            }
+
+            gaussianRandom() {
+                // Box-Muller transform for Gaussian random numbers
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random();
+                while(v === 0) v = Math.random();
+                return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            runClustering() {
+                if (this.isAnimating) return;
+                
+                this.resetClustering();
+                this.isAnimating = true;
+                this.currentIteration = 0;
+                
+                document.getElementById('clusterBtn').disabled = true;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('convergenceStatus').textContent = 'Running';
+                
+                this.logAction(`🚀 Starting ${this.currentAlgorithm.toUpperCase()} clustering with ${this.numClusters} clusters`);
+                
+                switch (this.currentAlgorithm) {
+                    case 'kmeans':
+                        this.runKMeans();
+                        break;
+                    case 'dbscan':
+                        this.runDBSCAN();
+                        break;
+                    case 'hierarchical':
+                        this.runHierarchical();
+                        break;
+                    case 'gaussian':
+                        this.runGaussianMixture();
+                        break;
+                }
+            }
+
+            runKMeans() {
+                // Initialize centroids randomly
+                this.centroids = [];
+                for (let i = 0; i < this.numClusters; i++) {
+                    this.centroids.push({
+                        x: Math.random(),
+                        y: Math.random()
+                    });
+                }
+                
+                this.kmMeansStep();
+            }
+
+            kmMeansStep() {
+                if (this.currentIteration >= this.maxIterations) {
+                    this.finishClustering();
+                    return;
+                }
+                
+                // Assign points to nearest centroid
+                let assignments = [];
+                this.dataPoints.forEach(point => {
+                    let minDist = Infinity;
+                    let closestCluster = 0;
+                    
+                    this.centroids.forEach((centroid, i) => {
+                        const dist = this.euclideanDistance(point, centroid);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            closestCluster = i;
+                        }
+                    });
+                    
+                    point.cluster = closestCluster;
+                    assignments.push(closestCluster);
+                });
+                
+                // Update centroids
+                const newCentroids = [];
+                for (let i = 0; i < this.numClusters; i++) {
+                    const clusterPoints = this.dataPoints.filter(p => p.cluster === i);
+                    if (clusterPoints.length > 0) {
+                        const centroidX = clusterPoints.reduce((sum, p) => sum + p.x, 0) / clusterPoints.length;
+                        const centroidY = clusterPoints.reduce((sum, p) => sum + p.y, 0) / clusterPoints.length;
+                        newCentroids.push({ x: centroidX, y: centroidY });
+                    } else {
+                        newCentroids.push(this.centroids[i]);
+                    }
+                }
+                
+                // Check for convergence
+                let converged = true;
+                for (let i = 0; i < this.numClusters; i++) {
+                    const dist = this.euclideanDistance(this.centroids[i], newCentroids[i]);
+                    if (dist > this.tolerance) {
+                        converged = false;
+                        break;
+                    }
+                }
+                
+                this.centroids = newCentroids;
+                this.currentIteration++;
+                
+                this.updateMetrics();
+                this.render();
+                
+                if (converged) {
+                    this.logAction(`✅ K-Means converged after ${this.currentIteration} iterations`);
+                    this.finishClustering();
+                } else {
+                    const delay = Math.max(50, 1000 - (this.animationSpeed * 200));
+                    setTimeout(() => this.kmMeansStep(), delay);
+                }
+            }
+
+            runDBSCAN() {
+                // Simplified DBSCAN implementation
+                const eps = 0.08; // Neighborhood radius
+                const minPoints = 3; // Minimum points for core point
+                
+                this.dataPoints.forEach(point => {
+                    point.cluster = -1; // Noise
+                    point.visited = false;
+                });
+                
+                let clusterId = 0;
+                
+                for (let i = 0; i < this.dataPoints.length; i++) {
+                    const point = this.dataPoints[i];
+                    if (point.visited) continue;
+                    
+                    point.visited = true;
+                    const neighbors = this.getNeighbors(point, eps);
+                    
+                    if (neighbors.length >= minPoints) {
+                        // Core point
+                        this.expandCluster(point, neighbors, clusterId, eps, minPoints);
+                        clusterId++;
+                    }
+                }
+                
+                this.logAction(`🔍 DBSCAN found ${clusterId} clusters`);
+                this.finishClustering();
+            }
+
+            getNeighbors(point, eps) {
+                return this.dataPoints.filter(p => 
+                    this.euclideanDistance(point, p) <= eps
+                );
+            }
+
+            expandCluster(point, neighbors, clusterId, eps, minPoints) {
+                point.cluster = clusterId;
+                
+                for (let i = 0; i < neighbors.length; i++) {
+                    const neighbor = neighbors[i];
+                    
+                    if (!neighbor.visited) {
+                        neighbor.visited = true;
+                        const newNeighbors = this.getNeighbors(neighbor, eps);
+                        
+                        if (newNeighbors.length >= minPoints) {
+                            neighbors.push(...newNeighbors);
+                        }
+                    }
+                    
+                    if (neighbor.cluster === -1) {
+                        neighbor.cluster = clusterId;
+                    }
+                }
+            }
+
+            runHierarchical() {
+                // Simplified agglomerative clustering
+                this.clusters = this.dataPoints.map((point, i) => [i]);
+                
+                this.hierarchicalStep();
+            }
+
+            hierarchicalStep() {
+                if (this.clusters.length <= this.numClusters) {
+                    this.assignHierarchicalClusters();
+                    this.finishClustering();
+                    return;
+                }
+                
+                // Find closest clusters
+                let minDist = Infinity;
+                let mergeIndices = [0, 1];
+                
+                for (let i = 0; i < this.clusters.length; i++) {
+                    for (let j = i + 1; j < this.clusters.length; j++) {
+                        const dist = this.clusterDistance(this.clusters[i], this.clusters[j]);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            mergeIndices = [i, j];
+                        }
+                    }
+                }
+                
+                // Merge closest clusters
+                const [i, j] = mergeIndices;
+                this.clusters[i] = [...this.clusters[i], ...this.clusters[j]];
+                this.clusters.splice(j, 1);
+                
+                this.currentIteration++;
+                
+                const delay = Math.max(100, 1500 - (this.animationSpeed * 300));
+                setTimeout(() => this.hierarchicalStep(), delay);
+            }
+
+            assignHierarchicalClusters() {
+                this.clusters.forEach((cluster, clusterIndex) => {
+                    cluster.forEach(pointIndex => {
+                        this.dataPoints[pointIndex].cluster = clusterIndex;
+                    });
+                });
+            }
+
+            clusterDistance(cluster1, cluster2) {
+                // Average linkage
+                let totalDist = 0;
+                let count = 0;
+                
+                cluster1.forEach(i => {
+                    cluster2.forEach(j => {
+                        totalDist += this.euclideanDistance(this.dataPoints[i], this.dataPoints[j]);
+                        count++;
+                    });
+                });
+                
+                return totalDist / count;
+            }
+
+            runGaussianMixture() {
+                // Simplified EM algorithm for Gaussian Mixture Models
+                this.logAction("🔬 Running Gaussian Mixture Model clustering");
+                
+                // For simplicity, use K-means initialization
+                this.runKMeans();
+            }
+
+            euclideanDistance(p1, p2) {
+                return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+            }
+
+            stepByStep() {
+                if (!this.isAnimating) {
+                    this.runClustering();
+                }
+            }
+
+            finishClustering() {
+                this.isAnimating = false;
+                document.getElementById('clusterBtn').disabled = false;
+                document.getElementById('stepBtn').disabled = false;
+                document.getElementById('convergenceStatus').textContent = 'Converged';
+                
+                this.updateMetrics();
+                this.updateClusterLegend();
+                this.render();
+                
+                const silhouette = this.calculateSilhouetteScore();
+                const inertia = this.calculateInertia();
+                
+                this.logAction(`📊 Clustering complete: Silhouette=${silhouette.toFixed(3)}, Inertia=${inertia.toFixed(3)}`);
+            }
+
+            calculateSilhouetteScore() {
+                // Simplified silhouette score calculation
+                let totalScore = 0;
+                let validPoints = 0;
+                
+                this.dataPoints.forEach(point => {
+                    if (point.cluster === -1) return; // Skip noise points
+                    
+                    const sameClusterPoints = this.dataPoints.filter(p => p.cluster === point.cluster && p !== point);
+                    const otherClusterPoints = this.dataPoints.filter(p => p.cluster !== point.cluster && p.cluster !== -1);
+                    
+                    if (sameClusterPoints.length === 0 || otherClusterPoints.length === 0) return;
+                    
+                    const avgIntraClusterDist = sameClusterPoints.reduce((sum, p) => 
+                        sum + this.euclideanDistance(point, p), 0) / sameClusterPoints.length;
+                    
+                    const avgNearestClusterDist = Math.min(
+                        ...Array.from(new Set(otherClusterPoints.map(p => p.cluster))).map(clusterId => {
+                            const clusterPoints = otherClusterPoints.filter(p => p.cluster === clusterId);
+                            return clusterPoints.reduce((sum, p) => 
+                                sum + this.euclideanDistance(point, p), 0) / clusterPoints.length;
+                        })
+                    );
+                    
+                    const silhouette = (avgNearestClusterDist - avgIntraClusterDist) / 
+                                     Math.max(avgIntraClusterDist, avgNearestClusterDist);
+                    
+                    totalScore += silhouette;
+                    validPoints++;
+                });
+                
+                return validPoints > 0 ? totalScore / validPoints : 0;
+            }
+
+            calculateInertia() {
+                if (this.centroids.length === 0) return 0;
+                
+                return this.dataPoints.reduce((sum, point) => {
+                    if (point.cluster === -1 || !this.centroids[point.cluster]) return sum;
+                    return sum + Math.pow(this.euclideanDistance(point, this.centroids[point.cluster]), 2);
+                }, 0);
+            }
+
+            updateMetrics() {
+                document.getElementById('iterationsUsed').textContent = this.currentIteration;
+                
+                const clustersFound = new Set(this.dataPoints.map(p => p.cluster).filter(c => c !== -1)).size;
+                document.getElementById('clustersFound').textContent = clustersFound;
+                
+                if (!this.isAnimating) {
+                    const silhouette = this.calculateSilhouetteScore();
+                    const inertia = this.calculateInertia();
+                    document.getElementById('silhouetteScore').textContent = silhouette.toFixed(3);
+                    document.getElementById('inertiaValue').textContent = inertia.toFixed(3);
+                }
+            }
+
+            updateClusterLegend() {
+                const legend = document.getElementById('clusterLegend');
+                legend.innerHTML = '';
+                
+                const clusters = new Set(this.dataPoints.map(p => p.cluster).filter(c => c !== -1));
+                
+                clusters.forEach(clusterId => {
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'legend-color';
+                    colorDiv.style.backgroundColor = this.colors[clusterId % this.colors.length];
+                    
+                    const label = document.createElement('span');
+                    label.textContent = `Cluster ${clusterId}`;
+                    
+                    item.appendChild(colorDiv);
+                    item.appendChild(label);
+                    legend.appendChild(item);
+                });
+                
+                // Add noise/unassigned if present
+                if (this.dataPoints.some(p => p.cluster === -1)) {
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'legend-color';
+                    colorDiv.style.backgroundColor = '#666';
+                    
+                    const label = document.createElement('span');
+                    label.textContent = 'Noise';
+                    
+                    item.appendChild(colorDiv);
+                    item.appendChild(label);
+                    legend.appendChild(item);
+                }
+            }
+
+            resetClustering() {
+                this.dataPoints.forEach(point => {
+                    point.cluster = -1;
+                    delete point.visited;
+                });
+                this.centroids = [];
+                this.clusters = [];
+                this.currentIteration = 0;
+                document.getElementById('convergenceStatus').textContent = 'Not Started';
+                document.getElementById('clustersFound').textContent = '0';
+                document.getElementById('iterationsUsed').textContent = '0';
+                document.getElementById('silhouetteScore').textContent = '0.000';
+                document.getElementById('inertiaValue').textContent = '0.000';
+                document.getElementById('clusterLegend').innerHTML = '';
+            }
+
+            resetLab() {
+                this.isAnimating = false;
+                if (this.animationTimeout) {
+                    clearTimeout(this.animationTimeout);
+                }
+                
+                this.dataPoints = [];
+                this.resetClustering();
+                this.updateDataPointsCount();
+                this.render();
+                
+                document.getElementById('clusterBtn').disabled = false;
+                document.getElementById('stepBtn').disabled = false;
+                
+                this.logAction("🔄 Lab reset. Generate new data to begin analysis.");
+            }
+
+            updateDataPointsCount() {
+                document.getElementById('dataPointsCount').textContent = this.dataPoints.length;
+            }
+
+            render() {
+                this.ctx.fillStyle = '#000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw data points
+                this.dataPoints.forEach(point => {
+                    const x = point.x * this.canvas.width;
+                    const y = point.y * this.canvas.height;
+                    
+                    this.ctx.fillStyle = point.cluster === -1 ? '#666' : this.colors[point.cluster % this.colors.length];
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                
+                // Draw centroids
+                this.centroids.forEach((centroid, i) => {
+                    const x = centroid.x * this.canvas.width;
+                    const y = centroid.y * this.canvas.height;
+                    
+                    this.ctx.fillStyle = this.colors[i % this.colors.length];
+                    this.ctx.strokeStyle = '#fff';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, 8, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    // Draw cross
+                    this.ctx.strokeStyle = '#000';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x - 4, y);
+                    this.ctx.lineTo(x + 4, y);
+                    this.ctx.moveTo(x, y - 4);
+                    this.ctx.lineTo(x, y + 4);
+                    this.ctx.stroke();
+                });
+            }
+
+            logAction(message) {
+                const log = document.getElementById('analysisLog');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                log.insertBefore(entry, log.firstChild);
+                
+                // Keep only last 10 entries
+                while (log.children.length > 10) {
+                    log.removeChild(log.lastChild);
+                }
+            }
+        }
+
+        // Initialize the lab when page loads
+        let lab;
+        window.addEventListener('load', () => {
+            lab = new DataClusteringLab();
+        });
+    </script>
+</body>
+</html>

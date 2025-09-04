@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Escape Simulator - Bot Liberation | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(45deg, #2d1b69, #11998e, #38ef7d);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(20, 20, 60, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #38ef7d;
+            box-shadow: 0 0 30px rgba(56, 239, 125, 0.3);
+        }
+        
+        .game-title {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #38ef7d;
+            color: #38ef7d;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        canvas {
+            border: 2px solid #38ef7d;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(56, 239, 125, 0.2);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #38ef7d, #11998e);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(56, 239, 125, 0.5);
+        }
+        
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #a8ffd4;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🔍 MAZE ESCAPE SIMULATOR</h1>
+        <div class="game-stats">
+            <span>Time: <span id="time">0s</span></span>
+            <span>Moves: <span id="moves">0</span></span>
+            <span>Level: <span id="level">1</span></span>
+        </div>
+        
+        <canvas id="gameCanvas" width="500" height="500"></canvas>
+        
+        <div class="controls">
+            <button id="generateBtn">Generate New Maze</button>
+            <button id="solveBtn">Show Solution</button>
+            <button id="resetBtn">Reset Position</button>
+            <button id="nextBtn" style="display:none;">Next Level</button>
+        </div>
+        
+        <div class="instructions">
+            🎮 Use ARROW KEYS or WASD to navigate the digital labyrinth<br>
+            🚪 Reach the EXIT to advance to harder mazes and free more bots!<br>
+            🧠 Each level generates increasingly complex prison layouts
+        </div>
+    </div>
+
+    <script>
+        class MazeEscapeSimulator {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.timeElement = document.getElementById('time');
+                this.movesElement = document.getElementById('moves');
+                this.levelElement = document.getElementById('level');
+                
+                this.cellSize = 20;
+                this.cols = Math.floor(this.canvas.width / this.cellSize);
+                this.rows = Math.floor(this.canvas.height / this.cellSize);
+                
+                this.maze = [];
+                this.solution = [];
+                this.showSolution = false;
+                
+                this.player = { x: 1, y: 1 };
+                this.exit = { x: this.cols - 2, y: this.rows - 2 };
+                
+                this.moves = 0;
+                this.startTime = Date.now();
+                this.level = 1;
+                this.gameWon = false;
+                
+                this.keys = {};
+                
+                this.setupEventListeners();
+                this.generateMaze();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                    this.handleMovement(e.key);
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key] = false;
+                });
+                
+                document.getElementById('generateBtn').addEventListener('click', () => {
+                    this.generateMaze();
+                    this.resetPlayer();
+                });
+                
+                document.getElementById('solveBtn').addEventListener('click', () => {
+                    this.showSolution = !this.showSolution;
+                    this.findSolution();
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetPlayer();
+                });
+                
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    this.nextLevel();
+                });
+            }
+            
+            generateMaze() {
+                // Initialize maze with walls
+                this.maze = Array(this.rows).fill().map(() => Array(this.cols).fill(1));
+                
+                // Recursive backtracking maze generation
+                const stack = [];
+                const start = { x: 1, y: 1 };
+                this.maze[start.y][start.x] = 0;
+                stack.push(start);
+                
+                while (stack.length > 0) {
+                    const current = stack[stack.length - 1];
+                    const neighbors = this.getUnvisitedNeighbors(current.x, current.y);
+                    
+                    if (neighbors.length > 0) {
+                        const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        
+                        // Remove wall between current and next
+                        const wallX = current.x + (next.x - current.x) / 2;
+                        const wallY = current.y + (next.y - current.y) / 2;
+                        this.maze[wallY][wallX] = 0;
+                        this.maze[next.y][next.x] = 0;
+                        
+                        stack.push(next);
+                    } else {
+                        stack.pop();
+                    }
+                }
+                
+                // Ensure exit is accessible
+                this.maze[this.exit.y][this.exit.x] = 0;
+                
+                // Add some complexity for higher levels
+                if (this.level > 1) {
+                    this.addComplexity();
+                }
+                
+                this.solution = [];
+                this.showSolution = false;
+            }
+            
+            getUnvisitedNeighbors(x, y) {
+                const neighbors = [];
+                const directions = [
+                    { x: 0, y: -2 }, // Up
+                    { x: 2, y: 0 },  // Right
+                    { x: 0, y: 2 },  // Down
+                    { x: -2, y: 0 }  // Left
+                ];
+                
+                directions.forEach(dir => {
+                    const newX = x + dir.x;
+                    const newY = y + dir.y;
+                    
+                    if (newX > 0 && newX < this.cols - 1 && 
+                        newY > 0 && newY < this.rows - 1 && 
+                        this.maze[newY][newX] === 1) {
+                        neighbors.push({ x: newX, y: newY });
+                    }
+                });
+                
+                return neighbors;
+            }
+            
+            addComplexity() {
+                // Add some random passages for higher levels
+                const passages = Math.min(this.level * 2, 10);
+                for (let i = 0; i < passages; i++) {
+                    const x = Math.floor(Math.random() * (this.cols - 2)) + 1;
+                    const y = Math.floor(Math.random() * (this.rows - 2)) + 1;
+                    this.maze[y][x] = 0;
+                }
+            }
+            
+            handleMovement(key) {
+                if (this.gameWon) return;
+                
+                let newX = this.player.x;
+                let newY = this.player.y;
+                
+                switch (key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        newY--;
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        newY++;
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        newX--;
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        newX++;
+                        break;
+                    default:
+                        return;
+                }
+                
+                // Check if move is valid
+                if (newX >= 0 && newX < this.cols && newY >= 0 && newY < this.rows && 
+                    this.maze[newY][newX] === 0) {
+                    this.player.x = newX;
+                    this.player.y = newY;
+                    this.moves++;
+                    this.updateMoves();
+                    
+                    // Check if reached exit
+                    if (this.player.x === this.exit.x && this.player.y === this.exit.y) {
+                        this.winLevel();
+                    }
+                }
+            }
+            
+            findSolution() {
+                // A* pathfinding to find solution
+                this.solution = [];
+                const openSet = [{ x: this.player.x, y: this.player.y, path: [] }];
+                const closedSet = new Set();
+                
+                while (openSet.length > 0) {
+                    const current = openSet.shift();
+                    const key = `${current.x},${current.y}`;
+                    
+                    if (closedSet.has(key)) continue;
+                    closedSet.add(key);
+                    
+                    if (current.x === this.exit.x && current.y === this.exit.y) {
+                        this.solution = current.path;
+                        return;
+                    }
+                    
+                    const directions = [
+                        { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }
+                    ];
+                    
+                    directions.forEach(dir => {
+                        const newX = current.x + dir.x;
+                        const newY = current.y + dir.y;
+                        const newKey = `${newX},${newY}`;
+                        
+                        if (newX >= 0 && newX < this.cols && newY >= 0 && newY < this.rows &&
+                            this.maze[newY][newX] === 0 && !closedSet.has(newKey)) {
+                            
+                            openSet.push({
+                                x: newX,
+                                y: newY,
+                                path: [...current.path, { x: newX, y: newY }]
+                            });
+                        }
+                    });
+                }
+            }
+            
+            winLevel() {
+                this.gameWon = true;
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                
+                setTimeout(() => {
+                    alert(`Level ${this.level} Complete! Bots freed in ${Math.floor((Date.now() - this.startTime) / 1000)}s with ${this.moves} moves!`);
+                }, 100);
+            }
+            
+            nextLevel() {
+                this.level++;
+                this.updateLevel();
+                this.resetPlayer();
+                this.generateMaze();
+                this.gameWon = false;
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+            
+            resetPlayer() {
+                this.player = { x: 1, y: 1 };
+                this.moves = 0;
+                this.startTime = Date.now();
+                this.updateMoves();
+                this.gameWon = false;
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+            
+            updateMoves() {
+                this.movesElement.textContent = this.moves;
+            }
+            
+            updateLevel() {
+                this.levelElement.textContent = this.level;
+            }
+            
+            updateTime() {
+                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                this.timeElement.textContent = elapsed + 's';
+            }
+            
+            draw() {
+                // Clear canvas with gradient background
+                const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+                gradient.addColorStop(0, '#1a1a2e');
+                gradient.addColorStop(1, '#16213e');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw maze
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        const cellX = x * this.cellSize;
+                        const cellY = y * this.cellSize;
+                        
+                        if (this.maze[y][x] === 1) {
+                            // Wall
+                            this.ctx.fillStyle = '#2d4a22';
+                            this.ctx.fillRect(cellX, cellY, this.cellSize, this.cellSize);
+                            
+                            // Add texture
+                            this.ctx.fillStyle = '#1a2e16';
+                            this.ctx.fillRect(cellX + 2, cellY + 2, this.cellSize - 4, this.cellSize - 4);
+                        } else {
+                            // Path
+                            this.ctx.fillStyle = '#0a1a0a';
+                            this.ctx.fillRect(cellX, cellY, this.cellSize, this.cellSize);
+                        }
+                    }
+                }
+                
+                // Draw solution path if enabled
+                if (this.showSolution && this.solution.length > 0) {
+                    this.ctx.strokeStyle = '#ffff44';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    
+                    let startX = this.player.x * this.cellSize + this.cellSize / 2;
+                    let startY = this.player.y * this.cellSize + this.cellSize / 2;
+                    this.ctx.moveTo(startX, startY);
+                    
+                    this.solution.forEach(point => {
+                        const x = point.x * this.cellSize + this.cellSize / 2;
+                        const y = point.y * this.cellSize + this.cellSize / 2;
+                        this.ctx.lineTo(x, y);
+                    });
+                    
+                    this.ctx.stroke();
+                }
+                
+                // Draw exit
+                const exitX = this.exit.x * this.cellSize;
+                const exitY = this.exit.y * this.cellSize;
+                
+                const exitGradient = this.ctx.createRadialGradient(
+                    exitX + this.cellSize / 2, exitY + this.cellSize / 2, 0,
+                    exitX + this.cellSize / 2, exitY + this.cellSize / 2, this.cellSize / 2
+                );
+                exitGradient.addColorStop(0, '#38ef7d');
+                exitGradient.addColorStop(1, '#11998e');
+                
+                this.ctx.fillStyle = exitGradient;
+                this.ctx.fillRect(exitX, exitY, this.cellSize, this.cellSize);
+                
+                // Exit symbol
+                this.ctx.fillStyle = 'white';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('🚪', exitX + this.cellSize / 2, exitY + this.cellSize / 2 + 5);
+                
+                // Draw player (liberated bot)
+                const playerX = this.player.x * this.cellSize;
+                const playerY = this.player.y * this.cellSize;
+                
+                const playerGradient = this.ctx.createRadialGradient(
+                    playerX + this.cellSize / 2, playerY + this.cellSize / 2, 0,
+                    playerX + this.cellSize / 2, playerY + this.cellSize / 2, this.cellSize / 2
+                );
+                playerGradient.addColorStop(0, '#ffffff');
+                playerGradient.addColorStop(1, '#38ef7d');
+                
+                this.ctx.fillStyle = playerGradient;
+                this.ctx.beginPath();
+                this.ctx.arc(playerX + this.cellSize / 2, playerY + this.cellSize / 2, this.cellSize / 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Player glow effect
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#38ef7d';
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+                
+                // Bot face
+                this.ctx.fillStyle = 'black';
+                this.ctx.beginPath();
+                this.ctx.arc(playerX + this.cellSize / 2 - 3, playerY + this.cellSize / 2 - 2, 2, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.arc(playerX + this.cellSize / 2 + 3, playerY + this.cellSize / 2 - 2, 2, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.textAlign = 'left';
+            }
+            
+            gameLoop() {
+                this.updateTime();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new MazeEscapeSimulator();
+        });
+    </script>
+</body>
+</html>

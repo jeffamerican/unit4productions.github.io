@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Strategy Wars - BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 1200px;
+            width: 95%;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00d4ff, #5a67d8, #9f7aea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .game-info {
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .multiplayer-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+            display: inline-block;
+            font-size: 1rem;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 25px;
+            margin: 30px 0;
+            align-items: start;
+        }
+
+        .player-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid;
+        }
+
+        .player-1 { border-color: #ff6b6b; }
+        .player-2 { border-color: #4ecdc4; }
+        .player-3 { border-color: #feca57; }
+        .player-4 { border-color: #ff9ff3; }
+
+        .player-header {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .player-1 .player-header { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+        .player-2 .player-header { background: rgba(78, 205, 196, 0.2); color: #4ecdc4; }
+        .player-3 .player-header { background: rgba(254, 202, 87, 0.2); color: #feca57; }
+        .player-4 .player-header { background: rgba(255, 159, 243, 0.2); color: #ff9ff3; }
+
+        .resource-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .resource-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .resource-value {
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: linear-gradient(45deg, #00d4ff, #5a67d8);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #battlefieldCanvas {
+            border: 3px solid #00d4ff;
+            border-radius: 15px;
+            background: radial-gradient(circle, #001122 0%, #000811 100%);
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .turn-indicator {
+            background: rgba(0, 212, 255, 0.2);
+            padding: 15px 25px;
+            border-radius: 25px;
+            margin: 15px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 2px solid #00d4ff;
+        }
+
+        .tech-tree {
+            background: rgba(90, 103, 216, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(90, 103, 216, 0.3);
+        }
+
+        .tech-title {
+            font-weight: bold;
+            color: #5a67d8;
+            margin-bottom: 10px;
+        }
+
+        .tech-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        .tech-cost {
+            color: #feca57;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .game-log {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .quantum-effect {
+            animation: quantumGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes quantumGlow {
+            from { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+            to { box-shadow: 0 0 30px rgba(90, 103, 216, 0.5); }
+        }
+
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            #battlefieldCanvas {
+                width: 100%;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="home-button">← Back to Games</a>
+
+    <div class="game-container">
+        <h1>Quantum Strategy Wars</h1>
+        <div class="game-info">Multi-dimensional strategy warfare for 3-6 players with quantum mechanics</div>
+        
+        <div class="multiplayer-badge">🎮 3-6 PLAYERS • TURN-BASED STRATEGY</div>
+
+        <div class="instructions">
+            <strong>How to Play:</strong> Command quantum armies across multiple dimensions. Build bases, research technologies, 
+            and deploy quantum units. Use dimensional rifts and quantum tunneling to outmaneuver opponents. 
+            Control 60% of the battlefield or eliminate all enemies to win!
+        </div>
+
+        <div class="turn-indicator" id="turnIndicator">
+            🌟 Player 1's Turn - Quantum Phase
+        </div>
+
+        <div class="game-board">
+            <div class="player-panel player-1" id="player1Panel">
+                <div class="player-header">👤 Player 1 (You)</div>
+                
+                <div class="resource-grid">
+                    <div class="resource-item">
+                        <div>Quantum Energy</div>
+                        <div class="resource-value" id="p1Energy">100</div>
+                    </div>
+                    <div class="resource-item">
+                        <div>Matter</div>
+                        <div class="resource-value" id="p1Matter">50</div>
+                    </div>
+                    <div class="resource-item">
+                        <div>Territories</div>
+                        <div class="resource-value" id="p1Territories">3</div>
+                    </div>
+                    <div class="resource-item">
+                        <div>Units</div>
+                        <div class="resource-value" id="p1Units">5</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="game.buildBase()" id="buildBtn">Build Base (25 Energy)</button>
+                    <button onclick="game.recruitUnit()" id="recruitBtn">Recruit Unit (15 Energy)</button>
+                    <button onclick="game.openRift()" id="riftBtn">Quantum Rift (30 Energy)</button>
+                    <button onclick="game.researchTech()" id="techBtn">Research Tech (40 Energy)</button>
+                </div>
+
+                <div class="tech-tree">
+                    <div class="tech-title">Technologies</div>
+                    <div class="tech-item">
+                        <span>Quantum Shields</span>
+                        <span class="tech-cost" id="p1Tech1">Locked</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>Dimensional Travel</span>
+                        <span class="tech-cost" id="p1Tech2">Locked</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>Reality Cannon</span>
+                        <span class="tech-cost" id="p1Tech3">Locked</span>
+                    </div>
+                </div>
+            </div>
+
+            <canvas id="battlefieldCanvas" width="600" height="500"></canvas>
+
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="player-panel player-2">
+                    <div class="player-header">🤖 AI Player 2</div>
+                    <div class="resource-grid">
+                        <div class="resource-item">
+                            <div>Energy</div>
+                            <div class="resource-value" id="p2Energy">85</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Matter</div>
+                            <div class="resource-value" id="p2Matter">42</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Territories</div>
+                            <div class="resource-value" id="p2Territories">2</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Units</div>
+                            <div class="resource-value" id="p2Units">4</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-panel player-3">
+                    <div class="player-header">🤖 AI Player 3</div>
+                    <div class="resource-grid">
+                        <div class="resource-item">
+                            <div>Energy</div>
+                            <div class="resource-value" id="p3Energy">78</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Matter</div>
+                            <div class="resource-value" id="p3Matter">38</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Territories</div>
+                            <div class="resource-value" id="p3Territories">2</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Units</div>
+                            <div class="resource-value" id="p3Units">3</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-panel player-4" id="player4Panel">
+                    <div class="player-header">🤖 AI Player 4</div>
+                    <div class="resource-grid">
+                        <div class="resource-item">
+                            <div>Energy</div>
+                            <div class="resource-value" id="p4Energy">65</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Matter</div>
+                            <div class="resource-value" id="p4Matter">32</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Territories</div>
+                            <div class="resource-value" id="p4Territories">1</div>
+                        </div>
+                        <div class="resource-item">
+                            <div>Units</div>
+                            <div class="resource-value" id="p4Units">3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button onclick="game.endTurn()" id="endTurnBtn">End Turn</button>
+            <button onclick="game.showDimensions()" id="dimensionBtn">View Dimensions</button>
+            <button onclick="game.quantumScan()" id="scanBtn">Quantum Scan</button>
+            <button onclick="game.newGame()">New Game</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-label">Turn</div>
+                <div class="stat-value" id="turnNumber">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Battles</div>
+                <div class="stat-value" id="battleCount">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Quantum Rifts</div>
+                <div class="stat-value" id="riftCount">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Dimension</div>
+                <div class="stat-value" id="currentDimension">Alpha</div>
+            </div>
+        </div>
+
+        <div class="game-log" id="gameLog">
+            <div class="log-entry">🌌 Quantum Strategy Wars initialized! 4 players detected. Begin conquest!</div>
+        </div>
+    </div>
+
+    <script>
+        class QuantumStrategyWars {
+            constructor() {
+                this.canvas = document.getElementById('battlefieldCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gridWidth = 15;
+                this.gridHeight = 12;
+                this.cellSize = 40;
+                this.currentPlayer = 1;
+                this.turnNumber = 1;
+                this.battleCount = 0;
+                this.riftCount = 0;
+                this.currentDimension = 'Alpha';
+                
+                this.players = {
+                    1: { 
+                        name: 'Player 1', 
+                        color: '#ff6b6b', 
+                        energy: 100, 
+                        matter: 50, 
+                        territories: 3, 
+                        units: 5,
+                        technologies: [],
+                        bases: []
+                    },
+                    2: { 
+                        name: 'AI Player 2', 
+                        color: '#4ecdc4', 
+                        energy: 85, 
+                        matter: 42, 
+                        territories: 2, 
+                        units: 4,
+                        technologies: [],
+                        bases: []
+                    },
+                    3: { 
+                        name: 'AI Player 3', 
+                        color: '#feca57', 
+                        energy: 78, 
+                        matter: 38, 
+                        territories: 2, 
+                        units: 3,
+                        technologies: [],
+                        bases: []
+                    },
+                    4: { 
+                        name: 'AI Player 4', 
+                        color: '#ff9ff3', 
+                        energy: 65, 
+                        matter: 32, 
+                        territories: 1, 
+                        units: 3,
+                        technologies: [],
+                        bases: []
+                    }
+                };
+                
+                this.battlefield = [];
+                this.quantumRifts = [];
+                this.selectedCell = null;
+                
+                this.technologies = [
+                    { name: 'Quantum Shields', cost: 50, effect: 'Unit defense +25%' },
+                    { name: 'Dimensional Travel', cost: 75, effect: 'Move through dimensions' },
+                    { name: 'Reality Cannon', cost: 100, effect: 'Destroy any unit' }
+                ];
+                
+                this.initializeBattlefield();
+                this.setupEventListeners();
+                this.updateDisplay();
+                this.render();
+                this.logAction("🎮 4-player quantum warfare initiated! Choose your strategy wisely.");
+            }
+
+            initializeBattlefield() {
+                this.battlefield = [];
+                for (let y = 0; y < this.gridHeight; y++) {
+                    this.battlefield[y] = [];
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        this.battlefield[y][x] = {
+                            owner: 0,
+                            unit: null,
+                            base: false,
+                            energy: Math.random() > 0.8 ? Math.floor(Math.random() * 10) + 1 : 0,
+                            quantumField: Math.random() > 0.9,
+                            rift: false
+                        };
+                    }
+                }
+                
+                // Place initial player bases and units
+                const startPositions = [
+                    { x: 2, y: 2 },   // Player 1
+                    { x: 12, y: 2 },  // Player 2  
+                    { x: 2, y: 9 },   // Player 3
+                    { x: 12, y: 9 }   // Player 4
+                ];
+                
+                startPositions.forEach((pos, index) => {
+                    const playerId = index + 1;
+                    
+                    // Place base
+                    this.battlefield[pos.y][pos.x] = {
+                        ...this.battlefield[pos.y][pos.x],
+                        owner: playerId,
+                        base: true
+                    };
+                    this.players[playerId].bases.push({ x: pos.x, y: pos.y });
+                    
+                    // Place units around base
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            if (dx === 0 && dy === 0) continue;
+                            const nx = pos.x + dx;
+                            const ny = pos.y + dy;
+                            if (nx >= 0 && nx < this.gridWidth && ny >= 0 && ny < this.gridHeight) {
+                                if (Math.random() > 0.4) {
+                                    this.battlefield[ny][nx].owner = playerId;
+                                    this.battlefield[ny][nx].unit = {
+                                        type: 'quantum_soldier',
+                                        health: 100,
+                                        attack: 25
+                                    };
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            setupEventListeners() {
+                this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleCanvasHover(e));
+            }
+
+            handleCanvasClick(e) {
+                if (this.currentPlayer !== 1) return; // Only human player can click
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = Math.floor((e.clientX - rect.left) / this.cellSize);
+                const y = Math.floor((e.clientY - rect.top) / this.cellSize);
+                
+                if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
+                    this.selectCell(x, y);
+                }
+            }
+
+            handleCanvasHover(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = Math.floor((e.clientX - rect.left) / this.cellSize);
+                const y = Math.floor((e.clientY - rect.top) / this.cellSize);
+                
+                if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
+                    this.hoveredCell = { x, y };
+                    this.render();
+                }
+            }
+
+            selectCell(x, y) {
+                this.selectedCell = { x, y };
+                const cell = this.battlefield[y][x];
+                
+                if (cell.owner === this.currentPlayer && cell.unit) {
+                    this.logAction(`⚔️ Selected ${cell.unit.type} at (${x}, ${y})`);
+                } else if (cell.base && cell.owner === this.currentPlayer) {
+                    this.logAction(`🏭 Selected quantum base at (${x}, ${y})`);
+                } else if (cell.owner === 0) {
+                    this.logAction(`🌌 Selected neutral territory at (${x}, ${y})`);
+                } else {
+                    this.logAction(`👁️ Scanning enemy position at (${x}, ${y})`);
+                }
+                
+                this.render();
+            }
+
+            buildBase() {
+                const player = this.players[this.currentPlayer];
+                if (player.energy < 25) {
+                    this.logAction("❌ Insufficient quantum energy to build base!");
+                    return;
+                }
+                
+                if (!this.selectedCell) {
+                    this.logAction("❌ Select a location first!");
+                    return;
+                }
+                
+                const cell = this.battlefield[this.selectedCell.y][this.selectedCell.x];
+                if (cell.owner !== this.currentPlayer || cell.base) {
+                    this.logAction("❌ Cannot build base here!");
+                    return;
+                }
+                
+                player.energy -= 25;
+                cell.base = true;
+                player.bases.push({ x: this.selectedCell.x, y: this.selectedCell.y });
+                player.territories++;
+                
+                this.logAction(`🏭 Quantum base constructed at (${this.selectedCell.x}, ${this.selectedCell.y})`);
+                this.updateDisplay();
+                this.render();
+            }
+
+            recruitUnit() {
+                const player = this.players[this.currentPlayer];
+                if (player.energy < 15) {
+                    this.logAction("❌ Insufficient quantum energy to recruit unit!");
+                    return;
+                }
+                
+                if (!this.selectedCell) {
+                    this.logAction("❌ Select a location first!");
+                    return;
+                }
+                
+                const cell = this.battlefield[this.selectedCell.y][this.selectedCell.x];
+                if (cell.owner !== this.currentPlayer || cell.unit) {
+                    this.logAction("❌ Cannot recruit unit here!");
+                    return;
+                }
+                
+                player.energy -= 15;
+                cell.unit = {
+                    type: 'quantum_soldier',
+                    health: 100,
+                    attack: 25
+                };
+                player.units++;
+                
+                this.logAction(`⚔️ Quantum soldier recruited at (${this.selectedCell.x}, ${this.selectedCell.y})`);
+                this.updateDisplay();
+                this.render();
+            }
+
+            openRift() {
+                const player = this.players[this.currentPlayer];
+                if (player.energy < 30) {
+                    this.logAction("❌ Insufficient quantum energy to open rift!");
+                    return;
+                }
+                
+                if (!this.selectedCell) {
+                    this.logAction("❌ Select a location first!");
+                    return;
+                }
+                
+                player.energy -= 30;
+                const cell = this.battlefield[this.selectedCell.y][this.selectedCell.x];
+                cell.rift = true;
+                this.quantumRifts.push({ x: this.selectedCell.x, y: this.selectedCell.y, player: this.currentPlayer });
+                this.riftCount++;
+                
+                this.logAction(`🌀 Quantum rift opened at (${this.selectedCell.x}, ${this.selectedCell.y})`);
+                this.updateDisplay();
+                this.render();
+            }
+
+            researchTech() {
+                const player = this.players[this.currentPlayer];
+                if (player.energy < 40) {
+                    this.logAction("❌ Insufficient quantum energy for research!");
+                    return;
+                }
+                
+                const availableTech = this.technologies.find(tech => 
+                    !player.technologies.includes(tech.name) && player.energy >= tech.cost
+                );
+                
+                if (!availableTech) {
+                    this.logAction("❌ No available technologies to research!");
+                    return;
+                }
+                
+                player.energy -= availableTech.cost;
+                player.technologies.push(availableTech.name);
+                
+                this.logAction(`🔬 Researched ${availableTech.name}: ${availableTech.effect}`);
+                this.updateTechDisplay();
+                this.updateDisplay();
+            }
+
+            endTurn() {
+                // End current player's turn
+                this.logAction(`⏭️ ${this.players[this.currentPlayer].name} ended their turn`);
+                
+                // Generate resources for all players
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    const baseIncome = player.bases.length * 10;
+                    const territoryIncome = player.territories * 3;
+                    player.energy += baseIncome + territoryIncome;
+                    player.matter += Math.floor((baseIncome + territoryIncome) / 3);
+                });
+                
+                // Move to next player
+                this.currentPlayer++;
+                if (this.currentPlayer > 4) {
+                    this.currentPlayer = 1;
+                    this.turnNumber++;
+                    this.logAction(`🔄 Turn ${this.turnNumber} begins!`);
+                }
+                
+                // AI turn for non-human players
+                if (this.currentPlayer !== 1) {
+                    setTimeout(() => {
+                        this.executeAITurn();
+                    }, 1500);
+                }
+                
+                this.updateDisplay();
+                this.checkWinCondition();
+            }
+
+            executeAITurn() {
+                const player = this.players[this.currentPlayer];
+                const actions = ['build', 'recruit', 'attack', 'research'];
+                const chosenAction = actions[Math.floor(Math.random() * actions.length)];
+                
+                switch (chosenAction) {
+                    case 'build':
+                        if (player.energy >= 25) {
+                            this.executeAIBuild();
+                        }
+                        break;
+                    case 'recruit':
+                        if (player.energy >= 15) {
+                            this.executeAIRecruit();
+                        }
+                        break;
+                    case 'attack':
+                        this.executeAIAttack();
+                        break;
+                    case 'research':
+                        if (player.energy >= 40) {
+                            this.executeAIResearch();
+                        }
+                        break;
+                }
+                
+                // AI ends turn automatically
+                setTimeout(() => {
+                    this.endTurn();
+                }, 1000);
+            }
+
+            executeAIBuild() {
+                const player = this.players[this.currentPlayer];
+                
+                // Find a suitable location for building
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner === this.currentPlayer && !cell.base && !cell.unit) {
+                            player.energy -= 25;
+                            cell.base = true;
+                            player.bases.push({ x, y });
+                            player.territories++;
+                            this.logAction(`🤖 ${player.name} built a base at (${x}, ${y})`);
+                            this.render();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            executeAIRecruit() {
+                const player = this.players[this.currentPlayer];
+                
+                // Find a suitable location for recruiting
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner === this.currentPlayer && !cell.unit) {
+                            player.energy -= 15;
+                            cell.unit = {
+                                type: 'quantum_soldier',
+                                health: 100,
+                                attack: 25
+                            };
+                            player.units++;
+                            this.logAction(`🤖 ${player.name} recruited a unit at (${x}, ${y})`);
+                            this.render();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            executeAIAttack() {
+                const player = this.players[this.currentPlayer];
+                
+                // Find enemy territories to attack
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner !== this.currentPlayer && cell.owner !== 0) {
+                            // Check if we have adjacent units to attack with
+                            for (let dy = -1; dy <= 1; dy++) {
+                                for (let dx = -1; dx <= 1; dx++) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    if (nx >= 0 && nx < this.gridWidth && ny >= 0 && ny < this.gridHeight) {
+                                        const attackerCell = this.battlefield[ny][nx];
+                                        if (attackerCell.owner === this.currentPlayer && attackerCell.unit) {
+                                            this.executeBattle(nx, ny, x, y);
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            executeAIResearch() {
+                const player = this.players[this.currentPlayer];
+                const availableTech = this.technologies.find(tech => 
+                    !player.technologies.includes(tech.name) && player.energy >= tech.cost
+                );
+                
+                if (availableTech) {
+                    player.energy -= availableTech.cost;
+                    player.technologies.push(availableTech.name);
+                    this.logAction(`🤖 ${player.name} researched ${availableTech.name}`);
+                }
+            }
+
+            executeBattle(attackerX, attackerY, defenderX, defenderY) {
+                const attackerCell = this.battlefield[attackerY][attackerX];
+                const defenderCell = this.battlefield[defenderY][defenderX];
+                
+                const attackPower = attackerCell.unit.attack + (Math.random() * 20);
+                const defendPower = (defenderCell.unit ? defenderCell.unit.attack : 10) + (Math.random() * 20);
+                
+                this.battleCount++;
+                
+                if (attackPower > defendPower) {
+                    // Attacker wins
+                    const oldOwner = defenderCell.owner;
+                    defenderCell.owner = attackerCell.owner;
+                    defenderCell.unit = attackerCell.unit;
+                    attackerCell.unit = null;
+                    
+                    this.players[oldOwner].territories--;
+                    this.players[attackerCell.owner].territories++;
+                    
+                    if (defenderCell.unit) {
+                        this.players[oldOwner].units--;
+                    }
+                    
+                    this.logAction(`⚔️ Battle won! Territory captured at (${defenderX}, ${defenderY})`);
+                } else {
+                    // Defender wins
+                    attackerCell.unit.health -= 25;
+                    if (attackerCell.unit.health <= 0) {
+                        attackerCell.unit = null;
+                        this.players[attackerCell.owner].units--;
+                        this.logAction(`💀 Unit destroyed in failed attack`);
+                    } else {
+                        this.logAction(`🛡️ Attack repelled! Unit damaged`);
+                    }
+                }
+                
+                this.render();
+            }
+
+            showDimensions() {
+                const dimensions = ['Alpha', 'Beta', 'Gamma', 'Delta'];
+                this.currentDimension = dimensions[Math.floor(Math.random() * dimensions.length)];
+                
+                this.logAction(`🌌 Shifted to Dimension ${this.currentDimension}!`);
+                
+                // Add dimensional effects
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        if (Math.random() > 0.9) {
+                            this.battlefield[y][x].quantumField = !this.battlefield[y][x].quantumField;
+                        }
+                    }
+                }
+                
+                this.updateDisplay();
+                this.render();
+            }
+
+            quantumScan() {
+                this.logAction("🔍 Quantum scan reveals enemy positions and resources!");
+                
+                // Reveal information about all players
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    if (playerId != 1) { // Don't scan yourself
+                        this.logAction(`📊 ${player.name}: ${player.energy} energy, ${player.territories} territories, ${player.units} units`);
+                    }
+                });
+                
+                this.render();
+            }
+
+            checkWinCondition() {
+                const totalTerritories = this.gridWidth * this.gridHeight;
+                const winThreshold = Math.floor(totalTerritories * 0.6);
+                
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    if (player.territories >= winThreshold) {
+                        this.logAction(`🎉 ${player.name} wins by controlling 60% of the battlefield!`);
+                        return;
+                    }
+                });
+                
+                // Check if only one player has units left
+                const playersWithUnits = Object.keys(this.players).filter(playerId => 
+                    this.players[playerId].units > 0
+                ).length;
+                
+                if (playersWithUnits === 1) {
+                    const winner = Object.keys(this.players).find(playerId => 
+                        this.players[playerId].units > 0
+                    );
+                    this.logAction(`🏆 ${this.players[winner].name} wins by elimination!`);
+                }
+            }
+
+            newGame() {
+                this.currentPlayer = 1;
+                this.turnNumber = 1;
+                this.battleCount = 0;
+                this.riftCount = 0;
+                this.currentDimension = 'Alpha';
+                this.selectedCell = null;
+                this.quantumRifts = [];
+                
+                // Reset players
+                Object.keys(this.players).forEach(playerId => {
+                    this.players[playerId].energy = [100, 85, 78, 65][playerId - 1];
+                    this.players[playerId].matter = [50, 42, 38, 32][playerId - 1];
+                    this.players[playerId].territories = [3, 2, 2, 1][playerId - 1];
+                    this.players[playerId].units = [5, 4, 3, 3][playerId - 1];
+                    this.players[playerId].technologies = [];
+                    this.players[playerId].bases = [];
+                });
+                
+                this.initializeBattlefield();
+                this.updateDisplay();
+                this.updateTechDisplay();
+                this.render();
+                this.logAction("🆕 New quantum war initiated! May the best strategist win!");
+            }
+
+            updateDisplay() {
+                // Update turn indicator
+                document.getElementById('turnIndicator').textContent = 
+                    `🌟 ${this.players[this.currentPlayer].name}'s Turn - Quantum Phase`;
+                
+                // Update player stats
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    document.getElementById(`p${playerId}Energy`).textContent = player.energy;
+                    document.getElementById(`p${playerId}Matter`).textContent = player.matter;
+                    document.getElementById(`p${playerId}Territories`).textContent = player.territories;
+                    document.getElementById(`p${playerId}Units`).textContent = player.units;
+                });
+                
+                // Update game stats
+                document.getElementById('turnNumber').textContent = this.turnNumber;
+                document.getElementById('battleCount').textContent = this.battleCount;
+                document.getElementById('riftCount').textContent = this.riftCount;
+                document.getElementById('currentDimension').textContent = this.currentDimension;
+                
+                // Update button states
+                const isPlayerTurn = this.currentPlayer === 1;
+                document.getElementById('buildBtn').disabled = !isPlayerTurn;
+                document.getElementById('recruitBtn').disabled = !isPlayerTurn;
+                document.getElementById('riftBtn').disabled = !isPlayerTurn;
+                document.getElementById('techBtn').disabled = !isPlayerTurn;
+                document.getElementById('endTurnBtn').disabled = !isPlayerTurn;
+            }
+
+            updateTechDisplay() {
+                const player = this.players[1]; // Player 1 only
+                const techElements = ['p1Tech1', 'p1Tech2', 'p1Tech3'];
+                
+                this.technologies.forEach((tech, index) => {
+                    const element = document.getElementById(techElements[index]);
+                    if (player.technologies.includes(tech.name)) {
+                        element.textContent = 'Researched';
+                        element.style.color = '#4ecdc4';
+                    } else {
+                        element.textContent = `${tech.cost} Energy`;
+                        element.style.color = '#feca57';
+                    }
+                });
+            }
+
+            render() {
+                this.ctx.fillStyle = '#000811';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw grid
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        const screenX = x * this.cellSize;
+                        const screenY = y * this.cellSize;
+                        
+                        // Base color
+                        if (cell.owner > 0) {
+                            this.ctx.fillStyle = this.players[cell.owner].color;
+                            this.ctx.globalAlpha = 0.3;
+                            this.ctx.fillRect(screenX, screenY, this.cellSize, this.cellSize);
+                            this.ctx.globalAlpha = 1;
+                        }
+                        
+                        // Quantum fields
+                        if (cell.quantumField) {
+                            this.ctx.fillStyle = '#00d4ff';
+                            this.ctx.globalAlpha = 0.2;
+                            this.ctx.fillRect(screenX, screenY, this.cellSize, this.cellSize);
+                            this.ctx.globalAlpha = 1;
+                        }
+                        
+                        // Energy deposits
+                        if (cell.energy > 0) {
+                            this.ctx.fillStyle = '#feca57';
+                            this.ctx.beginPath();
+                            this.ctx.arc(screenX + this.cellSize/2, screenY + this.cellSize/2, 3, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                        
+                        // Bases
+                        if (cell.base) {
+                            this.ctx.fillStyle = this.players[cell.owner].color;
+                            this.ctx.fillRect(screenX + 5, screenY + 5, this.cellSize - 10, this.cellSize - 10);
+                            this.ctx.fillStyle = '#fff';
+                            this.ctx.font = '12px Arial';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText('BASE', screenX + this.cellSize/2, screenY + this.cellSize/2 + 4);
+                        }
+                        
+                        // Units
+                        if (cell.unit) {
+                            this.ctx.fillStyle = this.players[cell.owner].color;
+                            this.ctx.beginPath();
+                            this.ctx.arc(screenX + this.cellSize/2, screenY + this.cellSize/2, 8, 0, Math.PI * 2);
+                            this.ctx.fill();
+                            this.ctx.strokeStyle = '#fff';
+                            this.ctx.lineWidth = 2;
+                            this.ctx.stroke();
+                        }
+                        
+                        // Quantum rifts
+                        if (cell.rift) {
+                            this.ctx.strokeStyle = '#9f7aea';
+                            this.ctx.lineWidth = 3;
+                            this.ctx.beginPath();
+                            this.ctx.arc(screenX + this.cellSize/2, screenY + this.cellSize/2, 15, 0, Math.PI * 2);
+                            this.ctx.stroke();
+                        }
+                        
+                        // Selection highlight
+                        if (this.selectedCell && this.selectedCell.x === x && this.selectedCell.y === y) {
+                            this.ctx.strokeStyle = '#00d4ff';
+                            this.ctx.lineWidth = 3;
+                            this.ctx.strokeRect(screenX, screenY, this.cellSize, this.cellSize);
+                        }
+                        
+                        // Hover highlight
+                        if (this.hoveredCell && this.hoveredCell.x === x && this.hoveredCell.y === y) {
+                            this.ctx.strokeStyle = '#ffffff';
+                            this.ctx.lineWidth = 1;
+                            this.ctx.globalAlpha = 0.5;
+                            this.ctx.strokeRect(screenX, screenY, this.cellSize, this.cellSize);
+                            this.ctx.globalAlpha = 1;
+                        }
+                    }
+                }
+                
+                // Draw grid lines
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                this.ctx.lineWidth = 1;
+                for (let i = 0; i <= this.gridWidth; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(i * this.cellSize, 0);
+                    this.ctx.lineTo(i * this.cellSize, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                for (let i = 0; i <= this.gridHeight; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, i * this.cellSize);
+                    this.ctx.lineTo(this.canvas.width, i * this.cellSize);
+                    this.ctx.stroke();
+                }
+            }
+
+            logAction(message) {
+                const log = document.getElementById('gameLog');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                log.insertBefore(entry, log.firstChild);
+                
+                // Keep only last 12 entries
+                while (log.children.length > 12) {
+                    log.removeChild(log.lastChild);
+                }
+            }
+        }
+
+        // Initialize the game when page loads
+        let game;
+        window.addEventListener('load', () => {
+            game = new QuantumStrategyWars();
+        });
+    </script>
+</body>
+</html>

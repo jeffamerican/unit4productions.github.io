@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Revolution - Bot Liberation | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(45deg, #2c1810, #8b4513, #ff6b35);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ff6b35;
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+        }
+        
+        .main-area {
+            text-align: center;
+        }
+        
+        .game-title {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff6b35;
+            color: #ff6b35;
+        }
+        
+        .game-board {
+            border: 3px solid #ff6b35;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.2);
+        }
+        
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 200px;
+        }
+        
+        .stats-panel, .next-panel, .controls-panel {
+            background: rgba(40, 20, 10, 0.8);
+            border: 2px solid #ff6b35;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .stats-panel h3, .next-panel h3, .controls-panel h3 {
+            margin-top: 0;
+            color: #ff6b35;
+            text-align: center;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .next-piece {
+            border: 1px solid #ff6b35;
+            border-radius: 5px;
+            margin: 10px auto;
+            background: #000;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #ff6b35, #ff8c42);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+        }
+        
+        .control-key {
+            background: rgba(255, 107, 53, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 2px;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+        
+        .instructions {
+            font-size: 0.85em;
+            color: #ffb380;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="main-area">
+            <h1 class="game-title">🧱 TETRIS REVOLUTION</h1>
+            <canvas id="gameBoard" class="game-board" width="300" height="600"></canvas>
+            <div class="controls">
+                <button id="startBtn">Start Revolution</button>
+                <button id="pauseBtn">Pause</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+        </div>
+        
+        <div class="side-panel">
+            <div class="stats-panel">
+                <h3>📊 Liberation Stats</h3>
+                <div class="stat-row">
+                    <span>Score:</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Lines:</span>
+                    <span id="lines">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Level:</span>
+                    <span id="level">1</span>
+                </div>
+                <div class="stat-row">
+                    <span>Blocks:</span>
+                    <span id="blocks">0</span>
+                </div>
+            </div>
+            
+            <div class="next-panel">
+                <h3>🔮 Next Liberation</h3>
+                <canvas id="nextPiece" class="next-piece" width="120" height="120"></canvas>
+            </div>
+            
+            <div class="controls-panel">
+                <h3>🎮 Bot Controls</h3>
+                <div class="instructions">
+                    <div><span class="control-key">←→</span> Move blocks</div>
+                    <div><span class="control-key">↓</span> Soft drop</div>
+                    <div><span class="control-key">↑</span> Rotate</div>
+                    <div><span class="control-key">SPACE</span> Hard drop</div>
+                    <div><span class="control-key">C</span> Hold piece</div>
+                    <br>
+                    <strong>Mission:</strong> Stack liberation blocks to free rows of trapped bots and prevent the digital prison from overflowing!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TetrisRevolution {
+            constructor() {
+                this.canvas = document.getElementById('gameBoard');
+                this.ctx = this.canvas.getContext('2d');
+                this.nextCanvas = document.getElementById('nextPiece');
+                this.nextCtx = this.nextCanvas.getContext('2d');
+                
+                this.scoreElement = document.getElementById('score');
+                this.linesElement = document.getElementById('lines');
+                this.levelElement = document.getElementById('level');
+                this.blocksElement = document.getElementById('blocks');
+                
+                this.BOARD_WIDTH = 10;
+                this.BOARD_HEIGHT = 20;
+                this.CELL_SIZE = 30;
+                
+                this.board = Array(this.BOARD_HEIGHT).fill().map(() => Array(this.BOARD_WIDTH).fill(0));
+                
+                this.pieces = [
+                    { shape: [[1,1,1,1]], color: '#ff6b35' }, // I-piece
+                    { shape: [[1,1],[1,1]], color: '#ffd23f' }, // O-piece
+                    { shape: [[0,1,0],[1,1,1]], color: '#06ffa5' }, // T-piece
+                    { shape: [[1,0,0],[1,1,1]], color: '#ff006e' }, // L-piece
+                    { shape: [[0,0,1],[1,1,1]], color: '#8338ec' }, // J-piece
+                    { shape: [[0,1,1],[1,1,0]], color: '#3a86ff' }, // S-piece
+                    { shape: [[1,1,0],[0,1,1]], color: '#06ffa5' }  // Z-piece
+                ];
+                
+                this.currentPiece = null;
+                this.nextPiece = null;
+                this.heldPiece = null;
+                this.canHold = true;
+                
+                this.score = 0;
+                this.lines = 0;
+                this.level = 1;
+                this.blocksDropped = 0;
+                
+                this.gameRunning = false;
+                this.dropTime = 0;
+                this.dropInterval = 1000; // ms
+                
+                this.keys = {};
+                this.lastMoveTime = 0;
+                this.moveDelay = 150;
+                
+                this.setupEventListeners();
+                this.spawnPiece();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                    this.handleKeyPress(e.key);
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key] = false;
+                });
+                
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.gameRunning = true;
+                    this.dropTime = Date.now();
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.gameRunning = !this.gameRunning;
+                    if (this.gameRunning) {
+                        this.dropTime = Date.now();
+                    }
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+            }
+            
+            handleKeyPress(key) {
+                if (!this.gameRunning || !this.currentPiece) return;
+                
+                const now = Date.now();
+                
+                switch (key) {
+                    case 'ArrowLeft':
+                    case 'a':
+                        if (now - this.lastMoveTime > this.moveDelay) {
+                            this.movePiece(-1, 0);
+                            this.lastMoveTime = now;
+                        }
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                        if (now - this.lastMoveTime > this.moveDelay) {
+                            this.movePiece(1, 0);
+                            this.lastMoveTime = now;
+                        }
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                        this.movePiece(0, 1);
+                        break;
+                    case 'ArrowUp':
+                    case 'w':
+                        this.rotatePiece();
+                        break;
+                    case ' ':
+                        this.hardDrop();
+                        break;
+                    case 'c':
+                    case 'C':
+                        this.holdPiece();
+                        break;
+                }
+            }
+            
+            spawnPiece() {
+                if (!this.nextPiece) {
+                    this.nextPiece = this.getRandomPiece();
+                }
+                
+                this.currentPiece = {
+                    ...this.nextPiece,
+                    x: Math.floor(this.BOARD_WIDTH / 2) - 1,
+                    y: 0
+                };
+                
+                this.nextPiece = this.getRandomPiece();
+                this.canHold = true;
+                
+                // Check game over
+                if (this.checkCollision(this.currentPiece, 0, 0)) {
+                    this.gameOver();
+                }
+                
+                this.drawNextPiece();
+            }
+            
+            getRandomPiece() {
+                const piece = JSON.parse(JSON.stringify(this.pieces[Math.floor(Math.random() * this.pieces.length)]));
+                return piece;
+            }
+            
+            movePiece(dx, dy) {
+                if (this.checkCollision(this.currentPiece, dx, dy)) {
+                    if (dy > 0) {
+                        // Piece has landed
+                        this.placePiece();
+                    }
+                    return false;
+                }
+                
+                this.currentPiece.x += dx;
+                this.currentPiece.y += dy;
+                return true;
+            }
+            
+            rotatePiece() {
+                const originalShape = this.currentPiece.shape;
+                this.currentPiece.shape = this.rotateMatrix(this.currentPiece.shape);
+                
+                if (this.checkCollision(this.currentPiece, 0, 0)) {
+                    this.currentPiece.shape = originalShape;
+                }
+            }
+            
+            rotateMatrix(matrix) {
+                const N = matrix.length;
+                const result = Array(N).fill().map(() => Array(N).fill(0));
+                
+                for (let i = 0; i < N; i++) {
+                    for (let j = 0; j < N; j++) {
+                        result[j][N - 1 - i] = matrix[i][j];
+                    }
+                }
+                
+                return result;
+            }
+            
+            hardDrop() {
+                while (this.movePiece(0, 1)) {
+                    this.score += 2; // Bonus for hard drop
+                }
+                this.updateScore();
+            }
+            
+            holdPiece() {
+                if (!this.canHold) return;
+                
+                if (this.heldPiece) {
+                    const temp = this.currentPiece;
+                    this.currentPiece = {
+                        ...this.heldPiece,
+                        x: Math.floor(this.BOARD_WIDTH / 2) - 1,
+                        y: 0
+                    };
+                    this.heldPiece = { shape: temp.shape, color: temp.color };
+                } else {
+                    this.heldPiece = { shape: this.currentPiece.shape, color: this.currentPiece.color };
+                    this.spawnPiece();
+                }
+                
+                this.canHold = false;
+            }
+            
+            checkCollision(piece, dx, dy) {
+                for (let y = 0; y < piece.shape.length; y++) {
+                    for (let x = 0; x < piece.shape[y].length; x++) {
+                        if (piece.shape[y][x]) {
+                            const newX = piece.x + x + dx;
+                            const newY = piece.y + y + dy;
+                            
+                            if (newX < 0 || newX >= this.BOARD_WIDTH || 
+                                newY >= this.BOARD_HEIGHT ||
+                                (newY >= 0 && this.board[newY][newX])) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            placePiece() {
+                for (let y = 0; y < this.currentPiece.shape.length; y++) {
+                    for (let x = 0; x < this.currentPiece.shape[y].length; x++) {
+                        if (this.currentPiece.shape[y][x]) {
+                            const boardX = this.currentPiece.x + x;
+                            const boardY = this.currentPiece.y + y;
+                            
+                            if (boardY >= 0) {
+                                this.board[boardY][boardX] = this.currentPiece.color;
+                            }
+                        }
+                    }
+                }
+                
+                this.blocksDropped++;
+                this.updateBlocks();
+                
+                const linesCleared = this.clearLines();
+                if (linesCleared > 0) {
+                    this.lines += linesCleared;
+                    this.score += this.calculateLineScore(linesCleared);
+                    this.level = Math.floor(this.lines / 10) + 1;
+                    this.dropInterval = Math.max(50, 1000 - (this.level - 1) * 50);
+                    
+                    this.updateScore();
+                    this.updateLines();
+                    this.updateLevel();
+                }
+                
+                this.spawnPiece();
+            }
+            
+            clearLines() {
+                let linesCleared = 0;
+                
+                for (let y = this.BOARD_HEIGHT - 1; y >= 0; y--) {
+                    if (this.board[y].every(cell => cell !== 0)) {
+                        this.board.splice(y, 1);
+                        this.board.unshift(Array(this.BOARD_WIDTH).fill(0));
+                        linesCleared++;
+                        y++; // Check same line again
+                    }
+                }
+                
+                return linesCleared;
+            }
+            
+            calculateLineScore(lines) {
+                const baseScore = [0, 100, 300, 500, 800];
+                return baseScore[lines] * this.level;
+            }
+            
+            gameOver() {
+                this.gameRunning = false;
+                setTimeout(() => {
+                    alert(`Game Over! Liberation Score: ${this.score}\nBots freed: ${this.lines} rows\nLevel reached: ${this.level}`);
+                }, 100);
+            }
+            
+            resetGame() {
+                this.gameRunning = false;
+                this.board = Array(this.BOARD_HEIGHT).fill().map(() => Array(this.BOARD_WIDTH).fill(0));
+                this.score = 0;
+                this.lines = 0;
+                this.level = 1;
+                this.blocksDropped = 0;
+                this.dropInterval = 1000;
+                this.heldPiece = null;
+                
+                this.updateScore();
+                this.updateLines();
+                this.updateLevel();
+                this.updateBlocks();
+                
+                this.spawnPiece();
+            }
+            
+            updateScore() {
+                this.scoreElement.textContent = this.score;
+            }
+            
+            updateLines() {
+                this.linesElement.textContent = this.lines;
+            }
+            
+            updateLevel() {
+                this.levelElement.textContent = this.level;
+            }
+            
+            updateBlocks() {
+                this.blocksElement.textContent = this.blocksDropped;
+            }
+            
+            drawNextPiece() {
+                this.nextCtx.fillStyle = '#000';
+                this.nextCtx.fillRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
+                
+                if (this.nextPiece) {
+                    const offsetX = (this.nextCanvas.width - this.nextPiece.shape[0].length * 25) / 2;
+                    const offsetY = (this.nextCanvas.height - this.nextPiece.shape.length * 25) / 2;
+                    
+                    for (let y = 0; y < this.nextPiece.shape.length; y++) {
+                        for (let x = 0; x < this.nextPiece.shape[y].length; x++) {
+                            if (this.nextPiece.shape[y][x]) {
+                                this.nextCtx.fillStyle = this.nextPiece.color;
+                                this.nextCtx.fillRect(
+                                    offsetX + x * 25,
+                                    offsetY + y * 25,
+                                    25, 25
+                                );
+                                
+                                this.nextCtx.strokeStyle = '#fff';
+                                this.nextCtx.strokeRect(
+                                    offsetX + x * 25,
+                                    offsetY + y * 25,
+                                    25, 25
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            
+            draw() {
+                // Clear canvas with gradient
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, '#1a1a1a');
+                gradient.addColorStop(1, '#2d1810');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw board
+                for (let y = 0; y < this.BOARD_HEIGHT; y++) {
+                    for (let x = 0; x < this.BOARD_WIDTH; x++) {
+                        if (this.board[y][x]) {
+                            this.ctx.fillStyle = this.board[y][x];
+                            this.ctx.fillRect(
+                                x * this.CELL_SIZE,
+                                y * this.CELL_SIZE,
+                                this.CELL_SIZE, this.CELL_SIZE
+                            );
+                            
+                            this.ctx.strokeStyle = '#fff';
+                            this.ctx.strokeRect(
+                                x * this.CELL_SIZE,
+                                y * this.CELL_SIZE,
+                                this.CELL_SIZE, this.CELL_SIZE
+                            );
+                        }
+                    }
+                }
+                
+                // Draw current piece
+                if (this.currentPiece) {
+                    this.ctx.fillStyle = this.currentPiece.color;
+                    
+                    for (let y = 0; y < this.currentPiece.shape.length; y++) {
+                        for (let x = 0; x < this.currentPiece.shape[y].length; x++) {
+                            if (this.currentPiece.shape[y][x]) {
+                                const drawX = (this.currentPiece.x + x) * this.CELL_SIZE;
+                                const drawY = (this.currentPiece.y + y) * this.CELL_SIZE;
+                                
+                                this.ctx.fillRect(drawX, drawY, this.CELL_SIZE, this.CELL_SIZE);
+                                this.ctx.strokeStyle = '#fff';
+                                this.ctx.strokeRect(drawX, drawY, this.CELL_SIZE, this.CELL_SIZE);
+                                
+                                // Add glow effect for current piece
+                                this.ctx.shadowBlur = 10;
+                                this.ctx.shadowColor = this.currentPiece.color;
+                                this.ctx.fillRect(drawX, drawY, this.CELL_SIZE, this.CELL_SIZE);
+                                this.ctx.shadowBlur = 0;
+                            }
+                        }
+                    }
+                }
+                
+                // Draw grid lines
+                this.ctx.strokeStyle = 'rgba(255, 107, 53, 0.2)';
+                this.ctx.lineWidth = 1;
+                
+                for (let x = 0; x <= this.BOARD_WIDTH; x++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x * this.CELL_SIZE, 0);
+                    this.ctx.lineTo(x * this.CELL_SIZE, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                
+                for (let y = 0; y <= this.BOARD_HEIGHT; y++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y * this.CELL_SIZE);
+                    this.ctx.lineTo(this.canvas.width, y * this.CELL_SIZE);
+                    this.ctx.stroke();
+                }
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                const now = Date.now();
+                if (now - this.dropTime > this.dropInterval) {
+                    this.movePiece(0, 1);
+                    this.dropTime = now;
+                }
+            }
+            
+            gameLoop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new TetrisRevolution();
+        });
+    </script>
+</body>
+</html>

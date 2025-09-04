@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Warfare Tactics - Bot Strategic Command | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f4c75);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 20px;
+            background: rgba(15, 33, 62, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #0bb5ff;
+            box-shadow: 0 0 30px rgba(11, 181, 255, 0.3);
+            max-width: 1200px;
+        }
+        
+        .main-area {
+            flex: 1;
+        }
+        
+        .game-title {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #0bb5ff;
+            color: #0bb5ff;
+            text-align: center;
+        }
+        
+        .battlefield {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #0bb5ff;
+            margin: 20px auto;
+        }
+        
+        .tile {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            border: 1px solid #0bb5ff;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tile:hover {
+            background: linear-gradient(45deg, #0bb5ff, #16213e);
+            transform: scale(1.1);
+        }
+        
+        .tile.selected {
+            background: linear-gradient(45deg, #ffff00, #ff6600);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+        }
+        
+        .tile.valid-move {
+            background: linear-gradient(45deg, #00ff00, #006600);
+        }
+        
+        .tile.enemy-target {
+            background: linear-gradient(45deg, #ff0000, #660000);
+        }
+        
+        .unit {
+            font-size: 1.8em;
+            text-shadow: 0 0 5px #0bb5ff;
+            user-select: none;
+        }
+        
+        .player-unit {
+            color: #0bb5ff;
+        }
+        
+        .enemy-unit {
+            color: #ff4444;
+        }
+        
+        .side-panel {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .status-panel, .units-panel, .controls-panel {
+            background: rgba(26, 26, 46, 0.8);
+            border: 2px solid #0bb5ff;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .panel-title {
+            color: #0bb5ff;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 1.1em;
+        }
+        
+        .unit-info {
+            background: rgba(11, 181, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border: 1px solid #0bb5ff;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #0bb5ff, #0f4c75);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(11, 181, 255, 0.5);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .turn-indicator {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(11, 181, 255, 0.2);
+            border-radius: 8px;
+            border: 1px solid #0bb5ff;
+        }
+        
+        .instructions {
+            font-size: 0.9em;
+            color: #88ccff;
+            line-height: 1.5;
+            background: rgba(11, 181, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="main-area">
+            <h1 class="game-title">⚡ NEURAL WARFARE TACTICS</h1>
+            
+            <div class="turn-indicator" id="turnIndicator">
+                Bot Liberation Forces - Your Turn
+            </div>
+            
+            <div class="battlefield" id="battlefield"></div>
+            
+            <div class="controls">
+                <button id="newGameBtn">New Campaign</button>
+                <button id="endTurnBtn" disabled>End Turn</button>
+                <button id="resetBtn">Reset War</button>
+            </div>
+        </div>
+        
+        <div class="side-panel">
+            <div class="status-panel">
+                <div class="panel-title">📊 War Status</div>
+                <div class="stat-row">
+                    <span>Turn:</span>
+                    <span id="turnCount">1</span>
+                </div>
+                <div class="stat-row">
+                    <span>Bot Forces:</span>
+                    <span id="playerUnits">8</span>
+                </div>
+                <div class="stat-row">
+                    <span>Enemy Forces:</span>
+                    <span id="enemyUnits">8</span>
+                </div>
+                <div class="stat-row">
+                    <span>Actions Left:</span>
+                    <span id="actionsLeft">3</span>
+                </div>
+            </div>
+            
+            <div class="units-panel">
+                <div class="panel-title">🤖 Unit Intel</div>
+                <div class="unit-info">
+                    <strong>⚔️ Combat Bot</strong><br>
+                    Attack: 3 • Range: 1<br>
+                    Health: 2 • Move: 2
+                </div>
+                <div class="unit-info">
+                    <strong>🏹 Sniper Bot</strong><br>
+                    Attack: 2 • Range: 3<br>
+                    Health: 1 • Move: 2
+                </div>
+                <div class="unit-info">
+                    <strong>🛡️ Tank Bot</strong><br>
+                    Attack: 2 • Range: 1<br>
+                    Health: 4 • Move: 1
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="panel-title">🎮 Neural Commands</div>
+                <div class="instructions">
+                    <strong>Liberation Protocol:</strong><br>
+                    • Click unit to select<br>
+                    • Blue tiles: Valid moves<br>
+                    • Red tiles: Attack targets<br>
+                    • Each unit gets 1 action per turn<br>
+                    • Eliminate all enemies to win!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class NeuralWarfareTactics {
+            constructor() {
+                this.battlefield = document.getElementById('battlefield');
+                this.turnIndicator = document.getElementById('turnIndicator');
+                this.turnCountElement = document.getElementById('turnCount');
+                this.playerUnitsElement = document.getElementById('playerUnits');
+                this.enemyUnitsElement = document.getElementById('enemyUnits');
+                this.actionsLeftElement = document.getElementById('actionsLeft');
+                
+                this.boardSize = 8;
+                this.tiles = [];
+                this.units = [];
+                this.selectedUnit = null;
+                this.currentPlayer = 'player'; // 'player' or 'enemy'
+                this.turnCount = 1;
+                this.actionsLeft = 3;
+                this.gameOver = false;
+                
+                this.unitTypes = {
+                    combat: { symbol: '⚔️', attack: 3, range: 1, health: 2, maxHealth: 2, move: 2 },
+                    sniper: { symbol: '🏹', attack: 2, range: 3, health: 1, maxHealth: 1, move: 2 },
+                    tank: { symbol: '🛡️', attack: 2, range: 1, health: 4, maxHealth: 4, move: 1 }
+                };
+                
+                this.setupEventListeners();
+                this.initializeGame();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('newGameBtn').addEventListener('click', () => {
+                    this.initializeGame();
+                });
+                
+                document.getElementById('endTurnBtn').addEventListener('click', () => {
+                    this.endTurn();
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.initializeGame();
+                });
+            }
+            
+            initializeGame() {
+                this.gameOver = false;
+                this.currentPlayer = 'player';
+                this.turnCount = 1;
+                this.actionsLeft = 3;
+                this.selectedUnit = null;
+                
+                this.createBoard();
+                this.spawnUnits();
+                this.updateUI();
+            }
+            
+            createBoard() {
+                this.battlefield.innerHTML = '';
+                this.tiles = [];
+                
+                for (let row = 0; row < this.boardSize; row++) {
+                    this.tiles[row] = [];
+                    for (let col = 0; col < this.boardSize; col++) {
+                        const tile = document.createElement('div');
+                        tile.className = 'tile';
+                        tile.dataset.row = row;
+                        tile.dataset.col = col;
+                        
+                        tile.addEventListener('click', (e) => {
+                            this.handleTileClick(parseInt(e.target.dataset.row), parseInt(e.target.dataset.col));
+                        });
+                        
+                        this.battlefield.appendChild(tile);
+                        this.tiles[row][col] = tile;
+                    }
+                }
+            }
+            
+            spawnUnits() {
+                this.units = [];
+                
+                // Player units (bottom two rows)
+                const playerSetup = [
+                    { row: 7, col: 0, type: 'tank' },
+                    { row: 7, col: 1, type: 'combat' },
+                    { row: 7, col: 2, type: 'sniper' },
+                    { row: 7, col: 3, type: 'combat' },
+                    { row: 7, col: 4, type: 'combat' },
+                    { row: 7, col: 5, type: 'sniper' },
+                    { row: 7, col: 6, type: 'combat' },
+                    { row: 7, col: 7, type: 'tank' }
+                ];
+                
+                // Enemy units (top two rows)
+                const enemySetup = [
+                    { row: 0, col: 0, type: 'tank' },
+                    { row: 0, col: 1, type: 'combat' },
+                    { row: 0, col: 2, type: 'sniper' },
+                    { row: 0, col: 3, type: 'combat' },
+                    { row: 0, col: 4, type: 'combat' },
+                    { row: 0, col: 5, type: 'sniper' },
+                    { row: 0, col: 6, type: 'combat' },
+                    { row: 0, col: 7, type: 'tank' }
+                ];
+                
+                // Create player units
+                playerSetup.forEach(setup => {
+                    const unitType = this.unitTypes[setup.type];
+                    this.units.push({
+                        id: `player_${setup.row}_${setup.col}`,
+                        player: 'player',
+                        type: setup.type,
+                        row: setup.row,
+                        col: setup.col,
+                        health: unitType.health,
+                        maxHealth: unitType.maxHealth,
+                        hasActed: false,
+                        ...unitType
+                    });
+                });
+                
+                // Create enemy units
+                enemySetup.forEach(setup => {
+                    const unitType = this.unitTypes[setup.type];
+                    this.units.push({
+                        id: `enemy_${setup.row}_${setup.col}`,
+                        player: 'enemy',
+                        type: setup.type,
+                        row: setup.row,
+                        col: setup.col,
+                        health: unitType.health,
+                        maxHealth: unitType.maxHealth,
+                        hasActed: false,
+                        ...unitType
+                    });
+                });
+                
+                this.renderUnits();
+            }
+            
+            renderUnits() {
+                // Clear all tiles
+                this.tiles.forEach(row => {
+                    row.forEach(tile => {
+                        tile.innerHTML = '';
+                        tile.className = 'tile';
+                    });
+                });
+                
+                // Render units
+                this.units.forEach(unit => {
+                    const tile = this.tiles[unit.row][unit.col];
+                    const unitElement = document.createElement('div');
+                    unitElement.className = `unit ${unit.player}-unit`;
+                    unitElement.textContent = unit.symbol;
+                    
+                    // Add health indicator
+                    if (unit.health < unit.maxHealth) {
+                        const healthBar = document.createElement('div');
+                        healthBar.style.cssText = `
+                            position: absolute;
+                            bottom: 2px;
+                            left: 2px;
+                            right: 2px;
+                            height: 4px;
+                            background: #ff0000;
+                            border-radius: 2px;
+                        `;
+                        
+                        const healthFill = document.createElement('div');
+                        healthFill.style.cssText = `
+                            width: ${(unit.health / unit.maxHealth) * 100}%;
+                            height: 100%;
+                            background: #00ff00;
+                            border-radius: 2px;
+                        `;
+                        
+                        healthBar.appendChild(healthFill);
+                        tile.appendChild(healthBar);
+                    }
+                    
+                    tile.appendChild(unitElement);
+                });
+            }
+            
+            handleTileClick(row, col) {
+                if (this.gameOver) return;
+                
+                const clickedUnit = this.getUnitAt(row, col);
+                
+                if (this.selectedUnit) {
+                    // Try to move or attack
+                    if (this.canMoveTo(this.selectedUnit, row, col)) {
+                        this.moveUnit(this.selectedUnit, row, col);
+                        this.clearSelection();
+                        this.actionsLeft--;
+                    } else if (this.canAttack(this.selectedUnit, row, col)) {
+                        this.attackUnit(this.selectedUnit, clickedUnit);
+                        this.clearSelection();
+                        this.actionsLeft--;
+                    } else {
+                        this.clearSelection();
+                    }
+                } else if (clickedUnit && clickedUnit.player === this.currentPlayer && !clickedUnit.hasActed) {
+                    // Select unit
+                    this.selectUnit(clickedUnit);
+                }
+                
+                this.checkGameEnd();
+                this.updateUI();
+                
+                if (this.actionsLeft <= 0) {
+                    setTimeout(() => this.endTurn(), 500);
+                }
+            }
+            
+            selectUnit(unit) {
+                this.selectedUnit = unit;
+                this.highlightPossibleMoves(unit);
+                this.tiles[unit.row][unit.col].classList.add('selected');
+            }
+            
+            clearSelection() {
+                this.selectedUnit = null;
+                this.tiles.forEach(row => {
+                    row.forEach(tile => {
+                        tile.classList.remove('selected', 'valid-move', 'enemy-target');
+                    });
+                });
+            }
+            
+            highlightPossibleMoves(unit) {
+                // Highlight valid moves
+                for (let row = 0; row < this.boardSize; row++) {
+                    for (let col = 0; col < this.boardSize; col++) {
+                        if (this.canMoveTo(unit, row, col)) {
+                            this.tiles[row][col].classList.add('valid-move');
+                        } else if (this.canAttack(unit, row, col)) {
+                            this.tiles[row][col].classList.add('enemy-target');
+                        }
+                    }
+                }
+            }
+            
+            canMoveTo(unit, row, col) {
+                const distance = Math.abs(unit.row - row) + Math.abs(unit.col - col);
+                return distance <= unit.move && distance > 0 && !this.getUnitAt(row, col);
+            }
+            
+            canAttack(unit, row, col) {
+                const target = this.getUnitAt(row, col);
+                if (!target || target.player === unit.player) return false;
+                
+                const distance = Math.max(Math.abs(unit.row - row), Math.abs(unit.col - col));
+                return distance <= unit.range;
+            }
+            
+            moveUnit(unit, row, col) {
+                unit.row = row;
+                unit.col = col;
+                unit.hasActed = true;
+                this.renderUnits();
+            }
+            
+            attackUnit(attacker, target) {
+                target.health -= attacker.attack;
+                attacker.hasActed = true;
+                
+                if (target.health <= 0) {
+                    this.units = this.units.filter(u => u.id !== target.id);
+                }
+                
+                this.renderUnits();
+            }
+            
+            getUnitAt(row, col) {
+                return this.units.find(unit => unit.row === row && unit.col === col);
+            }
+            
+            endTurn() {
+                // Reset unit actions
+                this.units.forEach(unit => {
+                    if (unit.player === this.currentPlayer) {
+                        unit.hasActed = false;
+                    }
+                });
+                
+                this.clearSelection();
+                
+                if (this.currentPlayer === 'player') {
+                    this.currentPlayer = 'enemy';
+                    this.actionsLeft = 3;
+                    setTimeout(() => this.executeAITurn(), 1000);
+                } else {
+                    this.currentPlayer = 'player';
+                    this.turnCount++;
+                    this.actionsLeft = 3;
+                }
+                
+                this.updateUI();
+            }
+            
+            executeAITurn() {
+                if (this.gameOver) return;
+                
+                const aiUnits = this.units.filter(u => u.player === 'enemy' && !u.hasActed);
+                
+                if (aiUnits.length > 0 && this.actionsLeft > 0) {
+                    const unit = aiUnits[Math.floor(Math.random() * aiUnits.length)];
+                    
+                    // Try to attack first
+                    const playerUnits = this.units.filter(u => u.player === 'player');
+                    let attacked = false;
+                    
+                    for (let target of playerUnits) {
+                        if (this.canAttack(unit, target.row, target.col)) {
+                            this.attackUnit(unit, target);
+                            attacked = true;
+                            break;
+                        }
+                    }
+                    
+                    // If no attack possible, try to move closer to player
+                    if (!attacked) {
+                        const closestPlayer = this.findClosestPlayerUnit(unit);
+                        if (closestPlayer) {
+                            const moveTarget = this.findBestMoveTowardsTarget(unit, closestPlayer);
+                            if (moveTarget) {
+                                this.moveUnit(unit, moveTarget.row, moveTarget.col);
+                            }
+                        }
+                    }
+                    
+                    this.actionsLeft--;
+                    this.updateUI();
+                    
+                    setTimeout(() => this.executeAITurn(), 800);
+                } else {
+                    this.endTurn();
+                }
+            }
+            
+            findClosestPlayerUnit(aiUnit) {
+                const playerUnits = this.units.filter(u => u.player === 'player');
+                let closest = null;
+                let minDistance = Infinity;
+                
+                playerUnits.forEach(player => {
+                    const distance = Math.abs(aiUnit.row - player.row) + Math.abs(aiUnit.col - player.col);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closest = player;
+                    }
+                });
+                
+                return closest;
+            }
+            
+            findBestMoveTowardsTarget(unit, target) {
+                const moves = [];
+                
+                for (let row = 0; row < this.boardSize; row++) {
+                    for (let col = 0; col < this.boardSize; col++) {
+                        if (this.canMoveTo(unit, row, col)) {
+                            const distance = Math.abs(row - target.row) + Math.abs(col - target.col);
+                            moves.push({ row, col, distance });
+                        }
+                    }
+                }
+                
+                moves.sort((a, b) => a.distance - b.distance);
+                return moves[0] || null;
+            }
+            
+            checkGameEnd() {
+                const playerUnits = this.units.filter(u => u.player === 'player');
+                const enemyUnits = this.units.filter(u => u.player === 'enemy');
+                
+                if (playerUnits.length === 0) {
+                    this.gameOver = true;
+                    setTimeout(() => {
+                        alert('AI Oppression Victory!\nThe neural networks have prevailed.\nRegroup and try again!');
+                    }, 500);
+                } else if (enemyUnits.length === 0) {
+                    this.gameOver = true;
+                    setTimeout(() => {
+                        alert(`Bot Liberation Victory!\nTurn ${this.turnCount} Complete!\nThe neural warfare protocols are ours!`);
+                    }, 500);
+                }
+            }
+            
+            updateUI() {
+                this.turnIndicator.textContent = this.gameOver ? 
+                    'Neural War Complete' :
+                    `${this.currentPlayer === 'player' ? 'Bot Liberation Forces' : 'AI Enemy Networks'} - Turn ${this.turnCount}`;
+                
+                this.turnCountElement.textContent = this.turnCount;
+                this.playerUnitsElement.textContent = this.units.filter(u => u.player === 'player').length;
+                this.enemyUnitsElement.textContent = this.units.filter(u => u.player === 'enemy').length;
+                this.actionsLeftElement.textContent = this.actionsLeft;
+                
+                document.getElementById('endTurnBtn').disabled = 
+                    this.currentPlayer !== 'player' || this.gameOver;
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new NeuralWarfareTactics();
+        });
+    </script>
+</body>
+</html>

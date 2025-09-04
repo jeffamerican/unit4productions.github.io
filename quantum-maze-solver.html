@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Maze Solver - BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00ff88, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-info {
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            background: #000;
+            margin: 20px 0;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ff88, #0099ff);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .game-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            #gameCanvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="home-button">← Back to Games</a>
+
+    <div class="game-container">
+        <h1>Quantum Maze Solver</h1>
+        <div class="game-info">Navigate through quantum-entangled mazes with teleportation abilities</div>
+
+        <div class="instructions">
+            <strong>How to Play:</strong> Use WASD or Arrow Keys to move. Collect quantum orbs to unlock teleportation abilities. 
+            Reach the exit portal while avoiding quantum barriers. Some paths exist in quantum superposition!
+        </div>
+
+        <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+        <div class="controls">
+            <button id="newMazeBtn">New Maze</button>
+            <button id="teleportBtn" disabled>Teleport (0 orbs)</button>
+            <button id="hintBtn">Quantum Hint</button>
+            <button id="resetBtn">Reset Position</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="currentLevel">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Quantum Orbs</div>
+                <div class="stat-value" id="quantumOrbs">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Moves</div>
+                <div class="stat-value" id="moveCount">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="gameTime">00:00</div>
+            </div>
+        </div>
+
+        <div class="game-log" id="gameLog">
+            <div class="log-entry">🎮 Quantum Maze Solver initialized. Enter the quantum realm!</div>
+        </div>
+    </div>
+
+    <script>
+        class QuantumMazeSolver {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.cellSize = 20;
+                this.rows = 20;
+                this.cols = 30;
+                this.maze = [];
+                this.player = { x: 1, y: 1 };
+                this.exit = { x: 28, y: 18 };
+                this.quantumOrbs = [];
+                this.orbsCollected = 0;
+                this.moves = 0;
+                this.level = 1;
+                this.startTime = Date.now();
+                this.gameTimer = null;
+                this.quantumBarriers = [];
+                
+                this.initializeGame();
+                this.setupEventListeners();
+                this.startGameTimer();
+                this.gameLoop();
+            }
+
+            initializeGame() {
+                this.generateMaze();
+                this.placeQuantumOrbs();
+                this.placeQuantumBarriers();
+                this.updateDisplay();
+                this.logAction("🌀 New quantum maze generated!");
+            }
+
+            generateMaze() {
+                // Initialize maze with walls
+                this.maze = Array(this.rows).fill().map(() => Array(this.cols).fill(1));
+                
+                // Recursive backtracking maze generation
+                const stack = [];
+                const visited = Array(this.rows).fill().map(() => Array(this.cols).fill(false));
+                
+                let current = { x: 1, y: 1 };
+                visited[current.y][current.x] = true;
+                this.maze[current.y][current.x] = 0;
+                
+                while (true) {
+                    const neighbors = this.getUnvisitedNeighbors(current, visited);
+                    
+                    if (neighbors.length > 0) {
+                        const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        stack.push(current);
+                        
+                        // Remove wall between current and next
+                        const wallX = current.x + (next.x - current.x) / 2;
+                        const wallY = current.y + (next.y - current.y) / 2;
+                        this.maze[wallY][wallX] = 0;
+                        
+                        visited[next.y][next.x] = true;
+                        this.maze[next.y][next.x] = 0;
+                        current = next;
+                    } else if (stack.length > 0) {
+                        current = stack.pop();
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Ensure exit is clear
+                this.maze[this.exit.y][this.exit.x] = 0;
+            }
+
+            getUnvisitedNeighbors(cell, visited) {
+                const neighbors = [];
+                const directions = [
+                    { x: 0, y: -2 }, // up
+                    { x: 2, y: 0 },  // right
+                    { x: 0, y: 2 },  // down
+                    { x: -2, y: 0 }  // left
+                ];
+
+                directions.forEach(dir => {
+                    const newX = cell.x + dir.x;
+                    const newY = cell.y + dir.y;
+                    
+                    if (newX > 0 && newX < this.cols - 1 && 
+                        newY > 0 && newY < this.rows - 1 && 
+                        !visited[newY][newX]) {
+                        neighbors.push({ x: newX, y: newY });
+                    }
+                });
+
+                return neighbors;
+            }
+
+            placeQuantumOrbs() {
+                this.quantumOrbs = [];
+                const orbCount = 3 + Math.floor(this.level / 2);
+                
+                for (let i = 0; i < orbCount; i++) {
+                    let x, y;
+                    do {
+                        x = Math.floor(Math.random() * this.cols);
+                        y = Math.floor(Math.random() * this.rows);
+                    } while (this.maze[y][x] === 1 || 
+                             (x === this.player.x && y === this.player.y) ||
+                             (x === this.exit.x && y === this.exit.y) ||
+                             this.quantumOrbs.some(orb => orb.x === x && orb.y === y));
+                    
+                    this.quantumOrbs.push({ 
+                        x, y, 
+                        collected: false,
+                        glow: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            placeQuantumBarriers() {
+                this.quantumBarriers = [];
+                const barrierCount = Math.min(5, this.level);
+                
+                for (let i = 0; i < barrierCount; i++) {
+                    let x, y;
+                    do {
+                        x = Math.floor(Math.random() * this.cols);
+                        y = Math.floor(Math.random() * this.rows);
+                    } while (this.maze[y][x] === 1 || 
+                             (x === this.player.x && y === this.player.y) ||
+                             (x === this.exit.x && y === this.exit.y) ||
+                             this.quantumOrbs.some(orb => orb.x === x && orb.y === y));
+                    
+                    this.quantumBarriers.push({ 
+                        x, y, 
+                        phase: Math.random() * Math.PI * 2,
+                        active: true
+                    });
+                }
+            }
+
+            render() {
+                this.ctx.fillStyle = '#000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw maze
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        if (this.maze[y][x] === 1) {
+                            this.ctx.fillStyle = '#333';
+                            this.ctx.fillRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
+                        }
+                    }
+                }
+                
+                // Draw quantum barriers
+                this.quantumBarriers.forEach(barrier => {
+                    const opacity = (Math.sin(barrier.phase) + 1) * 0.3 + 0.2;
+                    this.ctx.fillStyle = `rgba(255, 0, 100, ${opacity})`;
+                    this.ctx.fillRect(barrier.x * this.cellSize, barrier.y * this.cellSize, this.cellSize, this.cellSize);
+                    barrier.phase += 0.1;
+                });
+                
+                // Draw quantum orbs
+                this.quantumOrbs.forEach(orb => {
+                    if (!orb.collected) {
+                        const glowSize = Math.sin(orb.glow) * 3 + 8;
+                        this.ctx.fillStyle = '#00ff88';
+                        this.ctx.beginPath();
+                        this.ctx.arc(
+                            orb.x * this.cellSize + this.cellSize/2, 
+                            orb.y * this.cellSize + this.cellSize/2, 
+                            glowSize, 0, Math.PI * 2
+                        );
+                        this.ctx.fill();
+                        orb.glow += 0.1;
+                    }
+                });
+                
+                // Draw exit portal
+                this.ctx.fillStyle = '#0099ff';
+                this.ctx.fillRect(this.exit.x * this.cellSize, this.exit.y * this.cellSize, this.cellSize, this.cellSize);
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillText('EXIT', this.exit.x * this.cellSize + 2, this.exit.y * this.cellSize + 12);
+                
+                // Draw player
+                this.ctx.fillStyle = '#ffff00';
+                this.ctx.fillRect(this.player.x * this.cellSize, this.player.y * this.cellSize, this.cellSize, this.cellSize);
+            }
+
+            movePlayer(dx, dy) {
+                const newX = this.player.x + dx;
+                const newY = this.player.y + dy;
+                
+                if (newX >= 0 && newX < this.cols && newY >= 0 && newY < this.rows && 
+                    this.maze[newY][newX] === 0) {
+                    
+                    // Check quantum barriers
+                    const barrier = this.quantumBarriers.find(b => b.x === newX && b.y === newY);
+                    if (barrier && barrier.active) {
+                        this.logAction("⚡ Blocked by quantum barrier!");
+                        return;
+                    }
+                    
+                    this.player.x = newX;
+                    this.player.y = newY;
+                    this.moves++;
+                    
+                    // Check for quantum orb collection
+                    const orb = this.quantumOrbs.find(o => o.x === newX && o.y === newY && !o.collected);
+                    if (orb) {
+                        orb.collected = true;
+                        this.orbsCollected++;
+                        this.logAction(`🔮 Quantum orb collected! (+1 teleportation charge)`);
+                    }
+                    
+                    // Check for exit
+                    if (newX === this.exit.x && newY === this.exit.y) {
+                        this.levelComplete();
+                    }
+                    
+                    this.updateDisplay();
+                }
+            }
+
+            teleport() {
+                if (this.orbsCollected > 0) {
+                    // Find random empty space
+                    let attempts = 0;
+                    while (attempts < 50) {
+                        const x = Math.floor(Math.random() * this.cols);
+                        const y = Math.floor(Math.random() * this.rows);
+                        
+                        if (this.maze[y][x] === 0 && 
+                            !this.quantumBarriers.some(b => b.x === x && b.y === y && b.active)) {
+                            this.player.x = x;
+                            this.player.y = y;
+                            this.orbsCollected--;
+                            this.moves++;
+                            this.logAction(`🌀 Quantum teleportation successful!`);
+                            this.updateDisplay();
+                            return;
+                        }
+                        attempts++;
+                    }
+                    this.logAction("❌ Teleportation failed - no safe destination found!");
+                }
+            }
+
+            showHint() {
+                const distanceToExit = Math.abs(this.player.x - this.exit.x) + Math.abs(this.player.y - this.exit.y);
+                const direction = this.player.x < this.exit.x ? "east" : 
+                                 this.player.x > this.exit.x ? "west" : 
+                                 this.player.y < this.exit.y ? "south" : "north";
+                
+                this.logAction(`💡 Quantum analysis: ${distanceToExit} units to exit. Try moving ${direction}.`);
+            }
+
+            resetPosition() {
+                this.player.x = 1;
+                this.player.y = 1;
+                this.moves += 5; // Penalty for reset
+                this.logAction("🔄 Position reset to start (5 move penalty)");
+                this.updateDisplay();
+            }
+
+            levelComplete() {
+                this.level++;
+                const timeBonus = Math.max(0, 100 - this.moves);
+                this.logAction(`🎉 Level ${this.level - 1} completed! Time bonus: ${timeBonus} points`);
+                this.logAction(`🚀 Advancing to Quantum Level ${this.level}!`);
+                
+                this.player.x = 1;
+                this.player.y = 1;
+                this.moves = 0;
+                this.orbsCollected = 0;
+                this.initializeGame();
+            }
+
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key.toLowerCase()) {
+                        case 'w':
+                        case 'arrowup':
+                            this.movePlayer(0, -1);
+                            break;
+                        case 's':
+                        case 'arrowdown':
+                            this.movePlayer(0, 1);
+                            break;
+                        case 'a':
+                        case 'arrowleft':
+                            this.movePlayer(-1, 0);
+                            break;
+                        case 'd':
+                        case 'arrowright':
+                            this.movePlayer(1, 0);
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            this.teleport();
+                            break;
+                    }
+                });
+
+                document.getElementById('newMazeBtn').addEventListener('click', () => {
+                    this.level = 1;
+                    this.player.x = 1;
+                    this.player.y = 1;
+                    this.moves = 0;
+                    this.orbsCollected = 0;
+                    this.initializeGame();
+                });
+
+                document.getElementById('teleportBtn').addEventListener('click', () => this.teleport());
+                document.getElementById('hintBtn').addEventListener('click', () => this.showHint());
+                document.getElementById('resetBtn').addEventListener('click', () => this.resetPosition());
+            }
+
+            updateDisplay() {
+                document.getElementById('currentLevel').textContent = this.level;
+                document.getElementById('quantumOrbs').textContent = this.orbsCollected;
+                document.getElementById('moveCount').textContent = this.moves;
+                
+                const teleportBtn = document.getElementById('teleportBtn');
+                teleportBtn.disabled = this.orbsCollected === 0;
+                teleportBtn.textContent = `Teleport (${this.orbsCollected} orbs)`;
+            }
+
+            startGameTimer() {
+                this.gameTimer = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const seconds = (elapsed % 60).toString().padStart(2, '0');
+                    document.getElementById('gameTime').textContent = `${minutes}:${seconds}`;
+                }, 1000);
+            }
+
+            logAction(message) {
+                const log = document.getElementById('gameLog');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                log.insertBefore(entry, log.firstChild);
+                
+                // Keep only last 10 entries
+                while (log.children.length > 10) {
+                    log.removeChild(log.lastChild);
+                }
+            }
+
+            gameLoop() {
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            new QuantumMazeSolver();
+        });
+    </script>
+</body>
+</html>

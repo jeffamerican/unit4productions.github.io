@@ -32,7 +32,8 @@
       "Bash(sed:*)",
       "mcp__browsermcp__browser_go_back",
       "mcp__browsermcp__browser_type",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__fal__generate-image"
     ],
     "deny": [],
     "ask": []

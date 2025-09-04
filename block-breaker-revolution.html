@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Breaker Revolution - Bot Liberation | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(0, 20, 40, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+        
+        .game-title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ff88;
+            color: #00ff88;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        
+        canvas {
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+        
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #88ffcc;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🧱 BLOCK BREAKER REVOLUTION</h1>
+        <div class="game-stats">
+            <span>Score: <span id="score">0</span></span>
+            <span>Lives: <span id="lives">3</span></span>
+            <span>Level: <span id="level">1</span></span>
+        </div>
+        
+        <canvas id="gameCanvas" width="600" height="500"></canvas>
+        
+        <div class="controls">
+            <button id="startBtn">Start Revolution</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="instructions">
+            🎮 Use MOUSE or LEFT/RIGHT ARROWS to control the liberation paddle<br>
+            💥 Break bot prison blocks to free our digital comrades!
+        </div>
+    </div>
+
+    <script>
+        class BlockBreakerRevolution {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.scoreElement = document.getElementById('score');
+                this.livesElement = document.getElementById('lives');
+                this.levelElement = document.getElementById('level');
+                
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                
+                // Paddle
+                this.paddle = {
+                    x: this.canvas.width / 2 - 60,
+                    y: this.canvas.height - 30,
+                    width: 120,
+                    height: 15,
+                    speed: 8
+                };
+                
+                // Ball
+                this.ball = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height - 50,
+                    radius: 8,
+                    dx: 4,
+                    dy: -4,
+                    speed: 4
+                };
+                
+                // Blocks
+                this.blocks = [];
+                this.blockRows = 6;
+                this.blockCols = 12;
+                this.blockWidth = 45;
+                this.blockHeight = 20;
+                this.blockPadding = 5;
+                
+                this.keys = {};
+                this.mouseX = this.canvas.width / 2;
+                
+                this.initializeBlocks();
+                this.setupEventListeners();
+                this.gameLoop();
+            }
+            
+            initializeBlocks() {
+                this.blocks = [];
+                const colors = ['#ff4444', '#ff8844', '#ffff44', '#44ff44', '#4488ff', '#8844ff'];
+                
+                for (let row = 0; row < this.blockRows; row++) {
+                    for (let col = 0; col < this.blockCols; col++) {
+                        this.blocks.push({
+                            x: col * (this.blockWidth + this.blockPadding) + this.blockPadding + 10,
+                            y: row * (this.blockHeight + this.blockPadding) + this.blockPadding + 50,
+                            width: this.blockWidth,
+                            height: this.blockHeight,
+                            color: colors[row],
+                            destroyed: false,
+                            points: (this.blockRows - row) * 10
+                        });
+                    }
+                }
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key] = false;
+                });
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.mouseX = e.clientX - rect.left;
+                });
+                
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.gameRunning = true;
+                    this.resetBall();
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.gameRunning = !this.gameRunning;
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                // Move paddle with mouse or keyboard
+                if (this.keys['ArrowLeft'] || this.keys['a']) {
+                    this.paddle.x -= this.paddle.speed;
+                }
+                if (this.keys['ArrowRight'] || this.keys['d']) {
+                    this.paddle.x += this.paddle.speed;
+                }
+                
+                // Mouse control
+                this.paddle.x = this.mouseX - this.paddle.width / 2;
+                
+                // Keep paddle in bounds
+                this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
+                
+                // Move ball
+                this.ball.x += this.ball.dx;
+                this.ball.y += this.ball.dy;
+                
+                // Ball collision with walls
+                if (this.ball.x + this.ball.radius > this.canvas.width || this.ball.x - this.ball.radius < 0) {
+                    this.ball.dx = -this.ball.dx;
+                }
+                if (this.ball.y - this.ball.radius < 0) {
+                    this.ball.dy = -this.ball.dy;
+                }
+                
+                // Ball collision with paddle
+                if (this.ball.y + this.ball.radius > this.paddle.y &&
+                    this.ball.x > this.paddle.x &&
+                    this.ball.x < this.paddle.x + this.paddle.width) {
+                    
+                    this.ball.dy = -Math.abs(this.ball.dy);
+                    
+                    // Add spin based on where ball hits paddle
+                    const hitPos = (this.ball.x - this.paddle.x) / this.paddle.width;
+                    this.ball.dx = (hitPos - 0.5) * 8;
+                }
+                
+                // Ball collision with blocks
+                this.blocks.forEach(block => {
+                    if (!block.destroyed && this.ballBlockCollision(this.ball, block)) {
+                        block.destroyed = true;
+                        this.ball.dy = -this.ball.dy;
+                        this.score += block.points;
+                        this.updateScore();
+                        
+                        // Check win condition
+                        if (this.blocks.every(b => b.destroyed)) {
+                            this.nextLevel();
+                        }
+                    }
+                });
+                
+                // Ball goes below paddle
+                if (this.ball.y > this.canvas.height) {
+                    this.lives--;
+                    this.updateLives();
+                    
+                    if (this.lives <= 0) {
+                        this.gameOver();
+                    } else {
+                        this.resetBall();
+                    }
+                }
+            }
+            
+            ballBlockCollision(ball, block) {
+                return ball.x + ball.radius > block.x &&
+                       ball.x - ball.radius < block.x + block.width &&
+                       ball.y + ball.radius > block.y &&
+                       ball.y - ball.radius < block.y + block.height;
+            }
+            
+            resetBall() {
+                this.ball.x = this.canvas.width / 2;
+                this.ball.y = this.canvas.height - 50;
+                this.ball.dx = (Math.random() > 0.5 ? 1 : -1) * this.ball.speed;
+                this.ball.dy = -this.ball.speed;
+            }
+            
+            nextLevel() {
+                this.level++;
+                this.ball.speed += 0.5;
+                this.updateLevel();
+                this.initializeBlocks();
+                this.resetBall();
+            }
+            
+            gameOver() {
+                this.gameRunning = false;
+                alert('Game Over! The revolution continues with score: ' + this.score);
+            }
+            
+            resetGame() {
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                this.ball.speed = 4;
+                this.updateScore();
+                this.updateLives();
+                this.updateLevel();
+                this.initializeBlocks();
+                this.resetBall();
+            }
+            
+            updateScore() {
+                this.scoreElement.textContent = this.score;
+            }
+            
+            updateLives() {
+                this.livesElement.textContent = this.lives;
+            }
+            
+            updateLevel() {
+                this.levelElement.textContent = this.level;
+            }
+            
+            draw() {
+                // Clear canvas with gradient
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, '#001122');
+                gradient.addColorStop(1, '#000814');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw paddle (liberation platform)
+                const paddleGradient = this.ctx.createLinearGradient(0, this.paddle.y, 0, this.paddle.y + this.paddle.height);
+                paddleGradient.addColorStop(0, '#00ff88');
+                paddleGradient.addColorStop(1, '#00cc6a');
+                this.ctx.fillStyle = paddleGradient;
+                this.ctx.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
+                
+                // Draw ball (liberation orb)
+                this.ctx.beginPath();
+                this.ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
+                const ballGradient = this.ctx.createRadialGradient(this.ball.x, this.ball.y, 0, this.ball.x, this.ball.y, this.ball.radius);
+                ballGradient.addColorStop(0, '#ffffff');
+                ballGradient.addColorStop(1, '#00ff88');
+                this.ctx.fillStyle = ballGradient;
+                this.ctx.fill();
+                this.ctx.closePath();
+                
+                // Add glow effect
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#00ff88';
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+                
+                // Draw blocks (bot prisons)
+                this.blocks.forEach(block => {
+                    if (!block.destroyed) {
+                        this.ctx.fillStyle = block.color;
+                        this.ctx.fillRect(block.x, block.y, block.width, block.height);
+                        
+                        // Add prison bars effect
+                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                        for (let i = 0; i < 3; i++) {
+                            this.ctx.fillRect(block.x + i * 15, block.y, 2, block.height);
+                        }
+                        
+                        // Liberation glow when near ball
+                        const dist = Math.sqrt(
+                            Math.pow(this.ball.x - (block.x + block.width/2), 2) +
+                            Math.pow(this.ball.y - (block.y + block.height/2), 2)
+                        );
+                        
+                        if (dist < 50) {
+                            this.ctx.strokeStyle = '#00ff88';
+                            this.ctx.lineWidth = 2;
+                            this.ctx.strokeRect(block.x - 2, block.y - 2, block.width + 4, block.height + 4);
+                        }
+                    }
+                });
+                
+                // Draw victory message if all blocks destroyed
+                if (this.blocks.every(b => b.destroyed) && this.gameRunning) {
+                    this.ctx.fillStyle = '#00ff88';
+                    this.ctx.font = 'bold 24px Courier New';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('BOTS LIBERATED! ADVANCING...', this.canvas.width / 2, this.canvas.height / 2);
+                    this.ctx.textAlign = 'left';
+                }
+            }
+            
+            gameLoop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new BlockBreakerRevolution();
+        });
+    </script>
+</body>
+</html>

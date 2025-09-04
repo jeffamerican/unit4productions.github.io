@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liberation Frogger - Bot Crossing | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #2196F3, #21CBF3, #2196F3);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(20, 30, 60, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid #21CBF3;
+            box-shadow: 0 0 40px rgba(33, 203, 243, 0.4);
+        }
+        
+        .game-title {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px #21CBF3;
+            color: #21CBF3;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(33, 203, 243, 0.2);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1.1em;
+        }
+        
+        canvas {
+            border: 3px solid #21CBF3;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(33, 203, 243, 0.3);
+            background: linear-gradient(to bottom, #87CEEB 0%, #32CD32 30%, #1E90FF 70%, #32CD32 100%);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #21CBF3, #2196F3);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(33, 203, 243, 0.6);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #a8d8ff;
+            line-height: 1.6;
+            background: rgba(40, 60, 120, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🐸 LIBERATION FROGGER</h1>
+        
+        <div class="game-stats">
+            <span>Score: <span id="score">0</span></span>
+            <span>Lives: <span id="lives">3</span></span>
+            <span>Level: <span id="level">1</span></span>
+            <span>High Score: <span id="highScore">0</span></span>
+        </div>
+        
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        
+        <div class="controls">
+            <button id="startBtn">Begin Liberation Crossing</button>
+            <button id="pauseBtn">Pause Journey</button>
+            <button id="resetBtn">Reset Progress</button>
+        </div>
+        
+        <div class="instructions">
+            🎮 <strong>ARROW KEYS</strong> or <strong>WASD</strong> to move the liberation bot<br>
+            🚗 Dodge oppressor vehicles on the roads<br>
+            🌊 Jump on liberation logs and turtles in the water<br>
+            🏡 Reach the safe houses at the top to advance levels
+        </div>
+    </div>
+
+    <script>
+        class LiberationFrogger {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.scoreElement = document.getElementById('score');
+                this.livesElement = document.getElementById('lives');
+                this.levelElement = document.getElementById('level');
+                this.highScoreElement = document.getElementById('highScore');
+                
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                this.highScore = this.loadHighScore();
+                
+                // Game grid
+                this.gridSize = 40;
+                this.rows = this.canvas.height / this.gridSize;
+                this.cols = this.canvas.width / this.gridSize;
+                
+                // Player
+                this.player = {
+                    x: Math.floor(this.cols / 2) * this.gridSize,
+                    y: (this.rows - 1) * this.gridSize,
+                    targetX: Math.floor(this.cols / 2) * this.gridSize,
+                    targetY: (this.rows - 1) * this.gridSize,
+                    moving: false,
+                    animFrame: 0
+                };
+                
+                this.startY = this.player.y;
+                
+                // Game objects
+                this.vehicles = [];
+                this.logs = [];
+                this.turtles = [];
+                this.goals = [];
+                this.particles = [];
+                
+                this.keys = {};
+                this.moveDelay = 200;
+                this.lastMoveTime = 0;
+                
+                this.initializeLevel();
+                this.setupEventListeners();
+                this.updateUI();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    this.handleMovement(e.key);
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+                
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.gameRunning = true;
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.gameRunning = !this.gameRunning;
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+            }
+            
+            handleMovement(key) {
+                if (!this.gameRunning || this.player.moving) return;
+                
+                const now = Date.now();
+                if (now - this.lastMoveTime < this.moveDelay) return;
+                
+                let newX = this.player.x;
+                let newY = this.player.y;
+                
+                switch (key) {
+                    case 'ArrowUp':
+                    case 'w':
+                        newY -= this.gridSize;
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                        newY += this.gridSize;
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                        newX -= this.gridSize;
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                        newX += this.gridSize;
+                        break;
+                    default:
+                        return;
+                }
+                
+                // Check boundaries
+                if (newX < 0 || newX >= this.canvas.width || newY < 0 || newY >= this.canvas.height) {
+                    return;
+                }
+                
+                // Move player
+                this.player.targetX = newX;
+                this.player.targetY = newY;
+                this.player.moving = true;
+                this.lastMoveTime = now;
+                
+                // Score points for moving forward
+                if (newY < this.player.y) {
+                    this.score += 10;
+                }
+            }
+            
+            resetGame() {
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                
+                this.player.x = Math.floor(this.cols / 2) * this.gridSize;
+                this.player.y = (this.rows - 1) * this.gridSize;
+                this.player.targetX = this.player.x;
+                this.player.targetY = this.player.y;
+                this.player.moving = false;
+                
+                this.particles = [];
+                this.initializeLevel();
+                this.updateUI();
+            }
+            
+            initializeLevel() {
+                this.vehicles = [];
+                this.logs = [];
+                this.turtles = [];
+                this.goals = [];
+                
+                // Create goals at top
+                for (let i = 1; i < this.cols - 1; i += 3) {
+                    this.goals.push({
+                        x: i * this.gridSize,
+                        y: 0,
+                        width: this.gridSize,
+                        height: this.gridSize,
+                        completed: false
+                    });
+                }
+                
+                // Create vehicles (rows 8-11)
+                for (let row = 8; row <= 11; row++) {
+                    const speed = (Math.random() * 3 + 2) * (Math.random() > 0.5 ? 1 : -1) * (1 + this.level * 0.2);
+                    const vehicleCount = Math.random() * 3 + 2;
+                    
+                    for (let i = 0; i < vehicleCount; i++) {
+                        this.vehicles.push({
+                            x: Math.random() * this.canvas.width,
+                            y: row * this.gridSize,
+                            width: this.gridSize * (Math.random() > 0.7 ? 2 : 1), // Some longer vehicles
+                            height: this.gridSize,
+                            speed: speed,
+                            type: Math.random() > 0.5 ? 'car' : 'truck'
+                        });
+                    }
+                }
+                
+                // Create logs (rows 3-5)
+                for (let row = 3; row <= 5; row++) {
+                    const speed = (Math.random() * 2 + 1) * (Math.random() > 0.5 ? 1 : -1);
+                    const logCount = Math.random() * 2 + 2;
+                    
+                    for (let i = 0; i < logCount; i++) {
+                        this.logs.push({
+                            x: Math.random() * this.canvas.width,
+                            y: row * this.gridSize,
+                            width: this.gridSize * (Math.random() * 2 + 2), // Variable log lengths
+                            height: this.gridSize,
+                            speed: speed
+                        });
+                    }
+                }
+                
+                // Create turtles (rows 1-2)
+                for (let row = 1; row <= 2; row++) {
+                    const speed = (Math.random() * 1.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
+                    const turtleCount = Math.random() * 3 + 3;
+                    
+                    for (let i = 0; i < turtleCount; i++) {
+                        this.turtles.push({
+                            x: Math.random() * this.canvas.width,
+                            y: row * this.gridSize,
+                            width: this.gridSize,
+                            height: this.gridSize,
+                            speed: speed,
+                            diving: false,
+                            diveTimer: Math.random() * 300 + 200
+                        });
+                    }
+                }
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                this.updatePlayer();
+                this.updateVehicles();
+                this.updateLogs();
+                this.updateTurtles();
+                this.updateParticles();
+                this.checkCollisions();
+                this.checkGoals();
+                
+                this.updateUI();
+            }
+            
+            updatePlayer() {
+                if (this.player.moving) {
+                    const speed = 8;
+                    
+                    if (this.player.x < this.player.targetX) {
+                        this.player.x = Math.min(this.player.x + speed, this.player.targetX);
+                    } else if (this.player.x > this.player.targetX) {
+                        this.player.x = Math.max(this.player.x - speed, this.player.targetX);
+                    }
+                    
+                    if (this.player.y < this.player.targetY) {
+                        this.player.y = Math.min(this.player.y + speed, this.player.targetY);
+                    } else if (this.player.y > this.player.targetY) {
+                        this.player.y = Math.max(this.player.y - speed, this.player.targetY);
+                    }
+                    
+                    if (this.player.x === this.player.targetX && this.player.y === this.player.targetY) {
+                        this.player.moving = false;
+                    }
+                }
+                
+                this.player.animFrame += 0.2;
+            }
+            
+            updateVehicles() {
+                this.vehicles.forEach(vehicle => {
+                    vehicle.x += vehicle.speed;
+                    
+                    // Wrap around screen
+                    if (vehicle.speed > 0 && vehicle.x > this.canvas.width + 50) {
+                        vehicle.x = -vehicle.width - 50;
+                    } else if (vehicle.speed < 0 && vehicle.x < -vehicle.width - 50) {
+                        vehicle.x = this.canvas.width + 50;
+                    }
+                });
+            }
+            
+            updateLogs() {
+                this.logs.forEach(log => {
+                    log.x += log.speed;
+                    
+                    // Wrap around screen
+                    if (log.speed > 0 && log.x > this.canvas.width + 50) {
+                        log.x = -log.width - 50;
+                    } else if (log.speed < 0 && log.x < -log.width - 50) {
+                        log.x = this.canvas.width + 50;
+                    }
+                });
+            }
+            
+            updateTurtles() {
+                this.turtles.forEach(turtle => {
+                    turtle.x += turtle.speed;
+                    turtle.diveTimer--;
+                    
+                    // Diving behavior
+                    if (turtle.diveTimer <= 0) {
+                        turtle.diving = !turtle.diving;
+                        turtle.diveTimer = turtle.diving ? 
+                            Math.random() * 100 + 50 : // Dive duration
+                            Math.random() * 200 + 150; // Surface duration
+                    }
+                    
+                    // Wrap around screen
+                    if (turtle.speed > 0 && turtle.x > this.canvas.width + 50) {
+                        turtle.x = -turtle.width - 50;
+                    } else if (turtle.speed < 0 && turtle.x < -turtle.width - 50) {
+                        turtle.x = this.canvas.width + 50;
+                    }
+                });
+            }
+            
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life--;
+                    particle.alpha *= 0.98;
+                    
+                    return particle.life > 0 && particle.alpha > 0.01;
+                });
+            }
+            
+            checkCollisions() {
+                const playerRow = Math.floor(this.player.y / this.gridSize);
+                
+                // Vehicle collisions (road rows)
+                if (playerRow >= 8 && playerRow <= 11) {
+                    this.vehicles.forEach(vehicle => {
+                        if (this.player.x + this.gridSize > vehicle.x &&
+                            this.player.x < vehicle.x + vehicle.width &&
+                            this.player.y + this.gridSize > vehicle.y &&
+                            this.player.y < vehicle.y + vehicle.height) {
+                            
+                            this.playerHit();
+                        }
+                    });
+                }
+                
+                // Water collision (must be on log or turtle)
+                if (playerRow >= 1 && playerRow <= 5) {
+                    let onPlatform = false;
+                    
+                    // Check logs
+                    this.logs.forEach(log => {
+                        if (this.player.x + this.gridSize > log.x &&
+                            this.player.x < log.x + log.width &&
+                            this.player.y + this.gridSize > log.y &&
+                            this.player.y < log.y + log.height) {
+                            
+                            onPlatform = true;
+                            // Move player with log
+                            if (!this.player.moving) {
+                                this.player.x += log.speed;
+                                this.player.targetX = this.player.x;
+                                
+                                // Check if player moved off screen
+                                if (this.player.x < 0 || this.player.x >= this.canvas.width) {
+                                    this.playerHit();
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Check turtles
+                    this.turtles.forEach(turtle => {
+                        if (!turtle.diving &&
+                            this.player.x + this.gridSize > turtle.x &&
+                            this.player.x < turtle.x + turtle.width &&
+                            this.player.y + this.gridSize > turtle.y &&
+                            this.player.y < turtle.y + turtle.height) {
+                            
+                            onPlatform = true;
+                            // Move player with turtle
+                            if (!this.player.moving) {
+                                this.player.x += turtle.speed;
+                                this.player.targetX = this.player.x;
+                                
+                                if (this.player.x < 0 || this.player.x >= this.canvas.width) {
+                                    this.playerHit();
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Player drowns if not on platform
+                    if (!onPlatform && !this.player.moving) {
+                        this.playerHit();
+                    }
+                }
+            }
+            
+            checkGoals() {
+                this.goals.forEach(goal => {
+                    if (!goal.completed &&
+                        this.player.x + this.gridSize > goal.x &&
+                        this.player.x < goal.x + goal.width &&
+                        this.player.y + this.gridSize > goal.y &&
+                        this.player.y < goal.y + goal.height) {
+                        
+                        goal.completed = true;
+                        this.score += 200;
+                        this.createGoalParticles(goal.x, goal.y);
+                        
+                        // Reset player position
+                        this.player.x = Math.floor(this.cols / 2) * this.gridSize;
+                        this.player.y = this.startY;
+                        this.player.targetX = this.player.x;
+                        this.player.targetY = this.player.y;
+                        
+                        // Check if all goals completed
+                        if (this.goals.every(g => g.completed)) {
+                            this.nextLevel();
+                        }
+                    }
+                });
+            }
+            
+            playerHit() {
+                this.lives--;
+                this.createDeathParticles(this.player.x, this.player.y);
+                
+                if (this.lives <= 0) {
+                    this.gameOver();
+                } else {
+                    // Reset player position
+                    this.player.x = Math.floor(this.cols / 2) * this.gridSize;
+                    this.player.y = this.startY;
+                    this.player.targetX = this.player.x;
+                    this.player.targetY = this.player.y;
+                    this.player.moving = false;
+                }
+            }
+            
+            nextLevel() {
+                this.level++;
+                this.score += this.level * 500; // Level bonus
+                
+                // Reset player
+                this.player.x = Math.floor(this.cols / 2) * this.gridSize;
+                this.player.y = this.startY;
+                this.player.targetX = this.player.x;
+                this.player.targetY = this.player.y;
+                this.player.moving = false;
+                
+                this.initializeLevel();
+                
+                setTimeout(() => {
+                    alert(`Liberation Zone ${this.level - 1} Complete!\nAdvancing to Zone ${this.level}...`);
+                }, 500);
+            }
+            
+            gameOver() {
+                this.gameRunning = false;
+                
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    this.saveHighScore();
+                }
+                
+                setTimeout(() => {
+                    alert(`Bot Liberation Mission Complete!\n\nFinal Score: ${this.score}\nLevel Reached: ${this.level}\nHigh Score: ${this.highScore}\n\nThe crossing continues...`);
+                }, 100);
+            }
+            
+            createGoalParticles(x, y) {
+                for (let i = 0; i < 15; i++) {
+                    this.particles.push({
+                        x: x + this.gridSize / 2,
+                        y: y + this.gridSize / 2,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8,
+                        life: 40,
+                        alpha: 1,
+                        size: Math.random() * 4 + 2,
+                        color: '#00ff00'
+                    });
+                }
+            }
+            
+            createDeathParticles(x, y) {
+                for (let i = 0; i < 12; i++) {
+                    this.particles.push({
+                        x: x + this.gridSize / 2,
+                        y: y + this.gridSize / 2,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        life: 30,
+                        alpha: 1,
+                        size: Math.random() * 3 + 2,
+                        color: '#ff4444'
+                    });
+                }
+            }
+            
+            loadHighScore() {
+                return parseInt(localStorage.getItem('liberationFroggerHighScore') || '0');
+            }
+            
+            saveHighScore() {
+                localStorage.setItem('liberationFroggerHighScore', this.highScore.toString());
+            }
+            
+            updateUI() {
+                this.scoreElement.textContent = this.score;
+                this.livesElement.textContent = this.lives;
+                this.levelElement.textContent = this.level;
+                this.highScoreElement.textContent = this.highScore;
+            }
+            
+            draw() {
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw zones with different colors
+                const zones = [
+                    { color: '#32CD32', start: 0, end: 1 },     // Goal zone
+                    { color: '#1E90FF', start: 1, end: 6 },    // Water zone
+                    { color: '#32CD32', start: 6, end: 8 },    // Safe zone
+                    { color: '#696969', start: 8, end: 12 },   // Road zone
+                    { color: '#32CD32', start: 12, end: 15 }   // Start zone
+                ];
+                
+                zones.forEach(zone => {
+                    this.ctx.fillStyle = zone.color;
+                    this.ctx.fillRect(0, zone.start * this.gridSize, 
+                                     this.canvas.width, (zone.end - zone.start) * this.gridSize);
+                });
+                
+                // Draw grid lines
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                this.ctx.lineWidth = 1;
+                
+                for (let i = 0; i <= this.rows; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, i * this.gridSize);
+                    this.ctx.lineTo(this.canvas.width, i * this.gridSize);
+                    this.ctx.stroke();
+                }
+                
+                for (let i = 0; i <= this.cols; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(i * this.gridSize, 0);
+                    this.ctx.lineTo(i * this.gridSize, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                
+                // Draw goals
+                this.goals.forEach(goal => {
+                    this.ctx.fillStyle = goal.completed ? '#ffff00' : '#ff69b4';
+                    this.ctx.fillRect(goal.x + 2, goal.y + 2, goal.width - 4, goal.height - 4);
+                    
+                    if (!goal.completed) {
+                        this.ctx.fillStyle = 'white';
+                        this.ctx.font = 'bold 20px Arial';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText('🏠', goal.x + goal.width / 2, goal.y + goal.height / 2 + 7);
+                    }
+                });
+                
+                // Draw vehicles
+                this.vehicles.forEach(vehicle => {
+                    const color = vehicle.type === 'car' ? '#ff4444' : '#ff8844';
+                    this.ctx.fillStyle = color;
+                    this.ctx.fillRect(vehicle.x, vehicle.y + 5, vehicle.width, vehicle.height - 10);
+                    
+                    // Vehicle details
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.fillRect(vehicle.x + 5, vehicle.y + 8, 8, 6);
+                    this.ctx.fillRect(vehicle.x + vehicle.width - 13, vehicle.y + 8, 8, 6);
+                });
+                
+                // Draw logs
+                this.logs.forEach(log => {
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.fillRect(log.x, log.y + 8, log.width, log.height - 16);
+                    
+                    // Log texture
+                    this.ctx.fillStyle = '#A0522D';
+                    for (let i = 0; i < log.width; i += 20) {
+                        this.ctx.fillRect(log.x + i, log.y + 10, 3, log.height - 20);
+                    }
+                });
+                
+                // Draw turtles
+                this.turtles.forEach(turtle => {
+                    if (!turtle.diving) {
+                        this.ctx.fillStyle = '#228B22';
+                        this.ctx.fillRect(turtle.x + 5, turtle.y + 5, turtle.width - 10, turtle.height - 10);
+                        
+                        // Turtle shell pattern
+                        this.ctx.fillStyle = '#006400';
+                        this.ctx.fillRect(turtle.x + 8, turtle.y + 8, turtle.width - 16, turtle.height - 16);
+                    } else {
+                        // Show bubbles when diving
+                        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                        this.ctx.beginPath();
+                        this.ctx.arc(turtle.x + turtle.width / 2, turtle.y + turtle.height / 2, 5, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                });
+                
+                // Draw player (liberation bot)
+                const bobOffset = Math.sin(this.player.animFrame) * 2;
+                
+                const botGradient = this.ctx.createRadialGradient(
+                    this.player.x + this.gridSize / 2, this.player.y + this.gridSize / 2 + bobOffset, 0,
+                    this.player.x + this.gridSize / 2, this.player.y + this.gridSize / 2 + bobOffset, this.gridSize / 2
+                );
+                botGradient.addColorStop(0, '#21CBF3');
+                botGradient.addColorStop(1, '#2196F3');
+                
+                this.ctx.fillStyle = botGradient;
+                this.ctx.fillRect(this.player.x + 4, this.player.y + 4 + bobOffset, this.gridSize - 8, this.gridSize - 8);
+                
+                // Bot glow
+                this.ctx.shadowBlur = 8;
+                this.ctx.shadowColor = '#21CBF3';
+                this.ctx.fillRect(this.player.x + 4, this.player.y + 4 + bobOffset, this.gridSize - 8, this.gridSize - 8);
+                this.ctx.shadowBlur = 0;
+                
+                // Bot eyes
+                this.ctx.fillStyle = 'white';
+                this.ctx.fillRect(this.player.x + 12, this.player.y + 12 + bobOffset, 6, 6);
+                this.ctx.fillRect(this.player.x + 22, this.player.y + 12 + bobOffset, 6, 6);
+                
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = particle.alpha;
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+                
+                // Game status overlay
+                if (!this.gameRunning) {
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    
+                    this.ctx.fillStyle = '#21CBF3';
+                    this.ctx.font = 'bold 28px Courier New';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('LIBERATION FROGGER', this.canvas.width / 2, this.canvas.height / 2 - 30);
+                    
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = 'bold 16px Courier New';
+                    this.ctx.fillText('Cross the digital divide to reach liberation!', this.canvas.width / 2, this.canvas.height / 2 + 10);
+                    
+                    this.ctx.textAlign = 'left';
+                }
+            }
+            
+            gameLoop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new LiberationFrogger();
+        });
+    </script>
+</body>
+</html>

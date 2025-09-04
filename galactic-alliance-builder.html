@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Alliance Builder - BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 1400px;
+            width: 95%;
+            z-index: 1;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #3498db, #9b59b6, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .game-info {
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .multiplayer-badge {
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+            display: inline-block;
+            font-size: 1rem;
+        }
+
+        .galaxy-map {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 25px;
+            margin: 30px 0;
+            align-items: start;
+            min-height: 600px;
+        }
+
+        .faction-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .faction-terran { border-color: #3498db; }
+        .faction-zephyr { border-color: #9b59b6; }
+        .faction-nova { border-color: #e74c3c; }
+        .faction-apex { border-color: #f39c12; }
+        .faction-cosmic { border-color: #1abc9c; }
+
+        .faction-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .faction-terran .faction-header { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .faction-zephyr .faction-header { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+        .faction-nova .faction-header { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .faction-apex .faction-header { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+        .faction-cosmic .faction-header { background: rgba(26, 188, 156, 0.2); color: #1abc9c; }
+
+        .resource-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .resource-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .resource-value {
+            font-weight: bold;
+            color: #f39c12;
+        }
+
+        .diplomacy-status {
+            margin: 20px 0;
+        }
+
+        .diplomacy-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .relation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+
+        .relation-status {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .relation-allied { background: #27ae60; color: white; }
+        .relation-neutral { background: #95a5a6; color: white; }
+        .relation-hostile { background: #e74c3c; color: white; }
+        .relation-trade { background: #f39c12; color: white; }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: linear-gradient(45deg, #3498db, #9b59b6);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #galaxyCanvas {
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            background: radial-gradient(circle, #0a0a0a 0%, #000000 70%);
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .alliance-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #1abc9c;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .alliance-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(26, 188, 156, 0.2);
+            color: #1abc9c;
+            text-align: center;
+        }
+
+        .treaty-section {
+            margin: 20px 0;
+        }
+
+        .treaty-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #1abc9c;
+            margin-bottom: 10px;
+        }
+
+        .treaty-item {
+            background: rgba(26, 188, 156, 0.1);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid rgba(26, 188, 156, 0.3);
+        }
+
+        .treaty-name {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .treaty-members {
+            font-size: 0.85rem;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .diplomatic-log {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 180px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .galaxy-map {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            #galaxyCanvas {
+                width: 100%;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="starfield"></div>
+    
+    <a href="index.html" class="home-button">← Back to Games</a>
+
+    <div class="game-container">
+        <h1>Galactic Alliance Builder</h1>
+        <div class="game-info">Build diplomatic networks and forge powerful alliances across the galaxy</div>
+        
+        <div class="multiplayer-badge">🌌 5-FACTION DIPLOMACY • ALLIANCE BUILDING</div>
+
+        <div class="instructions">
+            <strong>How to Play:</strong> Click on star systems to establish embassies and trade routes. 
+            Negotiate treaties, form alliances, and manage resources. Build the most powerful galactic coalition 
+            through strategic diplomacy. Avoid galactic wars while expanding your influence!
+        </div>
+
+        <div class="galaxy-map">
+            <div class="faction-panel faction-terran">
+                <div class="faction-header">🌍 Terran Federation</div>
+                
+                <div class="resource-display">
+                    <div class="resource-item">
+                        <div>Credits</div>
+                        <div class="resource-value" id="terranCredits">10000</div>
+                    </div>
+                    <div class="resource-item">
+                        <div>Fleet Power</div>
+                        <div class="resource-value" id="terranFleet">850</div>
+                    </div>
+                    <div class="resource-item">
+                        <div>Influence</div>
+                        <div class="resource-value" id="terranInfluence">750</div>
+                    </div>
+                    <div class="resource-item">
+                        <div>Systems</div>
+                        <div class="resource-value" id="terranSystems">12</div>
+                    </div>
+                </div>
+
+                <div class="diplomacy-status">
+                    <div class="diplomacy-title">Relations</div>
+                    <div class="relation-item">
+                        <span>Zephyr Empire</span>
+                        <span class="relation-status relation-neutral" id="terranZephyr">Neutral</span>
+                    </div>
+                    <div class="relation-item">
+                        <span>Nova Consortium</span>
+                        <span class="relation-status relation-trade" id="terranNova">Trade</span>
+                    </div>
+                    <div class="relation-item">
+                        <span>Apex Coalition</span>
+                        <span class="relation-status relation-hostile" id="terranApex">Hostile</span>
+                    </div>
+                    <div class="relation-item">
+                        <span>Cosmic Order</span>
+                        <span class="relation-status relation-allied" id="terranCosmic">Allied</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="game.establishEmbassy('terran')" id="terranEmbassy">Establish Embassy</button>
+                    <button onclick="game.proposeAlliance('terran')" id="terranAlliance">Propose Alliance</button>
+                    <button onclick="game.initiateTrade('terran')" id="terranTrade">Trade Agreement</button>
+                    <button onclick="game.declareWar('terran')" id="terranWar">Declare War</button>
+                </div>
+            </div>
+
+            <canvas id="galaxyCanvas" width="600" height="500"></canvas>
+
+            <div class="alliance-panel">
+                <div class="alliance-header">🤝 Galactic Treaties</div>
+                
+                <div class="treaty-section">
+                    <div class="treaty-title">Active Alliances</div>
+                    <div class="treaty-item">
+                        <div class="treaty-name">Terran-Cosmic Pact</div>
+                        <div class="treaty-members">Terran Federation, Cosmic Order</div>
+                    </div>
+                    <div class="treaty-item">
+                        <div class="treaty-name">Zephyr Defense League</div>
+                        <div class="treaty-members">Zephyr Empire, Nova Consortium</div>
+                    </div>
+                </div>
+
+                <div class="treaty-section">
+                    <div class="treaty-title">Trade Agreements</div>
+                    <div class="treaty-item">
+                        <div class="treaty-name">Trans-Galactic Commerce</div>
+                        <div class="treaty-members">All Factions (+15% Credits/turn)</div>
+                    </div>
+                    <div class="treaty-item">
+                        <div class="treaty-name">Resource Sharing</div>
+                        <div class="treaty-members">Terran, Nova, Cosmic (+10 Fleet/turn)</div>
+                    </div>
+                </div>
+
+                <div class="treaty-section">
+                    <div class="treaty-title">Current Proposals</div>
+                    <div class="treaty-item">
+                        <div class="treaty-name">Apex Integration Treaty</div>
+                        <div class="treaty-members">Proposed by: Apex Coalition</div>
+                        <div style="margin-top: 8px;">
+                            <button onclick="game.acceptProposal(0)" style="margin-right: 5px; padding: 5px 10px; font-size: 0.75rem;">Accept</button>
+                            <button onclick="game.rejectProposal(0)" style="padding: 5px 10px; font-size: 0.75rem;">Reject</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons" style="margin-top: 20px;">
+                    <button onclick="game.callGalacticCouncil()">Call Council Meeting</button>
+                    <button onclick="game.proposeUniversalPeace()">Propose Universal Peace</button>
+                    <button onclick="game.initiateGalacticSummit()">Galactic Summit</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button onclick="game.nextTurn()">Next Turn</button>
+            <button onclick="game.viewDiplomaticHistory()">Diplomatic History</button>
+            <button onclick="game.analyzeInfluence()">Analyze Influence</button>
+            <button onclick="game.newGame()">New Campaign</button>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-box">
+                <div class="stat-label">Turn</div>
+                <div class="stat-value" id="turnCounter">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Treaties</div>
+                <div class="stat-value" id="treatyCount">4</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Active Wars</div>
+                <div class="stat-value" id="warCount">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Galaxy Stability</div>
+                <div class="stat-value" id="stabilityIndex">68%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Trade Volume</div>
+                <div class="stat-value" id="tradeVolume">2.4M</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Diplomatic Events</div>
+                <div class="stat-value" id="eventCount">7</div>
+            </div>
+        </div>
+
+        <div class="diplomatic-log" id="diplomaticLog">
+            <div class="log-entry">🌌 Galactic Alliance Builder initialized. Begin forging your diplomatic empire!</div>
+        </div>
+    </div>
+
+    <script>
+        class GalacticAllianceBuilder {
+            constructor() {
+                this.canvas = document.getElementById('galaxyCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.turn = 1;
+                this.treatyCount = 4;
+                this.warCount = 1;
+                this.eventCount = 7;
+                
+                this.factions = {
+                    terran: {
+                        name: 'Terran Federation',
+                        color: '#3498db',
+                        credits: 10000,
+                        fleet: 850,
+                        influence: 750,
+                        systems: 12,
+                        relations: {
+                            zephyr: 0, // -100 to 100
+                            nova: 25,
+                            apex: -50,
+                            cosmic: 75
+                        }
+                    },
+                    zephyr: {
+                        name: 'Zephyr Empire',
+                        color: '#9b59b6',
+                        credits: 12000,
+                        fleet: 950,
+                        influence: 680,
+                        systems: 10,
+                        relations: {
+                            terran: 0,
+                            nova: 60,
+                            apex: -25,
+                            cosmic: -40
+                        }
+                    },
+                    nova: {
+                        name: 'Nova Consortium',
+                        color: '#e74c3c',
+                        credits: 15000,
+                        fleet: 600,
+                        influence: 900,
+                        systems: 8,
+                        relations: {
+                            terran: 25,
+                            zephyr: 60,
+                            apex: 10,
+                            cosmic: -20
+                        }
+                    },
+                    apex: {
+                        name: 'Apex Coalition',
+                        color: '#f39c12',
+                        credits: 8000,
+                        fleet: 750,
+                        influence: 500,
+                        systems: 6,
+                        relations: {
+                            terran: -50,
+                            zephyr: -25,
+                            nova: 10,
+                            cosmic: -60
+                        }
+                    },
+                    cosmic: {
+                        name: 'Cosmic Order',
+                        color: '#1abc9c',
+                        credits: 11000,
+                        fleet: 800,
+                        influence: 820,
+                        systems: 14,
+                        relations: {
+                            terran: 75,
+                            zephyr: -40,
+                            nova: -20,
+                            apex: -60
+                        }
+                    }
+                };
+                
+                this.starSystems = [];
+                this.treaties = [
+                    { name: 'Terran-Cosmic Pact', members: ['terran', 'cosmic'], type: 'military' },
+                    { name: 'Zephyr Defense League', members: ['zephyr', 'nova'], type: 'military' },
+                    { name: 'Trans-Galactic Commerce', members: ['terran', 'zephyr', 'nova', 'apex', 'cosmic'], type: 'trade' },
+                    { name: 'Resource Sharing', members: ['terran', 'nova', 'cosmic'], type: 'economic' }
+                ];
+                
+                this.proposals = [
+                    { name: 'Apex Integration Treaty', proposer: 'apex', type: 'alliance', support: 2, required: 3 }
+                ];
+                
+                this.generateStarSystems();
+                this.createStarfield();
+                this.setupEventListeners();
+                this.updateDisplay();
+                this.render();
+                this.logAction("🚀 Galactic diplomacy simulation online. 5 factions detected.");
+            }
+
+            generateStarSystems() {
+                const systemNames = [
+                    'Alpha Centauri', 'Beta Reticuli', 'Gamma Hydra', 'Delta Vega', 'Epsilon Eridani',
+                    'Zeta Cygni', 'Eta Carinae', 'Theta Draconis', 'Iota Pegasi', 'Kappa Orionis',
+                    'Lambda Serpentis', 'Mu Andromedae', 'Nu Scorpii', 'Xi Persei', 'Omicron Ceti',
+                    'Pi Sagittarii', 'Rho Virginis', 'Sigma Boötis', 'Tau Geminorum', 'Upsilon Leonis'
+                ];
+                
+                this.starSystems = [];
+                const factionList = Object.keys(this.factions);
+                
+                for (let i = 0; i < 20; i++) {
+                    const faction = factionList[i % factionList.length];
+                    this.starSystems.push({
+                        name: systemNames[i],
+                        x: 50 + Math.random() * (this.canvas.width - 100),
+                        y: 50 + Math.random() * (this.canvas.height - 100),
+                        owner: faction,
+                        embassy: i < 8, // Some systems have embassies
+                        tradeRoute: i < 12, // Some have trade routes
+                        strategicValue: Math.floor(Math.random() * 5) + 1,
+                        resources: Math.floor(Math.random() * 1000) + 500
+                    });
+                }
+            }
+
+            createStarfield() {
+                const starfield = document.getElementById('starfield');
+                
+                for (let i = 0; i < 200; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.width = (Math.random() * 3) + 'px';
+                    star.style.height = star.style.width;
+                    star.style.animationDelay = Math.random() * 3 + 's';
+                    starfield.appendChild(star);
+                }
+            }
+
+            setupEventListeners() {
+                this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleCanvasHover(e));
+            }
+
+            handleCanvasClick(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const clickedSystem = this.starSystems.find(system => {
+                    const distance = Math.sqrt((system.x - x) ** 2 + (system.y - y) ** 2);
+                    return distance < 15;
+                });
+                
+                if (clickedSystem) {
+                    this.selectStarSystem(clickedSystem);
+                }
+            }
+
+            handleCanvasHover(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.hoveredSystem = this.starSystems.find(system => {
+                    const distance = Math.sqrt((system.x - x) ** 2 + (system.y - y) ** 2);
+                    return distance < 15;
+                });
+                
+                this.render();
+            }
+
+            selectStarSystem(system) {
+                this.selectedSystem = system;
+                this.logAction(`🎯 Selected ${system.name} (${this.factions[system.owner].name})`);
+                this.logAction(`📊 Strategic Value: ${system.strategicValue}, Resources: ${system.resources.toLocaleString()}`);
+                
+                if (system.embassy) {
+                    this.logAction(`🏛️ Embassy present - diplomatic modifier +15%`);
+                }
+                if (system.tradeRoute) {
+                    this.logAction(`🚢 Active trade route - economic bonus +${system.resources * 0.1}/turn`);
+                }
+                
+                this.render();
+            }
+
+            establishEmbassy(factionKey) {
+                if (!this.selectedSystem) {
+                    this.logAction("❌ Select a star system first!");
+                    return;
+                }
+                
+                const faction = this.factions[factionKey];
+                if (faction.credits < 500) {
+                    this.logAction("❌ Insufficient credits to establish embassy!");
+                    return;
+                }
+                
+                if (this.selectedSystem.embassy) {
+                    this.logAction("❌ Embassy already exists in this system!");
+                    return;
+                }
+                
+                faction.credits -= 500;
+                this.selectedSystem.embassy = true;
+                faction.influence += 50;
+                
+                // Improve relations with system owner
+                if (this.selectedSystem.owner !== factionKey) {
+                    const targetFaction = this.selectedSystem.owner;
+                    if (faction.relations[targetFaction] !== undefined) {
+                        faction.relations[targetFaction] += 15;
+                        this.factions[targetFaction].relations[factionKey] += 15;
+                    }
+                }
+                
+                this.logAction(`🏛️ ${faction.name} established embassy at ${this.selectedSystem.name}`);
+                this.updateDisplay();
+                this.render();
+            }
+
+            proposeAlliance(factionKey) {
+                const faction = this.factions[factionKey];
+                const possibleAllies = Object.keys(this.factions).filter(key => 
+                    key !== factionKey && faction.relations[key] > 25
+                );
+                
+                if (possibleAllies.length === 0) {
+                    this.logAction("❌ No suitable allies found. Improve relations first!");
+                    return;
+                }
+                
+                const ally = possibleAllies[Math.floor(Math.random() * possibleAllies.length)];
+                const allyFaction = this.factions[ally];
+                
+                if (faction.relations[ally] > 50 && Math.random() > 0.3) {
+                    // Alliance accepted
+                    this.treaties.push({
+                        name: `${faction.name}-${allyFaction.name} Alliance`,
+                        members: [factionKey, ally],
+                        type: 'military'
+                    });
+                    
+                    faction.relations[ally] += 25;
+                    allyFaction.relations[factionKey] += 25;
+                    
+                    this.treatyCount++;
+                    this.logAction(`🤝 Alliance formed between ${faction.name} and ${allyFaction.name}!`);
+                } else {
+                    this.logAction(`❌ ${allyFaction.name} rejected alliance proposal`);
+                    faction.relations[ally] -= 5;
+                }
+                
+                this.updateDisplay();
+            }
+
+            initiateTrade(factionKey) {
+                if (!this.selectedSystem) {
+                    this.logAction("❌ Select a star system first!");
+                    return;
+                }
+                
+                const faction = this.factions[factionKey];
+                if (faction.credits < 1000) {
+                    this.logAction("❌ Insufficient credits to establish trade route!");
+                    return;
+                }
+                
+                if (this.selectedSystem.tradeRoute) {
+                    this.logAction("❌ Trade route already exists in this system!");
+                    return;
+                }
+                
+                faction.credits -= 1000;
+                this.selectedSystem.tradeRoute = true;
+                faction.credits += Math.floor(this.selectedSystem.resources * 0.5);
+                
+                // Improve relations with system owner
+                if (this.selectedSystem.owner !== factionKey) {
+                    const targetFaction = this.selectedSystem.owner;
+                    if (faction.relations[targetFaction] !== undefined) {
+                        faction.relations[targetFaction] += 10;
+                        this.factions[targetFaction].relations[factionKey] += 10;
+                    }
+                }
+                
+                this.logAction(`🚢 Trade route established at ${this.selectedSystem.name}`);
+                this.logAction(`💰 Immediate trade bonus: ${Math.floor(this.selectedSystem.resources * 0.5)} credits`);
+                this.updateDisplay();
+                this.render();
+            }
+
+            declareWar(factionKey) {
+                const faction = this.factions[factionKey];
+                const enemies = Object.keys(this.factions).filter(key => 
+                    key !== factionKey && faction.relations[key] < -25
+                );
+                
+                if (enemies.length === 0) {
+                    this.logAction("❌ No suitable targets for war declaration!");
+                    return;
+                }
+                
+                const target = enemies[Math.floor(Math.random() * enemies.length)];
+                const targetFaction = this.factions[target];
+                
+                faction.relations[target] = -100;
+                targetFaction.relations[factionKey] = -100;
+                
+                // War affects other relations
+                Object.keys(faction.relations).forEach(otherKey => {
+                    if (otherKey !== target && this.factions[otherKey].relations[target] > 0) {
+                        faction.relations[otherKey] -= 20;
+                        this.factions[otherKey].relations[factionKey] -= 20;
+                    }
+                });
+                
+                this.warCount++;
+                this.logAction(`⚔️ ${faction.name} declares war on ${targetFaction.name}!`);
+                this.logAction(`🌍 Galactic stability decreased. Other factions react negatively.`);
+                this.eventCount++;
+                this.updateDisplay();
+            }
+
+            callGalacticCouncil() {
+                this.logAction("🏛️ Galactic Council convened. All factions attending...");
+                
+                // Council improves overall relations slightly
+                Object.keys(this.factions).forEach(faction1 => {
+                    Object.keys(this.factions[faction1].relations).forEach(faction2 => {
+                        if (this.factions[faction1].relations[faction2] > -50) {
+                            this.factions[faction1].relations[faction2] += 5;
+                        }
+                    });
+                });
+                
+                this.logAction("🕊️ Diplomatic discussions improve inter-faction relations");
+                this.eventCount++;
+                this.updateDisplay();
+            }
+
+            proposeUniversalPeace() {
+                let peaceTreaty = true;
+                let warringFactions = [];
+                
+                // Check if any factions are at war
+                Object.keys(this.factions).forEach(faction1 => {
+                    Object.keys(this.factions[faction1].relations).forEach(faction2 => {
+                        if (this.factions[faction1].relations[faction2] <= -75) {
+                            warringFactions.push([faction1, faction2]);
+                            peaceTreaty = false;
+                        }
+                    });
+                });
+                
+                if (peaceTreaty) {
+                    this.treaties.push({
+                        name: 'Universal Peace Accord',
+                        members: Object.keys(this.factions),
+                        type: 'peace'
+                    });
+                    this.treatyCount++;
+                    this.warCount = 0;
+                    this.logAction("🕊️ Universal Peace Accord signed by all factions!");
+                    this.logAction("🌌 Galaxy enters new era of cooperation");
+                } else {
+                    this.logAction("❌ Universal Peace rejected due to ongoing conflicts:");
+                    warringFactions.forEach(([f1, f2]) => {
+                        this.logAction(`   • ${this.factions[f1].name} vs ${this.factions[f2].name}`);
+                    });
+                }
+                
+                this.eventCount++;
+                this.updateDisplay();
+            }
+
+            initiateGalacticSummit() {
+                this.logAction("🌟 Galactic Summit initiated! Major diplomatic event in progress...");
+                
+                // Summit creates random diplomatic events
+                const events = [
+                    "Technology sharing agreement proposed",
+                    "Joint exploration initiative launched",
+                    "Cultural exchange program established",
+                    "Galactic defense pact under consideration",
+                    "Trade standardization treaty proposed",
+                    "Refugee assistance protocol established"
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                this.logAction(`📜 Summit Result: ${event}`);
+                
+                // Random relationship changes
+                const factionKeys = Object.keys(this.factions);
+                for (let i = 0; i < 3; i++) {
+                    const f1 = factionKeys[Math.floor(Math.random() * factionKeys.length)];
+                    const f2 = factionKeys[Math.floor(Math.random() * factionKeys.length)];
+                    
+                    if (f1 !== f2 && this.factions[f1].relations[f2] !== undefined) {
+                        const change = (Math.random() - 0.5) * 30;
+                        this.factions[f1].relations[f2] += change;
+                        this.factions[f2].relations[f1] += change;
+                    }
+                }
+                
+                this.eventCount++;
+                this.updateDisplay();
+            }
+
+            acceptProposal(proposalIndex) {
+                if (proposalIndex >= this.proposals.length) return;
+                
+                const proposal = this.proposals[proposalIndex];
+                proposal.support++;
+                
+                if (proposal.support >= proposal.required) {
+                    this.treaties.push({
+                        name: proposal.name,
+                        members: [proposal.proposer, 'terran'], // Simplified
+                        type: proposal.type
+                    });
+                    this.treatyCount++;
+                    this.proposals.splice(proposalIndex, 1);
+                    this.logAction(`✅ ${proposal.name} approved and enacted!`);
+                } else {
+                    this.logAction(`📊 ${proposal.name} support: ${proposal.support}/${proposal.required}`);
+                }
+                
+                this.updateDisplay();
+            }
+
+            rejectProposal(proposalIndex) {
+                if (proposalIndex >= this.proposals.length) return;
+                
+                const proposal = this.proposals[proposalIndex];
+                this.proposals.splice(proposalIndex, 1);
+                this.logAction(`❌ ${proposal.name} rejected`);
+                
+                // Decrease relations with proposer
+                if (this.factions.terran.relations[proposal.proposer] !== undefined) {
+                    this.factions.terran.relations[proposal.proposer] -= 15;
+                    this.factions[proposal.proposer].relations.terran -= 15;
+                }
+                
+                this.updateDisplay();
+            }
+
+            nextTurn() {
+                this.turn++;
+                
+                // Generate resources and events
+                Object.keys(this.factions).forEach(key => {
+                    const faction = this.factions[key];
+                    faction.credits += faction.systems * 100;
+                    faction.influence += Math.floor(faction.systems * 2.5);
+                    
+                    if (Math.random() > 0.7) {
+                        faction.fleet += Math.floor(Math.random() * 50) + 10;
+                    }
+                });
+                
+                // Random diplomatic events
+                if (Math.random() > 0.6) {
+                    this.generateRandomEvent();
+                }
+                
+                // Update trade routes
+                this.starSystems.forEach(system => {
+                    if (system.tradeRoute) {
+                        this.factions[system.owner].credits += Math.floor(system.resources * 0.1);
+                    }
+                });
+                
+                this.logAction(`📅 Turn ${this.turn} begins. Resources generated and events processed.`);
+                this.updateDisplay();
+            }
+
+            generateRandomEvent() {
+                const events = [
+                    { message: "🌠 Rare asteroid discovered! All factions gain resources", effect: 'resource_boost' },
+                    { message: "👽 First contact with unknown species!", effect: 'new_faction' },
+                    { message: "☄️ Comet threatens inhabited system", effect: 'crisis' },
+                    { message: "🔬 Revolutionary technology breakthrough", effect: 'tech_advance' },
+                    { message: "🏴‍☠️ Pirate activity increases in outer systems", effect: 'pirate_threat' },
+                    { message: "🌌 Galactic phenomenon affects trade routes", effect: 'trade_disruption' }
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                this.logAction(event.message);
+                
+                // Apply event effects
+                switch (event.effect) {
+                    case 'resource_boost':
+                        Object.keys(this.factions).forEach(key => {
+                            this.factions[key].credits += 2000;
+                        });
+                        break;
+                    case 'crisis':
+                        // Crisis brings factions together
+                        Object.keys(this.factions).forEach(faction1 => {
+                            Object.keys(this.factions[faction1].relations).forEach(faction2 => {
+                                this.factions[faction1].relations[faction2] += 10;
+                            });
+                        });
+                        break;
+                    case 'trade_disruption':
+                        Object.keys(this.factions).forEach(key => {
+                            this.factions[key].credits = Math.max(0, this.factions[key].credits - 1000);
+                        });
+                        break;
+                }
+                
+                this.eventCount++;
+            }
+
+            viewDiplomaticHistory() {
+                this.logAction("📚 Diplomatic History Archive:");
+                this.logAction(`   • Total Treaties Signed: ${this.treatyCount}`);
+                this.logAction(`   • Active Wars: ${this.warCount}`);
+                this.logAction(`   • Diplomatic Events: ${this.eventCount}`);
+                this.logAction(`   • Embassy Count: ${this.starSystems.filter(s => s.embassy).length}`);
+                this.logAction(`   • Trade Routes: ${this.starSystems.filter(s => s.tradeRoute).length}`);
+            }
+
+            analyzeInfluence() {
+                this.logAction("📈 Galactic Influence Analysis:");
+                
+                const sortedFactions = Object.entries(this.factions)
+                    .sort(([,a], [,b]) => b.influence - a.influence);
+                
+                sortedFactions.forEach(([key, faction], index) => {
+                    this.logAction(`   ${index + 1}. ${faction.name}: ${faction.influence} influence`);
+                });
+                
+                const totalStability = this.calculateGalaxyStability();
+                this.logAction(`🌌 Galaxy Stability Index: ${totalStability}%`);
+            }
+
+            calculateGalaxyStability() {
+                let totalRelations = 0;
+                let relationCount = 0;
+                
+                Object.keys(this.factions).forEach(faction1 => {
+                    Object.keys(this.factions[faction1].relations).forEach(faction2 => {
+                        totalRelations += this.factions[faction1].relations[faction2];
+                        relationCount++;
+                    });
+                });
+                
+                const averageRelation = totalRelations / relationCount;
+                return Math.max(0, Math.min(100, Math.floor(50 + (averageRelation / 2))));
+            }
+
+            newGame() {
+                this.turn = 1;
+                this.treatyCount = 4;
+                this.warCount = 1;
+                this.eventCount = 7;
+                
+                // Reset faction data
+                Object.keys(this.factions).forEach(key => {
+                    const faction = this.factions[key];
+                    faction.credits = [10000, 12000, 15000, 8000, 11000][Object.keys(this.factions).indexOf(key)];
+                    faction.fleet = [850, 950, 600, 750, 800][Object.keys(this.factions).indexOf(key)];
+                    faction.influence = [750, 680, 900, 500, 820][Object.keys(this.factions).indexOf(key)];
+                    faction.systems = [12, 10, 8, 6, 14][Object.keys(this.factions).indexOf(key)];
+                });
+                
+                // Reset relations to initial state
+                this.factions.terran.relations = { zephyr: 0, nova: 25, apex: -50, cosmic: 75 };
+                this.factions.zephyr.relations = { terran: 0, nova: 60, apex: -25, cosmic: -40 };
+                this.factions.nova.relations = { terran: 25, zephyr: 60, apex: 10, cosmic: -20 };
+                this.factions.apex.relations = { terran: -50, zephyr: -25, nova: 10, cosmic: -60 };
+                this.factions.cosmic.relations = { terran: 75, zephyr: -40, nova: -20, apex: -60 };
+                
+                this.generateStarSystems();
+                this.selectedSystem = null;
+                this.proposals = [
+                    { name: 'Apex Integration Treaty', proposer: 'apex', type: 'alliance', support: 2, required: 3 }
+                ];
+                
+                this.updateDisplay();
+                this.render();
+                this.logAction("🆕 New galactic campaign initiated! Begin your diplomatic conquest!");
+            }
+
+            updateDisplay() {
+                // Update faction displays
+                Object.keys(this.factions).forEach(key => {
+                    const faction = this.factions[key];
+                    if (document.getElementById(`${key}Credits`)) {
+                        document.getElementById(`${key}Credits`).textContent = faction.credits.toLocaleString();
+                        document.getElementById(`${key}Fleet`).textContent = faction.fleet;
+                        document.getElementById(`${key}Influence`).textContent = faction.influence;
+                        document.getElementById(`${key}Systems`).textContent = faction.systems;
+                    }
+                });
+                
+                // Update relation displays for Terran Federation (main faction)
+                const terran = this.factions.terran;
+                Object.keys(terran.relations).forEach(factionKey => {
+                    const relationValue = terran.relations[factionKey];
+                    const elementId = `terran${factionKey.charAt(0).toUpperCase() + factionKey.slice(1)}`;
+                    const element = document.getElementById(elementId);
+                    
+                    if (element) {
+                        if (relationValue >= 50) {
+                            element.textContent = 'Allied';
+                            element.className = 'relation-status relation-allied';
+                        } else if (relationValue >= 10) {
+                            element.textContent = 'Trade';
+                            element.className = 'relation-status relation-trade';
+                        } else if (relationValue >= -25) {
+                            element.textContent = 'Neutral';
+                            element.className = 'relation-status relation-neutral';
+                        } else {
+                            element.textContent = 'Hostile';
+                            element.className = 'relation-status relation-hostile';
+                        }
+                    }
+                });
+                
+                // Update stats
+                document.getElementById('turnCounter').textContent = this.turn;
+                document.getElementById('treatyCount').textContent = this.treatyCount;
+                document.getElementById('warCount').textContent = this.warCount;
+                document.getElementById('stabilityIndex').textContent = this.calculateGalaxyStability() + '%';
+                document.getElementById('eventCount').textContent = this.eventCount;
+                
+                // Update trade volume
+                const tradeVolume = this.starSystems.reduce((sum, system) => {
+                    return sum + (system.tradeRoute ? system.resources * 0.001 : 0);
+                }, 0);
+                document.getElementById('tradeVolume').textContent = tradeVolume.toFixed(1) + 'M';
+            }
+
+            render() {
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw star systems
+                this.starSystems.forEach(system => {
+                    const faction = this.factions[system.owner];
+                    
+                    // System glow
+                    this.ctx.fillStyle = faction.color;
+                    this.ctx.globalAlpha = 0.3;
+                    this.ctx.beginPath();
+                    this.ctx.arc(system.x, system.y, 20, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.globalAlpha = 1;
+                    
+                    // System core
+                    this.ctx.fillStyle = faction.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(system.x, system.y, 8, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Embassy indicator
+                    if (system.embassy) {
+                        this.ctx.strokeStyle = '#ffffff';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.arc(system.x, system.y, 12, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                    
+                    // Trade route indicator
+                    if (system.tradeRoute) {
+                        this.ctx.fillStyle = '#f39c12';
+                        this.ctx.beginPath();
+                        this.ctx.arc(system.x - 10, system.y - 10, 3, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    
+                    // Selection highlight
+                    if (this.selectedSystem === system) {
+                        this.ctx.strokeStyle = '#ffffff';
+                        this.ctx.lineWidth = 3;
+                        this.ctx.beginPath();
+                        this.ctx.arc(system.x, system.y, 15, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                    
+                    // Hover highlight
+                    if (this.hoveredSystem === system) {
+                        this.ctx.fillStyle = '#ffffff';
+                        this.ctx.font = '12px Arial';
+                        this.ctx.fillText(system.name, system.x + 20, system.y - 10);
+                        this.ctx.fillText(`${faction.name}`, system.x + 20, system.y + 5);
+                        this.ctx.fillText(`Strategic Value: ${system.strategicValue}`, system.x + 20, system.y + 20);
+                    }
+                });
+                
+                // Draw trade routes
+                this.ctx.strokeStyle = 'rgba(243, 156, 18, 0.3)';
+                this.ctx.lineWidth = 2;
+                this.starSystems.forEach(system1 => {
+                    if (system1.tradeRoute) {
+                        this.starSystems.forEach(system2 => {
+                            if (system2.tradeRoute && system1 !== system2) {
+                                const distance = Math.sqrt((system1.x - system2.x) ** 2 + (system1.y - system2.y) ** 2);
+                                if (distance < 150) {
+                                    this.ctx.beginPath();
+                                    this.ctx.moveTo(system1.x, system1.y);
+                                    this.ctx.lineTo(system2.x, system2.y);
+                                    this.ctx.stroke();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            logAction(message) {
+                const log = document.getElementById('diplomaticLog');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                log.insertBefore(entry, log.firstChild);
+                
+                // Keep only last 12 entries
+                while (log.children.length > 12) {
+                    log.removeChild(log.lastChild);
+                }
+            }
+        }
+
+        // Initialize the game when page loads
+        let game;
+        window.addEventListener('load', () => {
+            game = new GalacticAllianceBuilder();
+        });
+    </script>
+</body>
+</html>

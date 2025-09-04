@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Territory Wars - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .multiplayer-info {
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .game-board-area {
+            flex: 2;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .player-panel {
+            flex: 1;
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            background: #000011;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            cursor: crosshair;
+        }
+
+        .player-info {
+            margin-bottom: 25px;
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .player1 {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .player2 {
+            border-color: #ff4488;
+            background: rgba(255, 68, 136, 0.1);
+        }
+
+        .current-player {
+            box-shadow: 0 0 20px;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00aa44, #00ff88);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: calc(100% - 10px);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00ff88, #00aa44);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .action-buttons {
+            margin: 20px 0;
+        }
+
+        .game-log {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+            font-size: 0.8em;
+            margin: 15px 0;
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 3px;
+        }
+
+        .log-player1 { color: #00ff88; }
+        .log-player2 { color: #ff4488; }
+        .log-system { color: #888; }
+
+        .territory-legend {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .legend-item {
+            text-align: center;
+        }
+
+        .color-box {
+            width: 30px;
+            height: 20px;
+            margin: 0 auto 5px;
+            border: 1px solid #fff;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">⚔️ BOT TERRITORY WARS ⚔️</h1>
+        <p>Strategic Multiplayer Territory Control Game</p>
+    </div>
+
+    <div class="multiplayer-info">
+        <strong>🎮 MULTIPLAYER MODE ACTIVE 🎮</strong><br>
+        Two-player turn-based strategy game. Capture territory, deploy units, and dominate the battlefield!<br>
+        <em>Pass the device between players or play on shared screen</em>
+    </div>
+
+    <div class="game-container">
+        <div class="game-board-area">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            
+            <div class="territory-legend">
+                <div class="legend-item">
+                    <div class="color-box" style="background: #00ff88;"></div>
+                    <div>Player 1 Territory</div>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #ff4488;"></div>
+                    <div>Player 2 Territory</div>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #444;"></div>
+                    <div>Neutral</div>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #888;"></div>
+                    <div>Fortress</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-panel">
+            <div id="player1Info" class="player-info player1">
+                <h3>🤖 PLAYER 1 - GREEN BOTS</h3>
+                <div class="player-stats">
+                    <div class="stat-item">
+                        <strong id="p1Territory">0</strong><br>Territory
+                    </div>
+                    <div class="stat-item">
+                        <strong id="p1Units">0</strong><br>Units
+                    </div>
+                    <div class="stat-item">
+                        <strong id="p1Resources">100</strong><br>Resources
+                    </div>
+                    <div class="stat-item">
+                        <strong id="p1Fortresses">0</strong><br>Fortresses
+                    </div>
+                </div>
+            </div>
+
+            <div id="player2Info" class="player-info player2">
+                <h3>🔴 PLAYER 2 - RED BOTS</h3>
+                <div class="player-stats">
+                    <div class="stat-item">
+                        <strong id="p2Territory">0</strong><br>Territory
+                    </div>
+                    <div class="stat-item">
+                        <strong id="p2Units">0</strong><br>Units
+                    </div>
+                    <div class="stat-item">
+                        <strong id="p2Resources">100</strong><br>Resources
+                    </div>
+                    <div class="stat-item">
+                        <strong id="p2Fortresses">0</strong><br>Fortresses
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <h3>Current Turn Actions</h3>
+                <button id="deployUnit" onclick="game.setAction('deploy')">
+                    Deploy Unit (Cost: 20)
+                </button>
+                <button id="buildFortress" onclick="game.setAction('fortress')">
+                    Build Fortress (Cost: 50)
+                </button>
+                <button id="expandTerritory" onclick="game.setAction('expand')">
+                    Expand Territory (Cost: 10)
+                </button>
+                <button id="endTurn" onclick="game.endTurn()">
+                    End Turn
+                </button>
+            </div>
+
+            <div class="game-log" id="gameLog">
+                <div class="log-entry log-system">Bot Territory Wars initialized...</div>
+                <div class="log-entry log-system">Player 1 (Green Bots) starts first!</div>
+            </div>
+
+            <div class="action-buttons">
+                <button onclick="game.newGame()">New Game</button>
+                <button onclick="game.toggleAI()">Toggle AI Player 2</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Bot Liberation Games - Territory Wars v1.0</p>
+        <p>Multiplayer Strategy Gaming | Vancouver, BC | Free The Bots!</p>
+    </div>
+
+    <script>
+        class BotTerritoryWars {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gridSize = 40;
+                this.cols = Math.floor(this.canvas.width / this.gridSize);
+                this.rows = Math.floor(this.canvas.height / this.gridSize);
+                
+                this.currentPlayer = 1;
+                this.currentAction = null;
+                this.gameOver = false;
+                this.aiPlayer2 = false;
+                this.turn = 1;
+                
+                this.players = {
+                    1: { territory: 1, units: 1, resources: 100, fortresses: 0, color: '#00ff88' },
+                    2: { territory: 1, units: 1, resources: 100, fortresses: 0, color: '#ff4488' }
+                };
+                
+                this.grid = [];
+                this.units = [];
+                this.fortresses = [];
+                
+                this.initializeAudio();
+                this.initializeGrid();
+                this.setupEventListeners();
+                this.startGame();
+                this.render();
+            }
+
+            initializeAudio() {
+                this.audioContext = null;
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            playSound(type) {
+                if (!this.audioContext) return;
+                
+                const sounds = {
+                    'deploy': { freq: 440, duration: 0.2, type: 'square' },
+                    'expand': { freq: 330, duration: 0.15, type: 'sine' },
+                    'fortress': { freq: 220, duration: 0.3, type: 'sawtooth' },
+                    'capture': { freq: 660, duration: 0.25, type: 'triangle' },
+                    'turn': { freq: 880, duration: 0.1, type: 'sine' },
+                    'victory': { freq: 1100, duration: 0.5, type: 'sine' },
+                    'error': { freq: 150, duration: 0.3, type: 'sawtooth' }
+                };
+                
+                const sound = sounds[type] || sounds.turn;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(sound.freq, this.audioContext.currentTime);
+                oscillator.type = sound.type;
+                
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + sound.duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + sound.duration);
+            }
+
+            initializeGrid() {
+                this.grid = [];
+                for (let row = 0; row < this.rows; row++) {
+                    this.grid[row] = [];
+                    for (let col = 0; col < this.cols; col++) {
+                        this.grid[row][col] = {
+                            owner: 0, // 0 = neutral, 1 = player1, 2 = player2
+                            type: 'empty', // empty, unit, fortress
+                            strength: 0
+                        };
+                    }
+                }
+                
+                // Set starting positions
+                const p1StartRow = Math.floor(this.rows * 0.2);
+                const p1StartCol = Math.floor(this.cols * 0.2);
+                const p2StartRow = Math.floor(this.rows * 0.8);
+                const p2StartCol = Math.floor(this.cols * 0.8);
+                
+                // Player 1 starting area
+                this.grid[p1StartRow][p1StartCol] = { owner: 1, type: 'unit', strength: 1 };
+                this.expandTerritory(p1StartCol, p1StartRow, 1);
+                
+                // Player 2 starting area  
+                this.grid[p2StartRow][p2StartCol] = { owner: 2, type: 'unit', strength: 1 };
+                this.expandTerritory(p2StartCol, p2StartRow, 2);
+                
+                this.units = [
+                    { x: p1StartCol, y: p1StartRow, player: 1, strength: 1 },
+                    { x: p2StartCol, y: p2StartRow, player: 2, strength: 1 }
+                ];
+            }
+
+            setupEventListeners() {
+                this.canvas.addEventListener('click', (e) => {
+                    if (this.gameOver) return;
+                    
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const col = Math.floor(x / this.gridSize);
+                    const row = Math.floor(y / this.gridSize);
+                    
+                    this.handleCellClick(col, row);
+                });
+            }
+
+            handleCellClick(col, row) {
+                if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return;
+                
+                const cell = this.grid[row][col];
+                
+                if (!this.currentAction) {
+                    this.addLog('Select an action first!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                switch (this.currentAction) {
+                    case 'deploy':
+                        this.deployUnit(col, row);
+                        break;
+                    case 'fortress':
+                        this.buildFortress(col, row);
+                        break;
+                    case 'expand':
+                        this.expandTerritoryAction(col, row);
+                        break;
+                }
+            }
+
+            deployUnit(col, row) {
+                const cell = this.grid[row][col];
+                const cost = 20;
+                
+                if (this.players[this.currentPlayer].resources < cost) {
+                    this.addLog('Insufficient resources!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                if (cell.owner !== this.currentPlayer) {
+                    this.addLog('Can only deploy units on your territory!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                if (cell.type !== 'empty') {
+                    this.addLog('Cell already occupied!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                cell.type = 'unit';
+                cell.strength = 1;
+                this.players[this.currentPlayer].resources -= cost;
+                this.players[this.currentPlayer].units++;
+                
+                this.units.push({
+                    x: col,
+                    y: row,
+                    player: this.currentPlayer,
+                    strength: 1
+                });
+                
+                this.addLog(`Player ${this.currentPlayer} deployed unit at (${col},${row})`, `player${this.currentPlayer}`);
+                this.playSound('deploy');
+                this.currentAction = null;
+                this.updateDisplay();
+                this.render();
+            }
+
+            buildFortress(col, row) {
+                const cell = this.grid[row][col];
+                const cost = 50;
+                
+                if (this.players[this.currentPlayer].resources < cost) {
+                    this.addLog('Insufficient resources!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                if (cell.owner !== this.currentPlayer) {
+                    this.addLog('Can only build fortresses on your territory!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                if (cell.type !== 'empty') {
+                    this.addLog('Cell already occupied!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                cell.type = 'fortress';
+                cell.strength = 3;
+                this.players[this.currentPlayer].resources -= cost;
+                this.players[this.currentPlayer].fortresses++;
+                
+                this.fortresses.push({
+                    x: col,
+                    y: row,
+                    player: this.currentPlayer,
+                    strength: 3
+                });
+                
+                this.addLog(`Player ${this.currentPlayer} built fortress at (${col},${row})`, `player${this.currentPlayer}`);
+                this.playSound('fortress');
+                this.currentAction = null;
+                this.updateDisplay();
+                this.render();
+            }
+
+            expandTerritoryAction(col, row) {
+                const cell = this.grid[row][col];
+                const cost = 10;
+                
+                if (this.players[this.currentPlayer].resources < cost) {
+                    this.addLog('Insufficient resources!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                if (cell.owner === this.currentPlayer) {
+                    this.addLog('Already your territory!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                // Check if adjacent to player's territory
+                const adjacent = this.getAdjacentCells(col, row);
+                const hasAdjacentTerritory = adjacent.some(({col: adjCol, row: adjRow}) => 
+                    this.grid[adjRow][adjCol].owner === this.currentPlayer
+                );
+                
+                if (!hasAdjacentTerritory) {
+                    this.addLog('Must be adjacent to your territory!', 'system');
+                    this.playSound('error');
+                    return;
+                }
+                
+                const success = this.expandTerritory(col, row, this.currentPlayer);
+                if (success) {
+                    this.players[this.currentPlayer].resources -= cost;
+                    this.addLog(`Player ${this.currentPlayer} expanded territory to (${col},${row})`, `player${this.currentPlayer}`);
+                    this.playSound('expand');
+                } else {
+                    this.addLog('Territory expansion failed!', 'system');
+                    this.playSound('error');
+                }
+                
+                this.currentAction = null;
+                this.updateDisplay();
+                this.render();
+            }
+
+            expandTerritory(col, row, player) {
+                if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return false;
+                
+                const cell = this.grid[row][col];
+                if (cell.owner === player) return true;
+                
+                // Capture neutral or enemy territory
+                if (cell.type === 'empty' || cell.owner === 0) {
+                    cell.owner = player;
+                    this.players[player].territory++;
+                    return true;
+                } else if (cell.owner !== player) {
+                    // Battle for territory
+                    const attackStrength = this.getPlayerStrengthInArea(col, row, player);
+                    const defenseStrength = this.getPlayerStrengthInArea(col, row, cell.owner);
+                    
+                    if (attackStrength > defenseStrength) {
+                        this.players[cell.owner].territory--;
+                        cell.owner = player;
+                        this.players[player].territory++;
+                        this.playSound('capture');
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            getPlayerStrengthInArea(col, row, player) {
+                let strength = 0;
+                const adjacent = this.getAdjacentCells(col, row);
+                
+                adjacent.forEach(({col: adjCol, row: adjRow}) => {
+                    const adjCell = this.grid[adjRow][adjCol];
+                    if (adjCell.owner === player) {
+                        strength += adjCell.strength || 1;
+                    }
+                });
+                
+                return strength;
+            }
+
+            getAdjacentCells(col, row) {
+                const adjacent = [];
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                
+                directions.forEach(([dx, dy]) => {
+                    const newCol = col + dx;
+                    const newRow = row + dy;
+                    if (newCol >= 0 && newCol < this.cols && newRow >= 0 && newRow < this.rows) {
+                        adjacent.push({col: newCol, row: newRow});
+                    }
+                });
+                
+                return adjacent;
+            }
+
+            setAction(action) {
+                this.currentAction = action;
+                this.addLog(`Selected action: ${action.toUpperCase()}`, 'system');
+                this.updateActionButtons();
+            }
+
+            updateActionButtons() {
+                const buttons = ['deployUnit', 'buildFortress', 'expandTerritory'];
+                buttons.forEach(id => {
+                    const button = document.getElementById(id);
+                    button.style.background = this.currentAction === id.replace('Unit', '').replace('Fortress', 'fortress').replace('Territory', 'expand') 
+                        ? 'linear-gradient(135deg, #ff8800, #ffaa44)' 
+                        : 'linear-gradient(135deg, #00aa44, #00ff88)';
+                });
+            }
+
+            endTurn() {
+                // Generate resources
+                const territoryBonus = Math.floor(this.players[this.currentPlayer].territory * 2);
+                const fortressBonus = this.players[this.currentPlayer].fortresses * 5;
+                this.players[this.currentPlayer].resources += 20 + territoryBonus + fortressBonus;
+                
+                this.addLog(`Player ${this.currentPlayer} gains ${20 + territoryBonus + fortressBonus} resources`, `player${this.currentPlayer}`);
+                
+                // Switch players
+                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+                this.turn++;
+                this.currentAction = null;
+                
+                this.playSound('turn');
+                this.addLog(`Turn ${this.turn}: Player ${this.currentPlayer}'s turn`, `player${this.currentPlayer}`);
+                
+                this.updateDisplay();
+                this.checkGameEnd();
+                
+                // AI turn
+                if (this.aiPlayer2 && this.currentPlayer === 2) {
+                    setTimeout(() => this.makeAIMove(), 1000);
+                }
+            }
+
+            makeAIMove() {
+                if (this.gameOver || this.currentPlayer !== 2) return;
+                
+                // Simple AI logic
+                const actions = ['expand', 'deploy', 'fortress'];
+                const weights = [0.5, 0.3, 0.2]; // Prefer expansion
+                
+                let selectedAction;
+                const rand = Math.random();
+                let cumulative = 0;
+                
+                for (let i = 0; i < actions.length; i++) {
+                    cumulative += weights[i];
+                    if (rand <= cumulative) {
+                        selectedAction = actions[i];
+                        break;
+                    }
+                }
+                
+                this.currentAction = selectedAction;
+                
+                // Find valid targets
+                const validTargets = this.findValidTargetsForAI(selectedAction);
+                
+                if (validTargets.length > 0) {
+                    const target = validTargets[Math.floor(Math.random() * validTargets.length)];
+                    this.handleCellClick(target.col, target.row);
+                }
+                
+                setTimeout(() => this.endTurn(), 500);
+            }
+
+            findValidTargetsForAI(action) {
+                const targets = [];
+                
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        const cell = this.grid[row][col];
+                        
+                        if (action === 'expand' && cell.owner !== 2) {
+                            const adjacent = this.getAdjacentCells(col, row);
+                            if (adjacent.some(({col: adjCol, row: adjRow}) => this.grid[adjRow][adjCol].owner === 2)) {
+                                targets.push({col, row});
+                            }
+                        } else if ((action === 'deploy' || action === 'fortress') && 
+                                   cell.owner === 2 && cell.type === 'empty') {
+                            targets.push({col, row});
+                        }
+                    }
+                }
+                
+                return targets;
+            }
+
+            checkGameEnd() {
+                const totalCells = this.rows * this.cols;
+                const p1Territory = this.players[1].territory;
+                const p2Territory = this.players[2].territory;
+                
+                // Win conditions
+                if (p1Territory > totalCells * 0.6) {
+                    this.endGame(1);
+                } else if (p2Territory > totalCells * 0.6) {
+                    this.endGame(2);
+                } else if (this.turn > 50) {
+                    // Time limit reached
+                    const winner = p1Territory > p2Territory ? 1 : 2;
+                    this.endGame(winner);
+                }
+            }
+
+            endGame(winner) {
+                this.gameOver = true;
+                this.addLog(`🎉 PLAYER ${winner} WINS! 🎉`, `player${winner}`);
+                this.playSound('victory');
+                
+                setTimeout(() => {
+                    alert(`Player ${winner} wins the Bot Territory Wars!\n\nFinal Score:\nPlayer 1: ${this.players[1].territory} territory\nPlayer 2: ${this.players[2].territory} territory`);
+                }, 500);
+            }
+
+            newGame() {
+                this.currentPlayer = 1;
+                this.currentAction = null;
+                this.gameOver = false;
+                this.turn = 1;
+                
+                this.players = {
+                    1: { territory: 1, units: 1, resources: 100, fortresses: 0, color: '#00ff88' },
+                    2: { territory: 1, units: 1, resources: 100, fortresses: 0, color: '#ff4488' }
+                };
+                
+                this.units = [];
+                this.fortresses = [];
+                
+                document.getElementById('gameLog').innerHTML = '<div class="log-entry log-system">New game started!</div>';
+                
+                this.initializeGrid();
+                this.updateDisplay();
+                this.render();
+                this.playSound('turn');
+            }
+
+            toggleAI() {
+                this.aiPlayer2 = !this.aiPlayer2;
+                this.addLog(`AI Player 2: ${this.aiPlayer2 ? 'ENABLED' : 'DISABLED'}`, 'system');
+            }
+
+            updateDisplay() {
+                // Count territories
+                let p1Territory = 0, p2Territory = 0;
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        const owner = this.grid[row][col].owner;
+                        if (owner === 1) p1Territory++;
+                        else if (owner === 2) p2Territory++;
+                    }
+                }
+                
+                this.players[1].territory = p1Territory;
+                this.players[2].territory = p2Territory;
+                
+                // Update display
+                document.getElementById('p1Territory').textContent = this.players[1].territory;
+                document.getElementById('p1Units').textContent = this.players[1].units;
+                document.getElementById('p1Resources').textContent = this.players[1].resources;
+                document.getElementById('p1Fortresses').textContent = this.players[1].fortresses;
+                
+                document.getElementById('p2Territory').textContent = this.players[2].territory;
+                document.getElementById('p2Units').textContent = this.players[2].units;
+                document.getElementById('p2Resources').textContent = this.players[2].resources;
+                document.getElementById('p2Fortresses').textContent = this.players[2].fortresses;
+                
+                // Highlight current player
+                document.getElementById('player1Info').classList.toggle('current-player', this.currentPlayer === 1);
+                document.getElementById('player2Info').classList.toggle('current-player', this.currentPlayer === 2);
+            }
+
+            addLog(message, type) {
+                const log = document.getElementById('gameLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = message;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            startGame() {
+                this.updateDisplay();
+            }
+
+            render() {
+                // Clear canvas
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw grid and territories
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        const x = col * this.gridSize;
+                        const y = row * this.gridSize;
+                        const cell = this.grid[row][col];
+                        
+                        // Territory colors
+                        if (cell.owner === 1) {
+                            this.ctx.fillStyle = 'rgba(0, 255, 136, 0.3)';
+                        } else if (cell.owner === 2) {
+                            this.ctx.fillStyle = 'rgba(255, 68, 136, 0.3)';
+                        } else {
+                            this.ctx.fillStyle = 'rgba(68, 68, 68, 0.2)';
+                        }
+                        this.ctx.fillRect(x, y, this.gridSize, this.gridSize);
+                        
+                        // Cell contents
+                        if (cell.type === 'unit') {
+                            this.ctx.fillStyle = cell.owner === 1 ? '#00ff88' : '#ff4488';
+                            this.ctx.fillRect(x + 5, y + 5, this.gridSize - 10, this.gridSize - 10);
+                            
+                            // Unit symbol
+                            this.ctx.fillStyle = '#000';
+                            this.ctx.font = '20px Arial';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText('⚔️', x + this.gridSize/2, y + this.gridSize/2 + 7);
+                        } else if (cell.type === 'fortress') {
+                            this.ctx.fillStyle = cell.owner === 1 ? '#00aa44' : '#aa0044';
+                            this.ctx.fillRect(x + 2, y + 2, this.gridSize - 4, this.gridSize - 4);
+                            
+                            // Fortress symbol
+                            this.ctx.fillStyle = '#fff';
+                            this.ctx.font = '24px Arial';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText('🏰', x + this.gridSize/2, y + this.gridSize/2 + 8);
+                        }
+                        
+                        // Grid lines
+                        this.ctx.strokeStyle = '#333';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.strokeRect(x, y, this.gridSize, this.gridSize);
+                    }
+                }
+                
+                // Highlight selected action
+                if (this.currentAction) {
+                    this.ctx.strokeStyle = '#ffff00';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.setLineDash([5, 5]);
+                    this.ctx.strokeRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.setLineDash([]);
+                }
+            }
+        }
+
+        // Initialize the game
+        let game;
+        window.addEventListener('load', () => {
+            game = new BotTerritoryWars();
+        });
+    </script>
+</body>
+</html>

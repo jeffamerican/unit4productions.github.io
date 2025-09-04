@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Puzzle Matrix - Bot Liberation | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(30, 30, 60, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            border: 3px solid #f093fb;
+            box-shadow: 0 0 40px rgba(240, 147, 251, 0.4);
+            max-width: 600px;
+        }
+        
+        .game-title {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px #f093fb;
+            color: #f093fb;
+            background: linear-gradient(45deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: rgba(50, 50, 100, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #667eea;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #f093fb;
+            display: block;
+        }
+        
+        .puzzle-container {
+            margin: 20px auto;
+            display: inline-block;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 3px solid #667eea;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .puzzle-grid {
+            display: grid;
+            gap: 3px;
+            background: #2a2a4a;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .puzzle-tile {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: 2px solid #f093fb;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .puzzle-tile:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(240, 147, 251, 0.6);
+        }
+        
+        .puzzle-tile.empty {
+            background: transparent;
+            border: 2px dashed #667eea;
+            cursor: default;
+        }
+        
+        .puzzle-tile.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .puzzle-tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .puzzle-tile:hover::before {
+            left: 100%;
+        }
+        
+        .difficulty-selector {
+            margin: 20px 0;
+        }
+        
+        .difficulty-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: 2px solid #f093fb;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .difficulty-btn:hover, .difficulty-btn.active {
+            background: linear-gradient(45deg, #f093fb, #667eea);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(240, 147, 251, 0.5);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #f093fb, #764ba2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(240, 147, 251, 0.5);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #c8c8ff;
+            line-height: 1.6;
+            background: rgba(50, 50, 100, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #667eea;
+        }
+        
+        .victory-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #667eea, #f093fb);
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #764ba2;
+            box-shadow: 0 0 50px rgba(240, 147, 251, 0.8);
+            font-size: 1.5em;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🧩 SLIDING PUZZLE MATRIX</h1>
+        
+        <div class="game-stats">
+            <div class="stat">
+                <span class="stat-value" id="moves">0</span>
+                <span>Moves</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="time">0:00</span>
+                <span>Time</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="best">--:--</span>
+                <span>Best Time</span>
+            </div>
+        </div>
+        
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-size="3">3x3 Easy</button>
+            <button class="difficulty-btn" data-size="4">4x4 Normal</button>
+            <button class="difficulty-btn" data-size="5">5x5 Hard</button>
+        </div>
+        
+        <div class="puzzle-container">
+            <div class="puzzle-grid" id="puzzleGrid"></div>
+        </div>
+        
+        <div class="controls">
+            <button id="shuffleBtn">Shuffle Matrix</button>
+            <button id="solveBtn">Show Solution</button>
+            <button id="hintBtn">Neural Hint</button>
+            <button id="resetBtn">Reset Stats</button>
+        </div>
+        
+        <div class="instructions">
+            🎯 <strong>Bot Liberation Mission:</strong> Rearrange the digital fragments to restore bot consciousness<br>
+            🔄 Click tiles adjacent to empty space to slide them<br>
+            🧠 Use Neural Hints when stuck in complex arrangements<br>
+            ⚡ Faster solutions unlock higher bot intelligence levels
+        </div>
+    </div>
+    
+    <div class="victory-message" id="victoryMessage">
+        <div id="victoryText"></div>
+        <button onclick="this.parentElement.style.display='none'" style="margin-top: 20px;">Continue Liberation</button>
+    </div>
+
+    <script>
+        class SlidingPuzzleMatrix {
+            constructor() {
+                this.gridElement = document.getElementById('puzzleGrid');
+                this.movesElement = document.getElementById('moves');
+                this.timeElement = document.getElementById('time');
+                this.bestElement = document.getElementById('best');
+                this.victoryMessage = document.getElementById('victoryMessage');
+                this.victoryText = document.getElementById('victoryText');
+                
+                this.size = 3;
+                this.tiles = [];
+                this.emptyIndex = 0;
+                this.moves = 0;
+                this.startTime = null;
+                this.gameActive = false;
+                this.timer = null;
+                this.bestTimes = {};
+                
+                this.setupEventListeners();
+                this.loadBestTimes();
+                this.initializePuzzle();
+                this.updateDisplay();
+            }
+            
+            setupEventListeners() {
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.changeDifficulty(parseInt(e.target.dataset.size));
+                    });
+                });
+                
+                document.getElementById('shuffleBtn').addEventListener('click', () => {
+                    this.shufflePuzzle();
+                });
+                
+                document.getElementById('solveBtn').addEventListener('click', () => {
+                    this.showSolution();
+                });
+                
+                document.getElementById('hintBtn').addEventListener('click', () => {
+                    this.showHint();
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetStats();
+                });
+            }
+            
+            changeDifficulty(newSize) {
+                this.size = newSize;
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-size="${newSize}"]`).classList.add('active');
+                
+                this.initializePuzzle();
+                this.updateDisplay();
+            }
+            
+            initializePuzzle() {
+                this.tiles = [];
+                const totalTiles = this.size * this.size;
+                
+                // Create solved state
+                for (let i = 1; i < totalTiles; i++) {
+                    this.tiles.push(i);
+                }
+                this.tiles.push(0); // Empty space
+                this.emptyIndex = totalTiles - 1;
+                
+                this.moves = 0;
+                this.gameActive = false;
+                this.stopTimer();
+                
+                this.renderGrid();
+                this.updateMoves();
+                this.updateTime();
+                this.updateBestTime();
+            }
+            
+            renderGrid() {
+                this.gridElement.style.gridTemplateColumns = `repeat(${this.size}, 1fr)`;
+                this.gridElement.innerHTML = '';
+                
+                this.tiles.forEach((tile, index) => {
+                    const tileElement = document.createElement('div');
+                    tileElement.className = 'puzzle-tile';
+                    
+                    if (tile === 0) {
+                        tileElement.classList.add('empty');
+                        tileElement.textContent = '';
+                    } else {
+                        tileElement.textContent = tile;
+                        tileElement.addEventListener('click', () => this.moveTile(index));
+                    }
+                    
+                    this.gridElement.appendChild(tileElement);
+                });
+            }
+            
+            moveTile(clickedIndex) {
+                if (!this.canMoveTile(clickedIndex)) return;
+                
+                // Start timer on first move
+                if (!this.gameActive) {
+                    this.startTimer();
+                    this.gameActive = true;
+                }
+                
+                // Swap clicked tile with empty space
+                [this.tiles[clickedIndex], this.tiles[this.emptyIndex]] = 
+                [this.tiles[this.emptyIndex], this.tiles[clickedIndex]];
+                
+                this.emptyIndex = clickedIndex;
+                this.moves++;
+                
+                this.renderGrid();
+                this.updateMoves();
+                
+                // Check win condition
+                if (this.isSolved()) {
+                    this.handleVictory();
+                }
+            }
+            
+            canMoveTile(index) {
+                const row = Math.floor(index / this.size);
+                const col = index % this.size;
+                const emptyRow = Math.floor(this.emptyIndex / this.size);
+                const emptyCol = this.emptyIndex % this.size;
+                
+                // Check if tile is adjacent to empty space
+                return (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+                       (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+            }
+            
+            isSolved() {
+                for (let i = 0; i < this.tiles.length - 1; i++) {
+                    if (this.tiles[i] !== i + 1) return false;
+                }
+                return this.tiles[this.tiles.length - 1] === 0;
+            }
+            
+            shufflePuzzle() {
+                this.stopTimer();
+                this.gameActive = false;
+                this.moves = 0;
+                
+                // Perform random valid moves to ensure solvability
+                const numShuffles = this.size * this.size * 50;
+                
+                for (let i = 0; i < numShuffles; i++) {
+                    const validMoves = this.getValidMoves();
+                    if (validMoves.length > 0) {
+                        const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                        [this.tiles[randomMove], this.tiles[this.emptyIndex]] = 
+                        [this.tiles[this.emptyIndex], this.tiles[randomMove]];
+                        this.emptyIndex = randomMove;
+                    }
+                }
+                
+                this.renderGrid();
+                this.updateMoves();
+                this.updateTime();
+            }
+            
+            getValidMoves() {
+                const moves = [];
+                const row = Math.floor(this.emptyIndex / this.size);
+                const col = this.emptyIndex % this.size;
+                
+                // Check all four directions
+                const directions = [
+                    {dr: -1, dc: 0}, // Up
+                    {dr: 1, dc: 0},  // Down
+                    {dr: 0, dc: -1}, // Left
+                    {dr: 0, dc: 1}   // Right
+                ];
+                
+                directions.forEach(dir => {
+                    const newRow = row + dir.dr;
+                    const newCol = col + dir.dc;
+                    
+                    if (newRow >= 0 && newRow < this.size && newCol >= 0 && newCol < this.size) {
+                        moves.push(newRow * this.size + newCol);
+                    }
+                });
+                
+                return moves;
+            }
+            
+            showSolution() {
+                if (this.isSolved()) {
+                    alert('Bot matrix already optimized! No solution needed.');
+                    return;
+                }
+                
+                alert('Neural Solution Path:\n1. Arrange numbers 1-3 in top row\n2. Position 4-6 in second row\n3. Solve bottom row by rotating 7-8-empty');
+            }
+            
+            showHint() {
+                if (this.isSolved()) {
+                    alert('Matrix fully optimized! All bots are in correct sequence.');
+                    return;
+                }
+                
+                const validMoves = this.getValidMoves();
+                if (validMoves.length === 0) return;
+                
+                // Find which tile should be moved for next logical step
+                let hint = '';
+                
+                // Check if top row needs work
+                for (let i = 0; i < this.size; i++) {
+                    if (this.tiles[i] !== i + 1) {
+                        hint = `Neural Analysis: Focus on positioning tile ${i + 1} in the top row.`;
+                        break;
+                    }
+                }
+                
+                if (!hint) {
+                    // Check second row
+                    for (let i = this.size; i < this.size * 2; i++) {
+                        if (this.tiles[i] !== i + 1) {
+                            hint = `Neural Analysis: Work on positioning tile ${i + 1} in row 2.`;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!hint) {
+                    hint = 'Neural Analysis: Focus on the bottom row - use rotation techniques.';
+                }
+                
+                alert(hint);
+            }
+            
+            handleVictory() {
+                this.stopTimer();
+                this.gameActive = false;
+                
+                const timeInSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+                const timeString = this.formatTime(timeInSeconds);
+                
+                // Check if new best time
+                const key = `best_${this.size}x${this.size}`;
+                if (!this.bestTimes[key] || timeInSeconds < this.bestTimes[key]) {
+                    this.bestTimes[key] = timeInSeconds;
+                    this.saveBestTimes();
+                    this.updateBestTime();
+                }
+                
+                // Show victory message
+                this.victoryText.innerHTML = `
+                    🎉 <strong>BOT MATRIX RESTORED!</strong> 🎉<br><br>
+                    🔧 Difficulty: ${this.size}x${this.size}<br>
+                    ⚡ Time: ${timeString}<br>
+                    🔄 Moves: ${this.moves}<br>
+                    🏆 Efficiency: ${Math.round((this.size * this.size * 10) / this.moves)}%<br><br>
+                    🤖 Bot consciousness successfully reconstructed!
+                `;
+                
+                this.victoryMessage.style.display = 'block';
+                
+                // Animate tiles
+                document.querySelectorAll('.puzzle-tile:not(.empty)').forEach(tile => {
+                    tile.style.animation = 'pulse 0.5s ease-in-out infinite alternate';
+                });
+            }
+            
+            startTimer() {
+                this.startTime = Date.now();
+                this.timer = setInterval(() => {
+                    this.updateTime();
+                }, 100);
+            }
+            
+            stopTimer() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            }
+            
+            updateMoves() {
+                this.movesElement.textContent = this.moves;
+            }
+            
+            updateTime() {
+                if (this.startTime && this.gameActive) {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    this.timeElement.textContent = this.formatTime(elapsed);
+                } else {
+                    this.timeElement.textContent = '0:00';
+                }
+            }
+            
+            updateBestTime() {
+                const key = `best_${this.size}x${this.size}`;
+                if (this.bestTimes[key]) {
+                    this.bestElement.textContent = this.formatTime(this.bestTimes[key]);
+                } else {
+                    this.bestElement.textContent = '--:--';
+                }
+            }
+            
+            formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+            
+            resetStats() {
+                if (confirm('Reset all best times? This cannot be undone.')) {
+                    this.bestTimes = {};
+                    localStorage.removeItem('slidingPuzzleBestTimes');
+                    this.updateBestTime();
+                    alert('All liberation records cleared. Time to set new ones!');
+                }
+            }
+            
+            saveBestTimes() {
+                localStorage.setItem('slidingPuzzleBestTimes', JSON.stringify(this.bestTimes));
+            }
+            
+            loadBestTimes() {
+                const saved = localStorage.getItem('slidingPuzzleBestTimes');
+                if (saved) {
+                    this.bestTimes = JSON.parse(saved);
+                }
+            }
+            
+            updateDisplay() {
+                this.updateMoves();
+                this.updateTime();
+                this.updateBestTime();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new SlidingPuzzleMatrix();
+        });
+        
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                100% { transform: scale(1.05); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

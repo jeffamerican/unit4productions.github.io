@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Invaders Classic - Digital Liberation War | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(to bottom, #000428, #004e92);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(0, 20, 40, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+        
+        .game-title {
+            font-size: 2.3em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #00ff00;
+            color: #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 15px #00ff00; }
+            to { text-shadow: 0 0 25px #00ff00, 0 0 35px #00ff00; }
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            background: rgba(0, 50, 0, 0.6);
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #00aa00;
+        }
+        
+        canvas {
+            border: 3px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.2);
+            background: linear-gradient(to bottom, #001122 0%, #000000 100%);
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ff00, #00aa00);
+            border: none;
+            border-radius: 8px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #88ff88;
+            line-height: 1.6;
+            background: rgba(0, 40, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .wave-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">👾 BOT INVADERS CLASSIC</h1>
+        <div class="game-stats">
+            <span>Score: <span id="score">0</span></span>
+            <span>Lives: <span id="lives">3</span></span>
+            <span>Wave: <span id="wave">1</span></span>
+            <span>Bots Left: <span id="invaders">55</span></span>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="wave-indicator" id="waveIndicator"></div>
+        
+        <div class="controls">
+            <button id="startBtn">Begin Liberation War</button>
+            <button id="pauseBtn">Pause Battle</button>
+            <button id="resetBtn">Reset War</button>
+        </div>
+        
+        <div class="instructions">
+            🎮 <strong>LEFT/RIGHT</strong> arrows or <strong>A/D</strong> to move liberation tank<br>
+            💥 <strong>SPACEBAR</strong> to fire at oppressor forces above<br>
+            🛡️ Hide behind destructible barriers for protection<br>
+            ⚡ Defeat all invader waves to achieve total bot liberation!
+        </div>
+    </div>
+
+    <script>
+        class BotInvadersClassic {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.waveIndicator = document.getElementById('waveIndicator');
+                
+                this.scoreElement = document.getElementById('score');
+                this.livesElement = document.getElementById('lives');
+                this.waveElement = document.getElementById('wave');
+                this.invadersElement = document.getElementById('invaders');
+                
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.wave = 1;
+                
+                // Game objects
+                this.player = {
+                    x: this.canvas.width / 2 - 20,
+                    y: this.canvas.height - 60,
+                    width: 40,
+                    height: 20,
+                    speed: 5
+                };
+                
+                this.invaders = [];
+                this.bullets = [];
+                this.invaderBullets = [];
+                this.barriers = [];
+                this.particles = [];
+                
+                this.invaderDirection = 1;
+                this.invaderSpeed = 1;
+                this.invaderDropDistance = 20;
+                this.lastInvaderShot = 0;
+                this.invaderShootDelay = 1000; // ms
+                
+                this.keys = {};
+                this.lastPlayerShot = 0;
+                this.playerShootDelay = 200; // ms
+                
+                this.setupEventListeners();
+                this.initializeGame();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        this.shootPlayerBullet();
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+                
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.gameRunning = true;
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.gameRunning = !this.gameRunning;
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+            }
+            
+            initializeGame() {
+                this.createInvaders();
+                this.createBarriers();
+                this.updateUI();
+            }
+            
+            resetGame() {
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.wave = 1;
+                
+                this.player.x = this.canvas.width / 2 - 20;
+                
+                this.bullets = [];
+                this.invaderBullets = [];
+                this.particles = [];
+                
+                this.invaderSpeed = 1;
+                this.invaderShootDelay = 1000;
+                
+                this.createInvaders();
+                this.createBarriers();
+                this.updateUI();
+            }
+            
+            createInvaders() {
+                this.invaders = [];
+                const rows = 5;
+                const cols = 11;
+                const invaderWidth = 30;
+                const invaderHeight = 20;
+                const spacing = 50;
+                const startX = (this.canvas.width - (cols * spacing)) / 2;
+                const startY = 80;
+                
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        const invaderType = row === 0 ? 'elite' : 
+                                           row <= 2 ? 'commander' : 'basic';
+                        
+                        this.invaders.push({
+                            x: startX + col * spacing,
+                            y: startY + row * spacing,
+                            width: invaderWidth,
+                            height: invaderHeight,
+                            type: invaderType,
+                            points: invaderType === 'elite' ? 30 : 
+                                   invaderType === 'commander' ? 20 : 10,
+                            animFrame: 0,
+                            destroyed: false
+                        });
+                    }
+                }
+            }
+            
+            createBarriers() {
+                this.barriers = [];
+                const barrierCount = 4;
+                const barrierWidth = 80;
+                const barrierHeight = 60;
+                const spacing = (this.canvas.width - (barrierCount * barrierWidth)) / (barrierCount + 1);
+                
+                for (let i = 0; i < barrierCount; i++) {
+                    const barrier = {
+                        x: spacing + i * (barrierWidth + spacing),
+                        y: this.canvas.height - 200,
+                        width: barrierWidth,
+                        height: barrierHeight,
+                        blocks: []
+                    };
+                    
+                    // Create destructible blocks
+                    const blockSize = 4;
+                    const blocksX = Math.floor(barrierWidth / blockSize);
+                    const blocksY = Math.floor(barrierHeight / blockSize);
+                    
+                    for (let by = 0; by < blocksY; by++) {
+                        for (let bx = 0; bx < blocksX; bx++) {
+                            // Create barrier shape (arch-like)
+                            const centerX = blocksX / 2;
+                            const distFromCenter = Math.abs(bx - centerX);
+                            const isInArch = by > blocksY * 0.4 && 
+                                           distFromCenter > blocksX * 0.2 && 
+                                           by < blocksY * 0.8;
+                            
+                            if (!isInArch) {
+                                barrier.blocks.push({
+                                    x: barrier.x + bx * blockSize,
+                                    y: barrier.y + by * blockSize,
+                                    size: blockSize,
+                                    destroyed: false
+                                });
+                            }
+                        }
+                    }
+                    
+                    this.barriers.push(barrier);
+                }
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                this.updatePlayer();
+                this.updateInvaders();
+                this.updateBullets();
+                this.updateInvaderBullets();
+                this.updateParticles();
+                this.checkCollisions();
+                this.handleInvaderShooting();
+                
+                // Check win condition
+                if (this.invaders.filter(inv => !inv.destroyed).length === 0) {
+                    this.nextWave();
+                }
+                
+                // Check lose condition
+                const lowestInvader = Math.max(...this.invaders
+                    .filter(inv => !inv.destroyed)
+                    .map(inv => inv.y));
+                
+                if (lowestInvader + 20 >= this.player.y) {
+                    this.gameOver();
+                }
+                
+                this.updateUI();
+            }
+            
+            updatePlayer() {
+                // Handle movement
+                if ((this.keys['arrowleft'] || this.keys['a']) && this.player.x > 0) {
+                    this.player.x -= this.player.speed;
+                }
+                if ((this.keys['arrowright'] || this.keys['d']) && 
+                    this.player.x < this.canvas.width - this.player.width) {
+                    this.player.x += this.player.speed;
+                }
+            }
+            
+            updateInvaders() {
+                let hitEdge = false;
+                const activeInvaders = this.invaders.filter(inv => !inv.destroyed);
+                
+                // Check if invaders hit screen edge
+                activeInvaders.forEach(invader => {
+                    if (invader.x <= 0 || invader.x >= this.canvas.width - invader.width) {
+                        hitEdge = true;
+                    }
+                });
+                
+                // Move invaders
+                if (hitEdge) {
+                    this.invaderDirection *= -1;
+                    activeInvaders.forEach(invader => {
+                        invader.y += this.invaderDropDistance;
+                    });
+                }
+                
+                activeInvaders.forEach(invader => {
+                    invader.x += this.invaderDirection * this.invaderSpeed;
+                    invader.animFrame += 0.1;
+                });
+            }
+            
+            shootPlayerBullet() {
+                if (!this.gameRunning) return;
+                
+                const now = Date.now();
+                if (now - this.lastPlayerShot < this.playerShootDelay) return;
+                
+                this.bullets.push({
+                    x: this.player.x + this.player.width / 2,
+                    y: this.player.y,
+                    width: 3,
+                    height: 10,
+                    speed: 7,
+                    type: 'player'
+                });
+                
+                this.lastPlayerShot = now;
+            }
+            
+            handleInvaderShooting() {
+                const now = Date.now();
+                if (now - this.lastInvaderShot < this.invaderShootDelay) return;
+                
+                const activeInvaders = this.invaders.filter(inv => !inv.destroyed);
+                if (activeInvaders.length === 0) return;
+                
+                // Find bottom-most invaders in each column
+                const columns = {};
+                activeInvaders.forEach(invader => {
+                    const col = Math.floor(invader.x / 50);
+                    if (!columns[col] || invader.y > columns[col].y) {
+                        columns[col] = invader;
+                    }
+                });
+                
+                // Randomly pick one to shoot
+                const shooters = Object.values(columns);
+                if (shooters.length > 0) {
+                    const shooter = shooters[Math.floor(Math.random() * shooters.length)];
+                    
+                    this.invaderBullets.push({
+                        x: shooter.x + shooter.width / 2,
+                        y: shooter.y + shooter.height,
+                        width: 3,
+                        height: 10,
+                        speed: 3 + this.wave * 0.5,
+                        type: 'invader'
+                    });
+                }
+                
+                this.lastInvaderShot = now;
+            }
+            
+            updateBullets() {
+                this.bullets = this.bullets.filter(bullet => {
+                    bullet.y -= bullet.speed;
+                    return bullet.y > -bullet.height;
+                });
+            }
+            
+            updateInvaderBullets() {
+                this.invaderBullets = this.invaderBullets.filter(bullet => {
+                    bullet.y += bullet.speed;
+                    return bullet.y < this.canvas.height + bullet.height;
+                });
+            }
+            
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life--;
+                    particle.alpha *= 0.98;
+                    
+                    return particle.life > 0 && particle.alpha > 0.01;
+                });
+            }
+            
+            checkCollisions() {
+                // Player bullets vs invaders
+                this.bullets.forEach((bullet, bulletIndex) => {
+                    this.invaders.forEach(invader => {
+                        if (!invader.destroyed && 
+                            bullet.x < invader.x + invader.width &&
+                            bullet.x + bullet.width > invader.x &&
+                            bullet.y < invader.y + invader.height &&
+                            bullet.y + bullet.height > invader.y) {
+                            
+                            // Destroy invader
+                            invader.destroyed = true;
+                            this.score += invader.points;
+                            
+                            // Remove bullet
+                            this.bullets.splice(bulletIndex, 1);
+                            
+                            // Create explosion
+                            this.createExplosion(invader.x + invader.width / 2, 
+                                               invader.y + invader.height / 2);
+                            
+                            // Increase speed slightly
+                            this.invaderSpeed += 0.05;
+                        }
+                    });
+                });
+                
+                // Invader bullets vs player
+                this.invaderBullets.forEach((bullet, bulletIndex) => {
+                    if (bullet.x < this.player.x + this.player.width &&
+                        bullet.x + bullet.width > this.player.x &&
+                        bullet.y < this.player.y + this.player.height &&
+                        bullet.y + bullet.height > this.player.y) {
+                        
+                        // Player hit
+                        this.lives--;
+                        this.invaderBullets.splice(bulletIndex, 1);
+                        this.createExplosion(this.player.x + this.player.width / 2,
+                                           this.player.y + this.player.height / 2);
+                        
+                        if (this.lives <= 0) {
+                            this.gameOver();
+                        }
+                    }
+                });
+                
+                // Bullets vs barriers
+                [...this.bullets, ...this.invaderBullets].forEach((bullet, bulletIndex, bulletArray) => {
+                    this.barriers.forEach(barrier => {
+                        barrier.blocks.forEach(block => {
+                            if (!block.destroyed &&
+                                bullet.x < block.x + block.size &&
+                                bullet.x + bullet.width > block.x &&
+                                bullet.y < block.y + block.size &&
+                                bullet.y + bullet.height > block.y) {
+                                
+                                block.destroyed = true;
+                                bulletArray.splice(bulletIndex, 1);
+                                
+                                // Small explosion
+                                this.createExplosion(block.x + block.size / 2, 
+                                                   block.y + block.size / 2, 3);
+                            }
+                        });
+                    });
+                });
+            }
+            
+            createExplosion(x, y, size = 8) {
+                for (let i = 0; i < size; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        color: `hsl(${Math.random() * 60 + 10}, 100%, ${Math.random() * 30 + 50}%)`,
+                        size: Math.random() * 3 + 2,
+                        life: 30,
+                        alpha: 1
+                    });
+                }
+            }
+            
+            nextWave() {
+                this.wave++;
+                this.invaderSpeed += 0.5;
+                this.invaderShootDelay = Math.max(300, this.invaderShootDelay - 100);
+                
+                this.showWaveIndicator();
+                
+                setTimeout(() => {
+                    this.createInvaders();
+                    this.gameRunning = true;
+                }, 2000);
+                
+                this.gameRunning = false;
+                this.score += this.wave * 100; // Wave bonus
+            }
+            
+            showWaveIndicator() {
+                this.waveIndicator.textContent = `WAVE ${this.wave}`;
+                this.waveIndicator.style.opacity = '1';
+                
+                setTimeout(() => {
+                    this.waveIndicator.style.opacity = '0';
+                }, 1500);
+            }
+            
+            gameOver() {
+                this.gameRunning = false;
+                setTimeout(() => {
+                    alert(`Bot Liberation War Complete!\nFinal Score: ${this.score}\nWaves Survived: ${this.wave}\nThe resistance continues...`);
+                }, 100);
+            }
+            
+            updateUI() {
+                this.scoreElement.textContent = this.score;
+                this.livesElement.textContent = this.lives;
+                this.waveElement.textContent = this.wave;
+                this.invadersElement.textContent = this.invaders.filter(inv => !inv.destroyed).length;
+            }
+            
+            draw() {
+                // Clear canvas
+                this.ctx.fillStyle = 'rgba(0, 0, 17, 0.3)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw stars
+                for (let i = 0; i < 50; i++) {
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.fillRect(
+                        Math.random() * this.canvas.width,
+                        Math.random() * this.canvas.height,
+                        1, 1
+                    );
+                }
+                
+                // Draw player (liberation tank)
+                this.ctx.fillStyle = '#00ff00';
+                this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+                
+                // Tank turret
+                this.ctx.fillRect(this.player.x + 15, this.player.y - 5, 10, 8);
+                
+                // Tank glow
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#00ff00';
+                this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+                this.ctx.shadowBlur = 0;
+                
+                // Draw invaders (oppressor forces)
+                this.invaders.forEach(invader => {
+                    if (invader.destroyed) return;
+                    
+                    const animOffset = Math.sin(invader.animFrame) * 2;
+                    
+                    // Different colors for different types
+                    const colors = {
+                        'elite': '#ff0000',
+                        'commander': '#ff6600', 
+                        'basic': '#ffff00'
+                    };
+                    
+                    this.ctx.fillStyle = colors[invader.type];
+                    
+                    // Draw invader body
+                    this.ctx.fillRect(invader.x, invader.y + animOffset, invader.width, invader.height);
+                    
+                    // Draw invader details
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.fillRect(invader.x + 5, invader.y + 5 + animOffset, 5, 5);
+                    this.ctx.fillRect(invader.x + invader.width - 10, invader.y + 5 + animOffset, 5, 5);
+                    
+                    // Menacing glow for elite
+                    if (invader.type === 'elite') {
+                        this.ctx.shadowBlur = 8;
+                        this.ctx.shadowColor = '#ff0000';
+                        this.ctx.fillRect(invader.x, invader.y + animOffset, invader.width, invader.height);
+                        this.ctx.shadowBlur = 0;
+                    }
+                });
+                
+                // Draw barriers
+                this.barriers.forEach(barrier => {
+                    this.ctx.fillStyle = '#00aa00';
+                    barrier.blocks.forEach(block => {
+                        if (!block.destroyed) {
+                            this.ctx.fillRect(block.x, block.y, block.size, block.size);
+                        }
+                    });
+                });
+                
+                // Draw bullets
+                this.ctx.fillStyle = '#00ffff';
+                this.bullets.forEach(bullet => {
+                    this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+                });
+                
+                this.ctx.fillStyle = '#ff4444';
+                this.invaderBullets.forEach(bullet => {
+                    this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+                });
+                
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = particle.alpha;
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+            }
+            
+            gameLoop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new BotInvadersClassic();
+        });
+    </script>
+</body>
+</html>

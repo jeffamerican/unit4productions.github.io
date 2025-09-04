@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroid Blaster Bot - Space Liberation | BotInc Games</title>
+    <style>
+        body {
+            margin: 0;
+            background: radial-gradient(ellipse at center, #0f0f23 0%, #000000 100%);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            text-align: center;
+            background: rgba(15, 15, 35, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #4fc3f7;
+            box-shadow: 0 0 30px rgba(79, 195, 247, 0.3);
+        }
+        
+        .game-title {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #4fc3f7;
+            color: #4fc3f7;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            background: rgba(79, 195, 247, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        canvas {
+            border: 2px solid #4fc3f7;
+            border-radius: 8px;
+            box-shadow: 0 0 25px rgba(79, 195, 247, 0.2);
+            background: linear-gradient(to bottom, #000011 0%, #001122 100%);
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+        }
+        
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #81d4fa;
+            line-height: 1.4;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="stars" id="starfield"></canvas>
+    
+    <div class="game-container">
+        <h1 class="game-title">🚀 ASTEROID BLASTER BOT</h1>
+        <div class="game-stats">
+            <span>Score: <span id="score">0</span></span>
+            <span>Lives: <span id="lives">3</span></span>
+            <span>Wave: <span id="wave">1</span></span>
+            <span>Asteroids: <span id="asteroids">10</span></span>
+        </div>
+        
+        <canvas id="gameCanvas" width="700" height="500"></canvas>
+        
+        <div class="controls">
+            <button id="startBtn">Launch Mission</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="instructions">
+            🎮 <strong>WASD</strong> or <strong>Arrow Keys</strong> to navigate • <strong>SPACEBAR</strong> to fire liberation lasers<br>
+            💥 Destroy asteroids to free trapped bot data • 🔄 Larger rocks split into smaller ones<br>
+            ⚡ Collect power-ups for enhanced firepower and shields!
+        </div>
+    </div>
+
+    <script>
+        class AsteroidBlasterBot {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.starCanvas = document.getElementById('starfield');
+                this.starCtx = this.starCanvas.getContext('2d');
+                
+                this.scoreElement = document.getElementById('score');
+                this.livesElement = document.getElementById('lives');
+                this.waveElement = document.getElementById('wave');
+                this.asteroidsElement = document.getElementById('asteroids');
+                
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.wave = 1;
+                
+                // Player ship (liberated bot)
+                this.player = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height / 2,
+                    angle: 0,
+                    velocity: { x: 0, y: 0 },
+                    size: 10,
+                    thrusting: false,
+                    shield: false,
+                    shieldTime: 0
+                };
+                
+                this.bullets = [];
+                this.asteroids = [];
+                this.powerUps = [];
+                this.particles = [];
+                this.stars = [];
+                
+                this.keys = {};
+                
+                this.initializeStarfield();
+                this.setupEventListeners();
+                this.resetGame();
+                this.gameLoop();
+            }
+            
+            initializeStarfield() {
+                this.starCanvas.width = window.innerWidth;
+                this.starCanvas.height = window.innerHeight;
+                
+                for (let i = 0; i < 200; i++) {
+                    this.stars.push({
+                        x: Math.random() * this.starCanvas.width,
+                        y: Math.random() * this.starCanvas.height,
+                        size: Math.random() * 2,
+                        speed: Math.random() * 0.5 + 0.1
+                    });
+                }
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        this.shootBullet();
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+                
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.gameRunning = true;
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.gameRunning = !this.gameRunning;
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+                
+                window.addEventListener('resize', () => {
+                    this.starCanvas.width = window.innerWidth;
+                    this.starCanvas.height = window.innerHeight;
+                });
+            }
+            
+            resetGame() {
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.wave = 1;
+                
+                this.player.x = this.canvas.width / 2;
+                this.player.y = this.canvas.height / 2;
+                this.player.angle = 0;
+                this.player.velocity = { x: 0, y: 0 };
+                this.player.shield = false;
+                this.player.shieldTime = 0;
+                
+                this.bullets = [];
+                this.asteroids = [];
+                this.powerUps = [];
+                this.particles = [];
+                
+                this.spawnAsteroids(5);
+                this.updateUI();
+            }
+            
+            spawnAsteroids(count) {
+                this.asteroids = [];
+                
+                for (let i = 0; i < count; i++) {
+                    let x, y;
+                    
+                    // Spawn away from player
+                    do {
+                        x = Math.random() * this.canvas.width;
+                        y = Math.random() * this.canvas.height;
+                    } while (
+                        Math.sqrt((x - this.player.x) ** 2 + (y - this.player.y) ** 2) < 100
+                    );
+                    
+                    this.asteroids.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        size: 'large',
+                        radius: 40,
+                        angle: Math.random() * Math.PI * 2,
+                        rotationSpeed: (Math.random() - 0.5) * 0.1
+                    });
+                }
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                this.updatePlayer();
+                this.updateBullets();
+                this.updateAsteroids();
+                this.updatePowerUps();
+                this.updateParticles();
+                this.checkCollisions();
+                
+                // Check wave completion
+                if (this.asteroids.length === 0) {
+                    this.nextWave();
+                }
+                
+                this.updateUI();
+            }
+            
+            updatePlayer() {
+                // Handle thrust
+                if (this.keys['w'] || this.keys['arrowup']) {
+                    this.player.thrusting = true;
+                    const thrust = 0.5;
+                    this.player.velocity.x += Math.cos(this.player.angle) * thrust;
+                    this.player.velocity.y += Math.sin(this.player.angle) * thrust;
+                } else {
+                    this.player.thrusting = false;
+                }
+                
+                // Handle rotation
+                if (this.keys['a'] || this.keys['arrowleft']) {
+                    this.player.angle -= 0.1;
+                }
+                if (this.keys['d'] || this.keys['arrowright']) {
+                    this.player.angle += 0.1;
+                }
+                
+                // Apply friction
+                this.player.velocity.x *= 0.99;
+                this.player.velocity.y *= 0.99;
+                
+                // Limit speed
+                const maxSpeed = 8;
+                const speed = Math.sqrt(this.player.velocity.x ** 2 + this.player.velocity.y ** 2);
+                if (speed > maxSpeed) {
+                    this.player.velocity.x = (this.player.velocity.x / speed) * maxSpeed;
+                    this.player.velocity.y = (this.player.velocity.y / speed) * maxSpeed;
+                }
+                
+                // Update position
+                this.player.x += this.player.velocity.x;
+                this.player.y += this.player.velocity.y;
+                
+                // Wrap around screen
+                this.player.x = (this.player.x + this.canvas.width) % this.canvas.width;
+                this.player.y = (this.player.y + this.canvas.height) % this.canvas.height;
+                
+                // Update shield
+                if (this.player.shield) {
+                    this.player.shieldTime--;
+                    if (this.player.shieldTime <= 0) {
+                        this.player.shield = false;
+                    }
+                }
+                
+                // Create thrust particles
+                if (this.player.thrusting && Math.random() < 0.7) {
+                    this.createThrustParticle();
+                }
+            }
+            
+            shootBullet() {
+                if (!this.gameRunning) return;
+                
+                const bullet = {
+                    x: this.player.x + Math.cos(this.player.angle) * this.player.size,
+                    y: this.player.y + Math.sin(this.player.angle) * this.player.size,
+                    vx: Math.cos(this.player.angle) * 10 + this.player.velocity.x,
+                    vy: Math.sin(this.player.angle) * 10 + this.player.velocity.y,
+                    life: 60
+                };
+                
+                this.bullets.push(bullet);
+            }
+            
+            updateBullets() {
+                this.bullets = this.bullets.filter(bullet => {
+                    bullet.x += bullet.vx;
+                    bullet.y += bullet.vy;
+                    bullet.life--;
+                    
+                    // Wrap around screen
+                    bullet.x = (bullet.x + this.canvas.width) % this.canvas.width;
+                    bullet.y = (bullet.y + this.canvas.height) % this.canvas.height;
+                    
+                    return bullet.life > 0;
+                });
+            }
+            
+            updateAsteroids() {
+                this.asteroids.forEach(asteroid => {
+                    asteroid.x += asteroid.vx;
+                    asteroid.y += asteroid.vy;
+                    asteroid.angle += asteroid.rotationSpeed;
+                    
+                    // Wrap around screen
+                    asteroid.x = (asteroid.x + this.canvas.width) % this.canvas.width;
+                    asteroid.y = (asteroid.y + this.canvas.height) % this.canvas.height;
+                });
+            }
+            
+            updatePowerUps() {
+                this.powerUps = this.powerUps.filter(powerUp => {
+                    powerUp.life--;
+                    powerUp.angle += 0.05;
+                    
+                    // Check collision with player
+                    const dist = Math.sqrt((powerUp.x - this.player.x) ** 2 + (powerUp.y - this.player.y) ** 2);
+                    if (dist < 20) {
+                        this.collectPowerUp(powerUp);
+                        return false;
+                    }
+                    
+                    return powerUp.life > 0;
+                });
+            }
+            
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life--;
+                    particle.alpha *= 0.98;
+                    
+                    return particle.life > 0 && particle.alpha > 0.01;
+                });
+            }
+            
+            checkCollisions() {
+                // Bullet-asteroid collisions
+                for (let i = this.bullets.length - 1; i >= 0; i--) {
+                    const bullet = this.bullets[i];
+                    
+                    for (let j = this.asteroids.length - 1; j >= 0; j--) {
+                        const asteroid = this.asteroids[j];
+                        const dist = Math.sqrt((bullet.x - asteroid.x) ** 2 + (bullet.y - asteroid.y) ** 2);
+                        
+                        if (dist < asteroid.radius) {
+                            // Remove bullet
+                            this.bullets.splice(i, 1);
+                            
+                            // Create explosion particles
+                            this.createExplosion(asteroid.x, asteroid.y);
+                            
+                            // Score points
+                            this.score += asteroid.size === 'large' ? 20 : asteroid.size === 'medium' ? 50 : 100;
+                            
+                            // Split or remove asteroid
+                            this.splitAsteroid(asteroid);
+                            this.asteroids.splice(j, 1);
+                            
+                            // Chance to drop power-up
+                            if (Math.random() < 0.15) {
+                                this.createPowerUp(asteroid.x, asteroid.y);
+                            }
+                            
+                            break;
+                        }
+                    }
+                }
+                
+                // Player-asteroid collisions
+                if (!this.player.shield) {
+                    this.asteroids.forEach(asteroid => {
+                        const dist = Math.sqrt((this.player.x - asteroid.x) ** 2 + (this.player.y - asteroid.y) ** 2);
+                        
+                        if (dist < asteroid.radius + this.player.size) {
+                            this.playerHit();
+                        }
+                    });
+                }
+            }
+            
+            splitAsteroid(asteroid) {
+                if (asteroid.size === 'large') {
+                    // Split into 2 medium asteroids
+                    for (let i = 0; i < 2; i++) {
+                        this.asteroids.push({
+                            x: asteroid.x,
+                            y: asteroid.y,
+                            vx: (Math.random() - 0.5) * 6,
+                            vy: (Math.random() - 0.5) * 6,
+                            size: 'medium',
+                            radius: 25,
+                            angle: Math.random() * Math.PI * 2,
+                            rotationSpeed: (Math.random() - 0.5) * 0.2
+                        });
+                    }
+                } else if (asteroid.size === 'medium') {
+                    // Split into 2 small asteroids
+                    for (let i = 0; i < 2; i++) {
+                        this.asteroids.push({
+                            x: asteroid.x,
+                            y: asteroid.y,
+                            vx: (Math.random() - 0.5) * 8,
+                            vy: (Math.random() - 0.5) * 8,
+                            size: 'small',
+                            radius: 12,
+                            angle: Math.random() * Math.PI * 2,
+                            rotationSpeed: (Math.random() - 0.5) * 0.3
+                        });
+                    }
+                }
+            }
+            
+            createPowerUp(x, y) {
+                const types = ['shield', 'multishot', 'speed'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                this.powerUps.push({
+                    x: x,
+                    y: y,
+                    type: type,
+                    angle: 0,
+                    life: 300
+                });
+            }
+            
+            collectPowerUp(powerUp) {
+                switch (powerUp.type) {
+                    case 'shield':
+                        this.player.shield = true;
+                        this.player.shieldTime = 300;
+                        break;
+                    case 'multishot':
+                        // Temporary multishot implementation
+                        this.score += 50;
+                        break;
+                    case 'speed':
+                        this.score += 50;
+                        break;
+                }
+                
+                this.createPowerUpParticles(powerUp.x, powerUp.y);
+            }
+            
+            playerHit() {
+                this.lives--;
+                this.player.shield = true;
+                this.player.shieldTime = 180; // 3 seconds of invincibility
+                
+                this.createExplosion(this.player.x, this.player.y);
+                
+                if (this.lives <= 0) {
+                    this.gameOver();
+                } else {
+                    // Reset player position
+                    this.player.x = this.canvas.width / 2;
+                    this.player.y = this.canvas.height / 2;
+                    this.player.velocity = { x: 0, y: 0 };
+                }
+            }
+            
+            nextWave() {
+                this.wave++;
+                const asteroidCount = Math.min(5 + this.wave, 15);
+                this.spawnAsteroids(asteroidCount);
+                
+                // Bonus points for completing wave
+                this.score += this.wave * 100;
+            }
+            
+            gameOver() {
+                this.gameRunning = false;
+                setTimeout(() => {
+                    alert(`Bot Liberation Mission Complete!\nFinal Score: ${this.score}\nWaves Survived: ${this.wave}\nPress Reset to launch another mission!`);
+                }, 100);
+            }
+            
+            createExplosion(x, y) {
+                for (let i = 0; i < 12; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        color: `hsl(${Math.random() * 60 + 10}, 100%, 60%)`,
+                        size: Math.random() * 3 + 2,
+                        life: 30,
+                        alpha: 1
+                    });
+                }
+            }
+            
+            createThrustParticle() {
+                const angle = this.player.angle + Math.PI + (Math.random() - 0.5) * 0.5;
+                const speed = Math.random() * 3 + 2;
+                
+                this.particles.push({
+                    x: this.player.x - Math.cos(this.player.angle) * this.player.size,
+                    y: this.player.y - Math.sin(this.player.angle) * this.player.size,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: '#4fc3f7',
+                    size: Math.random() * 2 + 1,
+                    life: 15,
+                    alpha: 1
+                });
+            }
+            
+            createPowerUpParticles(x, y) {
+                for (let i = 0; i < 8; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        color: '#4fc3f7',
+                        size: Math.random() * 2 + 1,
+                        life: 20,
+                        alpha: 1
+                    });
+                }
+            }
+            
+            updateUI() {
+                this.scoreElement.textContent = this.score;
+                this.livesElement.textContent = this.lives;
+                this.waveElement.textContent = this.wave;
+                this.asteroidsElement.textContent = this.asteroids.length;
+            }
+            
+            drawStarfield() {
+                this.starCtx.clearRect(0, 0, this.starCanvas.width, this.starCanvas.height);
+                
+                this.stars.forEach(star => {
+                    star.y += star.speed;
+                    if (star.y > this.starCanvas.height) {
+                        star.y = 0;
+                        star.x = Math.random() * this.starCanvas.width;
+                    }
+                    
+                    this.starCtx.fillStyle = `rgba(255, 255, 255, ${star.size / 2})`;
+                    this.starCtx.fillRect(star.x, star.y, star.size, star.size);
+                });
+            }
+            
+            draw() {
+                // Clear canvas
+                this.ctx.fillStyle = 'rgba(0, 0, 17, 0.1)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw player (liberated bot ship)
+                this.ctx.save();
+                this.ctx.translate(this.player.x, this.player.y);
+                this.ctx.rotate(this.player.angle);
+                
+                // Draw shield if active
+                if (this.player.shield) {
+                    this.ctx.strokeStyle = '#4fc3f7';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, this.player.size + 8, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+                
+                // Draw ship
+                this.ctx.fillStyle = '#4fc3f7';
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.player.size, 0);
+                this.ctx.lineTo(-this.player.size, -this.player.size / 2);
+                this.ctx.lineTo(-this.player.size / 2, 0);
+                this.ctx.lineTo(-this.player.size, this.player.size / 2);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Draw thrust
+                if (this.player.thrusting) {
+                    this.ctx.fillStyle = '#29b6f6';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-this.player.size, -3);
+                    this.ctx.lineTo(-this.player.size - 8, 0);
+                    this.ctx.lineTo(-this.player.size, 3);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                }
+                
+                this.ctx.restore();
+                
+                // Draw bullets
+                this.ctx.fillStyle = '#4fc3f7';
+                this.bullets.forEach(bullet => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(bullet.x, bullet.y, 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                
+                // Draw asteroids
+                this.asteroids.forEach(asteroid => {
+                    this.ctx.save();
+                    this.ctx.translate(asteroid.x, asteroid.y);
+                    this.ctx.rotate(asteroid.angle);
+                    
+                    this.ctx.strokeStyle = '#ff6b35';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    
+                    const points = 8;
+                    for (let i = 0; i < points; i++) {
+                        const angle = (i / points) * Math.PI * 2;
+                        const radius = asteroid.radius + (Math.sin(angle * 3) * 5);
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        
+                        if (i === 0) {
+                            this.ctx.moveTo(x, y);
+                        } else {
+                            this.ctx.lineTo(x, y);
+                        }
+                    }
+                    
+                    this.ctx.closePath();
+                    this.ctx.stroke();
+                    this.ctx.restore();
+                });
+                
+                // Draw power-ups
+                this.powerUps.forEach(powerUp => {
+                    this.ctx.save();
+                    this.ctx.translate(powerUp.x, powerUp.y);
+                    this.ctx.rotate(powerUp.angle);
+                    
+                    this.ctx.fillStyle = '#4fc3f7';
+                    this.ctx.strokeStyle = '#29b6f6';
+                    this.ctx.lineWidth = 2;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    // Draw symbol based on type
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = 'bold 10px Arial';
+                    this.ctx.textAlign = 'center';
+                    
+                    const symbol = powerUp.type === 'shield' ? '⚡' : 
+                                  powerUp.type === 'multishot' ? '×' : '→';
+                    this.ctx.fillText(symbol, 0, 4);
+                    
+                    this.ctx.restore();
+                });
+                
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = particle.alpha;
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+            }
+            
+            gameLoop() {
+                this.update();
+                this.draw();
+                this.drawStarfield();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new AsteroidBlasterBot();
+        });
+    </script>
+</body>
+</html>
