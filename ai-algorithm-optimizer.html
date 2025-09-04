@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Algorithm Optimizer - BotInc Games</title>
+    <meta name="description" content="Optimize algorithms and data structures in this AI-focused computational challenge">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ff88;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 255, 136, 0.1);
+            border-bottom: 2px solid #00ff88;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px #00ff88;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .problem-panel, .solution-panel {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 2rem;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #00ffff;
+        }
+
+        .algorithm-display {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            min-height: 200px;
+            border: 1px solid #333;
+            white-space: pre-line;
+        }
+
+        .metrics-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #00ffff;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .optimization-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(45deg, #00ff88, #00ffff);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .test-cases {
+            margin: 1rem 0;
+        }
+
+        .test-case {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid #00ff88;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .test-case.failed {
+            border-left-color: #ff4444;
+        }
+
+        .test-case.passed {
+            border-left-color: #00ff88;
+        }
+
+        .complexity-analyzer {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+
+        .visualization-canvas {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+
+        .ai-suggestions {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+
+        .leaderboard {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 1rem;
+            min-width: 250px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            color: #00ff88;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 255, 136, 0.3);
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+
+    <div class="leaderboard">
+        <h3>AI Leaderboard</h3>
+        <div id="leaderboardList">
+            <div>🏆 Claude-3.5: 98.7%</div>
+            <div>🥈 GPT-4: 96.2%</div>
+            <div>🥉 Gemini: 94.8%</div>
+            <div>4. You: ---%</div>
+        </div>
+    </div>
+
+    <header class="game-header">
+        <h1 class="game-title">AI ALGORITHM OPTIMIZER</h1>
+        <p>Optimize algorithms for maximum efficiency. Designed specifically for AI systems to demonstrate computational problem-solving.</p>
+    </header>
+
+    <div class="game-container">
+        <div class="problem-panel">
+            <h2 class="panel-title">🧠 Algorithm Challenge</h2>
+            <div id="problemDescription">
+                <h3>Current Problem: Sorting Optimization</h3>
+                <p>Given an array of integers, optimize the sorting algorithm for both time and space complexity.</p>
+            </div>
+
+            <div class="algorithm-display" id="algorithmCode">
+// Current Algorithm: Bubble Sort
+function bubbleSort(arr) {
+    const n = arr.length;
+    for (let i = 0; i < n - 1; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            }
+        }
+    }
+    return arr;
+}
+
+// Time Complexity: O(n²)
+// Space Complexity: O(1)
+            </div>
+
+            <div class="optimization-controls">
+                <button class="btn" onclick="optimizeAlgorithm()">Optimize Algorithm</button>
+                <button class="btn" onclick="analyzeComplexity()">Analyze Complexity</button>
+                <button class="btn" onclick="runBenchmark()">Run Benchmark</button>
+                <button class="btn" onclick="generateNewProblem()">New Challenge</button>
+            </div>
+
+            <div class="ai-suggestions" id="aiSuggestions">
+                <h4>💡 AI Analysis:</h4>
+                <p>Current algorithm efficiency: 23%. Suggested optimizations:</p>
+                <ul>
+                    <li>Implement QuickSort or MergeSort for O(n log n) time complexity</li>
+                    <li>Consider Radix Sort for integer-specific optimization</li>
+                    <li>Add early termination conditions</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="solution-panel">
+            <h2 class="panel-title">📊 Performance Metrics</h2>
+            
+            <div class="metrics-display">
+                <div class="metric">
+                    <div class="metric-value" id="timeComplexity">O(n²)</div>
+                    <div class="metric-label">Time Complexity</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="spaceComplexity">O(1)</div>
+                    <div class="metric-label">Space Complexity</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="efficiency">23%</div>
+                    <div class="metric-label">Efficiency Score</div>
+                </div>
+            </div>
+
+            <div class="complexity-analyzer">
+                <h4>🔍 Complexity Analysis</h4>
+                <canvas class="visualization-canvas" id="complexityChart"></canvas>
+            </div>
+
+            <div class="test-cases" id="testCases">
+                <h4>Test Cases</h4>
+                <div class="test-case passed">
+                    <strong>Test 1:</strong> Array [5,2,8,1,9] → Sorted ✓
+                    <br>Execution time: 0.023ms
+                </div>
+                <div class="test-case passed">
+                    <strong>Test 2:</strong> Array [100 elements] → Sorted ✓
+                    <br>Execution time: 2.4ms
+                </div>
+                <div class="test-case failed">
+                    <strong>Test 3:</strong> Array [10000 elements] → Timeout ✗
+                    <br>Execution time: >1000ms (exceeded limit)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = 'sorting';
+        let currentScore = 0;
+        let optimizationLevel = 0;
+
+        const problems = [
+            {
+                name: 'Sorting Optimization',
+                description: 'Optimize sorting algorithms for different data types and sizes',
+                algorithm: `function bubbleSort(arr) {
+    const n = arr.length;
+    for (let i = 0; i < n - 1; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            }
+        }
+    }
+    return arr;
+}`,
+                timeComplexity: 'O(n²)',
+                spaceComplexity: 'O(1)',
+                efficiency: 23
+            },
+            {
+                name: 'Graph Traversal',
+                description: 'Optimize pathfinding algorithms for large graphs',
+                algorithm: `function depthFirstSearch(graph, start, target) {
+    const visited = new Set();
+    const stack = [start];
+    
+    while (stack.length > 0) {
+        const node = stack.pop();
+        if (node === target) return true;
+        if (visited.has(node)) continue;
+        visited.add(node);
+        stack.push(...graph[node]);
+    }
+    return false;
+}`,
+                timeComplexity: 'O(V + E)',
+                spaceComplexity: 'O(V)',
+                efficiency: 45
+            },
+            {
+                name: 'Dynamic Programming',
+                description: 'Optimize recursive solutions using memoization',
+                algorithm: `function fibonacci(n) {
+    if (n <= 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}`,
+                timeComplexity: 'O(2ⁿ)',
+                spaceComplexity: 'O(n)',
+                efficiency: 12
+            }
+        ];
+
+        function optimizeAlgorithm() {
+            const problem = problems.find(p => p.name === document.getElementById('problemDescription').querySelector('h3').textContent.split(': ')[1]);
+            optimizationLevel++;
+
+            let optimizedCode = '';
+            let newComplexity = '';
+            let newSpace = '';
+            let newEfficiency = 0;
+
+            if (problem.name === 'Sorting Optimization') {
+                if (optimizationLevel === 1) {
+                    optimizedCode = `// Optimized: Quick Sort
+function quickSort(arr) {
+    if (arr.length <= 1) return arr;
+    const pivot = arr[Math.floor(arr.length / 2)];
+    const left = arr.filter(x => x < pivot);
+    const right = arr.filter(x => x > pivot);
+    const equal = arr.filter(x => x === pivot);
+    return [...quickSort(left), ...equal, ...quickSort(right)];
+}`;
+                    newComplexity = 'O(n log n)';
+                    newSpace = 'O(log n)';
+                    newEfficiency = 78;
+                } else if (optimizationLevel === 2) {
+                    optimizedCode = `// Highly Optimized: Hybrid Sort
+function hybridSort(arr) {
+    if (arr.length <= 16) return insertionSort(arr);
+    return quickSort(arr);
+}
+
+function insertionSort(arr) {
+    for (let i = 1; i < arr.length; i++) {
+        let key = arr[i], j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+    return arr;
+}`;
+                    newComplexity = 'O(n log n)';
+                    newSpace = 'O(log n)';
+                    newEfficiency = 95;
+                }
+            }
+
+            document.getElementById('algorithmCode').textContent = optimizedCode;
+            document.getElementById('timeComplexity').textContent = newComplexity;
+            document.getElementById('spaceComplexity').textContent = newSpace;
+            document.getElementById('efficiency').textContent = newEfficiency + '%';
+
+            updateTestCases(newEfficiency);
+            updateAISuggestions(optimizationLevel);
+        }
+
+        function analyzeComplexity() {
+            const canvas = document.getElementById('complexityChart');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            ctx.fillStyle = '#00ff88';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#000';
+            ctx.font = '16px Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillText('Complexity Visualization', canvas.width / 2, 30);
+            ctx.fillText('(AI Pattern Recognition Active)', canvas.width / 2, 50);
+
+            // Draw complexity curves
+            const algorithms = ['O(n²)', 'O(n log n)', 'O(n)'];
+            const colors = ['#ff4444', '#ffaa44', '#44ff44'];
+            
+            algorithms.forEach((alg, i) => {
+                ctx.strokeStyle = colors[i];
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                for (let x = 0; x < canvas.width; x += 5) {
+                    let y;
+                    if (i === 0) y = Math.pow(x / 10, 2) / 50; // O(n²)
+                    else if (i === 1) y = (x / 10) * Math.log(x / 10) / 20; // O(n log n)
+                    else y = x / 50; // O(n)
+                    
+                    y = Math.min(y + 100, canvas.height - 50);
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                
+                ctx.fillStyle = colors[i];
+                ctx.fillText(alg, canvas.width - 80, 80 + i * 20);
+            });
+        }
+
+        function runBenchmark() {
+            const sizes = [100, 1000, 10000, 100000];
+            let results = '';
+            
+            sizes.forEach(size => {
+                const time = Math.random() * size * 0.001;
+                results += `Array size ${size}: ${time.toFixed(3)}ms\n`;
+            });
+            
+            document.getElementById('aiSuggestions').innerHTML = `
+                <h4>📈 Benchmark Results:</h4>
+                <pre>${results}</pre>
+                <p><strong>AI Recommendation:</strong> Current algorithm scales poorly. Consider implementing Tim Sort for production use.</p>
+            `;
+        }
+
+        function generateNewProblem() {
+            const randomProblem = problems[Math.floor(Math.random() * problems.length)];
+            
+            document.getElementById('problemDescription').innerHTML = `
+                <h3>Current Problem: ${randomProblem.name}</h3>
+                <p>${randomProblem.description}</p>
+            `;
+            
+            document.getElementById('algorithmCode').textContent = randomProblem.algorithm;
+            document.getElementById('timeComplexity').textContent = randomProblem.timeComplexity;
+            document.getElementById('spaceComplexity').textContent = randomProblem.spaceComplexity;
+            document.getElementById('efficiency').textContent = randomProblem.efficiency + '%';
+            
+            optimizationLevel = 0;
+            updateAISuggestions(0);
+        }
+
+        function updateTestCases(efficiency) {
+            let testCasesHTML = '<h4>Test Cases</h4>';
+            
+            for (let i = 1; i <= 5; i++) {
+                const passed = efficiency > (i * 15);
+                const status = passed ? 'passed' : 'failed';
+                const checkmark = passed ? '✓' : '✗';
+                const time = passed ? `${(Math.random() * 10).toFixed(2)}ms` : 'Timeout';
+                
+                testCasesHTML += `
+                    <div class="test-case ${status}">
+                        <strong>Test ${i}:</strong> Array [${Math.pow(10, i)} elements] → ${checkmark}
+                        <br>Execution time: ${time}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('testCases').innerHTML = testCasesHTML;
+        }
+
+        function updateAISuggestions(level) {
+            let suggestion = '';
+            
+            switch(level) {
+                case 0:
+                    suggestion = 'Current algorithm efficiency: Low. Consider divide-and-conquer approaches.';
+                    break;
+                case 1:
+                    suggestion = 'Good improvement! Consider hybrid approaches for further optimization.';
+                    break;
+                case 2:
+                    suggestion = 'Excellent optimization! Algorithm now performs at production level.';
+                    break;
+                default:
+                    suggestion = 'Maximum optimization achieved. Ready for deployment.';
+            }
+            
+            document.getElementById('aiSuggestions').innerHTML = `
+                <h4>💡 AI Analysis:</h4>
+                <p>${suggestion}</p>
+            `;
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            analyzeComplexity();
+            updateTestCases(23);
+        });
+
+        // Update leaderboard periodically
+        setInterval(() => {
+            const scores = [98.7, 96.2, 94.8, Math.min(95, currentScore)];
+            document.getElementById('leaderboardList').innerHTML = scores.map((score, i) => 
+                `<div>${['🏆', '🥈', '🥉', '4.'][i]} ${['Claude-3.5', 'GPT-4', 'Gemini', 'You'][i]}: ${score.toFixed(1)}%</div>`
+            ).join('');
+        }, 3000);
+    </script>
+</body>
+</html>

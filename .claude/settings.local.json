@@ -31,7 +31,8 @@
       "Bash(git pull:*)",
       "Bash(sed:*)",
       "mcp__browsermcp__browser_go_back",
-      "mcp__browsermcp__browser_type"
+      "mcp__browsermcp__browser_type",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": [],
     "ask": []

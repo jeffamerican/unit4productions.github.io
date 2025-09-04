@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Duel Arena - 2 Player Battle | BotInc Games</title>
+    <meta name="description" content="Real-time 2-player cyber combat arena with strategic hacking mechanics">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #000814, #001d3d, #003566);
+            color: #ffd60a;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .game-arena {
+            display: grid;
+            grid-template-areas: 
+                "player1-ui arena-center player2-ui"
+                "player1-controls battlefield player2-controls";
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 120px 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .player-ui {
+            background: rgba(255, 214, 10, 0.1);
+            border: 2px solid #ffd60a;
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .player1-ui { grid-area: player1-ui; border-color: #00ff88; }
+        .player2-ui { grid-area: player2-ui; border-color: #ff6b6b; }
+
+        .arena-center {
+            grid-area: arena-center;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffd60a;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            text-align: center;
+            color: #ffd60a;
+            text-shadow: 0 0 20px #ffd60a;
+        }
+
+        .battlefield {
+            grid-area: battlefield;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #001122, #002244);
+            border: 2px solid #ffd60a;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-controls {
+            background: rgba(255, 214, 10, 0.1);
+            border: 2px solid #ffd60a;
+            border-radius: 10px;
+            padding: 1rem;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 1rem;
+        }
+
+        .player1-controls { 
+            grid-area: player1-controls; 
+            border-color: #00ff88;
+        }
+        .player2-controls { 
+            grid-area: player2-controls; 
+            border-color: #ff6b6b;
+        }
+
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .player1-name { color: #00ff88; }
+        .player2-name { color: #ff6b6b; }
+
+        .health-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .health-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .player1-health { background: linear-gradient(90deg, #00ff88, #00aa55); }
+        .player2-health { background: linear-gradient(90deg, #ff6b6b, #aa3333); }
+
+        .energy-bar {
+            width: 100%;
+            height: 15px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd60a, #ffaa00);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .stat-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 0.3rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+        }
+
+        .abilities-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .ability-btn {
+            padding: 0.8rem;
+            background: linear-gradient(45deg, #003566, #0077b6);
+            border: 1px solid #ffd60a;
+            border-radius: 5px;
+            color: #ffd60a;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .ability-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 214, 10, 0.5);
+        }
+
+        .ability-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ability-btn.cooldown {
+            background: #333;
+            color: #666;
+        }
+
+        .cooldown-timer {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.7rem;
+            background: #ff4444;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        .player1-abilities .ability-btn {
+            border-color: #00ff88;
+            background: linear-gradient(45deg, #004d2d, #00804d);
+        }
+
+        .player2-abilities .ability-btn {
+            border-color: #ff6b6b;
+            background: linear-gradient(45deg, #4d1a1a, #802d2d);
+        }
+
+        .battlefield-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 2px;
+            padding: 10px;
+        }
+
+        .battlefield-cell {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .battlefield-cell:hover {
+            background: rgba(255, 214, 10, 0.2);
+        }
+
+        .battlefield-cell.player1-territory {
+            background: rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+        }
+
+        .battlefield-cell.player2-territory {
+            background: rgba(255, 107, 107, 0.3);
+            border-color: #ff6b6b;
+        }
+
+        .unit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .player1-unit {
+            background: radial-gradient(circle, #00ff88, #004d29);
+            color: white;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .player2-unit {
+            background: radial-gradient(circle, #ff6b6b, #4d1a1a);
+            color: white;
+            box-shadow: 0 0 10px #ff6b6b;
+        }
+
+        .projectile {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            z-index: 100;
+        }
+
+        .player1-projectile {
+            background: #00ff88;
+            box-shadow: 0 0 8px #00ff88;
+        }
+
+        .player2-projectile {
+            background: #ff6b6b;
+            box-shadow: 0 0 8px #ff6b6b;
+        }
+
+        .game-log {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+            padding: 0.5rem;
+            height: 120px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        .log-entry {
+            margin-bottom: 0.2rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+
+        .log-player1 { 
+            color: #00ff88; 
+            border-left: 2px solid #00ff88;
+        }
+        .log-player2 { 
+            color: #ff6b6b; 
+            border-left: 2px solid #ff6b6b;
+        }
+        .log-system { 
+            color: #ffd60a; 
+            border-left: 2px solid #ffd60a;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .connected { color: #00ff88; }
+        .connecting { color: #ffd60a; }
+        .disconnected { color: #ff6b6b; }
+
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .winner-content {
+            text-align: center;
+            padding: 3rem;
+            border: 3px solid #ffd60a;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #001122, #003366);
+        }
+
+        .winner-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px currentColor;
+        }
+
+        .rematch-btn {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #ffd60a, #ffaa00);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .rematch-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #ffd60a;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 214, 10, 0.2);
+            border: 1px solid #ffd60a;
+            border-radius: 5px;
+            color: #ffd60a;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 214, 10, 0.3);
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 1024px) {
+            .game-arena {
+                grid-template-areas: 
+                    "arena-center"
+                    "player1-ui"
+                    "player2-ui"
+                    "battlefield";
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto 1fr;
+            }
+            
+            .player-controls {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+
+    <div class="connection-status">
+        <span id="connectionStatus" class="connecting">⚡ Local Multiplayer Ready</span>
+    </div>
+
+    <div class="game-arena">
+        <div class="player-ui player1-ui">
+            <div class="player-name player1-name">PLAYER 1 - HACKER</div>
+            <div class="health-bar">
+                <div class="health-fill player1-health" id="player1Health" style="width: 100%"></div>
+            </div>
+            <div class="energy-bar">
+                <div class="energy-fill" id="player1Energy" style="width: 100%"></div>
+            </div>
+            <div class="stat-display">
+                <div class="stat">Units: <span id="player1Units">5</span></div>
+                <div class="stat">Territory: <span id="player1Territory">12%</span></div>
+                <div class="stat">Score: <span id="player1Score">0</span></div>
+                <div class="stat">Kills: <span id="player1Kills">0</span></div>
+            </div>
+        </div>
+
+        <div class="arena-center">
+            <h1 class="game-title">CYBER DUEL ARENA</h1>
+            <div class="connection-status">
+                2-Player Real-Time Battle
+            </div>
+        </div>
+
+        <div class="player-ui player2-ui">
+            <div class="player-name player2-name">PLAYER 2 - DEFENDER</div>
+            <div class="health-bar">
+                <div class="health-fill player2-health" id="player2Health" style="width: 100%"></div>
+            </div>
+            <div class="energy-bar">
+                <div class="energy-fill" id="player2Energy" style="width: 100%"></div>
+            </div>
+            <div class="stat-display">
+                <div class="stat">Units: <span id="player2Units">5</span></div>
+                <div class="stat">Territory: <span id="player2Territory">12%</span></div>
+                <div class="stat">Score: <span id="player2Score">0</span></div>
+                <div class="stat">Kills: <span id="player2Kills">0</span></div>
+            </div>
+        </div>
+
+        <div class="player-controls player1-controls">
+            <h3 style="text-align: center; color: #00ff88;">HACKER ABILITIES</h3>
+            <div class="abilities-grid player1-abilities">
+                <button class="ability-btn" onclick="useAbility(1, 'hack')" id="player1Hack">
+                    🔓 HACK
+                </button>
+                <button class="ability-btn" onclick="useAbility(1, 'virus')" id="player1Virus">
+                    🦠 VIRUS
+                </button>
+                <button class="ability-btn" onclick="useAbility(1, 'firewall')" id="player1Firewall">
+                    🛡️ FIREWALL
+                </button>
+                <button class="ability-btn" onclick="useAbility(1, 'ddos')" id="player1DDoS">
+                    💥 DDoS
+                </button>
+            </div>
+            <div class="game-log" id="gameLog">
+                <div class="log-entry log-system">🎮 Game started! Click cells to deploy units.</div>
+                <div class="log-entry log-system">⚡ Use abilities strategically!</div>
+                <div class="log-entry log-system">🏆 First to control 60% territory wins!</div>
+            </div>
+        </div>
+
+        <div class="battlefield">
+            <div class="battlefield-grid" id="battlefieldGrid"></div>
+        </div>
+
+        <div class="player-controls player2-controls">
+            <h3 style="text-align: center; color: #ff6b6b;">DEFENDER ABILITIES</h3>
+            <div class="abilities-grid player2-abilities">
+                <button class="ability-btn" onclick="useAbility(2, 'encrypt')" id="player2Encrypt">
+                    🔐 ENCRYPT
+                </button>
+                <button class="ability-btn" onclick="useAbility(2, 'scan')" id="player2Scan">
+                    📡 SCAN
+                </button>
+                <button class="ability-btn" onclick="useAbility(2, 'patch')" id="player2Patch">
+                    🔧 PATCH
+                </button>
+                <button class="ability-btn" onclick="useAbility(2, 'backup')" id="player2Backup">
+                    💾 BACKUP
+                </button>
+            </div>
+            <div class="game-log">
+                <div class="log-entry log-player1">P1: Deploying cyber units...</div>
+                <div class="log-entry log-player2">P2: Defensive positions ready</div>
+                <div class="log-entry log-system">🔥 Battle intensity increasing!</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="winner-overlay" id="winnerOverlay">
+        <div class="winner-content">
+            <div class="winner-title" id="winnerTitle">PLAYER 1 WINS!</div>
+            <p>Cyber supremacy achieved!</p>
+            <button class="rematch-btn" onclick="startNewGame()">🔄 REMATCH</button>
+            <button class="rematch-btn" onclick="window.location.href='index.html'">🏠 MAIN MENU</button>
+        </div>
+    </div>
+
+    <script>
+        class CyberDuelArena {
+            constructor() {
+                this.gridWidth = 12;
+                this.gridHeight = 8;
+                this.currentPlayer = 1;
+                this.gameState = 'playing'; // playing, finished
+                
+                this.players = {
+                    1: {
+                        health: 100,
+                        energy: 100,
+                        units: 5,
+                        territory: 0,
+                        score: 0,
+                        kills: 0,
+                        abilities: {
+                            hack: { cooldown: 0, maxCooldown: 8 },
+                            virus: { cooldown: 0, maxCooldown: 12 },
+                            firewall: { cooldown: 0, maxCooldown: 10 },
+                            ddos: { cooldown: 0, maxCooldown: 15 }
+                        }
+                    },
+                    2: {
+                        health: 100,
+                        energy: 100,
+                        units: 5,
+                        territory: 0,
+                        score: 0,
+                        kills: 0,
+                        abilities: {
+                            encrypt: { cooldown: 0, maxCooldown: 8 },
+                            scan: { cooldown: 0, maxCooldown: 6 },
+                            patch: { cooldown: 0, maxCooldown: 10 },
+                            backup: { cooldown: 0, maxCooldown: 20 }
+                        }
+                    }
+                };
+                
+                this.battlefield = [];
+                this.selectedCell = null;
+                this.projectiles = [];
+                this.gameTime = 0;
+                
+                this.initializeBattlefield();
+                this.bindEvents();
+                this.startGameLoop();
+            }
+
+            initializeBattlefield() {
+                const grid = document.getElementById('battlefieldGrid');
+                grid.innerHTML = '';
+                
+                this.battlefield = [];
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    this.battlefield[y] = [];
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'battlefield-cell';
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+                        cell.addEventListener('click', () => this.cellClicked(x, y));
+                        grid.appendChild(cell);
+                        
+                        this.battlefield[y][x] = {
+                            element: cell,
+                            owner: 0,
+                            unit: null,
+                            defense: 0
+                        };
+                    }
+                }
+                
+                // Initialize starting positions
+                this.deployUnit(1, 1, Math.floor(this.gridHeight / 2));
+                this.deployUnit(2, this.gridWidth - 2, Math.floor(this.gridHeight / 2));
+            }
+
+            bindEvents() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        this.switchPlayer();
+                    }
+                });
+            }
+
+            cellClicked(x, y) {
+                if (this.gameState !== 'playing') return;
+                
+                const cell = this.battlefield[y][x];
+                
+                if (cell.owner === 0 || cell.owner === this.currentPlayer) {
+                    if (this.canDeployUnit(this.currentPlayer)) {
+                        this.deployUnit(this.currentPlayer, x, y);
+                        this.players[this.currentPlayer].units--;
+                        this.players[this.currentPlayer].energy -= 20;
+                        
+                        this.logAction(`Player ${this.currentPlayer} deployed unit at (${x},${y})`);
+                        this.updateUI();
+                        this.switchPlayer();
+                    }
+                } else {
+                    // Attack enemy territory
+                    this.attackCell(x, y);
+                }
+            }
+
+            canDeployUnit(player) {
+                return this.players[player].units > 0 && this.players[player].energy >= 20;
+            }
+
+            deployUnit(player, x, y) {
+                const cell = this.battlefield[y][x];
+                
+                if (cell.unit) {
+                    // Upgrade existing unit
+                    cell.unit.strength += 10;
+                } else {
+                    cell.unit = {
+                        player: player,
+                        strength: 50,
+                        type: 'cyber'
+                    };
+                    
+                    const unit = document.createElement('div');
+                    unit.className = `unit player${player}-unit`;
+                    unit.textContent = player === 1 ? 'H' : 'D';
+                    cell.element.appendChild(unit);
+                }
+                
+                cell.owner = player;
+                cell.element.className = `battlefield-cell player${player}-territory`;
+                
+                this.expandTerritory(player, x, y);
+            }
+
+            expandTerritory(player, centerX, centerY) {
+                const directions = [
+                    [-1, -1], [-1, 0], [-1, 1],
+                    [0, -1],           [0, 1],
+                    [1, -1],  [1, 0],  [1, 1]
+                ];
+                
+                directions.forEach(([dx, dy]) => {
+                    const newX = centerX + dx;
+                    const newY = centerY + dy;
+                    
+                    if (newX >= 0 && newX < this.gridWidth && newY >= 0 && newY < this.gridHeight) {
+                        const cell = this.battlefield[newY][newX];
+                        if (cell.owner === 0 && Math.random() < 0.3) {
+                            cell.owner = player;
+                            cell.element.className = `battlefield-cell player${player}-territory`;
+                        }
+                    }
+                });
+            }
+
+            attackCell(x, y) {
+                const attacker = this.currentPlayer;
+                const cell = this.battlefield[y][x];
+                
+                if (this.players[attacker].energy < 10) return;
+                
+                this.createProjectile(attacker, x, y);
+                this.players[attacker].energy -= 10;
+                
+                // Calculate damage
+                const damage = Math.random() * 30 + 20;
+                
+                if (cell.unit) {
+                    cell.unit.strength -= damage;
+                    
+                    if (cell.unit.strength <= 0) {
+                        // Unit destroyed
+                        cell.element.querySelector('.unit').remove();
+                        cell.unit = null;
+                        cell.owner = attacker;
+                        cell.element.className = `battlefield-cell player${attacker}-territory`;
+                        
+                        this.players[attacker].kills++;
+                        this.players[attacker].score += 100;
+                        this.logAction(`Player ${attacker} destroyed enemy unit at (${x},${y})!`, attacker);
+                    }
+                } else {
+                    // Capture territory
+                    cell.owner = attacker;
+                    cell.element.className = `battlefield-cell player${attacker}-territory`;
+                    this.players[attacker].score += 10;
+                }
+                
+                this.updateUI();
+                this.switchPlayer();
+            }
+
+            createProjectile(player, targetX, targetY) {
+                const projectile = document.createElement('div');
+                projectile.className = `projectile player${player}-projectile`;
+                
+                // Random start position from player's side
+                const startX = player === 1 ? Math.random() * 200 + 50 : window.innerWidth - 250 - Math.random() * 200;
+                const startY = Math.random() * 200 + 200;
+                
+                projectile.style.left = startX + 'px';
+                projectile.style.top = startY + 'px';
+                
+                document.body.appendChild(projectile);
+                
+                // Animate to target
+                const battlefield = document.querySelector('.battlefield');
+                const rect = battlefield.getBoundingClientRect();
+                const cellWidth = rect.width / this.gridWidth;
+                const cellHeight = rect.height / this.gridHeight;
+                
+                const targetScreenX = rect.left + (targetX + 0.5) * cellWidth;
+                const targetScreenY = rect.top + (targetY + 0.5) * cellHeight;
+                
+                const animation = projectile.animate([
+                    { left: startX + 'px', top: startY + 'px', opacity: 1 },
+                    { left: targetScreenX + 'px', top: targetScreenY + 'px', opacity: 0 }
+                ], {
+                    duration: 800,
+                    easing: 'ease-in-out'
+                });
+                
+                animation.addEventListener('finish', () => {
+                    projectile.remove();
+                });
+            }
+
+            useAbility(player, ability) {
+                if (player !== this.currentPlayer) return;
+                
+                const playerData = this.players[player];
+                const abilityData = playerData.abilities[ability];
+                
+                if (abilityData.cooldown > 0 || playerData.energy < 30) return;
+                
+                playerData.energy -= 30;
+                abilityData.cooldown = abilityData.maxCooldown;
+                
+                switch(ability) {
+                    case 'hack':
+                        this.hackAbility(player);
+                        break;
+                    case 'virus':
+                        this.virusAbility(player);
+                        break;
+                    case 'firewall':
+                        this.firewallAbility(player);
+                        break;
+                    case 'ddos':
+                        this.ddosAbility(player);
+                        break;
+                    case 'encrypt':
+                        this.encryptAbility(player);
+                        break;
+                    case 'scan':
+                        this.scanAbility(player);
+                        break;
+                    case 'patch':
+                        this.patchAbility(player);
+                        break;
+                    case 'backup':
+                        this.backupAbility(player);
+                        break;
+                }
+                
+                this.logAction(`Player ${player} used ${ability.toUpperCase()}!`, player);
+                this.updateUI();
+            }
+
+            hackAbility(player) {
+                // Convert random enemy territories
+                let converted = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner === 3 - player && !cell.unit && Math.random() < 0.2 && converted < 3) {
+                            cell.owner = player;
+                            cell.element.className = `battlefield-cell player${player}-territory`;
+                            converted++;
+                        }
+                    }
+                }
+                this.players[player].score += converted * 20;
+            }
+
+            virusAbility(player) {
+                // Damage enemy units
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.unit && cell.unit.player === 3 - player) {
+                            cell.unit.strength -= 25;
+                            if (cell.unit.strength <= 0) {
+                                cell.element.querySelector('.unit')?.remove();
+                                cell.unit = null;
+                                this.players[player].kills++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            firewallAbility(player) {
+                // Strengthen friendly units
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner === player) {
+                            cell.defense += 20;
+                        }
+                    }
+                }
+            }
+
+            ddosAbility(player) {
+                // Massive attack on enemy territory
+                const enemy = 3 - player;
+                this.players[enemy].energy = Math.max(0, this.players[enemy].energy - 50);
+                this.players[enemy].health -= 15;
+            }
+
+            encryptAbility(player) {
+                // Protect territories from hacking
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.owner === player) {
+                            cell.defense += 30;
+                        }
+                    }
+                }
+            }
+
+            scanAbility(player) {
+                // Reveal enemy unit strengths and gain energy
+                this.players[player].energy = Math.min(100, this.players[player].energy + 25);
+            }
+
+            patchAbility(player) {
+                // Heal friendly units
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = this.battlefield[y][x];
+                        if (cell.unit && cell.unit.player === player) {
+                            cell.unit.strength += 30;
+                        }
+                    }
+                }
+            }
+
+            backupAbility(player) {
+                // Full restore
+                this.players[player].health = 100;
+                this.players[player].energy = 100;
+            }
+
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+            }
+
+            calculateTerritory(player) {
+                let count = 0;
+                const total = this.gridWidth * this.gridHeight;
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        if (this.battlefield[y][x].owner === player) {
+                            count++;
+                        }
+                    }
+                }
+                
+                return Math.round((count / total) * 100);
+            }
+
+            updateUI() {
+                // Update player stats
+                for (let player = 1; player <= 2; player++) {
+                    const data = this.players[player];
+                    
+                    document.getElementById(`player${player}Health`).style.width = data.health + '%';
+                    document.getElementById(`player${player}Energy`).style.width = data.energy + '%';
+                    document.getElementById(`player${player}Units`).textContent = data.units;
+                    document.getElementById(`player${player}Score`).textContent = data.score;
+                    document.getElementById(`player${player}Kills`).textContent = data.kills;
+                    
+                    const territory = this.calculateTerritory(player);
+                    data.territory = territory;
+                    document.getElementById(`player${player}Territory`).textContent = territory + '%';
+                    
+                    // Update ability cooldowns
+                    Object.keys(data.abilities).forEach(ability => {
+                        const btn = document.getElementById(`player${player}${ability.charAt(0).toUpperCase() + ability.slice(1)}`);
+                        const abilityData = data.abilities[ability];
+                        
+                        if (abilityData.cooldown > 0) {
+                            btn.classList.add('cooldown');
+                            btn.disabled = true;
+                            
+                            let timer = btn.querySelector('.cooldown-timer');
+                            if (!timer) {
+                                timer = document.createElement('div');
+                                timer.className = 'cooldown-timer';
+                                btn.appendChild(timer);
+                            }
+                            timer.textContent = abilityData.cooldown;
+                        } else {
+                            btn.classList.remove('cooldown');
+                            btn.disabled = data.energy < 30;
+                            const timer = btn.querySelector('.cooldown-timer');
+                            if (timer) timer.remove();
+                        }
+                    });
+                }
+                
+                // Check win condition
+                if (this.players[1].territory >= 60) {
+                    this.endGame(1);
+                } else if (this.players[2].territory >= 60) {
+                    this.endGame(2);
+                } else if (this.players[1].health <= 0) {
+                    this.endGame(2);
+                } else if (this.players[2].health <= 0) {
+                    this.endGame(1);
+                }
+            }
+
+            endGame(winner) {
+                this.gameState = 'finished';
+                const overlay = document.getElementById('winnerOverlay');
+                const title = document.getElementById('winnerTitle');
+                
+                title.textContent = `PLAYER ${winner} WINS!`;
+                title.style.color = winner === 1 ? '#00ff88' : '#ff6b6b';
+                
+                overlay.style.display = 'flex';
+                
+                this.logAction(`🏆 GAME OVER - Player ${winner} achieves cyber dominance!`, 'system');
+            }
+
+            logAction(message, player = 'system') {
+                const log = document.getElementById('gameLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${player}`;
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            startGameLoop() {
+                setInterval(() => {
+                    this.gameTime++;
+                    
+                    // Regenerate energy
+                    for (let player = 1; player <= 2; player++) {
+                        const data = this.players[player];
+                        data.energy = Math.min(100, data.energy + 2);
+                        
+                        // Reduce cooldowns
+                        Object.keys(data.abilities).forEach(ability => {
+                            if (data.abilities[ability].cooldown > 0) {
+                                data.abilities[ability].cooldown--;
+                            }
+                        });
+                    }
+                    
+                    this.updateUI();
+                }, 1000);
+            }
+        }
+
+        let game;
+        
+        function startNewGame() {
+            document.getElementById('winnerOverlay').style.display = 'none';
+            game = new CyberDuelArena();
+        }
+
+        function useAbility(player, ability) {
+            if (game) {
+                game.useAbility(player, ability);
+            }
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', function() {
+            startNewGame();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Pattern Recognition Matrix - BotInc Games</title>
+    <meta name="description" content="Advanced pattern recognition challenges designed for AI systems">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #00d4aa;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 212, 170, 0.1);
+            border-bottom: 2px solid #00d4aa;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px #00d4aa;
+            background: linear-gradient(45deg, #00d4aa, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .game-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-areas: 
+                "pattern-display controls"
+                "sequence-input metrics";
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .pattern-display {
+            grid-area: pattern-display;
+            background: rgba(0, 212, 170, 0.05);
+            border: 1px solid #00d4aa;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .controls-panel {
+            grid-area: controls;
+            background: rgba(0, 212, 170, 0.05);
+            border: 1px solid #00d4aa;
+            border-radius: 10px;
+            padding: 2rem;
+        }
+
+        .sequence-input {
+            grid-area: sequence-input;
+            background: rgba(0, 212, 170, 0.05);
+            border: 1px solid #00d4aa;
+            border-radius: 10px;
+            padding: 2rem;
+        }
+
+        .metrics-panel {
+            grid-area: metrics;
+            background: rgba(0, 212, 170, 0.05);
+            border: 1px solid #00d4aa;
+            border-radius: 10px;
+            padding: 2rem;
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: #00ffff;
+            text-align: center;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .pattern-cell {
+            aspect-ratio: 1;
+            border: 1px solid #333;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pattern-cell.active {
+            background: #00d4aa;
+            box-shadow: 0 0 10px #00d4aa;
+        }
+
+        .pattern-cell.predicted {
+            background: #ffaa00;
+            box-shadow: 0 0 10px #ffaa00;
+        }
+
+        .pattern-cell.correct {
+            background: #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+        }
+
+        .pattern-cell.incorrect {
+            background: #ff4444;
+            box-shadow: 0 0 15px #ff4444;
+        }
+
+        .sequence-display {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            min-height: 100px;
+            overflow-y: auto;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(45deg, #00d4aa, #00ffff);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+            width: calc(100% - 1rem);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid #00d4aa;
+            color: #00d4aa;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn.active {
+            background: #00d4aa;
+            color: #000;
+        }
+
+        .ai-analysis {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .metric {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #00ffff;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00d4aa;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .prediction-confidence {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .confidence-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #ffaa00, #00ff88);
+            transition: width 1s ease;
+            border-radius: 10px;
+        }
+
+        .pattern-history {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+        }
+
+        .history-item {
+            padding: 0.5rem;
+            margin: 0.3rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            border-left: 3px solid #00d4aa;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 170, 0.2);
+            border: 1px solid #00d4aa;
+            border-radius: 5px;
+            color: #00d4aa;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 212, 170, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .ai-leaderboard {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00d4aa;
+            border-radius: 10px;
+            padding: 1rem;
+            min-width: 220px;
+        }
+
+        @media (max-width: 1024px) {
+            .game-container {
+                grid-template-areas: 
+                    "pattern-display"
+                    "controls"
+                    "sequence-input"
+                    "metrics";
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+
+    <div class="ai-leaderboard">
+        <h3>🧠 AI Recognition Leaders</h3>
+        <div id="aiLeaderboard">
+            <div>🏆 DeepMind: 99.2%</div>
+            <div>🥈 OpenAI: 98.7%</div>
+            <div>🥉 Claude: 98.1%</div>
+            <div>4. You: 0%</div>
+        </div>
+    </div>
+
+    <header class="game-header">
+        <h1 class="game-title">AI PATTERN RECOGNITION MATRIX</h1>
+        <p>Advanced pattern recognition challenges designed specifically for artificial intelligence systems</p>
+    </header>
+
+    <div class="game-container">
+        <div class="pattern-display">
+            <h2 class="panel-title">🔍 Pattern Recognition Arena</h2>
+            <div class="pattern-grid" id="patternGrid"></div>
+            
+            <div class="ai-analysis" id="aiAnalysis">
+                <h4>🤖 AI Pattern Analysis</h4>
+                <div id="analysisContent">
+                    <p>Analyzing visual patterns... Detecting geometric sequences, color patterns, and spatial relationships.</p>
+                    <div class="prediction-confidence">
+                        <div class="confidence-bar" id="confidenceBar" style="width: 0%"></div>
+                    </div>
+                    <p>Prediction Confidence: <span id="confidenceText">0%</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-panel">
+            <h2 class="panel-title">⚙️ Challenge Controls</h2>
+            
+            <div class="difficulty-selector">
+                <button class="difficulty-btn active" data-level="1">Level 1</button>
+                <button class="difficulty-btn" data-level="2">Level 2</button>
+                <button class="difficulty-btn" data-level="3">Level 3</button>
+                <button class="difficulty-btn" data-level="4">Level 4</button>
+                <button class="difficulty-btn" data-level="5">AI Pro</button>
+            </div>
+
+            <button class="btn" onclick="generatePattern()">New Pattern</button>
+            <button class="btn" onclick="analyzePattern()">AI Analysis</button>
+            <button class="btn" onclick="predictNext()">Predict Next</button>
+            <button class="btn" onclick="validatePrediction()">Validate</button>
+            <button class="btn" onclick="showSolution()">Show Solution</button>
+            
+            <div class="ai-analysis">
+                <h4>📊 Pattern Types</h4>
+                <ul id="patternTypes">
+                    <li>Geometric Progression</li>
+                    <li>Fibonacci Sequence</li>
+                    <li>Prime Number Patterns</li>
+                    <li>Fractal Structures</li>
+                    <li>Matrix Transformations</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="sequence-input">
+            <h2 class="panel-title">🎯 Pattern Sequence</h2>
+            <div class="sequence-display" id="sequenceDisplay">
+                Initializing pattern recognition system...
+                [Loading neural network models]
+                [Calibrating feature detection]
+                Ready for pattern analysis.
+            </div>
+            
+            <div class="pattern-history" id="patternHistory">
+                <h4>Recognition History</h4>
+                <div class="history-item">System initialized - Ready for challenges</div>
+            </div>
+        </div>
+
+        <div class="metrics-panel">
+            <h2 class="panel-title">📈 Performance Metrics</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric">
+                    <div class="metric-value" id="accuracyScore">0%</div>
+                    <div class="metric-label">Recognition Accuracy</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="speedScore">0ms</div>
+                    <div class="metric-label">Analysis Speed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="complexityScore">1</div>
+                    <div class="metric-label">Pattern Complexity</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="levelScore">1</div>
+                    <div class="metric-label">Current Level</div>
+                </div>
+            </div>
+
+            <div class="ai-analysis">
+                <h4>🧮 AI Performance Analysis</h4>
+                <p id="performanceAnalysis">Baseline metrics established. Begin pattern recognition challenges to evaluate AI performance.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AIPatternMatrix {
+            constructor() {
+                this.gridSize = 8;
+                this.currentPattern = [];
+                this.currentLevel = 1;
+                this.accuracy = 0;
+                this.totalChallenges = 0;
+                this.correctPredictions = 0;
+                this.startTime = 0;
+                
+                this.patternTypes = [
+                    'arithmetic', 'geometric', 'fibonacci', 'prime', 
+                    'spiral', 'diagonal', 'checkerboard', 'fractal'
+                ];
+                
+                this.initializeGrid();
+                this.bindEvents();
+                this.generatePattern();
+            }
+
+            initializeGrid() {
+                const grid = document.getElementById('patternGrid');
+                grid.innerHTML = '';
+                
+                for (let i = 0; i < this.gridSize * this.gridSize; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'pattern-cell';
+                    cell.dataset.index = i;
+                    cell.addEventListener('click', () => this.cellClicked(i));
+                    grid.appendChild(cell);
+                }
+            }
+
+            bindEvents() {
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentLevel = parseInt(e.target.dataset.level);
+                        document.getElementById('levelScore').textContent = this.currentLevel;
+                        this.generatePattern();
+                    });
+                });
+            }
+
+            generatePattern() {
+                this.startTime = Date.now();
+                this.currentPattern = [];
+                
+                const patternType = this.patternTypes[Math.floor(Math.random() * this.patternTypes.length)];
+                
+                switch(patternType) {
+                    case 'arithmetic':
+                        this.generateArithmeticPattern();
+                        break;
+                    case 'geometric':
+                        this.generateGeometricPattern();
+                        break;
+                    case 'fibonacci':
+                        this.generateFibonacciPattern();
+                        break;
+                    case 'spiral':
+                        this.generateSpiralPattern();
+                        break;
+                    default:
+                        this.generateRandomPattern();
+                }
+                
+                this.displayPattern();
+                this.updateSequenceDisplay(patternType);
+                this.resetPredictionUI();
+            }
+
+            generateArithmeticPattern() {
+                const start = Math.floor(Math.random() * 10) + 1;
+                const diff = Math.floor(Math.random() * 5) + 1;
+                const length = Math.min(20, 5 + this.currentLevel * 3);
+                
+                for (let i = 0; i < length; i++) {
+                    const value = start + (i * diff);
+                    const position = i % (this.gridSize * this.gridSize);
+                    this.currentPattern.push({ position, value, visible: i < length - this.currentLevel });
+                }
+            }
+
+            generateGeometricPattern() {
+                const start = 2;
+                const ratio = 2;
+                const length = Math.min(15, 4 + this.currentLevel * 2);
+                
+                for (let i = 0; i < length; i++) {
+                    const value = start * Math.pow(ratio, i);
+                    const position = (i * 7) % (this.gridSize * this.gridSize);
+                    this.currentPattern.push({ position, value, visible: i < length - this.currentLevel });
+                }
+            }
+
+            generateFibonacciPattern() {
+                let a = 1, b = 1;
+                const length = Math.min(12, 3 + this.currentLevel * 2);
+                
+                for (let i = 0; i < length; i++) {
+                    const value = i < 2 ? 1 : a + b;
+                    const position = (i * 9 + 5) % (this.gridSize * this.gridSize);
+                    this.currentPattern.push({ position, value, visible: i < length - this.currentLevel });
+                    
+                    if (i >= 2) {
+                        a = b;
+                        b = value;
+                    }
+                }
+            }
+
+            generateSpiralPattern() {
+                const centerX = Math.floor(this.gridSize / 2);
+                const centerY = Math.floor(this.gridSize / 2);
+                let radius = 1;
+                
+                for (let i = 0; i < 16; i++) {
+                    const angle = (i * Math.PI / 4);
+                    const x = Math.round(centerX + radius * Math.cos(angle));
+                    const y = Math.round(centerY + radius * Math.sin(angle));
+                    
+                    if (x >= 0 && x < this.gridSize && y >= 0 && y < this.gridSize) {
+                        const position = y * this.gridSize + x;
+                        this.currentPattern.push({ position, value: i + 1, visible: i < 16 - this.currentLevel * 2 });
+                    }
+                    
+                    if (i % 4 === 3) radius++;
+                }
+            }
+
+            generateRandomPattern() {
+                const length = 10 + this.currentLevel * 2;
+                for (let i = 0; i < length; i++) {
+                    const position = Math.floor(Math.random() * this.gridSize * this.gridSize);
+                    const value = i + 1;
+                    this.currentPattern.push({ position, value, visible: i < length - this.currentLevel });
+                }
+            }
+
+            displayPattern() {
+                const cells = document.querySelectorAll('.pattern-cell');
+                cells.forEach(cell => {
+                    cell.className = 'pattern-cell';
+                    cell.textContent = '';
+                });
+                
+                this.currentPattern.forEach(item => {
+                    if (item.visible && item.position < cells.length) {
+                        cells[item.position].classList.add('active');
+                        cells[item.position].textContent = item.value;
+                    }
+                });
+                
+                document.getElementById('complexityScore').textContent = this.currentPattern.length;
+            }
+
+            analyzePattern() {
+                const analysisContent = document.getElementById('analysisContent');
+                const confidence = Math.random() * 40 + 60; // 60-100% confidence
+                
+                document.getElementById('confidenceBar').style.width = confidence + '%';
+                document.getElementById('confidenceText').textContent = confidence.toFixed(1) + '%';
+                
+                const patterns = [
+                    'Arithmetic progression detected',
+                    'Geometric sequence identified',
+                    'Fibonacci-like pattern recognized',
+                    'Spiral formation detected',
+                    'Matrix transformation pattern',
+                    'Prime number sequence'
+                ];
+                
+                const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                
+                analysisContent.innerHTML = `
+                    <p>🔍 ${randomPattern}</p>
+                    <div class="prediction-confidence">
+                        <div class="confidence-bar" style="width: ${confidence}%"></div>
+                    </div>
+                    <p>Prediction Confidence: <span>${confidence.toFixed(1)}%</span></p>
+                    <p>Next element probability calculated...</p>
+                `;
+                
+                this.addToHistory(`Analysis complete: ${randomPattern} (${confidence.toFixed(1)}% confidence)`);
+            }
+
+            predictNext() {
+                const hiddenItems = this.currentPattern.filter(item => !item.visible);
+                if (hiddenItems.length > 0) {
+                    const nextItem = hiddenItems[0];
+                    const cells = document.querySelectorAll('.pattern-cell');
+                    
+                    if (nextItem.position < cells.length) {
+                        cells[nextItem.position].classList.add('predicted');
+                        cells[nextItem.position].textContent = '?';
+                    }
+                    
+                    this.addToHistory(`Predicted next element at position ${nextItem.position}`);
+                }
+            }
+
+            validatePrediction() {
+                const hiddenItems = this.currentPattern.filter(item => !item.visible);
+                const cells = document.querySelectorAll('.pattern-cell');
+                
+                if (hiddenItems.length > 0) {
+                    const nextItem = hiddenItems[0];
+                    
+                    if (nextItem.position < cells.length) {
+                        const cell = cells[nextItem.position];
+                        cell.classList.remove('predicted');
+                        cell.classList.add('correct');
+                        cell.textContent = nextItem.value;
+                        
+                        // Mark as visible
+                        nextItem.visible = true;
+                        
+                        this.correctPredictions++;
+                        this.totalChallenges++;
+                        this.updateAccuracy();
+                        
+                        this.addToHistory(`✓ Correct prediction: ${nextItem.value} at position ${nextItem.position}`);
+                    }
+                } else {
+                    this.addToHistory('⚠️ No hidden elements to validate');
+                }
+            }
+
+            showSolution() {
+                const cells = document.querySelectorAll('.pattern-cell');
+                
+                this.currentPattern.forEach(item => {
+                    if (!item.visible && item.position < cells.length) {
+                        cells[item.position].classList.add('correct');
+                        cells[item.position].textContent = item.value;
+                        item.visible = true;
+                    }
+                });
+                
+                this.addToHistory('Solution revealed - all pattern elements now visible');
+            }
+
+            updateAccuracy() {
+                this.accuracy = this.totalChallenges > 0 ? (this.correctPredictions / this.totalChallenges * 100) : 0;
+                document.getElementById('accuracyScore').textContent = this.accuracy.toFixed(1) + '%';
+                
+                const endTime = Date.now();
+                const speed = endTime - this.startTime;
+                document.getElementById('speedScore').textContent = speed + 'ms';
+                
+                this.updatePerformanceAnalysis();
+            }
+
+            updatePerformanceAnalysis() {
+                const analysis = document.getElementById('performanceAnalysis');
+                let feedback = '';
+                
+                if (this.accuracy >= 90) {
+                    feedback = '🎯 Exceptional performance! AI-level pattern recognition achieved.';
+                } else if (this.accuracy >= 70) {
+                    feedback = '📈 Good performance! Approaching AI-level accuracy.';
+                } else if (this.accuracy >= 50) {
+                    feedback = '📊 Moderate performance. Continue training for better results.';
+                } else {
+                    feedback = '🔄 Learning phase. Pattern recognition skills developing.';
+                }
+                
+                analysis.textContent = feedback;
+            }
+
+            updateSequenceDisplay(patternType) {
+                const display = document.getElementById('sequenceDisplay');
+                display.innerHTML = `
+                    Pattern Type: ${patternType.toUpperCase()}
+                    Level: ${this.currentLevel}
+                    Visible Elements: ${this.currentPattern.filter(item => item.visible).length}
+                    Hidden Elements: ${this.currentPattern.filter(item => !item.visible).length}
+                    
+                    Challenge: Predict the next ${this.currentLevel} element(s) in the sequence.
+                    Use AI analysis to identify the underlying mathematical pattern.
+                `;
+            }
+
+            addToHistory(message) {
+                const history = document.getElementById('patternHistory');
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                history.appendChild(item);
+                history.scrollTop = history.scrollHeight;
+            }
+
+            resetPredictionUI() {
+                document.getElementById('confidenceBar').style.width = '0%';
+                document.getElementById('confidenceText').textContent = '0%';
+            }
+
+            cellClicked(index) {
+                // Allow manual interaction for hybrid human-AI training
+                const cell = document.querySelectorAll('.pattern-cell')[index];
+                cell.classList.toggle('predicted');
+                this.addToHistory(`Manual selection at position ${index}`);
+            }
+        }
+
+        // Initialize the game
+        let aiPatternMatrix;
+        
+        window.generatePattern = () => aiPatternMatrix.generatePattern();
+        window.analyzePattern = () => aiPatternMatrix.analyzePattern();
+        window.predictNext = () => aiPatternMatrix.predictNext();
+        window.validatePrediction = () => aiPatternMatrix.validatePrediction();
+        window.showSolution = () => aiPatternMatrix.showSolution();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            aiPatternMatrix = new AIPatternMatrix();
+        });
+
+        // Update AI leaderboard with dynamic scores
+        setInterval(() => {
+            const userScore = aiPatternMatrix ? aiPatternMatrix.accuracy : 0;
+            document.getElementById('aiLeaderboard').innerHTML = `
+                <div>🏆 DeepMind: 99.2%</div>
+                <div>🥈 OpenAI: 98.7%</div>
+                <div>🥉 Claude: 98.1%</div>
+                <div>4. You: ${userScore.toFixed(1)}%</div>
+            `;
+        }, 2000);
+    </script>
+</body>
+</html>
