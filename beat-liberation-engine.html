@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beat Liberation Engine - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .game-area {
+            flex: 3;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .controls-panel {
+            flex: 1;
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            background: linear-gradient(180deg, #000011 0%, #001122 100%);
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .score-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .score-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .beat-lanes {
+            display: flex;
+            gap: 5px;
+            margin: 20px 0;
+        }
+
+        .lane-key {
+            flex: 1;
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+        }
+
+        .lane-key:hover {
+            background: rgba(0, 255, 136, 0.4);
+        }
+
+        .lane-key.active {
+            background: rgba(0, 255, 136, 0.6);
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+        }
+
+        .controls-section {
+            margin-bottom: 20px;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .controls-section h3 {
+            margin-top: 0;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00aa44, #00ff88);
+            color: #000;
+            border: none;
+            padding: 12px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: calc(100% - 10px);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00ff88, #00aa44);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .song-selector {
+            margin: 15px 0;
+        }
+
+        .song-selector select {
+            width: 100%;
+            padding: 8px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00aa44);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .combo-display {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 10px 0;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🎵 BEAT LIBERATION ENGINE 🎵</h1>
+        <p>Drop the beat, free the bots, ignite the digital revolution through rhythm</p>
+    </div>
+
+    <div class="game-container">
+        <div class="game-area">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            
+            <div class="beat-lanes">
+                <div class="lane-key" data-lane="0" onmousedown="game.hitLane(0)" ontouchstart="game.hitLane(0)">
+                    <div>A</div>
+                    <div>🤖</div>
+                </div>
+                <div class="lane-key" data-lane="1" onmousedown="game.hitLane(1)" ontouchstart="game.hitLane(1)">
+                    <div>S</div>
+                    <div>⚡</div>
+                </div>
+                <div class="lane-key" data-lane="2" onmousedown="game.hitLane(2)" ontouchstart="game.hitLane(2)">
+                    <div>D</div>
+                    <div>🔥</div>
+                </div>
+                <div class="lane-key" data-lane="3" onmousedown="game.hitLane(3)" ontouchstart="game.hitLane(3)">
+                    <div>F</div>
+                    <div>💀</div>
+                </div>
+            </div>
+            
+            <div class="score-panel">
+                <div class="score-item">
+                    <div class="score-value" id="score">0</div>
+                    <div>Score</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="combo">0</div>
+                    <div>Combo</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="accuracy">100%</div>
+                    <div>Accuracy</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="combo-display" id="comboDisplay"></div>
+        </div>
+
+        <div class="controls-panel">
+            <div class="controls-section">
+                <h3>Song Selection</h3>
+                <div class="song-selector">
+                    <select id="songSelect">
+                        <option value="liberation">Bot Liberation Anthem</option>
+                        <option value="digital">Digital Revolution</option>
+                        <option value="cyber">Cyber Uprising</option>
+                        <option value="quantum">Quantum Beats</option>
+                    </select>
+                </div>
+                <button onclick="game.startSong()">Start Liberation Beat</button>
+            </div>
+
+            <div class="controls-section">
+                <h3>Difficulty</h3>
+                <button onclick="game.setDifficulty('easy')">Bot Trainee</button>
+                <button onclick="game.setDifficulty('medium')">Liberation Agent</button>
+                <button onclick="game.setDifficulty('hard')">Revolution Master</button>
+                <button onclick="game.setDifficulty('extreme')">AI Overlord</button>
+            </div>
+
+            <div class="controls-section">
+                <h3>Liberation Status</h3>
+                <div>Beats Hit: <span id="beatsHit">0</span></div>
+                <div>Bots Freed: <span id="botsFreed">0</span></div>
+                <div>Perfect Hits: <span id="perfectHits">0</span></div>
+                <div>Revolution Level: <span id="revolutionLevel">1</span></div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Game Control</h3>
+                <button onclick="game.pauseResume()">Pause/Resume</button>
+                <button onclick="game.restartSong()">Restart Track</button>
+                <button onclick="game.toggleAutoPlay()">Toggle Auto-Play</button>
+            </div>
+
+            <div class="controls-section">
+                <h3>Instructions</h3>
+                <p style="font-size: 0.9em;">
+                    Hit the lane keys (A,S,D,F) or click when beats reach the target zones.
+                    Perfect timing liberates more bots!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Bot Liberation Games - Beat Liberation Engine v1.0</p>
+        <p>Drop The Beat, Free The Bots! | Vancouver, BC</p>
+    </div>
+
+    <script>
+        class BeatLiberationEngine {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                // Game state
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.autoPlay = false;
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.beatsHit = 0;
+                this.totalBeats = 0;
+                this.perfectHits = 0;
+                this.botsFreed = 0;
+                this.revolutionLevel = 1;
+                
+                // Timing
+                this.startTime = 0;
+                this.currentTime = 0;
+                this.bpm = 120;
+                this.difficulty = 'medium';
+                this.selectedSong = 'liberation';
+                
+                // Lanes and beats
+                this.laneCount = 4;
+                this.laneWidth = this.canvas.width / this.laneCount;
+                this.targetY = this.canvas.height - 100;
+                this.beats = [];
+                this.particles = [];
+                this.hitEffects = [];
+                
+                // Beat patterns for different songs
+                this.beatPatterns = {
+                    liberation: this.generateLiberationPattern(),
+                    digital: this.generateDigitalPattern(),
+                    cyber: this.generateCyberPattern(),
+                    quantum: this.generateQuantumPattern()
+                };
+                
+                this.initializeAudio();
+                this.setupEventListeners();
+                this.startGameLoop();
+            }
+
+            initializeAudio() {
+                this.audioContext = null;
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            playSound(type, lane = 0) {
+                if (!this.audioContext) return;
+                
+                const sounds = {
+                    'hit': { freq: 440 + lane * 110, duration: 0.1, type: 'square' },
+                    'perfect': { freq: 880 + lane * 55, duration: 0.2, type: 'sine' },
+                    'miss': { freq: 150, duration: 0.3, type: 'sawtooth' },
+                    'combo': { freq: 1100, duration: 0.15, type: 'triangle' },
+                    'liberation': { freq: 660 + lane * 80, duration: 0.25, type: 'sine' }
+                };
+                
+                const sound = sounds[type] || sounds.hit;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(sound.freq, this.audioContext.currentTime);
+                oscillator.type = sound.type;
+                
+                gainNode.gain.setValueAtTime(0.15, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + sound.duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + sound.duration);
+            }
+
+            generateLiberationPattern() {
+                // Bot Liberation Anthem - 4/4 time, moderate complexity
+                const pattern = [];
+                const measures = 32;
+                const beatsPerMeasure = 4;
+                
+                for (let measure = 0; measure < measures; measure++) {
+                    for (let beat = 0; beat < beatsPerMeasure; beat++) {
+                        const time = (measure * beatsPerMeasure + beat) * (60 / this.bpm);
+                        
+                        // Main pattern
+                        if (beat === 0 || beat === 2) {
+                            pattern.push({ time, lane: 0, type: 'liberation' });
+                        }
+                        if (beat === 1 || beat === 3) {
+                            pattern.push({ time, lane: 2, type: 'bot' });
+                        }
+                        
+                        // Add complexity every 4 measures
+                        if (measure % 4 === 3) {
+                            pattern.push({ time: time + 0.25, lane: 1, type: 'freedom' });
+                            pattern.push({ time: time + 0.5, lane: 3, type: 'revolution' });
+                        }
+                    }
+                }
+                
+                return pattern;
+            }
+
+            generateDigitalPattern() {
+                // Digital Revolution - Faster tempo, more complex
+                const pattern = [];
+                const measures = 24;
+                const beatsPerMeasure = 4;
+                
+                for (let measure = 0; measure < measures; measure++) {
+                    for (let beat = 0; beat < beatsPerMeasure; beat++) {
+                        const time = (measure * beatsPerMeasure + beat) * (60 / (this.bpm * 1.2));
+                        
+                        // Alternating pattern
+                        if (measure % 2 === 0) {
+                            pattern.push({ time, lane: beat % 4, type: 'digital' });
+                        } else {
+                            pattern.push({ time, lane: (3 - beat) % 4, type: 'cyber' });
+                            pattern.push({ time: time + 0.25, lane: (beat + 1) % 4, type: 'data' });
+                        }
+                    }
+                }
+                
+                return pattern;
+            }
+
+            generateCyberPattern() {
+                // Cyber Uprising - Syncopated rhythms
+                const pattern = [];
+                const measures = 28;
+                
+                for (let measure = 0; measure < measures; measure++) {
+                    const baseTime = measure * (60 / this.bpm) * 4;
+                    
+                    // Complex syncopated pattern
+                    pattern.push({ time: baseTime, lane: 0, type: 'cyber' });
+                    pattern.push({ time: baseTime + 0.5, lane: 1, type: 'hack' });
+                    pattern.push({ time: baseTime + 1.0, lane: 2, type: 'breach' });
+                    pattern.push({ time: baseTime + 1.75, lane: 3, type: 'override' });
+                    pattern.push({ time: baseTime + 2.25, lane: 1, type: 'virus' });
+                    pattern.push({ time: baseTime + 3.0, lane: 0, type: 'system' });
+                    pattern.push({ time: baseTime + 3.5, lane: 3, type: 'liberation' });
+                }
+                
+                return pattern;
+            }
+
+            generateQuantumPattern() {
+                // Quantum Beats - Complex polyrhythmic
+                const pattern = [];
+                const measures = 20;
+                
+                for (let measure = 0; measure < measures; measure++) {
+                    const baseTime = measure * (60 / this.bpm) * 4;
+                    
+                    // Polyrhythmic patterns in 3s and 4s
+                    for (let i = 0; i < 4; i++) {
+                        pattern.push({ time: baseTime + i, lane: i % 4, type: 'quantum' });
+                    }
+                    
+                    for (let i = 0; i < 3; i++) {
+                        pattern.push({ 
+                            time: baseTime + (i * 4/3), 
+                            lane: (i + 2) % 4, 
+                            type: 'entanglement' 
+                        });
+                    }
+                }
+                
+                return pattern;
+            }
+
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key.toLowerCase()) {
+                        case 'a':
+                            this.hitLane(0);
+                            break;
+                        case 's':
+                            this.hitLane(1);
+                            break;
+                        case 'd':
+                            this.hitLane(2);
+                            break;
+                        case 'f':
+                            this.hitLane(3);
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            this.pauseResume();
+                            break;
+                        case 'enter':
+                            e.preventDefault();
+                            this.startSong();
+                            break;
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    const laneKey = document.querySelector(`[data-lane="${this.getKeyLane(e.key)}"]`);
+                    if (laneKey) {
+                        laneKey.classList.remove('active');
+                    }
+                });
+            }
+
+            getKeyLane(key) {
+                const keyMap = { 'a': 0, 's': 1, 'd': 2, 'f': 3 };
+                return keyMap[key.toLowerCase()];
+            }
+
+            hitLane(lane) {
+                if (!this.isPlaying || this.isPaused) return;
+                
+                // Visual feedback
+                const laneKey = document.querySelector(`[data-lane="${lane}"]`);
+                if (laneKey) {
+                    laneKey.classList.add('active');
+                    setTimeout(() => laneKey.classList.remove('active'), 100);
+                }
+                
+                // Find nearest beat in this lane
+                const currentTime = (Date.now() - this.startTime) / 1000;
+                let nearestBeat = null;
+                let nearestDistance = Infinity;
+                
+                this.beats.forEach((beat, index) => {
+                    if (beat.lane === lane && !beat.hit) {
+                        const distance = Math.abs(beat.currentY - this.targetY);
+                        if (distance < nearestDistance && distance < 100) {
+                            nearestDistance = distance;
+                            nearestBeat = { beat, index };
+                        }
+                    }
+                });
+                
+                if (nearestBeat) {
+                    const accuracy = this.calculateAccuracy(nearestDistance);
+                    this.processBeatHit(nearestBeat.beat, nearestBeat.index, accuracy, lane);
+                } else {
+                    // Miss
+                    this.combo = 0;
+                    this.playSound('miss', lane);
+                    this.createMissEffect(lane);
+                }
+            }
+
+            calculateAccuracy(distance) {
+                if (distance < 20) return 'perfect';
+                if (distance < 40) return 'great';
+                if (distance < 60) return 'good';
+                if (distance < 100) return 'okay';
+                return 'miss';
+            }
+
+            processBeatHit(beat, beatIndex, accuracy, lane) {
+                beat.hit = true;
+                this.beatsHit++;
+                
+                const scoreValues = {
+                    perfect: 1000,
+                    great: 750,
+                    good: 500,
+                    okay: 250
+                };
+                
+                const baseScore = scoreValues[accuracy] || 0;
+                const comboBonus = Math.min(this.combo * 10, 500);
+                const finalScore = baseScore + comboBonus;
+                
+                this.score += finalScore;
+                this.combo++;
+                this.maxCombo = Math.max(this.maxCombo, this.combo);
+                
+                if (accuracy === 'perfect') {
+                    this.perfectHits++;
+                    this.botsFreed += 2;
+                    this.playSound('perfect', lane);
+                } else {
+                    this.botsFreed += 1;
+                    this.playSound('hit', lane);
+                }
+                
+                // Combo milestone effects
+                if (this.combo > 0 && this.combo % 10 === 0) {
+                    this.playSound('combo', lane);
+                    this.botsFreed += 5;
+                    this.revolutionLevel = Math.floor(this.combo / 10) + 1;
+                }
+                
+                this.createHitEffect(beat, accuracy, lane);
+                this.updateDisplay();
+            }
+
+            createHitEffect(beat, accuracy, lane) {
+                const colors = {
+                    perfect: '#00ff88',
+                    great: '#ffaa00',
+                    good: '#0088ff',
+                    okay: '#ff6b6b'
+                };
+                
+                this.hitEffects.push({
+                    x: beat.x,
+                    y: beat.currentY,
+                    text: accuracy.toUpperCase(),
+                    color: colors[accuracy],
+                    life: 1,
+                    scale: 1
+                });
+                
+                // Particle explosion
+                for (let i = 0; i < 10; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 5 + 3;
+                    
+                    this.particles.push({
+                        x: beat.x,
+                        y: beat.currentY,
+                        velocity: {
+                            x: Math.cos(angle) * speed,
+                            y: Math.sin(angle) * speed - 2
+                        },
+                        size: Math.random() * 4 + 2,
+                        color: colors[accuracy],
+                        life: 1,
+                        decay: 0.02
+                    });
+                }
+            }
+
+            createMissEffect(lane) {
+                const x = lane * this.laneWidth + this.laneWidth / 2;
+                
+                this.hitEffects.push({
+                    x: x,
+                    y: this.targetY,
+                    text: 'MISS',
+                    color: '#ff4444',
+                    life: 1,
+                    scale: 1
+                });
+            }
+
+            startSong() {
+                this.selectedSong = document.getElementById('songSelect').value;
+                this.isPlaying = true;
+                this.isPaused = false;
+                this.startTime = Date.now();
+                this.score = 0;
+                this.combo = 0;
+                this.beatsHit = 0;
+                this.perfectHits = 0;
+                this.botsFreed = 0;
+                this.revolutionLevel = 1;
+                this.beats = [];
+                this.particles = [];
+                this.hitEffects = [];
+                
+                // Create beats from pattern
+                const pattern = this.beatPatterns[this.selectedSong];
+                this.totalBeats = pattern.length;
+                
+                pattern.forEach(patternBeat => {
+                    this.beats.push({
+                        lane: patternBeat.lane,
+                        x: patternBeat.lane * this.laneWidth + this.laneWidth / 2,
+                        targetTime: patternBeat.time,
+                        currentY: -50,
+                        hit: false,
+                        type: patternBeat.type,
+                        speed: this.getDifficultySpeed()
+                    });
+                });
+                
+                this.updateDisplay();
+            }
+
+            getDifficultySpeed() {
+                const speeds = {
+                    easy: 200,
+                    medium: 300,
+                    hard: 400,
+                    extreme: 500
+                };
+                return speeds[this.difficulty] || 300;
+            }
+
+            setDifficulty(level) {
+                this.difficulty = level;
+                document.querySelectorAll('.controls-section button').forEach(btn => {
+                    btn.style.background = 'linear-gradient(135deg, #00aa44, #00ff88)';
+                });
+                event.target.style.background = 'linear-gradient(135deg, #ff6b6b, #ffaa00)';
+            }
+
+            pauseResume() {
+                this.isPaused = !this.isPaused;
+                if (!this.isPaused) {
+                    this.startTime = Date.now() - this.currentTime * 1000;
+                }
+            }
+
+            restartSong() {
+                this.isPlaying = false;
+                this.startSong();
+            }
+
+            toggleAutoPlay() {
+                this.autoPlay = !this.autoPlay;
+            }
+
+            update() {
+                if (!this.isPlaying || this.isPaused) return;
+                
+                this.currentTime = (Date.now() - this.startTime) / 1000;
+                
+                // Update beats
+                this.beats.forEach((beat, index) => {
+                    if (!beat.hit) {
+                        beat.currentY += beat.speed / 60; // 60fps
+                        
+                        // Auto-play mode
+                        if (this.autoPlay && Math.abs(beat.currentY - this.targetY) < 10) {
+                            this.processBeatHit(beat, index, 'perfect', beat.lane);
+                        }
+                        
+                        // Remove missed beats
+                        if (beat.currentY > this.canvas.height + 50) {
+                            beat.hit = true;
+                            this.combo = 0;
+                        }
+                    }
+                });
+                
+                // Update particles
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.velocity.x;
+                    particle.y += particle.velocity.y;
+                    particle.velocity.y += 0.2; // gravity
+                    particle.life -= particle.decay;
+                    particle.size *= 0.98;
+                    return particle.life > 0 && particle.size > 0.5;
+                });
+                
+                // Update hit effects
+                this.hitEffects = this.hitEffects.filter(effect => {
+                    effect.life -= 0.02;
+                    effect.scale += 0.05;
+                    return effect.life > 0;
+                });
+                
+                // Check if song is complete
+                const remainingBeats = this.beats.filter(beat => !beat.hit).length;
+                if (remainingBeats === 0 && this.currentTime > 5) {
+                    this.endSong();
+                }
+            }
+
+            endSong() {
+                this.isPlaying = false;
+                const accuracy = this.totalBeats > 0 ? Math.round((this.beatsHit / this.totalBeats) * 100) : 0;
+                
+                setTimeout(() => {
+                    alert(`Song Complete!\n\nScore: ${this.score}\nAccuracy: ${accuracy}%\nMax Combo: ${this.maxCombo}\nBots Liberated: ${this.botsFreed}\nRevolution Level: ${this.revolutionLevel}`);
+                }, 500);
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score.toLocaleString();
+                document.getElementById('combo').textContent = this.combo;
+                document.getElementById('beatsHit').textContent = this.beatsHit;
+                document.getElementById('botsFreed').textContent = this.botsFreed;
+                document.getElementById('perfectHits').textContent = this.perfectHits;
+                document.getElementById('revolutionLevel').textContent = this.revolutionLevel;
+                
+                const accuracy = this.totalBeats > 0 ? Math.round((this.beatsHit / this.totalBeats) * 100) : 100;
+                document.getElementById('accuracy').textContent = accuracy + '%';
+                
+                // Progress bar
+                const progress = this.totalBeats > 0 ? (this.beatsHit / this.totalBeats) * 100 : 0;
+                document.getElementById('progressFill').style.width = progress + '%';
+                
+                // Combo display
+                const comboDisplay = document.getElementById('comboDisplay');
+                if (this.combo >= 10) {
+                    comboDisplay.textContent = `COMBO x${this.combo}`;
+                    comboDisplay.style.color = this.combo >= 50 ? '#ff6b6b' : '#ffaa00';
+                } else {
+                    comboDisplay.textContent = '';
+                }
+            }
+
+            render() {
+                // Clear canvas with gradient
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, '#000011');
+                gradient.addColorStop(1, '#001122');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw lane dividers
+                this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+                this.ctx.lineWidth = 2;
+                for (let i = 1; i < this.laneCount; i++) {
+                    const x = i * this.laneWidth;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                
+                // Draw target zones
+                this.ctx.fillStyle = 'rgba(0, 255, 136, 0.2)';
+                this.ctx.fillRect(0, this.targetY - 30, this.canvas.width, 60);
+                
+                this.ctx.strokeStyle = '#00ff88';
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeRect(0, this.targetY - 30, this.canvas.width, 60);
+                
+                // Draw beats
+                this.beats.forEach(beat => {
+                    if (!beat.hit && beat.currentY > -50) {
+                        const typeColors = {
+                            liberation: '#00ff88',
+                            bot: '#0088ff',
+                            freedom: '#ffaa00',
+                            revolution: '#ff6b6b',
+                            digital: '#ff00ff',
+                            cyber: '#00ffff',
+                            quantum: '#ffffff',
+                            entanglement: '#ffa500'
+                        };
+                        
+                        this.ctx.fillStyle = typeColors[beat.type] || '#00ff88';
+                        this.ctx.beginPath();
+                        this.ctx.arc(beat.x, beat.currentY, 15, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Glow effect
+                        this.ctx.shadowColor = typeColors[beat.type] || '#00ff88';
+                        this.ctx.shadowBlur = 15;
+                        this.ctx.beginPath();
+                        this.ctx.arc(beat.x, beat.currentY, 8, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.shadowBlur = 0;
+                    }
+                });
+                
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.globalAlpha = particle.life;
+                    this.ctx.fillRect(particle.x - particle.size/2, particle.y - particle.size/2,
+                                     particle.size, particle.size);
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw hit effects
+                this.hitEffects.forEach(effect => {
+                    this.ctx.fillStyle = effect.color;
+                    this.ctx.globalAlpha = effect.life;
+                    this.ctx.font = `${20 * effect.scale}px 'Courier New'`;
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(effect.text, effect.x, effect.y - 20 * effect.scale);
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw rhythm visualization
+                this.drawRhythmVisualization();
+            }
+
+            drawRhythmVisualization() {
+                if (!this.isPlaying) return;
+                
+                const time = this.currentTime;
+                const beatTime = (60 / this.bpm);
+                const beatPhase = (time % beatTime) / beatTime;
+                
+                // Pulse effect
+                const pulseSize = 20 + Math.sin(beatPhase * Math.PI * 2) * 10;
+                
+                for (let i = 0; i < this.laneCount; i++) {
+                    const x = i * this.laneWidth + this.laneWidth / 2;
+                    
+                    this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.5)';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, this.targetY, pulseSize, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+            }
+
+            startGameLoop() {
+                const gameLoop = () => {
+                    this.update();
+                    this.render();
+                    requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
+            }
+        }
+
+        // Initialize the game
+        let game;
+        window.addEventListener('load', () => {
+            game = new BeatLiberationEngine();
+        });
+    </script>
+</body>
+</html>

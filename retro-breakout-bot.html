@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Breakout Bot - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            background: #000011;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🧱 RETRO BREAKOUT BOT 🧱</h1>
+        <p>Break through the digital firewall to free trapped bots</p>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="level">1</div><div>Level</div></div>
+        <div class="stat"><div id="lives">3</div><div>Lives</div></div>
+    </div>
+    <div style="text-align: center;"><p>Use LEFT/RIGHT arrows or A/D to control the paddle</p></div>
+
+    <script>
+        class RetroBreakoutBot {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.paddle = {
+                    x: this.canvas.width / 2 - 50,
+                    y: this.canvas.height - 30,
+                    width: 100,
+                    height: 15,
+                    speed: 8
+                };
+                
+                this.ball = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height - 100,
+                    vx: 5,
+                    vy: -5,
+                    radius: 8,
+                    trail: []
+                };
+                
+                this.blocks = [];
+                this.particles = [];
+                this.powerups = [];
+                
+                this.score = 0;
+                this.level = 1;
+                this.lives = 3;
+                this.keys = {};
+                
+                this.generateBlocks();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            generateBlocks() {
+                this.blocks = [];
+                const rows = 8;
+                const cols = 14;
+                const blockWidth = 50;
+                const blockHeight = 20;
+                const padding = 5;
+                
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        this.blocks.push({
+                            x: col * (blockWidth + padding) + padding + 20,
+                            y: row * (blockHeight + padding) + padding + 50,
+                            width: blockWidth,
+                            height: blockHeight,
+                            hits: 1 + Math.floor(row / 3),
+                            maxHits: 1 + Math.floor(row / 3),
+                            color: this.getBlockColor(row)
+                        });
+                    }
+                }
+            }
+            
+            getBlockColor(row) {
+                const colors = ['#ff6b6b', '#ffaa00', '#00ff88', '#00aaff', '#aa00ff'];
+                return colors[Math.floor(row / 2) % colors.length];
+            }
+            
+            setupInput() {
+                document.addEventListener('keydown', (e) => this.keys[e.key.toLowerCase()] = true);
+                document.addEventListener('keyup', (e) => this.keys[e.key.toLowerCase()] = false);
+            }
+            
+            update() {
+                // Paddle movement
+                if (this.keys['arrowleft'] || this.keys['a']) {
+                    this.paddle.x = Math.max(0, this.paddle.x - this.paddle.speed);
+                }
+                if (this.keys['arrowright'] || this.keys['d']) {
+                    this.paddle.x = Math.min(this.canvas.width - this.paddle.width, 
+                                           this.paddle.x + this.paddle.speed);
+                }
+                
+                // Ball movement
+                this.ball.x += this.ball.vx;
+                this.ball.y += this.ball.vy;
+                
+                // Ball trail
+                this.ball.trail.push({ x: this.ball.x, y: this.ball.y, life: 10 });
+                this.ball.trail = this.ball.trail.filter(t => {
+                    t.life--;
+                    return t.life > 0;
+                });
+                
+                // Ball collision with walls
+                if (this.ball.x <= this.ball.radius || this.ball.x >= this.canvas.width - this.ball.radius) {
+                    this.ball.vx = -this.ball.vx;
+                }
+                if (this.ball.y <= this.ball.radius) {
+                    this.ball.vy = -this.ball.vy;
+                }
+                
+                // Ball collision with paddle
+                if (this.ball.y + this.ball.radius >= this.paddle.y &&
+                    this.ball.x >= this.paddle.x &&
+                    this.ball.x <= this.paddle.x + this.paddle.width) {
+                    
+                    this.ball.vy = -Math.abs(this.ball.vy);
+                    
+                    // Add spin based on where ball hits paddle
+                    const hitPos = (this.ball.x - this.paddle.x) / this.paddle.width;
+                    this.ball.vx += (hitPos - 0.5) * 4;
+                    
+                    // Limit ball speed
+                    const speed = Math.sqrt(this.ball.vx * this.ball.vx + this.ball.vy * this.ball.vy);
+                    if (speed > 10) {
+                        this.ball.vx = (this.ball.vx / speed) * 10;
+                        this.ball.vy = (this.ball.vy / speed) * 10;
+                    }
+                }
+                
+                // Ball collision with blocks
+                this.blocks = this.blocks.filter(block => {
+                    if (this.ball.x + this.ball.radius >= block.x &&
+                        this.ball.x - this.ball.radius <= block.x + block.width &&
+                        this.ball.y + this.ball.radius >= block.y &&
+                        this.ball.y - this.ball.radius <= block.y + block.height) {
+                        
+                        // Determine collision side
+                        const ballCenterX = this.ball.x;
+                        const ballCenterY = this.ball.y;
+                        const blockCenterX = block.x + block.width / 2;
+                        const blockCenterY = block.y + block.height / 2;
+                        
+                        const dx = Math.abs(ballCenterX - blockCenterX);
+                        const dy = Math.abs(ballCenterY - blockCenterY);
+                        
+                        if (dx / block.width > dy / block.height) {
+                            this.ball.vx = -this.ball.vx;
+                        } else {
+                            this.ball.vy = -this.ball.vy;
+                        }
+                        
+                        // Damage block
+                        block.hits--;
+                        this.score += 10;
+                        
+                        // Create particles
+                        for (let i = 0; i < 5; i++) {
+                            this.particles.push({
+                                x: block.x + block.width / 2,
+                                y: block.y + block.height / 2,
+                                vx: (Math.random() - 0.5) * 6,
+                                vy: (Math.random() - 0.5) * 6,
+                                color: block.color,
+                                life: 30
+                            });
+                        }
+                        
+                        return block.hits > 0;
+                    }
+                    return true;
+                });
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.2; // gravity
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                // Check for ball falling off screen
+                if (this.ball.y > this.canvas.height) {
+                    this.lives--;
+                    if (this.lives <= 0) {
+                        alert(`Game Over! Final Score: ${this.score}`);
+                        this.restart();
+                    } else {
+                        this.resetBall();
+                    }
+                }
+                
+                // Check level completion
+                if (this.blocks.length === 0) {
+                    this.level++;
+                    this.score += 1000;
+                    this.generateBlocks();
+                    this.resetBall();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            resetBall() {
+                this.ball.x = this.canvas.width / 2;
+                this.ball.y = this.canvas.height - 100;
+                this.ball.vx = (Math.random() - 0.5) * 8;
+                this.ball.vy = -5;
+                this.ball.trail = [];
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw blocks
+                this.blocks.forEach(block => {
+                    const alpha = block.hits / block.maxHits;
+                    this.ctx.fillStyle = block.color;
+                    this.ctx.globalAlpha = alpha;
+                    this.ctx.fillRect(block.x, block.y, block.width, block.height);
+                    
+                    // Block outline
+                    this.ctx.globalAlpha = 1;
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.strokeRect(block.x, block.y, block.width, block.height);
+                });
+                
+                // Draw paddle
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
+                
+                // Draw ball trail
+                this.ball.trail.forEach((t, i) => {
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.globalAlpha = t.life / 10;
+                    this.ctx.beginPath();
+                    this.ctx.arc(t.x, t.y, this.ball.radius * (t.life / 10), 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw ball
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.beginPath();
+                this.ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 30;
+                    this.ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+                });
+                this.ctx.globalAlpha = 1;
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('lives').textContent = this.lives;
+            }
+            
+            restart() {
+                this.score = 0;
+                this.level = 1;
+                this.lives = 3;
+                this.particles = [];
+                this.generateBlocks();
+                this.resetBall();
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new RetroBreakoutBot();
+    </script>
+</body>
+</html>

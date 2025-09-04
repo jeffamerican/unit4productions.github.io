@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Drift Racer - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            background: linear-gradient(180deg, #000033 0%, #000011 100%);
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🏎️ NEON DRIFT RACER 🏎️</h1>
+        <p>Race through the digital highways at blazing speeds</p>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value" id="speed">0</div>
+            <div>Speed</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="distance">0</div>
+            <div>Distance</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="score">0</div>
+            <div>Score</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <p>Use ARROW KEYS or WASD to control your neon racer</p>
+        <p>SPACE to boost | R to restart</p>
+    </div>
+
+    <script>
+        class NeonDriftRacer {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.car = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height * 0.8,
+                    speed: 0,
+                    maxSpeed: 15,
+                    acceleration: 0.3,
+                    friction: 0.95,
+                    angle: 0,
+                    drift: 0
+                };
+                
+                this.road = { offset: 0, curves: [] };
+                this.obstacles = [];
+                this.pickups = [];
+                this.particles = [];
+                
+                this.score = 0;
+                this.distance = 0;
+                this.gameSpeed = 5;
+                
+                this.keys = {};
+                this.setupInput();
+                this.generateRoad();
+                this.startGame();
+            }
+
+            setupInput() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+            }
+
+            generateRoad() {
+                for (let i = 0; i < 100; i++) {
+                    this.road.curves.push({
+                        y: i * 50,
+                        curve: Math.sin(i * 0.1) * 100
+                    });
+                }
+            }
+
+            update() {
+                // Car controls
+                if (this.keys['arrowleft'] || this.keys['a']) {
+                    this.car.x -= 5;
+                    this.car.drift -= 0.1;
+                }
+                if (this.keys['arrowright'] || this.keys['d']) {
+                    this.car.x += 5;
+                    this.car.drift += 0.1;
+                }
+                if (this.keys['arrowup'] || this.keys['w']) {
+                    this.car.speed = Math.min(this.car.maxSpeed, this.car.speed + this.car.acceleration);
+                }
+                if (this.keys['arrowdown'] || this.keys['s']) {
+                    this.car.speed = Math.max(0, this.car.speed - this.car.acceleration * 2);
+                }
+                if (this.keys[' ']) {
+                    this.car.speed = Math.min(this.car.maxSpeed * 1.5, this.car.speed + 0.5);
+                }
+                if (this.keys['r']) {
+                    this.restart();
+                }
+                
+                this.car.speed *= this.car.friction;
+                this.car.drift *= 0.9;
+                this.car.angle = this.car.drift * 0.1;
+                
+                // Update road
+                this.road.offset += this.car.speed + this.gameSpeed;
+                this.distance += this.car.speed;
+                this.score += Math.floor(this.car.speed);
+                
+                // Generate particles
+                if (Math.abs(this.car.drift) > 0.5) {
+                    this.particles.push({
+                        x: this.car.x,
+                        y: this.car.y + 20,
+                        vx: -this.car.drift * 2,
+                        vy: 2,
+                        life: 30,
+                        color: '#00ff88'
+                    });
+                }
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                this.updateDisplay();
+            }
+
+            render() {
+                // Clear
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw road
+                this.ctx.strokeStyle = '#00ff88';
+                this.ctx.lineWidth = 4;
+                
+                for (let i = 0; i < 20; i++) {
+                    const y = this.canvas.height - (i * 30) + (this.road.offset % 30);
+                    const curve = Math.sin((this.road.offset + i * 30) * 0.01) * 50;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.canvas.width / 2 - 200 + curve, y);
+                    this.ctx.lineTo(this.canvas.width / 2 + 200 + curve, y);
+                    this.ctx.stroke();
+                }
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 30;
+                    this.ctx.fillRect(p.x, p.y, 4, 4);
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw car
+                this.ctx.save();
+                this.ctx.translate(this.car.x, this.car.y);
+                this.ctx.rotate(this.car.angle);
+                
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(-15, -30, 30, 60);
+                
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(-10, -25, 20, 10);
+                
+                this.ctx.restore();
+            }
+
+            updateDisplay() {
+                document.getElementById('speed').textContent = Math.floor(this.car.speed * 10);
+                document.getElementById('distance').textContent = Math.floor(this.distance);
+                document.getElementById('score').textContent = this.score;
+            }
+
+            restart() {
+                this.car.x = this.canvas.width / 2;
+                this.car.speed = 0;
+                this.distance = 0;
+                this.score = 0;
+                this.road.offset = 0;
+                this.particles = [];
+            }
+
+            startGame() {
+                const gameLoop = () => {
+                    this.update();
+                    this.render();
+                    requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
+            }
+        }
+
+        new NeonDriftRacer();
+    </script>
+</body>
+</html>

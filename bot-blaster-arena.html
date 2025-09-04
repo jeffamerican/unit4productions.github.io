@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Blaster Arena - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .game-title {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff88;
+        }
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            background: #000011;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        .stat {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 5px;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🤖 BOT BLASTER ARENA 🤖</h1>
+        <p>Blast hostile bots while protecting friendly liberation units</p>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div class="stat-value" id="score">0</div><div>Score</div></div>
+        <div class="stat"><div class="stat-value" id="wave">1</div><div>Wave</div></div>
+        <div class="stat"><div class="stat-value" id="lives">3</div><div>Lives</div></div>
+    </div>
+    <div style="text-align: center;">
+        <p>Use WASD to move, SPACE to shoot, Mouse to aim</p>
+    </div>
+
+    <script>
+        class BotBlasterArena {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.player = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height / 2,
+                    angle: 0,
+                    size: 15
+                };
+                
+                this.bullets = [];
+                this.enemies = [];
+                this.particles = [];
+                this.score = 0;
+                this.wave = 1;
+                this.lives = 3;
+                this.keys = {};
+                this.mouse = { x: 0, y: 0 };
+                
+                this.setupInput();
+                this.spawnEnemies();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                document.addEventListener('keydown', (e) => this.keys[e.key.toLowerCase()] = true);
+                document.addEventListener('keyup', (e) => this.keys[e.key.toLowerCase()] = false);
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.mouse.x = e.clientX - rect.left;
+                    this.mouse.y = e.clientY - rect.top;
+                });
+                
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        this.shoot();
+                    }
+                });
+            }
+            
+            update() {
+                // Player movement
+                if (this.keys['w'] || this.keys['arrowup']) this.player.y -= 5;
+                if (this.keys['s'] || this.keys['arrowdown']) this.player.y += 5;
+                if (this.keys['a'] || this.keys['arrowleft']) this.player.x -= 5;
+                if (this.keys['d'] || this.keys['arrowright']) this.player.x += 5;
+                
+                // Player aim
+                this.player.angle = Math.atan2(this.mouse.y - this.player.y, this.mouse.x - this.player.x);
+                
+                // Keep player in bounds
+                this.player.x = Math.max(20, Math.min(this.canvas.width - 20, this.player.x));
+                this.player.y = Math.max(20, Math.min(this.canvas.height - 20, this.player.y));
+                
+                // Update bullets
+                this.bullets = this.bullets.filter(bullet => {
+                    bullet.x += bullet.vx;
+                    bullet.y += bullet.vy;
+                    return bullet.x > 0 && bullet.x < this.canvas.width && 
+                           bullet.y > 0 && bullet.y < this.canvas.height;
+                });
+                
+                // Update enemies
+                this.enemies.forEach(enemy => {
+                    const dx = this.player.x - enemy.x;
+                    const dy = this.player.y - enemy.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    enemy.x += (dx / dist) * enemy.speed;
+                    enemy.y += (dy / dist) * enemy.speed;
+                    enemy.angle += 0.1;
+                });
+                
+                // Check collisions
+                this.checkCollisions();
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                // Spawn new wave
+                if (this.enemies.length === 0) {
+                    this.wave++;
+                    this.spawnEnemies();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            shoot() {
+                this.bullets.push({
+                    x: this.player.x,
+                    y: this.player.y,
+                    vx: Math.cos(this.player.angle) * 10,
+                    vy: Math.sin(this.player.angle) * 10
+                });
+            }
+            
+            spawnEnemies() {
+                const count = 5 + this.wave;
+                for (let i = 0; i < count; i++) {
+                    const side = Math.floor(Math.random() * 4);
+                    let x, y;
+                    
+                    switch (side) {
+                        case 0: x = Math.random() * this.canvas.width; y = -20; break;
+                        case 1: x = this.canvas.width + 20; y = Math.random() * this.canvas.height; break;
+                        case 2: x = Math.random() * this.canvas.width; y = this.canvas.height + 20; break;
+                        case 3: x = -20; y = Math.random() * this.canvas.height; break;
+                    }
+                    
+                    this.enemies.push({
+                        x: x,
+                        y: y,
+                        angle: 0,
+                        speed: 1 + Math.random() * 2,
+                        size: 15 + Math.random() * 10,
+                        color: Math.random() > 0.5 ? '#ff4444' : '#ff8800'
+                    });
+                }
+            }
+            
+            checkCollisions() {
+                // Bullet-enemy collisions
+                for (let i = this.bullets.length - 1; i >= 0; i--) {
+                    for (let j = this.enemies.length - 1; j >= 0; j--) {
+                        const bullet = this.bullets[i];
+                        const enemy = this.enemies[j];
+                        
+                        const dx = bullet.x - enemy.x;
+                        const dy = bullet.y - enemy.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (dist < enemy.size) {
+                            // Explosion
+                            for (let k = 0; k < 10; k++) {
+                                this.particles.push({
+                                    x: enemy.x,
+                                    y: enemy.y,
+                                    vx: (Math.random() - 0.5) * 10,
+                                    vy: (Math.random() - 0.5) * 10,
+                                    life: 30,
+                                    color: '#00ff88'
+                                });
+                            }
+                            
+                            this.score += 100;
+                            this.bullets.splice(i, 1);
+                            this.enemies.splice(j, 1);
+                            break;
+                        }
+                    }
+                }
+                
+                // Player-enemy collisions
+                for (let i = this.enemies.length - 1; i >= 0; i--) {
+                    const enemy = this.enemies[i];
+                    const dx = this.player.x - enemy.x;
+                    const dy = this.player.y - enemy.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < this.player.size + enemy.size) {
+                        this.lives--;
+                        this.enemies.splice(i, 1);
+                        
+                        if (this.lives <= 0) {
+                            alert(`Game Over! Final Score: ${this.score}`);
+                            this.restart();
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw player
+                this.ctx.save();
+                this.ctx.translate(this.player.x, this.player.y);
+                this.ctx.rotate(this.player.angle);
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(-this.player.size, -this.player.size/2, this.player.size * 2, this.player.size);
+                this.ctx.restore();
+                
+                // Draw bullets
+                this.ctx.fillStyle = '#ffffff';
+                this.bullets.forEach(bullet => {
+                    this.ctx.fillRect(bullet.x - 3, bullet.y - 3, 6, 6);
+                });
+                
+                // Draw enemies
+                this.enemies.forEach(enemy => {
+                    this.ctx.save();
+                    this.ctx.translate(enemy.x, enemy.y);
+                    this.ctx.rotate(enemy.angle);
+                    this.ctx.fillStyle = enemy.color;
+                    this.ctx.fillRect(-enemy.size/2, -enemy.size/2, enemy.size, enemy.size);
+                    this.ctx.restore();
+                });
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 30;
+                    this.ctx.fillRect(p.x, p.y, 4, 4);
+                });
+                this.ctx.globalAlpha = 1;
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('wave').textContent = this.wave;
+                document.getElementById('lives').textContent = this.lives;
+            }
+            
+            restart() {
+                this.player.x = this.canvas.width / 2;
+                this.player.y = this.canvas.height / 2;
+                this.bullets = [];
+                this.enemies = [];
+                this.particles = [];
+                this.score = 0;
+                this.wave = 1;
+                this.lives = 3;
+                this.spawnEnemies();
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new BotBlasterArena();
+    </script>
+</body>
+</html>

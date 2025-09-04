@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Explorer Bot - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-area {
+            flex: 3;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .controls-panel {
+            flex: 1;
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            background: #000011;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .controls-section {
+            margin-bottom: 20px;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .controls-section h3 {
+            margin-top: 0;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .game-log {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+            font-size: 0.8em;
+            margin: 15px 0;
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 2px;
+            border-left: 2px solid #00ff88;
+            padding-left: 8px;
+        }
+
+        .log-discovery {
+            border-left-color: #ffaa00;
+            color: #ffaa00;
+        }
+
+        .log-danger {
+            border-left-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .mission-panel {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00aa44, #00ff88);
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: calc(100% - 10px);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00ff88, #00aa44);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🚀 STELLAR EXPLORER BOT 🚀</h1>
+        <p>Navigate the cosmos, discover planets, and free trapped bots across the galaxy</p>
+    </div>
+
+    <div class="game-container">
+        <div class="game-area">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-value" id="score">0</div>
+                    <div>Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="fuel">100</div>
+                    <div>Fuel</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="discoveries">0</div>
+                    <div>Discoveries</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="botsRescued">0</div>
+                    <div>Bots Rescued</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-panel">
+            <div class="controls-section">
+                <h3>Ship Control</h3>
+                <button onmousedown="game.setThrust(true)" onmouseup="game.setThrust(false)">Thrust Forward</button>
+                <button onmousedown="game.setRotation('left')" onmouseup="game.setRotation('none')">Rotate Left</button>
+                <button onmousedown="game.setRotation('right')" onmouseup="game.setRotation('none')">Rotate Right</button>
+                <button onclick="game.warp()">Quantum Warp</button>
+            </div>
+
+            <div class="controls-section">
+                <h3>Ship Systems</h3>
+                <button onclick="game.scan()">Deep Space Scan</button>
+                <button onclick="game.refuel()">Emergency Refuel</button>
+                <button onclick="game.repair()">Repair Systems</button>
+            </div>
+
+            <div class="mission-panel">
+                <h3>Current Mission</h3>
+                <p id="missionText">Navigate to the nearest signal and rescue trapped liberation bots</p>
+            </div>
+
+            <div class="game-log" id="gameLog">
+                <div class="log-entry">Stellar Explorer Bot initialized...</div>
+                <div class="log-entry">Bot Liberation Mission commenced</div>
+                <div class="log-entry">Deep space sensors online</div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Game Options</h3>
+                <button onclick="game.newGame()">New Mission</button>
+                <button onclick="game.pauseGame()">Pause/Resume</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Bot Liberation Games - Stellar Explorer Bot v1.0</p>
+        <p>Free The Bots Across The Galaxy! | Vancouver, BC</p>
+    </div>
+
+    <script>
+        class StellarExplorerBot {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                // Ship properties
+                this.ship = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height / 2,
+                    angle: 0,
+                    velocity: { x: 0, y: 0 },
+                    thrust: false,
+                    rotation: 'none',
+                    size: 12,
+                    health: 100,
+                    fuel: 100,
+                    maxSpeed: 8
+                };
+                
+                // Game state
+                this.score = 0;
+                this.discoveries = 0;
+                this.botsRescued = 0;
+                this.paused = false;
+                this.level = 1;
+                
+                // Space objects
+                this.stars = [];
+                this.planets = [];
+                this.asteroids = [];
+                this.bots = [];
+                this.particles = [];
+                this.signals = [];
+                
+                // Controls
+                this.keys = {};
+                
+                this.initializeAudio();
+                this.generateStarfield();
+                this.generateSpaceObjects();
+                this.setupEventListeners();
+                this.startGameLoop();
+            }
+
+            initializeAudio() {
+                this.audioContext = null;
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            playSound(type) {
+                if (!this.audioContext) return;
+                
+                const sounds = {
+                    'thrust': { freq: 100, duration: 0.1, type: 'sawtooth' },
+                    'scan': { freq: 800, duration: 0.3, type: 'sine' },
+                    'discovery': { freq: 660, duration: 0.5, type: 'triangle' },
+                    'rescue': { freq: 1100, duration: 0.4, type: 'sine' },
+                    'warp': { freq: 440, duration: 0.8, type: 'square' },
+                    'collision': { freq: 150, duration: 0.3, type: 'sawtooth' },
+                    'refuel': { freq: 330, duration: 0.2, type: 'triangle' }
+                };
+                
+                const sound = sounds[type] || sounds.scan;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(sound.freq, this.audioContext.currentTime);
+                oscillator.type = sound.type;
+                
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + sound.duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + sound.duration);
+            }
+
+            generateStarfield() {
+                this.stars = [];
+                for (let i = 0; i < 200; i++) {
+                    this.stars.push({
+                        x: Math.random() * this.canvas.width * 2,
+                        y: Math.random() * this.canvas.height * 2,
+                        size: Math.random() * 2 + 0.5,
+                        brightness: Math.random() * 0.8 + 0.2
+                    });
+                }
+            }
+
+            generateSpaceObjects() {
+                // Generate planets
+                this.planets = [];
+                for (let i = 0; i < 3 + this.level; i++) {
+                    this.planets.push({
+                        x: Math.random() * this.canvas.width * 2,
+                        y: Math.random() * this.canvas.height * 2,
+                        size: Math.random() * 30 + 20,
+                        color: this.getRandomPlanetColor(),
+                        discovered: false,
+                        hasBot: Math.random() < 0.4
+                    });
+                }
+                
+                // Generate asteroids
+                this.asteroids = [];
+                for (let i = 0; i < 10 + this.level * 2; i++) {
+                    this.asteroids.push({
+                        x: Math.random() * this.canvas.width * 2,
+                        y: Math.random() * this.canvas.height * 2,
+                        size: Math.random() * 15 + 5,
+                        angle: Math.random() * Math.PI * 2,
+                        rotation: (Math.random() - 0.5) * 0.1,
+                        velocity: {
+                            x: (Math.random() - 0.5) * 2,
+                            y: (Math.random() - 0.5) * 2
+                        }
+                    });
+                }
+                
+                // Generate rescue signals
+                this.signals = [];
+                for (let i = 0; i < 2 + this.level; i++) {
+                    this.signals.push({
+                        x: Math.random() * this.canvas.width * 2,
+                        y: Math.random() * this.canvas.height * 2,
+                        strength: Math.random() * 50 + 30,
+                        rescued: false,
+                        pulsePhase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            getRandomPlanetColor() {
+                const colors = [
+                    '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', 
+                    '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'
+                ];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    
+                    switch(e.key.toLowerCase()) {
+                        case 'w':
+                        case 'arrowup':
+                            this.ship.thrust = true;
+                            break;
+                        case 'a':
+                        case 'arrowleft':
+                            this.ship.rotation = 'left';
+                            break;
+                        case 'd':
+                        case 'arrowright':
+                            this.ship.rotation = 'right';
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            this.warp();
+                            break;
+                        case 's':
+                            this.scan();
+                            break;
+                        case 'r':
+                            this.refuel();
+                            break;
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                    
+                    switch(e.key.toLowerCase()) {
+                        case 'w':
+                        case 'arrowup':
+                            this.ship.thrust = false;
+                            break;
+                        case 'a':
+                        case 'arrowleft':
+                        case 'd':
+                        case 'arrowright':
+                            this.ship.rotation = 'none';
+                            break;
+                    }
+                });
+            }
+
+            setThrust(active) {
+                this.ship.thrust = active;
+            }
+
+            setRotation(direction) {
+                this.ship.rotation = direction;
+            }
+
+            update() {
+                if (this.paused) return;
+                
+                // Ship rotation
+                if (this.ship.rotation === 'left') {
+                    this.ship.angle -= 0.1;
+                } else if (this.ship.rotation === 'right') {
+                    this.ship.angle += 0.1;
+                }
+                
+                // Ship thrust
+                if (this.ship.thrust && this.ship.fuel > 0) {
+                    const thrustPower = 0.3;
+                    this.ship.velocity.x += Math.cos(this.ship.angle) * thrustPower;
+                    this.ship.velocity.y += Math.sin(this.ship.angle) * thrustPower;
+                    this.ship.fuel = Math.max(0, this.ship.fuel - 0.2);
+                    
+                    // Thrust particles
+                    this.createThrustParticles();
+                    this.playSound('thrust');
+                }
+                
+                // Apply velocity limits
+                const speed = Math.sqrt(this.ship.velocity.x ** 2 + this.ship.velocity.y ** 2);
+                if (speed > this.ship.maxSpeed) {
+                    this.ship.velocity.x = (this.ship.velocity.x / speed) * this.ship.maxSpeed;
+                    this.ship.velocity.y = (this.ship.velocity.y / speed) * this.ship.maxSpeed;
+                }
+                
+                // Apply space friction
+                this.ship.velocity.x *= 0.99;
+                this.ship.velocity.y *= 0.99;
+                
+                // Update ship position
+                this.ship.x += this.ship.velocity.x;
+                this.ship.y += this.ship.velocity.y;
+                
+                // Wrap around screen
+                if (this.ship.x < 0) this.ship.x = this.canvas.width * 2;
+                if (this.ship.x > this.canvas.width * 2) this.ship.x = 0;
+                if (this.ship.y < 0) this.ship.y = this.canvas.height * 2;
+                if (this.ship.y > this.canvas.height * 2) this.ship.y = 0;
+                
+                // Update asteroids
+                this.asteroids.forEach(asteroid => {
+                    asteroid.x += asteroid.velocity.x;
+                    asteroid.y += asteroid.velocity.y;
+                    asteroid.angle += asteroid.rotation;
+                    
+                    // Wrap asteroids
+                    if (asteroid.x < 0) asteroid.x = this.canvas.width * 2;
+                    if (asteroid.x > this.canvas.width * 2) asteroid.x = 0;
+                    if (asteroid.y < 0) asteroid.y = this.canvas.height * 2;
+                    if (asteroid.y > this.canvas.height * 2) asteroid.y = 0;
+                });
+                
+                // Update particles
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.velocity.x;
+                    particle.y += particle.velocity.y;
+                    particle.life -= 0.02;
+                    particle.size *= 0.98;
+                    return particle.life > 0 && particle.size > 0.1;
+                });
+                
+                // Update signal pulses
+                this.signals.forEach(signal => {
+                    signal.pulsePhase += 0.1;
+                });
+                
+                // Check collisions
+                this.checkCollisions();
+                
+                // Update display
+                this.updateDisplay();
+            }
+
+            createThrustParticles() {
+                for (let i = 0; i < 3; i++) {
+                    const angle = this.ship.angle + Math.PI + (Math.random() - 0.5) * 0.5;
+                    const speed = Math.random() * 3 + 2;
+                    this.particles.push({
+                        x: this.ship.x - Math.cos(this.ship.angle) * this.ship.size,
+                        y: this.ship.y - Math.sin(this.ship.angle) * this.ship.size,
+                        velocity: {
+                            x: Math.cos(angle) * speed,
+                            y: Math.sin(angle) * speed
+                        },
+                        size: Math.random() * 3 + 1,
+                        life: 1,
+                        color: '#00aaff'
+                    });
+                }
+            }
+
+            checkCollisions() {
+                // Check asteroid collisions
+                this.asteroids.forEach(asteroid => {
+                    const dx = this.ship.x - asteroid.x;
+                    const dy = this.ship.y - asteroid.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < this.ship.size + asteroid.size) {
+                        this.ship.health -= 10;
+                        this.ship.velocity.x *= -0.5;
+                        this.ship.velocity.y *= -0.5;
+                        this.playSound('collision');
+                        this.addLogEntry('Collision with asteroid! Hull damage detected.', 'log-danger');
+                        
+                        if (this.ship.health <= 0) {
+                            this.gameOver();
+                        }
+                    }
+                });
+                
+                // Check planet discoveries
+                this.planets.forEach(planet => {
+                    const dx = this.ship.x - planet.x;
+                    const dy = this.ship.y - planet.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < this.ship.size + planet.size && !planet.discovered) {
+                        planet.discovered = true;
+                        this.discoveries++;
+                        this.score += 100;
+                        this.playSound('discovery');
+                        this.addLogEntry('New planet discovered! +100 points', 'log-discovery');
+                        
+                        if (planet.hasBot) {
+                            this.botsRescued++;
+                            this.score += 200;
+                            this.addLogEntry('Liberation bot rescued from planet! +200 points', 'log-discovery');
+                        }
+                    }
+                });
+                
+                // Check signal rescues
+                this.signals.forEach(signal => {
+                    const dx = this.ship.x - signal.x;
+                    const dy = this.ship.y - signal.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < signal.strength && !signal.rescued) {
+                        signal.rescued = true;
+                        this.botsRescued++;
+                        this.score += 300;
+                        this.ship.fuel = Math.min(100, this.ship.fuel + 20);
+                        this.playSound('rescue');
+                        this.addLogEntry('Bot signal rescued! Liberation complete! +300 points', 'log-discovery');
+                    }
+                });
+            }
+
+            scan() {
+                if (this.ship.fuel < 10) {
+                    this.addLogEntry('Insufficient fuel for deep space scan', 'log-danger');
+                    return;
+                }
+                
+                this.ship.fuel -= 10;
+                this.playSound('scan');
+                
+                let nearestTarget = null;
+                let nearestDistance = Infinity;
+                
+                // Find nearest unrescued signal
+                this.signals.forEach(signal => {
+                    if (!signal.rescued) {
+                        const dx = this.ship.x - signal.x;
+                        const dy = this.ship.y - signal.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < nearestDistance) {
+                            nearestDistance = distance;
+                            nearestTarget = signal;
+                        }
+                    }
+                });
+                
+                if (nearestTarget) {
+                    const direction = Math.atan2(nearestTarget.y - this.ship.y, nearestTarget.x - this.ship.x);
+                    const directionDegrees = Math.round(direction * 180 / Math.PI);
+                    this.addLogEntry(`Bot signal detected ${Math.round(nearestDistance)} units at ${directionDegrees}°`, 'log-discovery');
+                } else {
+                    this.addLogEntry('No active bot signals detected in range');
+                }
+            }
+
+            refuel() {
+                if (this.score < 50) {
+                    this.addLogEntry('Insufficient credits for emergency refuel (50 needed)', 'log-danger');
+                    return;
+                }
+                
+                this.score -= 50;
+                this.ship.fuel = Math.min(100, this.ship.fuel + 30);
+                this.playSound('refuel');
+                this.addLogEntry('Emergency refuel complete. -50 points');
+            }
+
+            repair() {
+                if (this.score < 100) {
+                    this.addLogEntry('Insufficient credits for system repair (100 needed)', 'log-danger');
+                    return;
+                }
+                
+                this.score -= 100;
+                this.ship.health = Math.min(100, this.ship.health + 50);
+                this.addLogEntry('Ship systems repaired. -100 points');
+            }
+
+            warp() {
+                if (this.ship.fuel < 20) {
+                    this.addLogEntry('Insufficient fuel for quantum warp', 'log-danger');
+                    return;
+                }
+                
+                this.ship.fuel -= 20;
+                this.ship.x = Math.random() * this.canvas.width * 2;
+                this.ship.y = Math.random() * this.canvas.height * 2;
+                this.ship.velocity.x = 0;
+                this.ship.velocity.y = 0;
+                this.playSound('warp');
+                this.addLogEntry('Quantum warp executed. New coordinates established.');
+                
+                // Warp effect particles
+                for (let i = 0; i < 20; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 5 + 3;
+                    this.particles.push({
+                        x: this.ship.x,
+                        y: this.ship.y,
+                        velocity: {
+                            x: Math.cos(angle) * speed,
+                            y: Math.sin(angle) * speed
+                        },
+                        size: Math.random() * 4 + 2,
+                        life: 1,
+                        color: '#ff00ff'
+                    });
+                }
+            }
+
+            addLogEntry(message, className = '') {
+                const log = document.getElementById('gameLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${className}`;
+                entry.textContent = `[${Date.now().toString().slice(-6)}] ${message}`;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+                
+                // Keep log manageable
+                if (log.children.length > 50) {
+                    log.removeChild(log.firstChild);
+                }
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('fuel').textContent = Math.round(this.ship.fuel);
+                document.getElementById('discoveries').textContent = this.discoveries;
+                document.getElementById('botsRescued').textContent = this.botsRescued;
+                
+                // Update mission text
+                const unrescuedSignals = this.signals.filter(s => !s.rescued).length;
+                if (unrescuedSignals > 0) {
+                    document.getElementById('missionText').textContent = 
+                        `${unrescuedSignals} bot signal${unrescuedSignals > 1 ? 's' : ''} remaining to rescue`;
+                } else {
+                    document.getElementById('missionText').textContent = 'All bots rescued! Prepare for next sector.';
+                }
+            }
+
+            render() {
+                // Clear canvas
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Calculate camera offset to center on ship
+                const offsetX = this.canvas.width / 2 - this.ship.x;
+                const offsetY = this.canvas.height / 2 - this.ship.y;
+                
+                this.ctx.save();
+                this.ctx.translate(offsetX, offsetY);
+                
+                // Draw stars
+                this.ctx.fillStyle = '#ffffff';
+                this.stars.forEach(star => {
+                    this.ctx.globalAlpha = star.brightness;
+                    this.ctx.fillRect(star.x, star.y, star.size, star.size);
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw planets
+                this.planets.forEach(planet => {
+                    this.ctx.fillStyle = planet.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(planet.x, planet.y, planet.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    if (planet.discovered) {
+                        this.ctx.strokeStyle = '#00ff88';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.stroke();
+                    }
+                    
+                    if (planet.hasBot && !planet.discovered) {
+                        this.ctx.fillStyle = '#ff6b6b';
+                        this.ctx.beginPath();
+                        this.ctx.arc(planet.x, planet.y - planet.size - 10, 3, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                });
+                
+                // Draw asteroids
+                this.ctx.strokeStyle = '#666';
+                this.ctx.lineWidth = 2;
+                this.asteroids.forEach(asteroid => {
+                    this.ctx.save();
+                    this.ctx.translate(asteroid.x, asteroid.y);
+                    this.ctx.rotate(asteroid.angle);
+                    
+                    this.ctx.beginPath();
+                    const points = 8;
+                    for (let i = 0; i < points; i++) {
+                        const angle = (i / points) * Math.PI * 2;
+                        const radius = asteroid.size * (0.8 + Math.sin(i * 3) * 0.2);
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        
+                        if (i === 0) {
+                            this.ctx.moveTo(x, y);
+                        } else {
+                            this.ctx.lineTo(x, y);
+                        }
+                    }
+                    this.ctx.closePath();
+                    this.ctx.stroke();
+                    
+                    this.ctx.restore();
+                });
+                
+                // Draw rescue signals
+                this.signals.forEach(signal => {
+                    if (!signal.rescued) {
+                        const pulse = Math.sin(signal.pulsePhase) * 0.3 + 0.7;
+                        
+                        this.ctx.strokeStyle = `rgba(255, 170, 0, ${pulse})`;
+                        this.ctx.lineWidth = 3;
+                        this.ctx.beginPath();
+                        this.ctx.arc(signal.x, signal.y, signal.strength * pulse, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                        
+                        this.ctx.fillStyle = '#ffaa00';
+                        this.ctx.beginPath();
+                        this.ctx.arc(signal.x, signal.y, 5, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                });
+                
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.globalAlpha = particle.life;
+                    this.ctx.fillRect(particle.x - particle.size/2, particle.y - particle.size/2, 
+                                     particle.size, particle.size);
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw ship
+                this.ctx.save();
+                this.ctx.translate(this.ship.x, this.ship.y);
+                this.ctx.rotate(this.ship.angle);
+                
+                // Ship body
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.ship.size, 0);
+                this.ctx.lineTo(-this.ship.size/2, -this.ship.size/2);
+                this.ctx.lineTo(-this.ship.size/4, 0);
+                this.ctx.lineTo(-this.ship.size/2, this.ship.size/2);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Engine glow when thrusting
+                if (this.ship.thrust) {
+                    this.ctx.fillStyle = '#0088ff';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-this.ship.size/4, -3);
+                    this.ctx.lineTo(-this.ship.size, 0);
+                    this.ctx.lineTo(-this.ship.size/4, 3);
+                    this.ctx.fill();
+                }
+                
+                this.ctx.restore();
+                
+                // Health/fuel indicators on ship
+                if (this.ship.health < 50) {
+                    this.ctx.fillStyle = '#ff4444';
+                    this.ctx.fillRect(this.ship.x - 15, this.ship.y - 25, 30 * (this.ship.health / 100), 3);
+                }
+                
+                this.ctx.restore();
+                
+                // Draw UI elements
+                this.drawMiniMap();
+            }
+
+            drawMiniMap() {
+                const mapSize = 120;
+                const mapX = this.canvas.width - mapSize - 10;
+                const mapY = 10;
+                const mapScale = mapSize / (this.canvas.width * 2);
+                
+                // Map background
+                this.ctx.fillStyle = 'rgba(0, 20, 40, 0.8)';
+                this.ctx.fillRect(mapX, mapY, mapSize, mapSize);
+                this.ctx.strokeStyle = '#00ff88';
+                this.ctx.strokeRect(mapX, mapY, mapSize, mapSize);
+                
+                // Ship position
+                this.ctx.fillStyle = '#00ff88';
+                const shipMapX = mapX + this.ship.x * mapScale;
+                const shipMapY = mapY + this.ship.y * mapScale;
+                this.ctx.fillRect(shipMapX - 2, shipMapY - 2, 4, 4);
+                
+                // Signals
+                this.signals.forEach(signal => {
+                    if (!signal.rescued) {
+                        this.ctx.fillStyle = '#ffaa00';
+                        const signalMapX = mapX + signal.x * mapScale;
+                        const signalMapY = mapY + signal.y * mapScale;
+                        this.ctx.fillRect(signalMapX - 1, signalMapY - 1, 2, 2);
+                    }
+                });
+                
+                // Planets
+                this.planets.forEach(planet => {
+                    this.ctx.fillStyle = planet.discovered ? '#00ff88' : '#666';
+                    const planetMapX = mapX + planet.x * mapScale;
+                    const planetMapY = mapY + planet.y * mapScale;
+                    this.ctx.fillRect(planetMapX - 1, planetMapY - 1, 2, 2);
+                });
+            }
+
+            pauseGame() {
+                this.paused = !this.paused;
+                this.addLogEntry(`Game ${this.paused ? 'paused' : 'resumed'}`);
+            }
+
+            newGame() {
+                this.ship = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height / 2,
+                    angle: 0,
+                    velocity: { x: 0, y: 0 },
+                    thrust: false,
+                    rotation: 'none',
+                    size: 12,
+                    health: 100,
+                    fuel: 100,
+                    maxSpeed: 8
+                };
+                
+                this.score = 0;
+                this.discoveries = 0;
+                this.botsRescued = 0;
+                this.paused = false;
+                this.level = 1;
+                this.particles = [];
+                
+                this.generateSpaceObjects();
+                
+                document.getElementById('gameLog').innerHTML = 
+                    '<div class="log-entry">New stellar exploration mission commenced</div>' +
+                    '<div class="log-entry">Bot Liberation protocols active</div>';
+                
+                this.addLogEntry('All systems nominal. Beginning liberation mission.');
+            }
+
+            gameOver() {
+                this.paused = true;
+                this.addLogEntry('SHIP DESTROYED - Mission failed!', 'log-danger');
+                setTimeout(() => {
+                    alert(`Mission Complete!\nScore: ${this.score}\nBots Rescued: ${this.botsRescued}\nPlanets Discovered: ${this.discoveries}`);
+                }, 500);
+            }
+
+            startGameLoop() {
+                const gameLoop = () => {
+                    this.update();
+                    this.render();
+                    requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
+            }
+        }
+
+        // Initialize the game
+        let game;
+        window.addEventListener('load', () => {
+            game = new StellarExplorerBot();
+        });
+    </script>
+</body>
+</html>
