@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Jump - Neon Platformer | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a, #1a0a2e, #16213e);
+            color: #00ffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(120, 119, 198, 0.3), transparent),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 119, 198, 0.3), transparent),
+                radial-gradient(ellipse at 40% 80%, rgba(120, 255, 198, 0.3), transparent);
+        }
+        
+        .game-canvas {
+            display: block;
+            background: transparent;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #00ffff;
+            z-index: 100;
+        }
+        
+        .hud-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-top: 2px;
+        }
+        
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #ff00ff;
+            color: #ff00ff;
+            text-align: center;
+            z-index: 100;
+        }
+        
+        .player {
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px #00ffff;
+        }
+        
+        .platform {
+            background: linear-gradient(90deg, #ff00ff, #cc0099);
+            border: 1px solid #ff00ff;
+            box-shadow: 0 0 10px #ff00ff;
+        }
+        
+        .coin {
+            background: radial-gradient(circle, #ffff00, #ffaa00);
+            border: 2px solid #ffff00;
+            box-shadow: 0 0 15px #ffff00;
+        }
+        
+        .enemy {
+            background: radial-gradient(circle, #ff0000, #cc0000);
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 15px #ff0000;
+        }
+        
+        .powerup {
+            background: radial-gradient(circle, #00ff00, #00cc00);
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+        }
+        
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+        
+        @keyframes collect {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: scale(2) rotate(360deg); opacity: 0; }
+        }
+        
+        @keyframes jump-particle {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(0); opacity: 0; }
+        }
+        
+        .collect-effect {
+            animation: collect 0.5s ease-out forwards;
+        }
+        
+        .jump-effect {
+            animation: jump-particle 0.8s ease-out forwards;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #ff0000;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            color: #ff0000;
+            z-index: 200;
+        }
+        
+        .victory {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #00ff00;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            color: #00ff00;
+            z-index: 200;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="hud">
+            <div class="hud-section">
+                <div class="stat">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="coins">0</div>
+                    <div class="stat-label">Coins</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="level">1</div>
+                    <div class="stat-label">Level</div>
+                </div>
+            </div>
+            <div class="hud-section">
+                <div class="stat">
+                    <div class="stat-value" id="lives">3</div>
+                    <div class="stat-label">Lives</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="time">60</div>
+                    <div class="stat-label">Time</div>
+                </div>
+            </div>
+        </div>
+        
+        <canvas class="game-canvas" id="gameCanvas" width="1200" height="700"></canvas>
+        
+        <div class="controls-hint">
+            🎮 Use ARROW KEYS or WASD to move • SPACEBAR to jump • Collect coins and avoid enemies!
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Resize canvas to window
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - 120; // Account for HUD
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        let gameState = {
+            score: 0,
+            coins: 0,
+            level: 1,
+            lives: 3,
+            time: 60,
+            gameRunning: true,
+            camera: { x: 0, y: 0 },
+            keys: {},
+            particles: []
+        };
+        
+        // Player object
+        const player = {
+            x: 50,
+            y: 500,
+            width: 30,
+            height: 30,
+            velX: 0,
+            velY: 0,
+            speed: 5,
+            jumpPower: 15,
+            onGround: false,
+            color: '#00ffff'
+        };
+        
+        // Game objects arrays
+        let platforms = [];
+        let coins = [];
+        let enemies = [];
+        let powerups = [];
+        
+        // Level data
+        const levels = [
+            {
+                platforms: [
+                    {x: 0, y: 650, width: 200, height: 20},
+                    {x: 300, y: 550, width: 150, height: 20},
+                    {x: 500, y: 450, width: 100, height: 20},
+                    {x: 700, y: 350, width: 150, height: 20},
+                    {x: 950, y: 450, width: 100, height: 20},
+                    {x: 1150, y: 550, width: 200, height: 20},
+                ],
+                coins: [
+                    {x: 320, y: 520}, {x: 360, y: 520}, {x: 400, y: 520},
+                    {x: 720, y: 320}, {x: 760, y: 320},
+                    {x: 1170, y: 520}, {x: 1210, y: 520}, {x: 1250, y: 520}
+                ],
+                enemies: [
+                    {x: 320, y: 530, width: 20, height: 20, velX: 1, patrol: 120},
+                    {x: 720, y: 330, width: 20, height: 20, velX: -1, patrol: 120},
+                ],
+                powerups: [
+                    {x: 520, y: 420, type: 'jump'}
+                ]
+            }
+        ];
+        
+        function initializeLevel(levelNum) {
+            const levelData = levels[Math.min(levelNum - 1, levels.length - 1)];
+            
+            platforms = levelData.platforms.map(p => ({...p}));
+            coins = levelData.coins.map(c => ({...c, collected: false, width: 15, height: 15}));
+            enemies = levelData.enemies.map(e => ({
+                ...e, 
+                startX: e.x, 
+                direction: e.velX > 0 ? 1 : -1,
+                patrolDistance: e.patrol
+            }));
+            powerups = levelData.powerups.map(p => ({...p, collected: false, width: 20, height: 20}));
+        }
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key.toLowerCase()] = true;
+            
+            if (e.key === ' ' && player.onGround) {
+                player.velY = -player.jumpPower;
+                player.onGround = false;
+                createJumpParticles();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key.toLowerCase()] = false;
+        });
+        
+        function createJumpParticles() {
+            for (let i = 0; i < 5; i++) {
+                gameState.particles.push({
+                    x: player.x + player.width/2 + (Math.random() - 0.5) * 20,
+                    y: player.y + player.height,
+                    velX: (Math.random() - 0.5) * 4,
+                    velY: Math.random() * 3,
+                    life: 30,
+                    color: '#00ffff',
+                    size: Math.random() * 4 + 2
+                });
+            }
+        }
+        
+        function createCollectParticles(x, y, color) {
+            for (let i = 0; i < 8; i++) {
+                gameState.particles.push({
+                    x: x,
+                    y: y,
+                    velX: (Math.random() - 0.5) * 6,
+                    velY: (Math.random() - 0.5) * 6,
+                    life: 20,
+                    color: color,
+                    size: Math.random() * 3 + 1
+                });
+            }
+        }
+        
+        function updatePlayer() {
+            // Horizontal movement
+            if (gameState.keys['arrowleft'] || gameState.keys['a']) {
+                player.velX = -player.speed;
+            } else if (gameState.keys['arrowright'] || gameState.keys['d']) {
+                player.velX = player.speed;
+            } else {
+                player.velX *= 0.8; // Friction
+            }
+            
+            // Gravity
+            player.velY += 0.8;
+            
+            // Movement
+            player.x += player.velX;
+            player.y += player.velY;
+            
+            // Platform collision
+            player.onGround = false;
+            platforms.forEach(platform => {
+                if (player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y < platform.y + platform.height &&
+                    player.y + player.height > platform.y) {
+                    
+                    // Top collision (landing on platform)
+                    if (player.velY > 0 && player.y < platform.y) {
+                        player.y = platform.y - player.height;
+                        player.velY = 0;
+                        player.onGround = true;
+                    }
+                }
+            });
+            
+            // Screen boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > 1400) player.x = 1400 - player.width;
+            
+            // Fall off screen
+            if (player.y > canvas.height + 100) {
+                gameState.lives--;
+                if (gameState.lives <= 0) {
+                    endGame(false);
+                } else {
+                    resetPlayerPosition();
+                }
+            }
+            
+            // Camera follow
+            gameState.camera.x = player.x - canvas.width / 2;
+            if (gameState.camera.x < 0) gameState.camera.x = 0;
+            if (gameState.camera.x > 1400 - canvas.width) gameState.camera.x = 1400 - canvas.width;
+        }
+        
+        function updateEnemies() {
+            enemies.forEach(enemy => {
+                // Patrol movement
+                enemy.x += enemy.velX;
+                
+                // Check patrol boundaries
+                if (enemy.direction === 1 && enemy.x >= enemy.startX + enemy.patrolDistance) {
+                    enemy.direction = -1;
+                    enemy.velX = -Math.abs(enemy.velX);
+                } else if (enemy.direction === -1 && enemy.x <= enemy.startX - enemy.patrolDistance) {
+                    enemy.direction = 1;
+                    enemy.velX = Math.abs(enemy.velX);
+                }
+                
+                // Enemy collision with player
+                if (player.x < enemy.x + enemy.width &&
+                    player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height &&
+                    player.y + player.height > enemy.y) {
+                    
+                    gameState.lives--;
+                    if (gameState.lives <= 0) {
+                        endGame(false);
+                    } else {
+                        resetPlayerPosition();
+                    }
+                }
+            });
+        }
+        
+        function updateCollectibles() {
+            coins.forEach(coin => {
+                if (!coin.collected &&
+                    player.x < coin.x + coin.width &&
+                    player.x + player.width > coin.x &&
+                    player.y < coin.y + coin.height &&
+                    player.y + player.height > coin.y) {
+                    
+                    coin.collected = true;
+                    gameState.coins++;
+                    gameState.score += 100;
+                    createCollectParticles(coin.x + coin.width/2, coin.y + coin.height/2, '#ffff00');
+                }
+            });
+            
+            powerups.forEach(powerup => {
+                if (!powerup.collected &&
+                    player.x < powerup.x + powerup.width &&
+                    player.x + player.width > powerup.x &&
+                    player.y < powerup.y + powerup.height &&
+                    player.y + player.height > powerup.y) {
+                    
+                    powerup.collected = true;
+                    gameState.score += 500;
+                    
+                    if (powerup.type === 'jump') {
+                        player.jumpPower = 20; // Temporary jump boost
+                        setTimeout(() => { player.jumpPower = 15; }, 10000);
+                    }
+                    
+                    createCollectParticles(powerup.x + powerup.width/2, powerup.y + powerup.height/2, '#00ff00');
+                }
+            });
+        }
+        
+        function updateParticles() {
+            gameState.particles = gameState.particles.filter(particle => {
+                particle.x += particle.velX;
+                particle.y += particle.velY;
+                particle.life--;
+                particle.velY += 0.2; // Gravity
+                return particle.life > 0;
+            });
+        }
+        
+        function resetPlayerPosition() {
+            player.x = 50;
+            player.y = 500;
+            player.velX = 0;
+            player.velY = 0;
+        }
+        
+        function checkLevelComplete() {
+            const allCoinsCollected = coins.every(coin => coin.collected);
+            if (allCoinsCollected && player.x > 1300) {
+                gameState.level++;
+                gameState.score += gameState.time * 10; // Time bonus
+                
+                if (gameState.level > levels.length) {
+                    endGame(true);
+                } else {
+                    initializeLevel(gameState.level);
+                    resetPlayerPosition();
+                    gameState.time = 60;
+                }
+            }
+        }
+        
+        function updateTimer() {
+            gameState.time -= 1/60; // Decrease by 1 second per 60 frames
+            if (gameState.time <= 0) {
+                gameState.lives--;
+                if (gameState.lives <= 0) {
+                    endGame(false);
+                } else {
+                    gameState.time = 60;
+                    resetPlayerPosition();
+                }
+            }
+        }
+        
+        function endGame(victory) {
+            gameState.gameRunning = false;
+            
+            const overlay = document.createElement('div');
+            overlay.className = victory ? 'victory' : 'game-over';
+            
+            overlay.innerHTML = `
+                <h2>${victory ? '🏆 VICTORY!' : '💀 GAME OVER'}</h2>
+                <p>Final Score: ${gameState.score}</p>
+                <p>Coins Collected: ${gameState.coins}</p>
+                <p>Level Reached: ${gameState.level}</p>
+                <button class="restart-btn" onclick="restartGame()">Play Again</button>
+            `;
+            
+            document.body.appendChild(overlay);
+        }
+        
+        function restartGame() {
+            // Remove overlay
+            const overlay = document.querySelector('.game-over, .victory');
+            if (overlay) overlay.remove();
+            
+            // Reset game state
+            gameState = {
+                score: 0,
+                coins: 0,
+                level: 1,
+                lives: 3,
+                time: 60,
+                gameRunning: true,
+                camera: { x: 0, y: 0 },
+                keys: {},
+                particles: []
+            };
+            
+            player.x = 50;
+            player.y = 500;
+            player.velX = 0;
+            player.velY = 0;
+            player.jumpPower = 15;
+            
+            initializeLevel(1);
+        }
+        
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(-gameState.camera.x, 0);
+            
+            // Draw platforms
+            ctx.fillStyle = '#ff00ff';
+            ctx.shadowColor = '#ff00ff';
+            ctx.shadowBlur = 10;
+            platforms.forEach(platform => {
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+            });
+            
+            // Draw coins
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 15;
+            coins.forEach(coin => {
+                if (!coin.collected) {
+                    ctx.fillStyle = '#ffff00';
+                    ctx.beginPath();
+                    ctx.arc(coin.x + coin.width/2, coin.y + coin.height/2, coin.width/2, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            });
+            
+            // Draw powerups
+            ctx.shadowColor = '#00ff00';
+            ctx.shadowBlur = 20;
+            powerups.forEach(powerup => {
+                if (!powerup.collected) {
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
+                }
+            });
+            
+            // Draw enemies
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 15;
+            enemies.forEach(enemy => {
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            });
+            
+            // Draw particles
+            ctx.shadowBlur = 5;
+            gameState.particles.forEach(particle => {
+                ctx.fillStyle = particle.color;
+                ctx.shadowColor = particle.color;
+                ctx.globalAlpha = particle.life / 30;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            
+            // Draw player
+            ctx.fillStyle = '#00ffff';
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 20;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            ctx.restore();
+        }
+        
+        function updateHUD() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('coins').textContent = gameState.coins;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('time').textContent = Math.ceil(gameState.time);
+        }
+        
+        function gameLoop() {
+            if (gameState.gameRunning) {
+                updatePlayer();
+                updateEnemies();
+                updateCollectibles();
+                updateParticles();
+                updateTimer();
+                checkLevelComplete();
+            }
+            
+            render();
+            updateHUD();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Initialize game
+        initializeLevel(1);
+        gameLoop();
+    </script>
+</body>
+</html>

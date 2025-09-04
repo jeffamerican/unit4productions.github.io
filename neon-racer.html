@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Racer - High Speed Future | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #00ffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, #000 0%, #1a0033 50%, #330066 100%);
+        }
+        
+        .game-canvas {
+            display: block;
+            background: linear-gradient(180deg, #000022 0%, #001133 100%);
+        }
+        
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+        }
+        
+        .hud-left, .hud-right {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        .speed-meter {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 200px;
+            height: 100px;
+            border: 3px solid #00ffff;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+        }
+        
+        .speed-arc {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .speed-value {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        .minimap {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 150px;
+            height: 150px;
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .controls-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border: 3px solid #ffff00;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 200;
+        }
+        
+        .controls-hint.hidden {
+            display: none;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            z-index: 300;
+        }
+        
+        .victory { border-color: #00ff00; color: #00ff00; }
+        .crash { border-color: #ff0000; color: #ff0000; }
+        
+        .road {
+            background: repeating-linear-gradient(
+                0deg,
+                #333 0px,
+                #333 10px,
+                #555 10px,
+                #555 20px
+            );
+        }
+        
+        .car {
+            position: absolute;
+            width: 40px;
+            height: 80px;
+            background: linear-gradient(180deg, #ff0000, #cc0000);
+            border: 2px solid #fff;
+            border-radius: 10px 10px 5px 5px;
+            box-shadow: 0 0 20px #ff0000;
+        }
+        
+        .player-car {
+            background: linear-gradient(180deg, #00ffff, #0099cc);
+            box-shadow: 0 0 30px #00ffff;
+        }
+        
+        .enemy-car {
+            background: linear-gradient(180deg, #ff00ff, #cc00cc);
+            box-shadow: 0 0 20px #ff00ff;
+        }
+        
+        .police-car {
+            background: linear-gradient(180deg, #ffff00, #cccc00);
+            box-shadow: 0 0 20px #ffff00;
+        }
+        
+        @keyframes boost {
+            0% { box-shadow: 0 0 30px #00ffff; }
+            50% { box-shadow: 0 0 50px #00ffff, 0 0 80px #ffffff; }
+            100% { box-shadow: 0 0 30px #00ffff; }
+        }
+        
+        .boost-effect {
+            animation: boost 0.3s ease-in-out;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .explosion {
+            background: radial-gradient(circle, #ff4444, #ff0000);
+        }
+        
+        .boost-particle {
+            background: radial-gradient(circle, #00ffff, #ffffff);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="hud">
+            <div class="hud-left">
+                <div class="stat">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="distance">0</div>
+                    <div class="stat-label">Distance (km)</div>
+                </div>
+            </div>
+            <div class="hud-right">
+                <div class="stat">
+                    <div class="stat-value" id="level">1</div>
+                    <div class="stat-label">Level</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="fuel">100</div>
+                    <div class="stat-label">Fuel %</div>
+                </div>
+            </div>
+        </div>
+        
+        <canvas class="game-canvas" id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="speed-meter">
+            <canvas id="speedometer" width="180" height="80"></canvas>
+            <div class="speed-value" id="speedValue">0</div>
+        </div>
+        
+        <div class="minimap">
+            <canvas id="minimap" width="146" height="146"></canvas>
+        </div>
+        
+        <div class="controls-hint" id="controlsHint">
+            <h2>🏁 NEON RACER</h2>
+            <p>Race through the neon highways at blazing speed!</p>
+            <p><strong>Controls:</strong></p>
+            <p>Arrow Keys / WASD - Steer</p>
+            <p>Spacebar - Boost (limited fuel)</p>
+            <p>Avoid crashes and reach the finish line!</p>
+            <button class="start-btn" onclick="startRace()">START RACE</button>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const speedCanvas = document.getElementById('speedometer');
+        const speedCtx = speedCanvas.getContext('2d');
+        const minimapCanvas = document.getElementById('minimap');
+        const minimapCtx = minimapCanvas.getContext('2d');
+        
+        // Resize canvas to window
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        let gameState = {
+            score: 0,
+            distance: 0,
+            level: 1,
+            fuel: 100,
+            speed: 0,
+            maxSpeed: 300,
+            acceleration: 0.5,
+            gameRunning: false,
+            raceStarted: false,
+            keys: {},
+            roadOffset: 0,
+            playerX: canvas.width / 2 - 20,
+            playerY: canvas.height - 120,
+            cars: [],
+            particles: [],
+            raceDistance: 10000, // 10km race
+            boostActive: false,
+            boostCooldown: 0
+        };
+        
+        const carColors = [
+            { body: '#ff0000', shadow: '#ff0000' }, // Red
+            { body: '#ff00ff', shadow: '#ff00ff' }, // Magenta
+            { body: '#ffff00', shadow: '#ffff00' }, // Yellow
+            { body: '#00ff00', shadow: '#00ff00' }, // Green
+            { body: '#ff8800', shadow: '#ff8800' }  // Orange
+        ];
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key.toLowerCase()] = true;
+            
+            if (e.key === ' ' && gameState.fuel > 0 && gameState.boostCooldown <= 0) {
+                activateBoost();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key.toLowerCase()] = false;
+        });
+        
+        function activateBoost() {
+            if (gameState.fuel <= 0 || gameState.boostActive) return;
+            
+            gameState.boostActive = true;
+            gameState.boostCooldown = 180; // 3 seconds at 60fps
+            gameState.fuel = Math.max(0, gameState.fuel - 20);
+            
+            // Visual effect
+            createBoostParticles();
+            
+            setTimeout(() => {
+                gameState.boostActive = false;
+            }, 2000);
+        }
+        
+        function createBoostParticles() {
+            for (let i = 0; i < 15; i++) {
+                gameState.particles.push({
+                    x: gameState.playerX + 20 + (Math.random() - 0.5) * 30,
+                    y: gameState.playerY + 80,
+                    velX: (Math.random() - 0.5) * 8,
+                    velY: Math.random() * 5 + 2,
+                    life: 30,
+                    maxLife: 30,
+                    color: '#00ffff',
+                    size: Math.random() * 6 + 3,
+                    type: 'boost'
+                });
+            }
+        }
+        
+        function createExplosion(x, y) {
+            for (let i = 0; i < 20; i++) {
+                gameState.particles.push({
+                    x: x,
+                    y: y,
+                    velX: (Math.random() - 0.5) * 12,
+                    velY: (Math.random() - 0.5) * 12,
+                    life: 40,
+                    maxLife: 40,
+                    color: Math.random() > 0.5 ? '#ff4444' : '#ff8800',
+                    size: Math.random() * 8 + 2,
+                    type: 'explosion'
+                });
+            }
+        }
+        
+        function spawnTraffic() {
+            if (Math.random() < 0.02) { // 2% chance per frame
+                const lanes = [
+                    canvas.width * 0.3,
+                    canvas.width * 0.4,
+                    canvas.width * 0.5,
+                    canvas.width * 0.6,
+                    canvas.width * 0.7
+                ];
+                
+                const car = {
+                    x: lanes[Math.floor(Math.random() * lanes.length)] - 20,
+                    y: -80,
+                    width: 40,
+                    height: 80,
+                    speed: Math.random() * 3 + 1,
+                    color: carColors[Math.floor(Math.random() * carColors.length)],
+                    type: Math.random() < 0.1 ? 'police' : 'normal'
+                };
+                
+                gameState.cars.push(car);
+            }
+        }
+        
+        function updatePlayer() {
+            // Horizontal movement
+            if (gameState.keys['arrowleft'] || gameState.keys['a']) {
+                gameState.playerX -= 8;
+            }
+            if (gameState.keys['arrowright'] || gameState.keys['d']) {
+                gameState.playerX += 8;
+            }
+            
+            // Keep player on road
+            const roadWidth = canvas.width * 0.5;
+            const roadStart = canvas.width * 0.25;
+            gameState.playerX = Math.max(roadStart, Math.min(roadStart + roadWidth - 40, gameState.playerX));
+            
+            // Speed control
+            if (gameState.keys['arrowup'] || gameState.keys['w']) {
+                gameState.speed = Math.min(gameState.maxSpeed, gameState.speed + gameState.acceleration);
+            } else if (gameState.keys['arrowdown'] || gameState.keys['s']) {
+                gameState.speed = Math.max(0, gameState.speed - gameState.acceleration * 2);
+            } else {
+                gameState.speed = Math.max(0, gameState.speed - gameState.acceleration * 0.5);
+            }
+            
+            // Boost effect
+            if (gameState.boostActive) {
+                gameState.speed = Math.min(gameState.maxSpeed * 1.5, gameState.speed + gameState.acceleration * 2);
+            }
+            
+            // Update distance and score
+            gameState.distance += gameState.speed / 60 / 100; // Convert to km
+            gameState.score += Math.floor(gameState.speed / 10);
+            
+            // Road scrolling
+            gameState.roadOffset += gameState.speed / 10;
+            
+            // Cooldowns
+            if (gameState.boostCooldown > 0) {
+                gameState.boostCooldown--;
+            }
+            
+            // Fuel regeneration (very slow)
+            if (gameState.fuel < 100 && Math.random() < 0.001) {
+                gameState.fuel = Math.min(100, gameState.fuel + 1);
+            }
+        }
+        
+        function updateTraffic() {
+            gameState.cars = gameState.cars.filter(car => {
+                car.y += car.speed + gameState.speed / 10;
+                
+                // Check collision with player
+                if (car.x < gameState.playerX + 40 &&
+                    car.x + car.width > gameState.playerX &&
+                    car.y < gameState.playerY + 80 &&
+                    car.y + car.height > gameState.playerY) {
+                    
+                    crash();
+                    return false;
+                }
+                
+                return car.y < canvas.height + 100;
+            });
+        }
+        
+        function updateParticles() {
+            gameState.particles = gameState.particles.filter(particle => {
+                particle.x += particle.velX;
+                particle.y += particle.velY;
+                particle.life--;
+                
+                if (particle.type === 'boost') {
+                    particle.velY += 0.2;
+                }
+                
+                return particle.life > 0;
+            });
+        }
+        
+        function crash() {
+            createExplosion(gameState.playerX + 20, gameState.playerY + 40);
+            gameState.speed = 0;
+            endRace(false);
+        }
+        
+        function checkRaceComplete() {
+            if (gameState.distance >= gameState.raceDistance / 1000) { // Convert to km
+                endRace(true);
+            }
+        }
+        
+        function endRace(victory) {
+            gameState.gameRunning = false;
+            
+            const overlay = document.createElement('div');
+            overlay.className = `game-over ${victory ? 'victory' : 'crash'}`;
+            overlay.innerHTML = `
+                <h2>${victory ? '🏁 RACE COMPLETE!' : '💥 CRASHED!'}</h2>
+                <p>Distance: ${gameState.distance.toFixed(2)} km</p>
+                <p>Final Score: ${gameState.score}</p>
+                <p>Top Speed: ${Math.floor(gameState.speed)} km/h</p>
+                <button class="start-btn" onclick="resetRace()">Race Again</button>
+            `;
+            
+            document.body.appendChild(overlay);
+        }
+        
+        function drawRoad() {
+            const roadWidth = canvas.width * 0.5;
+            const roadStart = canvas.width * 0.25;
+            
+            // Road surface
+            ctx.fillStyle = '#333';
+            ctx.fillRect(roadStart, 0, roadWidth, canvas.height);
+            
+            // Road lines
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([30, 20]);
+            
+            for (let i = 0; i < 3; i++) {
+                const x = roadStart + roadWidth * (i + 1) / 4;
+                ctx.beginPath();
+                ctx.moveTo(x, (gameState.roadOffset % 50) - 50);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Road borders
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#ffff00';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(roadStart, 0);
+            ctx.lineTo(roadStart, canvas.height);
+            ctx.moveTo(roadStart + roadWidth, 0);
+            ctx.lineTo(roadStart + roadWidth, canvas.height);
+            ctx.stroke();
+        }
+        
+        function drawCars() {
+            gameState.cars.forEach(car => {
+                ctx.fillStyle = car.color.body;
+                ctx.fillRect(car.x, car.y, car.width, car.height);
+                
+                // Car details
+                ctx.fillStyle = '#000';
+                ctx.fillRect(car.x + 5, car.y + 10, car.width - 10, 20); // Windshield
+                ctx.fillRect(car.x + 5, car.y + car.height - 30, car.width - 10, 20); // Rear window
+                
+                // Glow effect
+                ctx.shadowColor = car.color.shadow;
+                ctx.shadowBlur = 15;
+                ctx.strokeStyle = car.color.shadow;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(car.x, car.y, car.width, car.height);
+                ctx.shadowBlur = 0;
+            });
+        }
+        
+        function drawPlayer() {
+            ctx.fillStyle = '#00ffff';
+            ctx.fillRect(gameState.playerX, gameState.playerY, 40, 80);
+            
+            // Player car details
+            ctx.fillStyle = '#000';
+            ctx.fillRect(gameState.playerX + 5, gameState.playerY + 15, 30, 15); // Windshield
+            ctx.fillRect(gameState.playerX + 5, gameState.playerY + 50, 30, 15); // Rear window
+            
+            // Glow effect
+            ctx.shadowColor = gameState.boostActive ? '#ffffff' : '#00ffff';
+            ctx.shadowBlur = gameState.boostActive ? 30 : 20;
+            ctx.strokeStyle = gameState.boostActive ? '#ffffff' : '#00ffff';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(gameState.playerX, gameState.playerY, 40, 80);
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawParticles() {
+            gameState.particles.forEach(particle => {
+                const alpha = particle.life / particle.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = particle.color;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawSpeedometer() {
+            speedCtx.clearRect(0, 0, 180, 80);
+            
+            // Arc background
+            speedCtx.strokeStyle = '#333';
+            speedCtx.lineWidth = 10;
+            speedCtx.beginPath();
+            speedCtx.arc(90, 70, 50, Math.PI, 0);
+            speedCtx.stroke();
+            
+            // Speed arc
+            const speedPercent = gameState.speed / gameState.maxSpeed;
+            const angle = Math.PI * speedPercent;
+            
+            speedCtx.strokeStyle = gameState.boostActive ? '#ffffff' : '#00ffff';
+            speedCtx.lineWidth = 8;
+            speedCtx.beginPath();
+            speedCtx.arc(90, 70, 50, Math.PI, Math.PI + angle);
+            speedCtx.stroke();
+            
+            document.getElementById('speedValue').textContent = Math.floor(gameState.speed) + ' km/h';
+        }
+        
+        function drawMinimap() {
+            minimapCtx.clearRect(0, 0, 146, 146);
+            
+            // Track
+            minimapCtx.fillStyle = '#333';
+            minimapCtx.fillRect(20, 0, 106, 146);
+            
+            // Progress
+            const progress = gameState.distance / (gameState.raceDistance / 1000);
+            minimapCtx.fillStyle = '#00ff00';
+            minimapCtx.fillRect(20, 0, 106, progress * 146);
+            
+            // Player position
+            const playerPos = 146 - (progress * 146);
+            minimapCtx.fillStyle = '#00ffff';
+            minimapCtx.fillRect(70, playerPos - 2, 6, 4);
+            
+            // Finish line
+            minimapCtx.fillStyle = '#ffff00';
+            minimapCtx.fillRect(20, 0, 106, 3);
+        }
+        
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawRoad();
+            drawCars();
+            drawPlayer();
+            drawParticles();
+            drawSpeedometer();
+            drawMinimap();
+        }
+        
+        function updateHUD() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('distance').textContent = gameState.distance.toFixed(2);
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('fuel').textContent = Math.floor(gameState.fuel);
+        }
+        
+        function gameLoop() {
+            if (gameState.gameRunning) {
+                updatePlayer();
+                updateTraffic();
+                updateParticles();
+                spawnTraffic();
+                checkRaceComplete();
+            }
+            
+            render();
+            updateHUD();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function startRace() {
+            document.getElementById('controlsHint').classList.add('hidden');
+            gameState.gameRunning = true;
+            gameState.raceStarted = true;
+        }
+        
+        function resetRace() {
+            // Remove overlay
+            const overlay = document.querySelector('.game-over');
+            if (overlay) overlay.remove();
+            
+            // Reset game state
+            gameState = {
+                score: 0,
+                distance: 0,
+                level: 1,
+                fuel: 100,
+                speed: 0,
+                maxSpeed: 300,
+                acceleration: 0.5,
+                gameRunning: true,
+                raceStarted: true,
+                keys: {},
+                roadOffset: 0,
+                playerX: canvas.width / 2 - 20,
+                playerY: canvas.height - 120,
+                cars: [],
+                particles: [],
+                raceDistance: 10000,
+                boostActive: false,
+                boostCooldown: 0
+            };
+        }
+        
+        // Initialize
+        resizeCanvas();
+        gameLoop();
+    </script>
+</body>
+</html>

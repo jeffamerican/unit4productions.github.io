@@ -28,7 +28,10 @@
       "Bash(cp:*)",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(sed:*)",
+      "mcp__browsermcp__browser_go_back",
+      "mcp__browsermcp__browser_type"
     ],
     "deny": [],
     "ask": []

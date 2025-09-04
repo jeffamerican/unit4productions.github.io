@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Builder Sim - Digital Metropolis | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298, #1e3c72);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .game-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .game-area {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #87CEEB, #4682B4);
+        }
+        
+        .game-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            background: 
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .control-panel {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            border-left: 3px solid #00bfff;
+            overflow-y: auto;
+        }
+        
+        .panel-header {
+            background: linear-gradient(45deg, #00bfff, #1e90ff);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #00bfff;
+        }
+        
+        .game-title {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        .city-name {
+            font-size: 1.1em;
+            color: #add8e6;
+        }
+        
+        .stats-section {
+            background: rgba(0, 191, 255, 0.1);
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 191, 255, 0.3);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #00bfff;
+        }
+        
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #00bfff;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #add8e6;
+        }
+        
+        .buildings-section {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 191, 255, 0.3);
+        }
+        
+        .section-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #00bfff;
+            border-bottom: 2px solid #00bfff;
+            padding-bottom: 5px;
+        }
+        
+        .building-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .building-btn {
+            background: linear-gradient(145deg, #1e3c72, #2a5298);
+            border: 2px solid #00bfff;
+            color: white;
+            padding: 15px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.9em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .building-btn:hover {
+            background: linear-gradient(145deg, #2a5298, #3a62a8);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .building-btn.selected {
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+        
+        .building-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .building-icon {
+            font-size: 1.5em;
+            margin-bottom: 3px;
+        }
+        
+        .building-cost {
+            color: #ffa500;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .controls-section {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #ff6347, #ff4500);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: linear-gradient(45deg, #ff4500, #ff6347);
+            box-shadow: 0 0 15px rgba(255, 99, 71, 0.5);
+        }
+        
+        .time-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .time-btn {
+            flex: 1;
+            background: linear-gradient(45deg, #32cd32, #228b22);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        
+        .time-btn.active {
+            background: linear-gradient(45deg, #00ff00, #32cd32);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        .message-log {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            border-top: 2px solid #00bfff;
+        }
+        
+        .message {
+            margin-bottom: 8px;
+            padding: 5px;
+            background: rgba(0, 191, 255, 0.1);
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        .message.warning { background: rgba(255, 165, 0, 0.2); color: #ffa500; }
+        .message.error { background: rgba(255, 0, 0, 0.2); color: #ff6b6b; }
+        .message.success { background: rgba(0, 255, 0, 0.2); color: #90ee90; }
+        
+        .building {
+            position: absolute;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .building:hover {
+            transform: scale(1.1);
+            z-index: 100;
+        }
+        
+        .residential {
+            background: linear-gradient(45deg, #90EE90, #98FB98);
+            border-color: #228B22;
+            color: #006400;
+        }
+        
+        .commercial {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border-color: #FF8C00;
+            color: #8B4513;
+        }
+        
+        .industrial {
+            background: linear-gradient(45deg, #696969, #808080);
+            border-color: #2F4F4F;
+            color: #000000;
+        }
+        
+        .park {
+            background: linear-gradient(45deg, #32CD32, #00FF00);
+            border-color: #228B22;
+            color: #006400;
+        }
+        
+        .police {
+            background: linear-gradient(45deg, #0000FF, #4169E1);
+            border-color: #00008B;
+            color: #FFFFFF;
+        }
+        
+        .fire {
+            background: linear-gradient(45deg, #FF0000, #FF4500);
+            border-color: #8B0000;
+            color: #FFFFFF;
+        }
+        
+        .hospital {
+            background: linear-gradient(45deg, #FF69B4, #FFB6C1);
+            border-color: #DC143C;
+            color: #8B008B;
+        }
+        
+        .school {
+            background: linear-gradient(45deg, #9370DB, #8A2BE2);
+            border-color: #4B0082;
+            color: #FFFFFF;
+        }
+        
+        @keyframes build {
+            0% { transform: scale(0) rotate(180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        .build-animation {
+            animation: build 0.5s ease-out;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            pointer-events: none;
+            z-index: 1000;
+            border: 1px solid #00bfff;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-area">
+            <canvas class="game-canvas" id="gameCanvas" width="1000" height="700"></canvas>
+        </div>
+        
+        <div class="control-panel">
+            <div class="panel-header">
+                <div class="game-title">🏙️ City Builder</div>
+                <div class="city-name">New Metropolis</div>
+            </div>
+            
+            <div class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="population">0</div>
+                        <div class="stat-label">Population</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="money">10000</div>
+                        <div class="stat-label">Budget</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="happiness">50</div>
+                        <div class="stat-label">Happiness</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="growth">0</div>
+                        <div class="stat-label">Growth</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="buildings-section">
+                <div class="section-title">🏗️ Buildings</div>
+                <div class="building-grid">
+                    <button class="building-btn" onclick="selectBuilding('residential')" id="residentialBtn">
+                        <div class="building-icon">🏠</div>
+                        <div>House</div>
+                        <div class="building-cost">$500</div>
+                    </button>
+                    <button class="building-btn" onclick="selectBuilding('commercial')" id="commercialBtn">
+                        <div class="building-icon">🏪</div>
+                        <div>Shop</div>
+                        <div class="building-cost">$800</div>
+                    </button>
+                    <button class="building-btn" onclick="selectBuilding('industrial')" id="industrialBtn">
+                        <div class="building-icon">🏭</div>
+                        <div>Factory</div>
+                        <div class="building-cost">$1200</div>
+                    </button>
+                    <button class="building-btn" onclick="selectBuilding('park')" id="parkBtn">
+                        <div class="building-icon">🌳</div>
+                        <div>Park</div>
+                        <div class="building-cost">$300</div>
+                    </button>
+                    <button class="building-btn" onclick="selectBuilding('police')" id="policeBtn">
+                        <div class="building-icon">🚔</div>
+                        <div>Police</div>
+                        <div class="building-cost">$1000</div>
+                    </button>
+                    <button class="building-btn" onclick="selectBuilding('fire')" id="fireBtn">
+                        <div class="building-icon">🚒</div>
+                        <div>Fire Dept</div>
+                        <div class="building-cost">$900</div>
+                    </button>
+                    <button class="building-btn" onclick="selectBuilding('hospital')" id="hospitalBtn">
+                        <div class="building-icon">🏥</div>
+                        <div>Hospital</div>
+                        <div class="building-cost">$2000</div>
+                    </button>
+                    <button class="building-btn" onclick="selectBuilding('school')" id="schoolBtn">
+                        <div class="building-icon">🏫</div>
+                        <div>School</div>
+                        <div class="building-cost">$1500</div>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="controls-section">
+                <div class="section-title">⚙️ Controls</div>
+                <div class="time-controls">
+                    <button class="time-btn" onclick="setSpeed(0)" id="pauseBtn">⏸️ Pause</button>
+                    <button class="time-btn active" onclick="setSpeed(1)" id="normalBtn">▶️ Normal</button>
+                    <button class="time-btn" onclick="setSpeed(2)" id="fastBtn">⏩ Fast</button>
+                </div>
+                <button class="control-btn" onclick="bulldoze()">🧨 Bulldoze Mode</button>
+                <button class="control-btn" onclick="resetCity()">🔄 Reset City</button>
+            </div>
+            
+            <div class="message-log" id="messageLog">
+                <div class="message">Welcome to City Builder! Start by placing some residential buildings.</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let gameState = {
+            money: 10000,
+            population: 0,
+            happiness: 50,
+            growth: 0,
+            selectedBuilding: null,
+            bulldozeMode: false,
+            gameSpeed: 1,
+            buildings: [],
+            gridSize: 40,
+            time: 0
+        };
+        
+        const buildingTypes = {
+            residential: { 
+                cost: 500, income: 50, population: 10, happiness: 0, icon: '🏠', 
+                color: '#90EE90', size: { width: 40, height: 40 }
+            },
+            commercial: { 
+                cost: 800, income: 100, population: 0, happiness: 5, icon: '🏪', 
+                color: '#FFD700', size: { width: 40, height: 40 }
+            },
+            industrial: { 
+                cost: 1200, income: 150, population: 0, happiness: -10, icon: '🏭', 
+                color: '#696969', size: { width: 60, height: 40 }
+            },
+            park: { 
+                cost: 300, income: 0, population: 0, happiness: 15, icon: '🌳', 
+                color: '#32CD32', size: { width: 40, height: 40 }
+            },
+            police: { 
+                cost: 1000, income: -50, population: 0, happiness: 10, icon: '🚔', 
+                color: '#0000FF', size: { width: 40, height: 40 }
+            },
+            fire: { 
+                cost: 900, income: -40, population: 0, happiness: 8, icon: '🚒', 
+                color: '#FF0000', size: { width: 40, height: 40 }
+            },
+            hospital: { 
+                cost: 2000, income: -80, population: 0, happiness: 20, icon: '🏥', 
+                color: '#FF69B4', size: { width: 60, height: 40 }
+            },
+            school: { 
+                cost: 1500, income: -60, population: 0, happiness: 15, icon: '🏫', 
+                color: '#9370DB', size: { width: 60, height: 40 }
+            }
+        };
+        
+        function selectBuilding(type) {
+            if (gameState.money < buildingTypes[type].cost) {
+                addMessage(`Not enough money for ${type}! Need $${buildingTypes[type].cost}`, 'error');
+                return;
+            }
+            
+            gameState.selectedBuilding = type;
+            gameState.bulldozeMode = false;
+            
+            // Update UI
+            document.querySelectorAll('.building-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById(type + 'Btn').classList.add('selected');
+            
+            canvas.style.cursor = 'crosshair';
+        }
+        
+        function bulldoze() {
+            gameState.bulldozeMode = !gameState.bulldozeMode;
+            gameState.selectedBuilding = null;
+            
+            document.querySelectorAll('.building-btn').forEach(btn => btn.classList.remove('selected'));
+            canvas.style.cursor = gameState.bulldozeMode ? 'not-allowed' : 'default';
+        }
+        
+        function setSpeed(speed) {
+            gameState.gameSpeed = speed;
+            
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            const buttons = ['pauseBtn', 'normalBtn', 'fastBtn'];
+            document.getElementById(buttons[speed]).classList.add('active');
+        }
+        
+        function snapToGrid(x, y) {
+            const gridX = Math.floor(x / gameState.gridSize) * gameState.gridSize;
+            const gridY = Math.floor(y / gameState.gridSize) * gameState.gridSize;
+            return { x: gridX, y: gridY };
+        }
+        
+        function canPlaceBuilding(x, y, buildingType) {
+            const size = buildingTypes[buildingType].size;
+            
+            for (let building of gameState.buildings) {
+                const bSize = buildingTypes[building.type].size;
+                if (x < building.x + bSize.width &&
+                    x + size.width > building.x &&
+                    y < building.y + bSize.height &&
+                    y + size.height > building.y) {
+                    return false;
+                }
+            }
+            
+            return x >= 0 && y >= 0 && 
+                   x + size.width <= canvas.width && 
+                   y + size.height <= canvas.height;
+        }
+        
+        function placeBuilding(x, y, type) {
+            if (!canPlaceBuilding(x, y, type)) {
+                addMessage("Can't place building there!", 'error');
+                return false;
+            }
+            
+            const building = {
+                x: x,
+                y: y,
+                type: type,
+                id: Math.random().toString(36).substr(2, 9),
+                age: 0
+            };
+            
+            gameState.buildings.push(building);
+            gameState.money -= buildingTypes[type].cost;
+            
+            addMessage(`Built ${type} for $${buildingTypes[type].cost}`, 'success');
+            return true;
+        }
+        
+        function removeBuilding(x, y) {
+            for (let i = gameState.buildings.length - 1; i >= 0; i--) {
+                const building = gameState.buildings[i];
+                const size = buildingTypes[building.type].size;
+                
+                if (x >= building.x && x < building.x + size.width &&
+                    y >= building.y && y < building.y + size.height) {
+                    
+                    gameState.buildings.splice(i, 1);
+                    gameState.money += Math.floor(buildingTypes[building.type].cost * 0.7);
+                    addMessage(`Demolished ${building.type}`, 'warning');
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function updateCity() {
+            if (gameState.gameSpeed === 0) return;
+            
+            gameState.time += gameState.gameSpeed;
+            
+            if (gameState.time % 60 === 0) { // Once per second at normal speed
+                let totalIncome = 0;
+                let totalPopulation = 0;
+                let totalHappiness = 0;
+                
+                gameState.buildings.forEach(building => {
+                    const type = buildingTypes[building.type];
+                    totalIncome += type.income;
+                    totalPopulation += type.population;
+                    totalHappiness += type.happiness;
+                    building.age++;
+                });
+                
+                gameState.money += totalIncome;
+                gameState.population = totalPopulation;
+                gameState.happiness = Math.max(0, Math.min(100, 50 + totalHappiness / Math.max(1, gameState.buildings.length) * 10));
+                
+                // Growth calculation
+                gameState.growth = Math.floor(gameState.happiness / 10 - 5 + Math.random() * 3);
+                
+                // Random events
+                if (Math.random() < 0.01 && gameState.buildings.length > 5) {
+                    const events = [
+                        { text: "Tourism boost! +$500", money: 500, type: 'success' },
+                        { text: "Economic downturn. -$300", money: -300, type: 'warning' },
+                        { text: "Federal grant received! +$1000", money: 1000, type: 'success' },
+                        { text: "Infrastructure maintenance. -$200", money: -200, type: 'warning' }
+                    ];
+                    
+                    const event = events[Math.floor(Math.random() * events.length)];
+                    gameState.money += event.money;
+                    addMessage(event.text, event.type);
+                }
+            }
+        }
+        
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x <= canvas.width; x += gameState.gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= canvas.height; y += gameState.gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw buildings
+            gameState.buildings.forEach(building => {
+                const type = buildingTypes[building.type];
+                const size = type.size;
+                
+                // Building shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(building.x + 2, building.y + 2, size.width, size.height);
+                
+                // Building body
+                ctx.fillStyle = type.color;
+                ctx.fillRect(building.x, building.y, size.width, size.height);
+                
+                // Building border
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(building.x, building.y, size.width, size.height);
+                
+                // Building icon/text
+                ctx.fillStyle = '#000';
+                ctx.font = `${Math.min(size.width, size.height) * 0.6}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(
+                    type.icon, 
+                    building.x + size.width / 2, 
+                    building.y + size.height / 2
+                );
+            });
+            
+            // Draw placement preview
+            if (gameState.selectedBuilding && !gameState.bulldozeMode) {
+                const mousePos = getMousePos();
+                if (mousePos) {
+                    const snapped = snapToGrid(mousePos.x, mousePos.y);
+                    const type = buildingTypes[gameState.selectedBuilding];
+                    const canPlace = canPlaceBuilding(snapped.x, snapped.y, gameState.selectedBuilding);
+                    
+                    ctx.fillStyle = canPlace ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';
+                    ctx.fillRect(snapped.x, snapped.y, type.size.width, type.size.height);
+                    
+                    ctx.strokeStyle = canPlace ? '#00ff00' : '#ff0000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(snapped.x, snapped.y, type.size.width, type.size.height);
+                }
+            }
+        }
+        
+        function updateDisplay() {
+            document.getElementById('population').textContent = gameState.population;
+            document.getElementById('money').textContent = '$' + gameState.money;
+            document.getElementById('happiness').textContent = Math.floor(gameState.happiness) + '%';
+            document.getElementById('growth').textContent = gameState.growth + '%';
+            
+            // Update building button states
+            Object.keys(buildingTypes).forEach(type => {
+                const btn = document.getElementById(type + 'Btn');
+                if (gameState.money < buildingTypes[type].cost) {
+                    btn.classList.add('disabled');
+                } else {
+                    btn.classList.remove('disabled');
+                }
+            });
+        }
+        
+        function addMessage(text, type = 'info') {
+            const messageLog = document.getElementById('messageLog');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = new Date().toLocaleTimeString() + ': ' + text;
+            
+            messageLog.appendChild(message);
+            messageLog.scrollTop = messageLog.scrollHeight;
+            
+            // Keep only last 20 messages
+            const messages = messageLog.querySelectorAll('.message');
+            if (messages.length > 20) {
+                messages[0].remove();
+            }
+        }
+        
+        let mousePos = null;
+        
+        function getMousePos() {
+            return mousePos;
+        }
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mousePos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const snapped = snapToGrid(x, y);
+            
+            if (gameState.bulldozeMode) {
+                removeBuilding(x, y);
+            } else if (gameState.selectedBuilding) {
+                if (placeBuilding(snapped.x, snapped.y, gameState.selectedBuilding)) {
+                    // Don't clear selection, allow multiple placements
+                }
+            }
+        });
+        
+        function resetCity() {
+            if (confirm('Are you sure you want to reset your city?')) {
+                gameState = {
+                    money: 10000,
+                    population: 0,
+                    happiness: 50,
+                    growth: 0,
+                    selectedBuilding: null,
+                    bulldozeMode: false,
+                    gameSpeed: 1,
+                    buildings: [],
+                    gridSize: 40,
+                    time: 0
+                };
+                
+                document.getElementById('messageLog').innerHTML = '<div class="message">City reset! Start building your new metropolis.</div>';
+                document.querySelectorAll('.building-btn').forEach(btn => btn.classList.remove('selected'));
+            }
+        }
+        
+        function gameLoop() {
+            updateCity();
+            render();
+            updateDisplay();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Start the game
+        gameLoop();
+    </script>
+</body>
+</html>

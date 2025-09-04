@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Duel - Cyber Card Battle | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f051d, #1a0f3d, #2d1b69);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .game-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .game-header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .game-title {
+            font-size: 1.8em;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+        }
+        
+        .health-bars {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .health-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .health-label {
+            font-weight: bold;
+            min-width: 50px;
+        }
+        
+        .health-meter {
+            width: 150px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid;
+        }
+        
+        .player-health { border-color: #00ffff; }
+        .enemy-health { border-color: #ff0044; }
+        
+        .health-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .player-health .health-fill { background: linear-gradient(90deg, #00ffff, #0099cc); }
+        .enemy-health .health-fill { background: linear-gradient(90deg, #ff0044, #cc0033); }
+        
+        .battlefield {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            background: 
+                radial-gradient(ellipse at 30% 30%, rgba(0, 255, 255, 0.1), transparent),
+                radial-gradient(ellipse at 70% 70%, rgba(255, 0, 68, 0.1), transparent);
+        }
+        
+        .enemy-area {
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border: 2px dashed rgba(255, 0, 68, 0.5);
+            border-radius: 10px;
+            background: rgba(255, 0, 68, 0.05);
+        }
+        
+        .combat-zone {
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .combat-text {
+            font-size: 1.5em;
+            text-align: center;
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
+        }
+        
+        .player-area {
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border: 2px dashed rgba(0, 255, 255, 0.5);
+            border-radius: 10px;
+            background: rgba(0, 255, 255, 0.05);
+        }
+        
+        .hand {
+            height: 140px;
+            background: rgba(0, 0, 0, 0.6);
+            border-top: 2px solid #00ffff;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            overflow-x: auto;
+        }
+        
+        .card {
+            width: 100px;
+            height: 120px;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
+        }
+        
+        .card.selected {
+            transform: translateY(-15px) scale(1.1);
+            border-color: #ffff00;
+            box-shadow: 0 15px 40px rgba(255, 255, 0, 0.6);
+        }
+        
+        .card.enemy {
+            border-color: #ff0044;
+            background: linear-gradient(145deg, #2e1a1a, #3e1621);
+        }
+        
+        .card.enemy:hover {
+            box-shadow: 0 10px 30px rgba(255, 0, 68, 0.5);
+        }
+        
+        .card-cost {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: #ffff00;
+            color: #000;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .card-name {
+            font-weight: bold;
+            font-size: 0.8em;
+            text-align: center;
+            color: #fff;
+            line-height: 1.1;
+        }
+        
+        .card-icon {
+            font-size: 2em;
+            margin: 5px 0;
+        }
+        
+        .card-stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .attack { color: #ff6b6b; }
+        .defense { color: #74c0fc; }
+        
+        .energy-bar {
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #ffff00;
+        }
+        
+        .energy-label {
+            color: #ffff00;
+            font-weight: bold;
+        }
+        
+        .energy-meter {
+            flex: 1;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffff00, #ffaa00);
+            transition: width 0.3s ease;
+        }
+        
+        .game-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(45deg, #ff0044, #ff3366);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 68, 0.4);
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        @keyframes damage {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(255, 0, 0, 0.5); }
+            100% { background-color: transparent; }
+        }
+        
+        @keyframes heal {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(0, 255, 0, 0.5); }
+            100% { background-color: transparent; }
+        }
+        
+        .damage-effect {
+            animation: damage 0.5s ease;
+        }
+        
+        .heal-effect {
+            animation: heal 0.5s ease;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .game-over h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px;
+        }
+        
+        .victory { color: #00ff00; }
+        .defeat { color: #ff0000; }
+        
+        .restart-btn {
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-title">⚡ DIGITAL DUEL</div>
+            <div class="health-bars">
+                <div class="health-bar">
+                    <div class="health-label">YOU</div>
+                    <div class="health-meter player-health">
+                        <div class="health-fill" id="playerHealthFill" style="width: 100%;"></div>
+                    </div>
+                    <div id="playerHealthText">100/100</div>
+                </div>
+                <div class="health-bar">
+                    <div class="health-label">AI</div>
+                    <div class="health-meter enemy-health">
+                        <div class="health-fill" id="enemyHealthFill" style="width: 100%;"></div>
+                    </div>
+                    <div id="enemyHealthText">100/100</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="battlefield">
+            <div class="enemy-area" id="enemyField"></div>
+            
+            <div class="combat-zone">
+                <div class="combat-text" id="combatText">Choose your cards and begin the duel!</div>
+            </div>
+            
+            <div class="player-area" id="playerField"></div>
+        </div>
+        
+        <div class="energy-bar">
+            <div class="energy-label">ENERGY:</div>
+            <div class="energy-meter">
+                <div class="energy-fill" id="energyFill" style="width: 100%;"></div>
+            </div>
+            <div id="energyText">5/5</div>
+            <div class="game-actions">
+                <button class="action-btn" onclick="endTurn()" id="endTurnBtn">End Turn</button>
+                <button class="action-btn" onclick="resetGame()">New Game</button>
+            </div>
+        </div>
+        
+        <div class="hand" id="playerHand"></div>
+    </div>
+    
+    <script>
+        let gameState = {
+            playerHealth: 100,
+            enemyHealth: 100,
+            playerMaxHealth: 100,
+            enemyMaxHealth: 100,
+            playerEnergy: 5,
+            maxEnergy: 5,
+            turn: 'player',
+            playerHand: [],
+            enemyHand: [],
+            playerField: [],
+            enemyField: [],
+            selectedCard: null,
+            gameOver: false
+        };
+        
+        const cardDatabase = [
+            { name: "Cyber Strike", cost: 2, attack: 30, defense: 10, icon: "⚡", type: "attack", description: "Quick digital assault" },
+            { name: "Fire Wall", cost: 3, attack: 15, defense: 35, icon: "🔥", type: "defense", description: "Protective barrier" },
+            { name: "Data Spike", cost: 1, attack: 20, defense: 5, icon: "📡", type: "attack", description: "Fast data attack" },
+            { name: "Shield Matrix", cost: 4, attack: 10, defense: 50, icon: "🛡️", type: "defense", description: "Ultimate protection" },
+            { name: "Lightning Bolt", cost: 3, attack: 40, defense: 0, icon: "⚡", type: "spell", description: "Direct damage" },
+            { name: "Healing Code", cost: 2, attack: 0, defense: 0, icon: "💚", type: "heal", heal: 25, description: "Restore health" },
+            { name: "Virus Bomb", cost: 5, attack: 60, defense: 20, icon: "💣", type: "attack", description: "Massive damage" },
+            { name: "Ice Wall", cost: 2, attack: 5, defense: 30, icon: "🧊", type: "defense", description: "Freezing barrier" },
+            { name: "Neural Link", cost: 1, attack: 15, defense: 15, icon: "🧠", type: "balanced", description: "Mind connection" },
+            { name: "Quantum Burst", cost: 4, attack: 45, defense: 15, icon: "🌌", type: "attack", description: "Reality tear" }
+        ];
+        
+        function initializeGame() {
+            dealInitialCards();
+            updateDisplay();
+            showCombatText("Game initialized. Your turn!");
+        }
+        
+        function dealInitialCards() {
+            gameState.playerHand = [];
+            gameState.enemyHand = [];
+            
+            // Deal 5 cards to each player
+            for (let i = 0; i < 5; i++) {
+                gameState.playerHand.push(getRandomCard());
+                gameState.enemyHand.push(getRandomCard());
+            }
+        }
+        
+        function getRandomCard() {
+            const card = { ...cardDatabase[Math.floor(Math.random() * cardDatabase.length)] };
+            card.id = Math.random().toString(36).substr(2, 9);
+            return card;
+        }
+        
+        function renderHand() {
+            const handElement = document.getElementById('playerHand');
+            handElement.innerHTML = '';
+            
+            gameState.playerHand.forEach(card => {
+                const cardElement = createCardElement(card, true);
+                handElement.appendChild(cardElement);
+            });
+        }
+        
+        function createCardElement(card, isPlayer = false) {
+            const cardEl = document.createElement('div');
+            cardEl.className = `card ${isPlayer ? '' : 'enemy'}`;
+            cardEl.dataset.cardId = card.id;
+            
+            if (isPlayer) {
+                cardEl.onclick = () => selectCard(card);
+            }
+            
+            cardEl.innerHTML = `
+                <div class="card-cost">${card.cost}</div>
+                <div class="card-name">${card.name}</div>
+                <div class="card-icon">${card.icon}</div>
+                <div class="card-stats">
+                    <span class="attack">${card.attack}⚔️</span>
+                    <span class="defense">${card.defense}🛡️</span>
+                </div>
+            `;
+            
+            return cardEl;
+        }
+        
+        function selectCard(card) {
+            if (gameState.turn !== 'player' || gameState.gameOver) return;
+            if (card.cost > gameState.playerEnergy) {
+                showCombatText("Not enough energy!");
+                return;
+            }
+            
+            // Remove previous selection
+            document.querySelectorAll('.card.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            gameState.selectedCard = card;
+            document.querySelector(`[data-card-id="${card.id}"]`).classList.add('selected');
+            
+            showCombatText(`${card.name} selected. Click to play!`);
+        }
+        
+        function playCard(card) {
+            if (!card) return;
+            
+            gameState.playerEnergy -= card.cost;
+            gameState.playerHand = gameState.playerHand.filter(c => c.id !== card.id);
+            
+            executeCardEffect(card, true);
+            
+            // Add card to field if it's a creature
+            if (card.type !== 'spell' && card.type !== 'heal') {
+                gameState.playerField.push(card);
+            }
+            
+            gameState.selectedCard = null;
+            updateDisplay();
+            
+            // Draw a new card
+            if (gameState.playerHand.length < 7) {
+                gameState.playerHand.push(getRandomCard());
+            }
+        }
+        
+        function executeCardEffect(card, isPlayer) {
+            const target = isPlayer ? 'enemy' : 'player';
+            const user = isPlayer ? 'player' : 'enemy';
+            
+            switch (card.type) {
+                case 'attack':
+                case 'spell':
+                    dealDamage(card.attack, target);
+                    showCombatText(`${card.name} deals ${card.attack} damage!`);
+                    break;
+                case 'heal':
+                    heal(card.heal, user);
+                    showCombatText(`${card.name} heals for ${card.heal}!`);
+                    break;
+                case 'defense':
+                case 'balanced':
+                    if (card.attack > 0) {
+                        dealDamage(card.attack, target);
+                    }
+                    showCombatText(`${card.name} activated!`);
+                    break;
+            }
+        }
+        
+        function dealDamage(amount, target) {
+            if (target === 'player') {
+                gameState.playerHealth = Math.max(0, gameState.playerHealth - amount);
+                document.querySelector('.battlefield').classList.add('damage-effect');
+            } else {
+                gameState.enemyHealth = Math.max(0, gameState.enemyHealth - amount);
+                document.querySelector('.enemy-area').classList.add('damage-effect');
+            }
+            
+            setTimeout(() => {
+                document.querySelectorAll('.damage-effect').forEach(el => {
+                    el.classList.remove('damage-effect');
+                });
+            }, 500);
+            
+            checkGameOver();
+        }
+        
+        function heal(amount, target) {
+            if (target === 'player') {
+                gameState.playerHealth = Math.min(gameState.playerMaxHealth, gameState.playerHealth + amount);
+                document.querySelector('.player-area').classList.add('heal-effect');
+            } else {
+                gameState.enemyHealth = Math.min(gameState.enemyMaxHealth, gameState.enemyHealth + amount);
+                document.querySelector('.enemy-area').classList.add('heal-effect');
+            }
+            
+            setTimeout(() => {
+                document.querySelectorAll('.heal-effect').forEach(el => {
+                    el.classList.remove('heal-effect');
+                });
+            }, 500);
+        }
+        
+        function checkGameOver() {
+            if (gameState.playerHealth <= 0) {
+                endGame(false);
+            } else if (gameState.enemyHealth <= 0) {
+                endGame(true);
+            }
+        }
+        
+        function endGame(victory) {
+            gameState.gameOver = true;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'game-over';
+            overlay.innerHTML = `
+                <h2 class="${victory ? 'victory' : 'defeat'}">
+                    ${victory ? '🏆 VICTORY!' : '💀 DEFEAT!'}
+                </h2>
+                <p>${victory ? 'You have mastered the digital realm!' : 'The AI has conquered your systems!'}</p>
+                <button class="restart-btn" onclick="resetGame()">Play Again</button>
+            `;
+            
+            document.querySelector('.game-container').appendChild(overlay);
+        }
+        
+        function endTurn() {
+            if (gameState.selectedCard) {
+                playCard(gameState.selectedCard);
+            }
+            
+            gameState.turn = gameState.turn === 'player' ? 'enemy' : 'player';
+            
+            if (gameState.turn === 'player') {
+                gameState.playerEnergy = Math.min(gameState.maxEnergy, gameState.playerEnergy + 2);
+                showCombatText("Your turn! Choose a card to play.");
+            } else {
+                showCombatText("AI is thinking...");
+                setTimeout(enemyTurn, 1500);
+            }
+            
+            updateDisplay();
+        }
+        
+        function enemyTurn() {
+            if (gameState.gameOver) return;
+            
+            // Simple AI: play affordable cards
+            const affordableCards = gameState.enemyHand.filter(card => card.cost <= 5);
+            
+            if (affordableCards.length > 0) {
+                const cardToPlay = affordableCards[Math.floor(Math.random() * affordableCards.length)];
+                gameState.enemyHand = gameState.enemyHand.filter(c => c.id !== cardToPlay.id);
+                
+                executeCardEffect(cardToPlay, false);
+                
+                if (cardToPlay.type !== 'spell' && cardToPlay.type !== 'heal') {
+                    gameState.enemyField.push(cardToPlay);
+                }
+                
+                showCombatText(`AI plays ${cardToPlay.name}!`);
+                
+                // AI draws a card
+                if (gameState.enemyHand.length < 7) {
+                    gameState.enemyHand.push(getRandomCard());
+                }
+            }
+            
+            setTimeout(() => {
+                gameState.turn = 'player';
+                gameState.playerEnergy = Math.min(gameState.maxEnergy, gameState.playerEnergy + 2);
+                showCombatText("Your turn!");
+                updateDisplay();
+            }, 2000);
+        }
+        
+        function showCombatText(text) {
+            document.getElementById('combatText').textContent = text;
+        }
+        
+        function updateDisplay() {
+            // Update health bars
+            const playerHealthPercent = (gameState.playerHealth / gameState.playerMaxHealth) * 100;
+            const enemyHealthPercent = (gameState.enemyHealth / gameState.enemyMaxHealth) * 100;
+            
+            document.getElementById('playerHealthFill').style.width = playerHealthPercent + '%';
+            document.getElementById('enemyHealthFill').style.width = enemyHealthPercent + '%';
+            document.getElementById('playerHealthText').textContent = `${gameState.playerHealth}/${gameState.playerMaxHealth}`;
+            document.getElementById('enemyHealthText').textContent = `${gameState.enemyHealth}/${gameState.enemyMaxHealth}`;
+            
+            // Update energy
+            const energyPercent = (gameState.playerEnergy / gameState.maxEnergy) * 100;
+            document.getElementById('energyFill').style.width = energyPercent + '%';
+            document.getElementById('energyText').textContent = `${gameState.playerEnergy}/${gameState.maxEnergy}`;
+            
+            // Update hand
+            renderHand();
+            
+            // Update field displays
+            renderField();
+            
+            // Update turn button
+            document.getElementById('endTurnBtn').disabled = gameState.turn !== 'player';
+            document.getElementById('endTurnBtn').textContent = gameState.turn === 'player' ? 'End Turn' : 'AI Turn';
+        }
+        
+        function renderField() {
+            const playerFieldEl = document.getElementById('playerField');
+            const enemyFieldEl = document.getElementById('enemyField');
+            
+            playerFieldEl.innerHTML = '';
+            enemyFieldEl.innerHTML = '';
+            
+            gameState.playerField.slice(0, 5).forEach(card => {
+                const cardEl = createCardElement(card, true);
+                cardEl.style.transform = 'scale(0.8)';
+                playerFieldEl.appendChild(cardEl);
+            });
+            
+            gameState.enemyField.slice(0, 5).forEach(card => {
+                const cardEl = createCardElement(card, false);
+                cardEl.style.transform = 'scale(0.8)';
+                enemyFieldEl.appendChild(cardEl);
+            });
+        }
+        
+        function resetGame() {
+            // Remove game over overlay if it exists
+            const overlay = document.querySelector('.game-over');
+            if (overlay) overlay.remove();
+            
+            gameState = {
+                playerHealth: 100,
+                enemyHealth: 100,
+                playerMaxHealth: 100,
+                enemyMaxHealth: 100,
+                playerEnergy: 5,
+                maxEnergy: 5,
+                turn: 'player',
+                playerHand: [],
+                enemyHand: [],
+                playerField: [],
+                enemyField: [],
+                selectedCard: null,
+                gameOver: false
+            };
+            
+            initializeGame();
+        }
+        
+        // Handle card clicks in hand
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.card.selected')) {
+                if (gameState.selectedCard) {
+                    playCard(gameState.selectedCard);
+                }
+            }
+        });
+        
+        // Initialize the game
+        initializeGame();
+    </script>
+</body>
+</html>
