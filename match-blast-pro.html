@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Blast Pro - Strategic Match-3 | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .game-container {
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .game-board-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .game-title {
+            font-size: 2.5em;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+        
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 15px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .grid-cell {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        
+        .grid-cell:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+        
+        .grid-cell.selected {
+            border-color: #ffff00;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.8);
+            transform: scale(1.2);
+        }
+        
+        .grid-cell.matched {
+            animation: matchPulse 0.5s ease-in-out;
+        }
+        
+        @keyframes matchPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); opacity: 0.7; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        
+        .gem-red { background: radial-gradient(circle, #ff4757, #ff3742); }
+        .gem-blue { background: radial-gradient(circle, #3742ff, #2f3640); }
+        .gem-green { background: radial-gradient(circle, #7bed9f, #5f6e60); }
+        .gem-yellow { background: radial-gradient(circle, #ffa502, #ff7675); }
+        .gem-purple { background: radial-gradient(circle, #5f27cd, #341f97); }
+        .gem-orange { background: radial-gradient(circle, #ff6348, #ff4757); }
+        
+        .special-bomb { 
+            background: radial-gradient(circle, #2f3542, #57606f);
+            animation: bombPulse 1s infinite;
+        }
+        
+        @keyframes bombPulse {
+            0%, 100% { box-shadow: 0 0 10px #ff4757; }
+            50% { box-shadow: 0 0 30px #ff4757, inset 0 0 20px #ff6b81; }
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .score-section {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 15px #ffd700;
+        }
+        
+        .score-label {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .level-section {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+        
+        .level-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        
+        .moves-section {
+            background: rgba(255, 107, 129, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ff6b81;
+            text-align: center;
+        }
+        
+        .moves-remaining {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff6b81;
+        }
+        
+        .objectives {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .objectives h3 {
+            color: #00d2d3;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .objective-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: linear-gradient(45deg, #764ba2, #f093fb);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+        
+        .combo-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 20px;
+            border: 2px solid #ffd700;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 15px #ffd700;
+        }
+        
+        .particle-effect {
+            position: absolute;
+            pointer-events: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        @keyframes particleExplode {
+            0% { 
+                transform: scale(1) translate(0, 0);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(0) translate(var(--dx), var(--dy));
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-board-area">
+            <div class="game-header">
+                <h1 class="game-title">💎 MATCH BLAST PRO</h1>
+            </div>
+            
+            <div class="game-grid" id="gameGrid"></div>
+            
+            <div class="combo-display" id="comboDisplay" style="display: none;">
+                COMBO x<span id="comboCount">0</span>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="score-section">
+                <div class="score-value" id="scoreValue">0</div>
+                <div class="score-label">SCORE</div>
+            </div>
+            
+            <div class="level-section">
+                <div class="level-display">LEVEL <span id="levelNumber">1</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="levelProgress" style="width: 0%;"></div>
+                </div>
+            </div>
+            
+            <div class="moves-section">
+                <div class="score-label">MOVES LEFT</div>
+                <div class="moves-remaining" id="movesLeft">20</div>
+            </div>
+            
+            <div class="objectives">
+                <h3>🎯 OBJECTIVES</h3>
+                <div class="objective-item">
+                    <span>💎 Red Gems:</span>
+                    <span id="redTarget">0/10</span>
+                </div>
+                <div class="objective-item">
+                    <span>💙 Blue Gems:</span>
+                    <span id="blueTarget">0/8</span>
+                </div>
+                <div class="objective-item">
+                    <span>💚 Green Gems:</span>
+                    <span id="greenTarget">0/6</span>
+                </div>
+            </div>
+            
+            <div class="game-controls">
+                <button class="control-btn" onclick="shuffleBoard()">🔄 Shuffle</button>
+                <button class="control-btn" onclick="useHint()">💡 Hint</button>
+                <button class="control-btn" onclick="resetGame()">🎮 New Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const GRID_SIZE = 8;
+        const GEM_TYPES = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        
+        let gameState = {
+            grid: [],
+            score: 0,
+            level: 1,
+            movesLeft: 20,
+            selectedCell: null,
+            combo: 0,
+            objectives: {
+                red: { current: 0, target: 10 },
+                blue: { current: 0, target: 8 },
+                green: { current: 0, target: 6 }
+            }
+        };
+        
+        function initializeGame() {
+            generateGrid();
+            updateDisplay();
+            renderGrid();
+        }
+        
+        function generateGrid() {
+            gameState.grid = [];
+            for (let row = 0; row < GRID_SIZE; row++) {
+                gameState.grid[row] = [];
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    let gemType;
+                    do {
+                        gemType = GEM_TYPES[Math.floor(Math.random() * GEM_TYPES.length)];
+                    } while (wouldCreateMatch(row, col, gemType));
+                    
+                    gameState.grid[row][col] = {
+                        type: gemType,
+                        isSpecial: false
+                    };
+                }
+            }
+        }
+        
+        function wouldCreateMatch(row, col, gemType) {
+            // Check horizontal matches
+            let horizontalCount = 1;
+            for (let c = col - 1; c >= 0 && gameState.grid[row][c] && gameState.grid[row][c].type === gemType; c--) {
+                horizontalCount++;
+            }
+            for (let c = col + 1; c < GRID_SIZE && gameState.grid[row][c] && gameState.grid[row][c].type === gemType; c++) {
+                horizontalCount++;
+            }
+            
+            // Check vertical matches
+            let verticalCount = 1;
+            for (let r = row - 1; r >= 0 && gameState.grid[r][col] && gameState.grid[r][col].type === gemType; r--) {
+                verticalCount++;
+            }
+            for (let r = row + 1; r < GRID_SIZE && gameState.grid[r][col] && gameState.grid[r][col].type === gemType; r++) {
+                verticalCount++;
+            }
+            
+            return horizontalCount >= 3 || verticalCount >= 3;
+        }
+        
+        function renderGrid() {
+            const gridElement = document.getElementById('gameGrid');
+            gridElement.innerHTML = '';
+            
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    const gem = gameState.grid[row][col];
+                    if (gem) {
+                        cell.classList.add('gem-' + gem.type);
+                        if (gem.isSpecial) {
+                            cell.classList.add('special-bomb');
+                            cell.textContent = '💣';
+                        } else {
+                            const gemIcons = {
+                                red: '💎', blue: '💙', green: '💚',
+                                yellow: '⭐', purple: '🔮', orange: '🧡'
+                            };
+                            cell.textContent = gemIcons[gem.type];
+                        }
+                    }
+                    
+                    cell.onclick = () => handleCellClick(row, col);
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+        
+        function handleCellClick(row, col) {
+            if (gameState.movesLeft <= 0) return;
+            
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            
+            if (gameState.selectedCell) {
+                // Deselect previous cell
+                const prevCell = document.querySelector('.selected');
+                if (prevCell) prevCell.classList.remove('selected');
+                
+                // Check if this is a valid swap
+                if (isAdjacentCell(gameState.selectedCell, {row, col})) {
+                    attemptSwap(gameState.selectedCell, {row, col});
+                    gameState.selectedCell = null;
+                } else {
+                    gameState.selectedCell = {row, col};
+                    cell.classList.add('selected');
+                }
+            } else {
+                gameState.selectedCell = {row, col};
+                cell.classList.add('selected');
+            }
+        }
+        
+        function isAdjacentCell(cell1, cell2) {
+            const rowDiff = Math.abs(cell1.row - cell2.row);
+            const colDiff = Math.abs(cell1.col - cell2.col);
+            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+        }
+        
+        function attemptSwap(cell1, cell2) {
+            // Swap gems
+            const temp = gameState.grid[cell1.row][cell1.col];
+            gameState.grid[cell1.row][cell1.col] = gameState.grid[cell2.row][cell2.col];
+            gameState.grid[cell2.row][cell2.col] = temp;
+            
+            // Check for matches
+            const matches = findMatches();
+            if (matches.length > 0) {
+                gameState.movesLeft--;
+                gameState.combo = 0;
+                processMatches();
+            } else {
+                // Swap back if no matches
+                const temp = gameState.grid[cell1.row][cell1.col];
+                gameState.grid[cell1.row][cell1.col] = gameState.grid[cell2.row][cell2.col];
+                gameState.grid[cell2.row][cell2.col] = temp;
+            }
+            
+            renderGrid();
+            updateDisplay();
+        }
+        
+        function findMatches() {
+            const matches = [];
+            
+            // Check horizontal matches
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE - 2; col++) {
+                    const gem = gameState.grid[row][col];
+                    if (gem && gameState.grid[row][col + 1] && gameState.grid[row][col + 2] &&
+                        gem.type === gameState.grid[row][col + 1].type &&
+                        gem.type === gameState.grid[row][col + 2].type) {
+                        
+                        const match = [{row, col: col}, {row, col: col + 1}, {row, col: col + 2}];
+                        // Extend match
+                        for (let c = col + 3; c < GRID_SIZE && gameState.grid[row][c] && gameState.grid[row][c].type === gem.type; c++) {
+                            match.push({row, col: c});
+                        }
+                        matches.push(match);
+                    }
+                }
+            }
+            
+            // Check vertical matches
+            for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row < GRID_SIZE - 2; row++) {
+                    const gem = gameState.grid[row][col];
+                    if (gem && gameState.grid[row + 1][col] && gameState.grid[row + 2][col] &&
+                        gem.type === gameState.grid[row + 1][col].type &&
+                        gem.type === gameState.grid[row + 2][col].type) {
+                        
+                        const match = [{row: row, col}, {row: row + 1, col}, {row: row + 2, col}];
+                        // Extend match
+                        for (let r = row + 3; r < GRID_SIZE && gameState.grid[r][col] && gameState.grid[r][col].type === gem.type; r++) {
+                            match.push({row: r, col});
+                        }
+                        matches.push(match);
+                    }
+                }
+            }
+            
+            return matches;
+        }
+        
+        function processMatches() {
+            const matches = findMatches();
+            if (matches.length === 0) {
+                // Check for game over conditions
+                if (gameState.movesLeft <= 0) {
+                    endGame();
+                }
+                return;
+            }
+            
+            gameState.combo++;
+            const comboMultiplier = Math.min(gameState.combo, 5);
+            
+            // Mark matched cells for removal
+            const matchedCells = new Set();
+            matches.forEach(match => {
+                match.forEach(cell => {
+                    matchedCells.add(`${cell.row}-${cell.col}`);
+                    
+                    // Update objectives
+                    const gem = gameState.grid[cell.row][cell.col];
+                    if (gem && gameState.objectives[gem.type]) {
+                        gameState.objectives[gem.type].current++;
+                    }
+                    
+                    // Add to score
+                    gameState.score += 10 * comboMultiplier;
+                    
+                    // Create special gem for large matches
+                    if (match.length >= 4) {
+                        gameState.grid[cell.row][cell.col].isSpecial = true;
+                    }
+                });
+            });
+            
+            // Create particle effects
+            matchedCells.forEach(cellKey => {
+                const [row, col] = cellKey.split('-').map(Number);
+                createParticleEffect(row, col);
+            });
+            
+            // Remove matched gems
+            matchedCells.forEach(cellKey => {
+                const [row, col] = cellKey.split('-').map(Number);
+                gameState.grid[row][col] = null;
+            });
+            
+            // Show combo
+            if (gameState.combo > 1) {
+                showCombo();
+            }
+            
+            // Drop gems and fill empty spaces
+            setTimeout(() => {
+                dropGems();
+                fillEmptySpaces();
+                renderGrid();
+                
+                // Check for additional matches
+                setTimeout(() => processMatches(), 500);
+            }, 300);
+            
+            updateDisplay();
+        }
+        
+        function createParticleEffect(row, col) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            if (!cell) return;
+            
+            const rect = cell.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 6; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle-effect';
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                
+                const angle = (i / 6) * 2 * Math.PI;
+                const distance = 50 + Math.random() * 30;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--dx', dx + 'px');
+                particle.style.setProperty('--dy', dy + 'px');
+                particle.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                particle.style.animation = 'particleExplode 0.8s ease-out forwards';
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+        
+        function showCombo() {
+            const comboDisplay = document.getElementById('comboDisplay');
+            const comboCount = document.getElementById('comboCount');
+            comboCount.textContent = gameState.combo;
+            comboDisplay.style.display = 'block';
+            
+            setTimeout(() => {
+                comboDisplay.style.display = 'none';
+            }, 2000);
+        }
+        
+        function dropGems() {
+            for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = GRID_SIZE - 1; row >= 0; row--) {
+                    if (gameState.grid[row][col] === null) {
+                        // Find gem above to drop
+                        for (let r = row - 1; r >= 0; r--) {
+                            if (gameState.grid[r][col] !== null) {
+                                gameState.grid[row][col] = gameState.grid[r][col];
+                                gameState.grid[r][col] = null;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function fillEmptySpaces() {
+            for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row < GRID_SIZE; row++) {
+                    if (gameState.grid[row][col] === null) {
+                        gameState.grid[row][col] = {
+                            type: GEM_TYPES[Math.floor(Math.random() * GEM_TYPES.length)],
+                            isSpecial: false
+                        };
+                    }
+                }
+            }
+        }
+        
+        function shuffleBoard() {
+            if (gameState.movesLeft <= 0) return;
+            
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    gameState.grid[row][col] = {
+                        type: GEM_TYPES[Math.floor(Math.random() * GEM_TYPES.length)],
+                        isSpecial: false
+                    };
+                }
+            }
+            
+            gameState.movesLeft--;
+            renderGrid();
+            updateDisplay();
+        }
+        
+        function useHint() {
+            // Simple hint: find any possible match
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE - 1; col++) {
+                    // Try swapping with right neighbor
+                    const temp = gameState.grid[row][col];
+                    gameState.grid[row][col] = gameState.grid[row][col + 1];
+                    gameState.grid[row][col + 1] = temp;
+                    
+                    if (findMatches().length > 0) {
+                        // Found a hint! Highlight these cells
+                        const cell1 = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                        const cell2 = document.querySelector(`[data-row="${row}"][data-col="${col + 1}"]`);
+                        
+                        cell1.style.border = '3px solid #ffff00';
+                        cell2.style.border = '3px solid #ffff00';
+                        
+                        setTimeout(() => {
+                            cell1.style.border = '';
+                            cell2.style.border = '';
+                        }, 2000);
+                        
+                        // Swap back
+                        gameState.grid[row][col + 1] = gameState.grid[row][col];
+                        gameState.grid[row][col] = temp;
+                        return;
+                    }
+                    
+                    // Swap back
+                    gameState.grid[row][col + 1] = gameState.grid[row][col];
+                    gameState.grid[row][col] = temp;
+                }
+            }
+        }
+        
+        function updateDisplay() {
+            document.getElementById('scoreValue').textContent = gameState.score.toLocaleString();
+            document.getElementById('levelNumber').textContent = gameState.level;
+            document.getElementById('movesLeft').textContent = gameState.movesLeft;
+            
+            // Update objectives
+            document.getElementById('redTarget').textContent = 
+                `${gameState.objectives.red.current}/${gameState.objectives.red.target}`;
+            document.getElementById('blueTarget').textContent = 
+                `${gameState.objectives.blue.current}/${gameState.objectives.blue.target}`;
+            document.getElementById('greenTarget').textContent = 
+                `${gameState.objectives.green.current}/${gameState.objectives.green.target}`;
+            
+            // Update level progress
+            const totalTargets = gameState.objectives.red.target + 
+                                gameState.objectives.blue.target + 
+                                gameState.objectives.green.target;
+            const currentProgress = gameState.objectives.red.current + 
+                                   gameState.objectives.blue.current + 
+                                   gameState.objectives.green.current;
+            const progressPercent = (currentProgress / totalTargets) * 100;
+            document.getElementById('levelProgress').style.width = progressPercent + '%';
+            
+            // Check level completion
+            if (currentProgress >= totalTargets) {
+                setTimeout(() => {
+                    alert(`Level ${gameState.level} Complete! 🎉`);
+                    nextLevel();
+                }, 500);
+            }
+        }
+        
+        function nextLevel() {
+            gameState.level++;
+            gameState.movesLeft = 20;
+            gameState.objectives = {
+                red: { current: 0, target: 10 + gameState.level * 2 },
+                blue: { current: 0, target: 8 + gameState.level * 2 },
+                green: { current: 0, target: 6 + gameState.level * 2 }
+            };
+            generateGrid();
+            renderGrid();
+            updateDisplay();
+        }
+        
+        function endGame() {
+            alert(`Game Over! Final Score: ${gameState.score.toLocaleString()}`);
+            resetGame();
+        }
+        
+        function resetGame() {
+            gameState = {
+                grid: [],
+                score: 0,
+                level: 1,
+                movesLeft: 20,
+                selectedCell: null,
+                combo: 0,
+                objectives: {
+                    red: { current: 0, target: 10 },
+                    blue: { current: 0, target: 8 },
+                    green: { current: 0, target: 6 }
+                }
+            };
+            
+            initializeGame();
+        }
+        
+        // Initialize the game
+        initializeGame();
+    </script>
+</body>
+</html>

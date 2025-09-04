@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Runner - Dimension Shift Puzzle | BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #232526, #414345);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-hud {
+            height: 60px;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 2px solid #00ffff;
+        }
+        
+        .hud-left, .hud-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .game-title {
+            font-size: 1.5em;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+        }
+        
+        .hud-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+        
+        .hud-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #00ffff;
+        }
+        
+        .hud-label {
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        
+        .game-canvas {
+            flex: 1;
+            background: radial-gradient(ellipse at center, #2c5aa0, #2c3e50);
+        }
+        
+        .controls-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 25px;
+            border: 2px solid #00ffff;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .control-key {
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .control-text {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        
+        .dimension-indicator {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid;
+            text-align: center;
+            min-width: 150px;
+        }
+        
+        .dimension-normal {
+            border-color: #00ffff;
+            color: #00ffff;
+        }
+        
+        .dimension-shadow {
+            border-color: #ff00ff;
+            color: #ff00ff;
+        }
+        
+        .dimension-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .dimension-desc {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        
+        .player {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #00ffff;
+            transition: all 0.1s ease;
+        }
+        
+        .player.shadow-dimension {
+            background: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+        
+        .platform {
+            position: absolute;
+            background: #34495e;
+            border: 2px solid #7f8c8d;
+        }
+        
+        .platform.normal-only {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-color: #2980b9;
+        }
+        
+        .platform.shadow-only {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border-color: #c0392b;
+        }
+        
+        .portal {
+            position: absolute;
+            width: 15px;
+            height: 30px;
+            border-radius: 50%;
+            animation: portalPulse 2s infinite;
+        }
+        
+        .portal-blue {
+            background: radial-gradient(ellipse, #00ffff, #0099cc);
+            box-shadow: 0 0 30px #00ffff;
+        }
+        
+        .portal-orange {
+            background: radial-gradient(ellipse, #ff6600, #cc4400);
+            box-shadow: 0 0 30px #ff6600;
+        }
+        
+        @keyframes portalPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        .collectible {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ffd700;
+            animation: collectibleFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes collectibleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .hazard {
+            position: absolute;
+            background: #e74c3c;
+            border: 2px solid #c0392b;
+            animation: hazardPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes hazardPulse {
+            0%, 100% { box-shadow: 0 0 10px #e74c3c; }
+            50% { box-shadow: 0 0 30px #e74c3c, inset 0 0 20px rgba(231, 76, 60, 0.5); }
+        }
+        
+        .goal {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #2ecc71, #27ae60);
+            border: 3px solid #27ae60;
+            border-radius: 50%;
+            box-shadow: 0 0 25px #2ecc71;
+            animation: goalPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes goalPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 40px #2ecc71; }
+        }
+        
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFade 1s ease-out forwards;
+        }
+        
+        @keyframes particleFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0) translateY(-30px); }
+        }
+        
+        .level-complete {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #2ecc71;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .level-complete h2 {
+            color: #2ecc71;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #2ecc71;
+        }
+        
+        .next-btn {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-hud">
+            <div class="hud-left">
+                <div class="game-title">🌀 Portal Runner</div>
+            </div>
+            <div class="hud-right">
+                <div class="hud-stat">
+                    <div class="hud-value" id="levelNum">1</div>
+                    <div class="hud-label">Level</div>
+                </div>
+                <div class="hud-stat">
+                    <div class="hud-value" id="collectCount">0</div>
+                    <div class="hud-label">Orbs</div>
+                </div>
+                <div class="hud-stat">
+                    <div class="hud-value" id="timeCount">0</div>
+                    <div class="hud-label">Time</div>
+                </div>
+            </div>
+        </div>
+        
+        <canvas class="game-canvas" id="gameCanvas" width="1200" height="600"></canvas>
+        
+        <div class="dimension-indicator" id="dimensionIndicator">
+            <div class="dimension-title">NORMAL</div>
+            <div class="dimension-desc">All platforms visible</div>
+        </div>
+        
+        <div class="controls-overlay">
+            <div class="control-key">←→</div>
+            <span class="control-text">Move</span>
+            <div class="control-key">↑</div>
+            <span class="control-text">Jump</span>
+            <div class="control-key">SPACE</div>
+            <span class="control-text">Dimension Shift</span>
+            <div class="control-key">R</div>
+            <span class="control-text">Reset</span>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Resize canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - 60; // Account for HUD
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        let gameState = {
+            level: 1,
+            dimension: 'normal', // 'normal' or 'shadow'
+            collectibles: 0,
+            time: 0,
+            gameRunning: true,
+            keys: {}
+        };
+        
+        let player = {
+            x: 50,
+            y: 400,
+            width: 20,
+            height: 20,
+            velX: 0,
+            velY: 0,
+            speed: 5,
+            jumpPower: 15,
+            onGround: false,
+            color: '#00ffff'
+        };
+        
+        // Level data
+        const levels = [
+            {
+                platforms: [
+                    {x: 0, y: 550, width: 200, height: 20, type: 'normal'},
+                    {x: 300, y: 450, width: 150, height: 20, type: 'normal'},
+                    {x: 500, y: 350, width: 100, height: 20, type: 'shadow'},
+                    {x: 650, y: 250, width: 150, height: 20, type: 'normal'},
+                    {x: 900, y: 400, width: 200, height: 20, type: 'normal'}
+                ],
+                collectibles: [
+                    {x: 320, y: 430}, {x: 670, y: 230}, {x: 950, y: 380}
+                ],
+                portals: [
+                    {x: 380, y: 420, type: 'blue'}, {x: 520, y: 320, type: 'orange'}
+                ],
+                hazards: [
+                    {x: 250, y: 530, width: 40, height: 20}
+                ],
+                goal: {x: 950, y: 360},
+                startX: 50,
+                startY: 500
+            },
+            {
+                platforms: [
+                    {x: 0, y: 550, width: 150, height: 20, type: 'normal'},
+                    {x: 200, y: 480, width: 100, height: 20, type: 'shadow'},
+                    {x: 350, y: 400, width: 80, height: 20, type: 'normal'},
+                    {x: 500, y: 300, width: 100, height: 20, type: 'shadow'},
+                    {x: 650, y: 200, width: 120, height: 20, type: 'normal'},
+                    {x: 850, y: 350, width: 200, height: 20, type: 'normal'}
+                ],
+                collectibles: [
+                    {x: 220, y: 460}, {x: 520, y: 280}, {x: 670, y: 180}, {x: 900, y: 330}
+                ],
+                portals: [
+                    {x: 150, y: 450, type: 'blue'}, {x: 430, y: 370, type: 'orange'}
+                ],
+                hazards: [
+                    {x: 300, y: 530, width: 50, height: 20},
+                    {x: 800, y: 530, width: 60, height: 20}
+                ],
+                goal: {x: 920, y: 310},
+                startX: 50,
+                startY: 500
+            }
+        ];
+        
+        let currentLevel = levels[0];
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key.toLowerCase()] = true;
+            
+            if (e.key === ' ') {
+                toggleDimension();
+            } else if (e.key.toLowerCase() === 'r') {
+                resetLevel();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key.toLowerCase()] = false;
+        });
+        
+        function toggleDimension() {
+            gameState.dimension = gameState.dimension === 'normal' ? 'shadow' : 'normal';
+            player.color = gameState.dimension === 'normal' ? '#00ffff' : '#ff00ff';
+            
+            const indicator = document.getElementById('dimensionIndicator');
+            if (gameState.dimension === 'normal') {
+                indicator.className = 'dimension-indicator dimension-normal';
+                indicator.innerHTML = '<div class="dimension-title">NORMAL</div><div class="dimension-desc">Blue platforms visible</div>';
+            } else {
+                indicator.className = 'dimension-indicator dimension-shadow';
+                indicator.innerHTML = '<div class="dimension-title">SHADOW</div><div class="dimension-desc">Red platforms visible</div>';
+            }
+            
+            createDimensionShiftEffect();
+        }
+        
+        function createDimensionShiftEffect() {
+            const colors = gameState.dimension === 'normal' ? ['#00ffff', '#0099cc'] : ['#ff00ff', '#cc00cc'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    createParticle(
+                        player.x + Math.random() * 20,
+                        player.y + Math.random() * 20,
+                        colors[Math.floor(Math.random() * colors.length)]
+                    );
+                }, i * 20);
+            }
+        }
+        
+        function createParticle(x, y, color) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.backgroundColor = color;
+            particle.style.boxShadow = `0 0 10px ${color}`;
+            document.body.appendChild(particle);
+            
+            setTimeout(() => particle.remove(), 1000);
+        }
+        
+        function updatePlayer() {
+            // Horizontal movement
+            if (gameState.keys['arrowleft'] || gameState.keys['a']) {
+                player.velX = -player.speed;
+            } else if (gameState.keys['arrowright'] || gameState.keys['d']) {
+                player.velX = player.speed;
+            } else {
+                player.velX *= 0.8; // Friction
+            }
+            
+            // Jumping
+            if ((gameState.keys['arrowup'] || gameState.keys['w']) && player.onGround) {
+                player.velY = -player.jumpPower;
+                player.onGround = false;
+            }
+            
+            // Gravity
+            player.velY += 0.8;
+            
+            // Movement
+            player.x += player.velX;
+            player.y += player.velY;
+            
+            // Platform collision
+            player.onGround = false;
+            currentLevel.platforms.forEach(platform => {
+                // Only collide with platforms visible in current dimension
+                if (platform.type !== 'normal' && platform.type !== gameState.dimension) {
+                    return;
+                }
+                
+                if (player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y < platform.y + platform.height &&
+                    player.y + player.height > platform.y) {
+                    
+                    // Top collision (landing on platform)
+                    if (player.velY > 0 && player.y < platform.y) {
+                        player.y = platform.y - player.height;
+                        player.velY = 0;
+                        player.onGround = true;
+                    }
+                }
+            });
+            
+            // Screen boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            
+            // Fall off screen
+            if (player.y > canvas.height + 100) {
+                resetLevel();
+            }
+            
+            // Portal collision
+            currentLevel.portals.forEach(portal => {
+                if (Math.hypot(player.x + player.width/2 - portal.x, player.y + player.height/2 - portal.y) < 25) {
+                    // Teleport to other portal of different type
+                    const otherPortal = currentLevel.portals.find(p => p.type !== portal.type);
+                    if (otherPortal) {
+                        player.x = otherPortal.x - player.width/2;
+                        player.y = otherPortal.y - player.height/2;
+                        createParticle(player.x, player.y, portal.type === 'blue' ? '#00ffff' : '#ff6600');
+                    }
+                }
+            });
+            
+            // Collectible collision
+            currentLevel.collectibles = currentLevel.collectibles.filter(collectible => {
+                if (Math.hypot(player.x + player.width/2 - collectible.x, player.y + player.height/2 - collectible.y) < 20) {
+                    gameState.collectibles++;
+                    createParticle(collectible.x, collectible.y, '#ffd700');
+                    return false;
+                }
+                return true;
+            });
+            
+            // Hazard collision
+            currentLevel.hazards.forEach(hazard => {
+                if (player.x < hazard.x + hazard.width &&
+                    player.x + player.width > hazard.x &&
+                    player.y < hazard.y + hazard.height &&
+                    player.y + player.height > hazard.y) {
+                    resetLevel();
+                }
+            });
+            
+            // Goal collision
+            const goal = currentLevel.goal;
+            if (Math.hypot(player.x + player.width/2 - goal.x, player.y + player.height/2 - goal.y) < 35) {
+                completeLevel();
+            }
+        }
+        
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw platforms
+            currentLevel.platforms.forEach(platform => {
+                // Only render platforms visible in current dimension
+                if (platform.type !== 'normal' && platform.type !== gameState.dimension) {
+                    return;
+                }
+                
+                let color;
+                if (platform.type === 'normal') {
+                    color = '#3498db';
+                } else if (platform.type === 'shadow') {
+                    color = '#e74c3c';
+                }
+                
+                ctx.fillStyle = color;
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                
+                // Platform glow
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 10;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+                ctx.shadowBlur = 0;
+            });
+            
+            // Draw portals
+            currentLevel.portals.forEach(portal => {
+                const color = portal.type === 'blue' ? '#00ffff' : '#ff6600';
+                ctx.fillStyle = color;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.ellipse(portal.x, portal.y, 8, 15, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+            
+            // Draw collectibles
+            currentLevel.collectibles.forEach(collectible => {
+                ctx.fillStyle = '#ffd700';
+                ctx.shadowColor = '#ffd700';
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(collectible.x, collectible.y, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+            
+            // Draw hazards
+            currentLevel.hazards.forEach(hazard => {
+                ctx.fillStyle = '#e74c3c';
+                ctx.shadowColor = '#e74c3c';
+                ctx.shadowBlur = 15;
+                ctx.fillRect(hazard.x, hazard.y, hazard.width, hazard.height);
+                ctx.shadowBlur = 0;
+            });
+            
+            // Draw goal
+            const goal = currentLevel.goal;
+            ctx.fillStyle = '#2ecc71';
+            ctx.shadowColor = '#2ecc71';
+            ctx.shadowBlur = 25;
+            ctx.beginPath();
+            ctx.arc(goal.x, goal.y, 15, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Draw player
+            ctx.fillStyle = player.color;
+            ctx.shadowColor = player.color;
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(player.x + player.width/2, player.y + player.height/2, player.width/2, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        function completeLevel() {
+            gameState.gameRunning = false;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'level-complete';
+            overlay.innerHTML = `
+                <h2>🌟 Level Complete!</h2>
+                <p>Orbs Collected: ${gameState.collectibles}</p>
+                <p>Time: ${gameState.time.toFixed(1)}s</p>
+                <button class="next-btn" onclick="nextLevel()">Next Level</button>
+            `;
+            
+            document.body.appendChild(overlay);
+        }
+        
+        function nextLevel() {
+            const overlay = document.querySelector('.level-complete');
+            if (overlay) overlay.remove();
+            
+            gameState.level++;
+            if (gameState.level > levels.length) {
+                alert('Congratulations! You completed all levels!');
+                gameState.level = 1;
+            }
+            
+            loadLevel(gameState.level - 1);
+        }
+        
+        function loadLevel(levelIndex) {
+            currentLevel = JSON.parse(JSON.stringify(levels[levelIndex]));
+            player.x = currentLevel.startX;
+            player.y = currentLevel.startY;
+            player.velX = 0;
+            player.velY = 0;
+            gameState.dimension = 'normal';
+            gameState.collectibles = 0;
+            gameState.time = 0;
+            gameState.gameRunning = true;
+            
+            toggleDimension();
+            toggleDimension(); // Reset to normal
+        }
+        
+        function resetLevel() {
+            loadLevel(gameState.level - 1);
+        }
+        
+        function updateHUD() {
+            document.getElementById('levelNum').textContent = gameState.level;
+            document.getElementById('collectCount').textContent = gameState.collectibles;
+            document.getElementById('timeCount').textContent = gameState.time.toFixed(1);
+        }
+        
+        function gameLoop() {
+            if (gameState.gameRunning) {
+                updatePlayer();
+                gameState.time += 1/60;
+            }
+            
+            render();
+            updateHUD();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Initialize
+        loadLevel(0);
+        gameLoop();
+    </script>
+</body>
+</html>
