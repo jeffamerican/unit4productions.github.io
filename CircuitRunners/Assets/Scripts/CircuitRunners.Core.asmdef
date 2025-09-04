@@ -1,0 +1,19 @@
+{
+    "name": "CircuitRunners.Core",
+    "rootNamespace": "CircuitRunners.Core",
+    "references": [
+        "CircuitRunners.Bot",
+        "CircuitRunners.Course",
+        "CircuitRunners.Data",
+        "CircuitRunners.Monetization"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

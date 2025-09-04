@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Snake - Retro Reimagined</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(ellipse at center, #0a0a2e 0%, #16213e 50%, #000000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #00ffff;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 400px;
+            height: 600px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.3), inset 0 0 50px rgba(0, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-header {
+            padding: 15px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .score-display {
+            display: flex;
+            gap: 20px;
+        }
+
+        .power-status {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .power-active {
+            color: #ff00ff;
+            text-shadow: 0 0 5px currentColor;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .game-board {
+            width: 100%;
+            height: 520px;
+            background: rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .snake-segment {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .snake-head {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            animation: headGlow 0.5s ease-in-out infinite alternate;
+        }
+
+        .snake-body {
+            background: linear-gradient(45deg, #008080, #004080);
+            border: 1px solid #006060;
+            color: #008080;
+        }
+
+        .food {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: 2px;
+            border-radius: 50%;
+            animation: foodPulse 1s ease-in-out infinite alternate;
+        }
+
+        .food.normal {
+            background: radial-gradient(circle, #ff0080, #cc0066);
+            box-shadow: 0 0 20px #ff0080;
+        }
+
+        .food.bonus {
+            background: radial-gradient(circle, #ffff00, #cccc00);
+            box-shadow: 0 0 20px #ffff00;
+        }
+
+        .food.special {
+            background: radial-gradient(circle, #ff8000, #cc6600);
+            box-shadow: 0 0 25px #ff8000;
+            animation: specialFood 1.5s ease-in-out infinite;
+        }
+
+        .powerup {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            margin: 1px;
+            border-radius: 4px;
+            animation: powerupSpin 2s linear infinite;
+        }
+
+        .powerup.speed {
+            background: linear-gradient(45deg, #00ff00, #008800);
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        .powerup.shield {
+            background: linear-gradient(45deg, #ff00ff, #880088);
+            box-shadow: 0 0 15px #ff00ff;
+        }
+
+        .powerup.ghost {
+            background: linear-gradient(45deg, #8800ff, #440088);
+            box-shadow: 0 0 15px #8800ff;
+        }
+
+        .ghost-trail {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: rgba(0, 255, 255, 0.3);
+            border-radius: 3px;
+            animation: fadeTrail 2s ease-out forwards;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            opacity: 0.7;
+            color: #00ffff;
+        }
+
+        .share-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .game-over h2 {
+            font-size: 28px;
+            color: #00ffff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ffff;
+            animation: titleGlow 1s ease-in-out infinite alternate;
+        }
+
+        .final-stats {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-width: 300px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        .ghost-comparison {
+            background: rgba(136, 0, 255, 0.1);
+            border: 1px solid #8800ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            max-width: 350px;
+        }
+
+        .ghost-comparison h3 {
+            font-size: 18px;
+            color: #8800ff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .ghost-race-time {
+            font-size: 14px;
+            color: #ff00ff;
+            margin: 5px 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-buttons button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .direction-pad {
+            position: absolute;
+            bottom: 60px;
+            right: 20px;
+            display: grid;
+            grid-template: 40px 40px 40px / 40px 40px 40px;
+            gap: 5px;
+            opacity: 0.7;
+        }
+
+        .direction-btn {
+            background: rgba(0, 255, 255, 0.3);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            color: #00ffff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .direction-btn:active {
+            background: rgba(0, 255, 255, 0.6);
+        }
+
+        .direction-btn.up { grid-area: 1 / 2; }
+        .direction-btn.left { grid-area: 2 / 1; }
+        .direction-btn.right { grid-area: 2 / 3; }
+        .direction-btn.down { grid-area: 3 / 2; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        @keyframes headGlow {
+            0% { box-shadow: 0 0 15px #00ffff; }
+            100% { box-shadow: 0 0 25px #00ffff, 0 0 35px #00ffff; }
+        }
+
+        @keyframes foodPulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        @keyframes specialFood {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        @keyframes powerupSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeTrail {
+            0% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0) translateX(var(--dx)) translateY(var(--dy)); opacity: 0; }
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 20px #00ffff; }
+            100% { text-shadow: 0 0 30px #00ffff, 0 0 40px #0080ff; }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                width: 95vw;
+                height: 85vh;
+            }
+            
+            .game-board {
+                height: calc(85vh - 80px);
+            }
+            
+            .direction-pad {
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <button class="share-button" onclick="shareScore()">Share</button>
+        <div class="game-header">
+            <div class="score-display">
+                <div>Score: <span id="score">0</span></div>
+                <div>Length: <span id="length">1</span></div>
+                <div>High: <span id="highScore">0</span></div>
+            </div>
+            <div class="power-status">
+                <div id="speedStatus" style="display: none;" class="power-active">SPEED</div>
+                <div id="shieldStatus" style="display: none;" class="power-active">SHIELD</div>
+                <div id="ghostStatus" style="display: none;" class="power-active">GHOST</div>
+            </div>
+        </div>
+        <div class="game-board" id="gameBoard">
+            <div class="controls">
+                WASD / Arrow Keys / Touch Controls
+            </div>
+        </div>
+        <div class="direction-pad">
+            <button class="direction-btn up" onclick="changeDirection('up')">↑</button>
+            <button class="direction-btn left" onclick="changeDirection('left')">←</button>
+            <button class="direction-btn right" onclick="changeDirection('right')">→</button>
+            <button class="direction-btn down" onclick="changeDirection('down')">↓</button>
+        </div>
+        <div class="game-over" id="gameOver">
+            <h2>GAME OVER</h2>
+            <div class="final-stats">
+                <div class="stat-row">
+                    <span>Final Score:</span>
+                    <span id="finalScore">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Snake Length:</span>
+                    <span id="finalLength">1</span>
+                </div>
+                <div class="stat-row">
+                    <span>Food Consumed:</span>
+                    <span id="foodCount">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Survival Time:</span>
+                    <span id="survivalTime">0</span>s
+                </div>
+            </div>
+            <div class="ghost-comparison" id="ghostComparison">
+                <h3>Ghost Race Performance</h3>
+                <div class="ghost-race-time" id="ghostTime">Your Time: 0s</div>
+                <div class="ghost-race-time" id="bestGhostTime">Best Ghost: 0s</div>
+                <div class="ghost-race-time" id="raceResult">Result: -</div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="restartGame()">Play Again</button>
+                <button onclick="shareScore()">Share Score</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class NeonSnake {
+            constructor() {
+                this.board = document.getElementById('gameBoard');
+                this.boardWidth = 380;
+                this.boardHeight = 500;
+                this.gridSize = 20;
+                
+                this.snake = [{x: 180, y: 240}]; // Center start
+                this.direction = {x: 0, y: -this.gridSize}; // Start moving up
+                this.nextDirection = {x: 0, y: -this.gridSize};
+                
+                this.food = null;
+                this.powerups = [];
+                this.ghostTrails = [];
+                this.particles = [];
+                
+                this.score = 0;
+                this.gameRunning = true;
+                this.speed = 150;
+                this.foodCount = 0;
+                this.startTime = Date.now();
+                
+                // Power-up states
+                this.powerStates = {
+                    speed: { active: false, duration: 0 },
+                    shield: { active: false, duration: 0 },
+                    ghost: { active: false, duration: 0 }
+                };
+                
+                // Ghost race data
+                this.ghostRaces = this.loadGhostRaces();
+                this.currentRace = [];
+                this.raceRecording = true;
+                
+                this.loadHighScore();
+                this.initControls();
+                this.spawnFood();
+                this.gameLoop();
+            }
+
+            loadHighScore() {
+                const saved = localStorage.getItem('neonSnakeHighScore');
+                if (saved) {
+                    document.getElementById('highScore').textContent = saved;
+                }
+            }
+
+            loadGhostRaces() {
+                const saved = localStorage.getItem('neonSnakeGhosts');
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            saveGhostRace() {
+                const race = {
+                    positions: [...this.currentRace],
+                    score: this.score,
+                    length: this.snake.length,
+                    time: Math.floor((Date.now() - this.startTime) / 1000)
+                };
+                
+                this.ghostRaces.push(race);
+                
+                // Keep only best 5 races
+                this.ghostRaces.sort((a, b) => b.score - a.score);
+                this.ghostRaces = this.ghostRaces.slice(0, 5);
+                
+                localStorage.setItem('neonSnakeGhosts', JSON.stringify(this.ghostRaces));
+            }
+
+            initControls() {
+                document.addEventListener('keydown', (e) => {
+                    this.handleKeyPress(e.key.toLowerCase());
+                });
+
+                // Touch controls
+                let touchStartX, touchStartY;
+                
+                this.board.addEventListener('touchstart', (e) => {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    e.preventDefault();
+                });
+
+                this.board.addEventListener('touchend', (e) => {
+                    if (!touchStartX || !touchStartY) return;
+                    
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    
+                    const diffX = touchStartX - touchEndX;
+                    const diffY = touchStartY - touchEndY;
+                    
+                    if (Math.abs(diffX) > Math.abs(diffY)) {
+                        // Horizontal swipe
+                        if (diffX > 0) {
+                            this.changeDirection('left');
+                        } else {
+                            this.changeDirection('right');
+                        }
+                    } else {
+                        // Vertical swipe
+                        if (diffY > 0) {
+                            this.changeDirection('up');
+                        } else {
+                            this.changeDirection('down');
+                        }
+                    }
+                    
+                    touchStartX = null;
+                    touchStartY = null;
+                    e.preventDefault();
+                });
+            }
+
+            handleKeyPress(key) {
+                switch(key) {
+                    case 'w':
+                    case 'arrowup':
+                        this.changeDirection('up');
+                        break;
+                    case 's':
+                    case 'arrowdown':
+                        this.changeDirection('down');
+                        break;
+                    case 'a':
+                    case 'arrowleft':
+                        this.changeDirection('left');
+                        break;
+                    case 'd':
+                    case 'arrowright':
+                        this.changeDirection('right');
+                        break;
+                }
+            }
+
+            changeDirection(direction) {
+                if (!this.gameRunning) return;
+
+                const directions = {
+                    'up': {x: 0, y: -this.gridSize},
+                    'down': {x: 0, y: this.gridSize},
+                    'left': {x: -this.gridSize, y: 0},
+                    'right': {x: this.gridSize, y: 0}
+                };
+
+                const newDir = directions[direction];
+                
+                // Prevent reverse direction
+                if (newDir.x !== -this.direction.x && newDir.y !== -this.direction.y) {
+                    this.nextDirection = newDir;
+                }
+            }
+
+            spawnFood() {
+                let validPosition = false;
+                let newFood;
+                
+                while (!validPosition) {
+                    newFood = {
+                        x: Math.floor(Math.random() * (this.boardWidth / this.gridSize)) * this.gridSize,
+                        y: Math.floor(Math.random() * (this.boardHeight / this.gridSize)) * this.gridSize
+                    };
+                    
+                    validPosition = !this.snake.some(segment => 
+                        segment.x === newFood.x && segment.y === newFood.y
+                    );
+                }
+                
+                // Determine food type
+                const rand = Math.random();
+                if (rand < 0.05) {
+                    newFood.type = 'special'; // 5% special food (3x points)
+                } else if (rand < 0.15) {
+                    newFood.type = 'bonus'; // 10% bonus food (2x points)
+                } else {
+                    newFood.type = 'normal';
+                }
+                
+                this.food = newFood;
+                this.renderFood();
+                
+                // Occasionally spawn powerups
+                if (Math.random() < 0.3 && this.powerups.length < 2) {
+                    this.spawnPowerup();
+                }
+            }
+
+            spawnPowerup() {
+                const types = ['speed', 'shield', 'ghost'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                let validPosition = false;
+                let powerup;
+                
+                while (!validPosition) {
+                    powerup = {
+                        x: Math.floor(Math.random() * (this.boardWidth / this.gridSize)) * this.gridSize,
+                        y: Math.floor(Math.random() * (this.boardHeight / this.gridSize)) * this.gridSize,
+                        type: type
+                    };
+                    
+                    validPosition = !this.snake.some(segment => 
+                        segment.x === powerup.x && segment.y === powerup.y
+                    ) && !(this.food.x === powerup.x && this.food.y === powerup.y);
+                }
+                
+                this.powerups.push(powerup);
+                this.renderPowerup(powerup);
+            }
+
+            moveSnake() {
+                this.direction = this.nextDirection;
+                
+                const head = {
+                    x: this.snake[0].x + this.direction.x,
+                    y: this.snake[0].y + this.direction.y
+                };
+
+                // Record position for ghost race
+                if (this.raceRecording) {
+                    this.currentRace.push({
+                        x: head.x,
+                        y: head.y,
+                        time: Date.now() - this.startTime
+                    });
+                }
+
+                // Create ghost trail if ghost mode active
+                if (this.powerStates.ghost.active) {
+                    this.createGhostTrail(this.snake[0]);
+                }
+
+                // Wall collision (unless ghost mode active)
+                if (!this.powerStates.ghost.active) {
+                    if (head.x < 0 || head.x >= this.boardWidth || 
+                        head.y < 0 || head.y >= this.boardHeight) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+
+                // Handle wall wrapping in ghost mode
+                if (this.powerStates.ghost.active) {
+                    head.x = (head.x + this.boardWidth) % this.boardWidth;
+                    head.y = (head.y + this.boardHeight) % this.boardHeight;
+                }
+
+                // Self collision (unless ghost mode active)
+                if (!this.powerStates.ghost.active) {
+                    if (this.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+
+                this.snake.unshift(head);
+
+                // Check food collision
+                if (head.x === this.food.x && head.y === this.food.y) {
+                    this.eatFood();
+                } else {
+                    this.snake.pop(); // Remove tail if no food eaten
+                }
+
+                // Check powerup collision
+                this.powerups.forEach((powerup, index) => {
+                    if (head.x === powerup.x && head.y === powerup.y) {
+                        this.collectPowerup(powerup);
+                        this.powerups.splice(index, 1);
+                        this.removePowerupElement(powerup);
+                    }
+                });
+            }
+
+            eatFood() {
+                let points = 10;
+                if (this.food.type === 'bonus') points = 20;
+                if (this.food.type === 'special') points = 50;
+                
+                this.score += points;
+                this.foodCount++;
+                
+                this.createParticles(this.food.x + 10, this.food.y + 10, this.food.type);
+                this.removeFoodElement();
+                this.spawnFood();
+                
+                // Increase speed slightly
+                this.speed = Math.max(80, this.speed - 2);
+                
+                this.updateDisplay();
+            }
+
+            collectPowerup(powerup) {
+                this.createParticles(powerup.x + 10, powerup.y + 10, 'powerup');
+                
+                switch (powerup.type) {
+                    case 'speed':
+                        this.powerStates.speed = { active: true, duration: 5000 };
+                        this.speed *= 0.5; // Double speed
+                        break;
+                    case 'shield':
+                        this.powerStates.shield = { active: true, duration: 8000 };
+                        break;
+                    case 'ghost':
+                        this.powerStates.ghost = { active: true, duration: 6000 };
+                        break;
+                }
+                
+                this.updatePowerStatus();
+            }
+
+            createGhostTrail(position) {
+                const trail = document.createElement('div');
+                trail.className = 'ghost-trail';
+                trail.style.left = position.x + 'px';
+                trail.style.top = position.y + 'px';
+                
+                this.board.appendChild(trail);
+                
+                setTimeout(() => {
+                    if (trail.parentNode) {
+                        trail.parentNode.removeChild(trail);
+                    }
+                }, 2000);
+            }
+
+            createParticles(x, y, type) {
+                const colors = {
+                    'normal': '#ff0080',
+                    'bonus': '#ffff00',
+                    'special': '#ff8000',
+                    'powerup': '#00ff00'
+                };
+                
+                for (let i = 0; i < 6; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    particle.style.background = colors[type] || '#00ffff';
+                    
+                    const angle = (Math.PI * 2 * i) / 6;
+                    const distance = 30 + Math.random() * 20;
+                    particle.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+                    particle.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+                    
+                    this.board.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 1000);
+                }
+            }
+
+            updatePowerStates() {
+                Object.keys(this.powerStates).forEach(power => {
+                    if (this.powerStates[power].active) {
+                        this.powerStates[power].duration -= this.speed;
+                        
+                        if (this.powerStates[power].duration <= 0) {
+                            this.powerStates[power].active = false;
+                            
+                            // Reset effects
+                            if (power === 'speed') {
+                                this.speed *= 2; // Restore normal speed
+                            }
+                        }
+                    }
+                });
+                
+                this.updatePowerStatus();
+            }
+
+            updatePowerStatus() {
+                document.getElementById('speedStatus').style.display = 
+                    this.powerStates.speed.active ? 'block' : 'none';
+                document.getElementById('shieldStatus').style.display = 
+                    this.powerStates.shield.active ? 'block' : 'none';
+                document.getElementById('ghostStatus').style.display = 
+                    this.powerStates.ghost.active ? 'block' : 'none';
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('length').textContent = this.snake.length;
+            }
+
+            renderSnake() {
+                // Clear existing snake elements
+                document.querySelectorAll('.snake-segment').forEach(el => el.remove());
+                
+                this.snake.forEach((segment, index) => {
+                    const element = document.createElement('div');
+                    element.className = index === 0 ? 'snake-segment snake-head' : 'snake-segment snake-body';
+                    element.style.left = segment.x + 'px';
+                    element.style.top = segment.y + 'px';
+                    
+                    // Add shield effect to head
+                    if (index === 0 && this.powerStates.shield.active) {
+                        element.style.boxShadow = '0 0 25px #ff00ff';
+                    }
+                    
+                    this.board.appendChild(element);
+                });
+            }
+
+            renderFood() {
+                this.removeFoodElement();
+                
+                const element = document.createElement('div');
+                element.className = `food ${this.food.type}`;
+                element.id = 'currentFood';
+                element.style.left = this.food.x + 'px';
+                element.style.top = this.food.y + 'px';
+                
+                this.board.appendChild(element);
+            }
+
+            renderPowerup(powerup) {
+                const element = document.createElement('div');
+                element.className = `powerup ${powerup.type}`;
+                element.style.left = powerup.x + 'px';
+                element.style.top = powerup.y + 'px';
+                powerup.element = element;
+                
+                this.board.appendChild(element);
+            }
+
+            removeFoodElement() {
+                const food = document.getElementById('currentFood');
+                if (food) food.remove();
+            }
+
+            removePowerupElement(powerup) {
+                if (powerup.element && powerup.element.parentNode) {
+                    powerup.element.parentNode.removeChild(powerup.element);
+                }
+            }
+
+            gameLoop() {
+                if (!this.gameRunning) return;
+
+                this.moveSnake();
+                this.updatePowerStates();
+                this.renderSnake();
+
+                setTimeout(() => this.gameLoop(), this.speed);
+            }
+
+            gameOver() {
+                this.gameRunning = false;
+                this.raceRecording = false;
+                
+                const survivalTime = Math.floor((Date.now() - this.startTime) / 1000);
+                
+                // Update high score
+                const currentHigh = parseInt(localStorage.getItem('neonSnakeHighScore') || '0');
+                if (this.score > currentHigh) {
+                    localStorage.setItem('neonSnakeHighScore', this.score.toString());
+                    document.getElementById('highScore').textContent = this.score;
+                }
+                
+                // Save ghost race
+                this.saveGhostRace();
+                
+                // Show final stats
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalLength').textContent = this.snake.length;
+                document.getElementById('foodCount').textContent = this.foodCount;
+                document.getElementById('survivalTime').textContent = survivalTime;
+                
+                // Show ghost comparison
+                this.showGhostComparison(survivalTime);
+                
+                document.getElementById('gameOver').style.display = 'flex';
+            }
+
+            showGhostComparison(currentTime) {
+                if (this.ghostRaces.length === 0) {
+                    document.getElementById('ghostComparison').style.display = 'none';
+                    return;
+                }
+                
+                const bestGhost = this.ghostRaces[0];
+                const timeDiff = currentTime - bestGhost.time;
+                
+                document.getElementById('ghostTime').textContent = `Your Time: ${currentTime}s`;
+                document.getElementById('bestGhostTime').textContent = `Best Ghost: ${bestGhost.time}s`;
+                
+                let result = '';
+                if (timeDiff > 0) {
+                    result = `${timeDiff}s slower than best ghost`;
+                } else if (timeDiff < 0) {
+                    result = `${Math.abs(timeDiff)}s faster! New record!`;
+                } else {
+                    result = 'Tied with best ghost!';
+                }
+                
+                document.getElementById('raceResult').textContent = result;
+            }
+        }
+
+        let game;
+
+        function startGame() {
+            game = new NeonSnake();
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            
+            // Clear game board
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '<div class="controls">WASD / Arrow Keys / Touch Controls</div>';
+            
+            startGame();
+        }
+
+        function changeDirection(direction) {
+            if (game) game.changeDirection(direction);
+        }
+
+        function shareScore() {
+            const score = game ? game.score : 0;
+            const length = game ? game.snake.length : 1;
+            const time = game ? Math.floor((Date.now() - game.startTime) / 1000) : 0;
+            
+            const text = `I just scored ${score} points with a ${length}-segment neon snake in ${time} seconds! The retro vibes are real. Can you slither better?`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Neon Snake High Score',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+                window.open(url, '_blank');
+            }
+        }
+
+        // Start the game
+        startGame();
+    </script>
+</body>
+</html>

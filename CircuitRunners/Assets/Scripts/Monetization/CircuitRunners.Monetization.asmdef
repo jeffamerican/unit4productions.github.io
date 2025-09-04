@@ -1,0 +1,16 @@
+{
+    "name": "CircuitRunners.Monetization",
+    "rootNamespace": "CircuitRunners.Monetization",
+    "references": [
+        "CircuitRunners.Data"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

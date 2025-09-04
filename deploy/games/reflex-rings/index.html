@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflex Rings - Unit4 Productions</title>
+    <meta name="description" content="Play Reflex Rings - Premium HTML5 gaming experience">
+    
+    <!-- SEO & Social Media -->
+    <meta property="og:title" content="Reflex Rings - Unit4 Productions">
+    <meta property="og:description" content="Premium HTML5 gaming experience">
+    <meta property="og:type" content="game">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <!-- Performance -->
+    <link rel="preload" href="game.js" as="script">
+    <link rel="stylesheet" href="game.css">
+    
+    <!-- Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="gameHeader">
+            <h1>Reflex Rings</h1>
+            <div id="gameScore">Score: <span id="score">0</span></div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="gameControls">
+            <button id="startBtn" onclick="startGame()">Start Game</button>
+            <button id="pauseBtn" onclick="pauseGame()">Pause</button>
+            <button id="resetBtn" onclick="resetGame()">Reset</button>
+        </div>
+        <div id="gameInfo">
+            <p>Click to play Reflex Rings</p>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+    <script>
+        // Game analytics
+        function trackGameEvent(event, data) {
+            gtag('event', event, {
+                game_name: 'Reflex Rings',
+                ...data
+            });
+        }
+        
+        // Track game start
+        window.addEventListener('gameStart', () => {
+            trackGameEvent('game_start', {event_category: 'games'});
+        });
+        
+        // Track game completion
+        window.addEventListener('gameComplete', (e) => {
+            trackGameEvent('game_complete', {
+                event_category: 'games',
+                score: e.detail.score
+            });
+        });
+    </script>
+</body>
+</html>

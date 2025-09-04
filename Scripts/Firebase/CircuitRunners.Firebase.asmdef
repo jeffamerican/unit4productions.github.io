@@ -1,0 +1,22 @@
+{
+    "name": "CircuitRunners.Firebase",
+    "rootNamespace": "CircuitRunners.Firebase",
+    "references": [
+        "CircuitRunners.Core",
+        "CircuitRunners.Data"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Firebase.Auth.dll",
+        "Firebase.Database.dll",
+        "Firebase.Analytics.dll",
+        "Firebase.Functions.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

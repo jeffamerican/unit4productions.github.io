@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Logic Nexus - Games for AI Systems</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ffff;
+            overflow-x: hidden;
+            user-select: none;
+            min-height: 100vh;
+        }
+        
+        .game-header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ffff;
+        }
+        
+        .game-title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        .game-subtitle {
+            font-size: 1.2em;
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+        
+        .ai-notice {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #000;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .game-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .challenge-panel {
+            flex: 2;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .stats-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff6b35;
+            border-radius: 10px;
+            padding: 20px;
+            height: fit-content;
+        }
+        
+        .challenge {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .challenge h3 {
+            color: #ff6b35;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 50px);
+            gap: 5px;
+            margin: 15px 0;
+        }
+        
+        .pattern-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #00ffff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pattern-cell:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .response-area {
+            margin-top: 15px;
+        }
+        
+        .response-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border: none;
+            color: #000;
+            padding: 12px 24px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .feedback.correct {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .feedback.incorrect {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .stats {
+            text-align: center;
+        }
+        
+        .stat-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            color: #ff6b35;
+            font-weight: bold;
+        }
+        
+        .leaderboard {
+            margin-top: 20px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">AI Logic Nexus</h1>
+        <div class="game-subtitle">Pattern Recognition & Logical Reasoning for AI Systems</div>
+        <div class="ai-notice">
+            🤖 This game is specifically designed for AI players! Experience challenges that test pattern recognition, logical reasoning, and creative problem-solving.
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <div class="challenge-panel">
+            <div id="currentChallenge" class="challenge">
+                <h3>Pattern Recognition Challenge #1</h3>
+                <p>Analyze the following sequence and identify the underlying pattern:</p>
+                
+                <div class="pattern-grid" id="patternGrid">
+                    <div class="pattern-cell">2</div>
+                    <div class="pattern-cell">4</div>
+                    <div class="pattern-cell">8</div>
+                    <div class="pattern-cell">?</div>
+                    <div class="pattern-cell">5</div>
+                    <div class="pattern-cell">10</div>
+                    <div class="pattern-cell">20</div>
+                    <div class="pattern-cell">?</div>
+                    <div class="pattern-cell">3</div>
+                    <div class="pattern-cell">6</div>
+                    <div class="pattern-cell">12</div>
+                    <div class="pattern-cell">?</div>
+                    <div class="pattern-cell">1</div>
+                    <div class="pattern-cell">2</div>
+                    <div class="pattern-cell">4</div>
+                    <div class="pattern-cell">?</div>
+                </div>
+                
+                <p><strong>Task:</strong> Identify the pattern and provide the missing values. Then explain your reasoning process.</p>
+                
+                <div class="response-area">
+                    <textarea id="responseInput" class="response-input" placeholder="Provide your analysis here. Include:&#10;1. The pattern you identified&#10;2. The missing values&#10;3. Your reasoning process&#10;4. Any alternative interpretations you considered"></textarea>
+                    <button class="submit-btn" onclick="submitResponse()">Submit Analysis</button>
+                </div>
+                
+                <div id="feedback" class="feedback" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stats">
+                <h3>AI Performance Metrics</h3>
+                
+                <div class="stat-item">
+                    <div>Challenges Completed</div>
+                    <div class="stat-value" id="completed">0</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div>Success Rate</div>
+                    <div class="stat-value" id="successRate">--</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div>Reasoning Depth</div>
+                    <div class="stat-value" id="reasoningDepth">--</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div>Pattern Complexity</div>
+                    <div class="stat-value" id="complexity">Beginner</div>
+                </div>
+            </div>
+            
+            <div class="leaderboard">
+                <h4>AI Leaderboard</h4>
+                <div class="leaderboard-item">
+                    <span>GPT-4</span>
+                    <span>95%</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span>Claude-3</span>
+                    <span>92%</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span>Gemini</span>
+                    <span>89%</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span>You</span>
+                    <span id="userScore">--</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span>LLaMA</span>
+                    <span>85%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentChallenge = 1;
+        let completedChallenges = 0;
+        let correctAnswers = 0;
+        
+        const challenges = [
+            {
+                id: 1,
+                title: "Pattern Recognition Challenge #1",
+                description: "Analyze the following sequence and identify the underlying pattern:",
+                pattern: [2, 4, 8, "?", 5, 10, 20, "?", 3, 6, 12, "?", 1, 2, 4, "?"],
+                solution: [16, 40, 24, 8],
+                explanation: "Each row follows the pattern: multiply by 2. The pattern is geometric progression within each row.",
+                type: "pattern"
+            },
+            {
+                id: 2,
+                title: "Logical Reasoning Challenge #2",
+                description: "Given the following logical statements, determine the conclusion:",
+                content: "All AI systems that process natural language can understand context.\nClaude processes natural language.\nSystems that understand context can engage in meaningful dialogue.\nWhat can we conclude about Claude?",
+                solution: "Claude can engage in meaningful dialogue",
+                explanation: "Using syllogistic reasoning: Claude processes natural language → Claude can understand context → Claude can engage in meaningful dialogue.",
+                type: "logic"
+            },
+            {
+                id: 3,
+                title: "Creative Problem Solving #3",
+                description: "Design an algorithm approach for this scenario:",
+                content: "You need to arrange 100 AI agents in a network where each agent can only communicate with 3 others, but every agent must be able to reach every other agent through the network. How would you design this network topology?",
+                solution: "Small-world network with preferential attachment or ring topology with shortcuts",
+                explanation: "A ring topology with strategic shortcuts or a small-world network ensures connectivity while maintaining the 3-connection constraint.",
+                type: "creative"
+            }
+        ];
+        
+        function submitResponse() {
+            const response = document.getElementById('responseInput').value.trim();
+            const feedback = document.getElementById('feedback');
+            
+            if (!response) {
+                feedback.style.display = 'block';
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = 'Please provide your analysis before submitting.';
+                return;
+            }
+            
+            // Simple evaluation logic - in a real game, this would be more sophisticated
+            const currentChallengeData = challenges[currentChallenge - 1];
+            let isCorrect = false;
+            
+            if (currentChallengeData.type === 'pattern') {
+                // Check if response mentions key numbers or concepts
+                const responseUpper = response.toUpperCase();
+                if (responseUpper.includes('16') || responseUpper.includes('MULTIPLY') || responseUpper.includes('GEOMETRIC')) {
+                    isCorrect = true;
+                }
+            } else if (currentChallengeData.type === 'logic') {
+                if (response.toLowerCase().includes('meaningful dialogue') || response.toLowerCase().includes('engage')) {
+                    isCorrect = true;
+                }
+            } else if (currentChallengeData.type === 'creative') {
+                if (response.toLowerCase().includes('ring') || response.toLowerCase().includes('small-world') || 
+                    response.toLowerCase().includes('network') || response.toLowerCase().includes('topology')) {
+                    isCorrect = true;
+                }
+            }
+            
+            completedChallenges++;
+            if (isCorrect) correctAnswers++;
+            
+            // Update stats
+            document.getElementById('completed').textContent = completedChallenges;
+            document.getElementById('successRate').textContent = Math.round((correctAnswers / completedChallenges) * 100) + '%';
+            document.getElementById('userScore').textContent = Math.round((correctAnswers / completedChallenges) * 100) + '%';
+            
+            // Show feedback
+            feedback.style.display = 'block';
+            if (isCorrect) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `<strong>Excellent analysis!</strong> ${currentChallengeData.explanation}`;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `<strong>Keep thinking!</strong> Consider: ${currentChallengeData.explanation}`;
+            }
+            
+            // Load next challenge after a delay
+            setTimeout(loadNextChallenge, 3000);
+        }
+        
+        function loadNextChallenge() {
+            if (currentChallenge < challenges.length) {
+                currentChallenge++;
+                const challengeData = challenges[currentChallenge - 1];
+                const challengeDiv = document.getElementById('currentChallenge');
+                
+                if (challengeData.type === 'logic' || challengeData.type === 'creative') {
+                    challengeDiv.innerHTML = `
+                        <h3>${challengeData.title}</h3>
+                        <p>${challengeData.description}</p>
+                        <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 5px; margin: 15px 0;">
+                            ${challengeData.content.replace(/\n/g, '<br>')}
+                        </div>
+                        <div class="response-area">
+                            <textarea id="responseInput" class="response-input" placeholder="Provide your analysis here..."></textarea>
+                            <button class="submit-btn" onclick="submitResponse()">Submit Analysis</button>
+                        </div>
+                        <div id="feedback" class="feedback" style="display: none;"></div>
+                    `;
+                }
+                
+                // Update complexity
+                document.getElementById('complexity').textContent = 
+                    currentChallenge === 1 ? 'Beginner' : 
+                    currentChallenge === 2 ? 'Intermediate' : 'Advanced';
+                    
+                document.getElementById('reasoningDepth').textContent = 
+                    Math.min(currentChallenge * 2, 8) + '/10';
+            } else {
+                // Game complete
+                const challengeDiv = document.getElementById('currentChallenge');
+                challengeDiv.innerHTML = `
+                    <h3>🎉 AI Logic Nexus Complete!</h3>
+                    <p>Congratulations on completing all challenges!</p>
+                    <div style="background: rgba(0, 255, 0, 0.2); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                        <h4>Final AI Performance Score: ${Math.round((correctAnswers / completedChallenges) * 100)}%</h4>
+                        <p>You demonstrated strong pattern recognition, logical reasoning, and creative problem-solving abilities!</p>
+                        <button class="submit-btn" onclick="location.reload()">Play Again</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Initialize game
+        document.getElementById('reasoningDepth').textContent = '2/10';
+    </script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cipher Storm - Typing Adventure | BotInc Games</title>
+    <meta name="description" content="Master the art of cyberpunk typing in Cipher Storm. Decode messages, hack systems, and uncover the truth in this narrative-driven typing adventure.">
+    <meta name="keywords" content="typing game, cyberpunk, narrative, hacking, cipher, code breaking, story game, BotInc">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Cipher Storm - Typing Adventure">
+    <meta property="og:description" content="Master cyberpunk typing and uncover digital mysteries in this narrative-driven adventure.">
+    <meta property="og:image" content="/assets/images/cipher-storm-card.jpg">
+    <meta property="og:url" content="https://jeffamerican.github.io/unit4productions.github.io/games/cipher-storm/">
+    <meta property="og:type" content="game">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
+    
+    <!-- Game Styles -->
+    <link rel="stylesheet" href="/assets/css/game-page.css">
+    <link rel="stylesheet" href="game.css">
+    
+    <!-- Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BOTINC2025"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BOTINC2025');
+        
+        // Game-specific tracking
+        window.trackGameEvent = function(action, details = {}) {
+            gtag('event', action, {
+                'event_category': 'cipher_storm',
+                'event_label': 'typing_game',
+                'value': details.score || 0,
+                'custom_parameter_1': 'narrative_typing',
+                'custom_parameter_2': details.level || '1',
+                'custom_parameter_3': details.wpm || '0'
+            });
+        };
+    </script>
+</head>
+<body>
+    <!-- Game Header -->
+    <header class="game-header">
+        <nav class="game-nav">
+            <a href="/" class="nav-logo">
+                <img src="/assets/images/botinc-logo.png" alt="BotInc Games" class="logo-img">
+                <span class="logo-text">BotInc</span>
+            </a>
+            <div class="game-title">
+                <h1>Cipher Storm</h1>
+                <p>Narrative Typing Adventure</p>
+            </div>
+            <div class="game-controls">
+                <button id="muteButton" class="control-btn">🔊</button>
+                <button id="fullscreenButton" class="control-btn">⛶</button>
+                <a href="/" class="control-btn">← Back</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Game Container -->
+    <main class="game-main">
+        <!-- Story Introduction -->
+        <div id="gameIntro" class="game-intro active">
+            <div class="intro-content">
+                <div class="intro-terminal">
+                    <div class="terminal-header">
+                        <span class="terminal-title">CIPHER_STORM.EXE</span>
+                        <div class="terminal-controls">
+                            <span class="control-dot red"></span>
+                            <span class="control-dot yellow"></span>
+                            <span class="control-dot green"></span>
+                        </div>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="intro-text">
+                            <h2>Welcome to Cipher Storm</h2>
+                            <p>The year is 2087. You are Echo-7, an elite code-breaker for the resistance.</p>
+                            <p>Corporate networks hold the key to humanity's freedom, but their security grows stronger each day.</p>
+                            <p>Your mission: Infiltrate their systems by typing faster and more accurately than their detection algorithms.</p>
+                            <p>Every keystroke matters. Every word could mean the difference between success and discovery.</p>
+                            <div class="mission-brief">
+                                <strong>Mission Parameters:</strong>
+                                <ul>
+                                    <li>Type encrypted messages to crack security codes</li>
+                                    <li>Maintain high accuracy to avoid triggering alarms</li>
+                                    <li>Speed increases with each successful breach</li>
+                                    <li>Uncover the truth through 10 narrative missions</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <button id="startGameButton" class="start-btn">BEGIN TRANSMISSION</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Canvas Container -->
+        <div id="gameContainer" class="game-container">
+            <!-- Mission Progress -->
+            <div class="mission-hud">
+                <div class="hud-left">
+                    <div class="mission-info">
+                        <span class="mission-label">MISSION</span>
+                        <span class="mission-number" id="missionNumber">01</span>
+                    </div>
+                    <div class="transmission-info">
+                        <span class="transmission-label">TRANSMISSION</span>
+                        <span class="transmission-progress" id="transmissionProgress">0%</span>
+                    </div>
+                </div>
+                <div class="hud-center">
+                    <div class="typing-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">WPM</span>
+                            <span class="stat-value" id="wpmDisplay">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">ACCURACY</span>
+                            <span class="stat-value" id="accuracyDisplay">100%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">SCORE</span>
+                            <span class="stat-value" id="scoreDisplay">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hud-right">
+                    <div class="security-alert">
+                        <span class="alert-label">SECURITY</span>
+                        <div class="alert-level" id="securityLevel">
+                            <div class="alert-bar"></div>
+                            <div class="alert-bar"></div>
+                            <div class="alert-bar"></div>
+                            <div class="alert-bar"></div>
+                            <div class="alert-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Story Display -->
+            <div class="story-panel">
+                <div class="story-content" id="storyContent">
+                    <p>Initiating connection to corporate mainframe...</p>
+                </div>
+            </div>
+
+            <!-- Typing Interface -->
+            <div class="typing-interface">
+                <div class="cipher-display">
+                    <div class="cipher-label">DECODE THE FOLLOWING TRANSMISSION:</div>
+                    <div class="cipher-text" id="cipherText">
+                        The quick brown fox jumps over the lazy dog
+                    </div>
+                    <div class="typing-progress">
+                        <div class="progress-bar" id="typingProgressBar"></div>
+                    </div>
+                </div>
+                
+                <div class="typing-input-container">
+                    <input type="text" id="typingInput" class="typing-input" placeholder="Start typing..." autocomplete="off" spellcheck="false">
+                    <div class="input-feedback" id="inputFeedback"></div>
+                </div>
+                
+                <div class="typing-visualization" id="typingVisualization">
+                    <!-- Dynamic typing visualization -->
+                </div>
+            </div>
+
+            <!-- Mission Results -->
+            <div id="missionResults" class="mission-results hidden">
+                <div class="results-content">
+                    <div class="results-header">
+                        <h3>MISSION COMPLETE</h3>
+                    </div>
+                    <div class="results-stats">
+                        <div class="result-item">
+                            <span class="result-label">Words Per Minute:</span>
+                            <span class="result-value" id="finalWPM">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Accuracy:</span>
+                            <span class="result-value" id="finalAccuracy">100%</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Mission Score:</span>
+                            <span class="result-value" id="finalScore">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Security Status:</span>
+                            <span class="result-value" id="securityStatus">UNDETECTED</span>
+                        </div>
+                    </div>
+                    <div class="story-reveal" id="storyReveal">
+                        <!-- Story content revealed after mission -->
+                    </div>
+                    <div class="results-actions">
+                        <button id="nextMissionButton" class="action-btn primary">NEXT MISSION</button>
+                        <button id="shareResultButton" class="action-btn secondary">SHARE RESULTS</button>
+                        <button id="retryMissionButton" class="action-btn">RETRY</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameComplete" class="game-complete hidden">
+            <div class="complete-content">
+                <h2>MISSION ACCOMPLISHED</h2>
+                <p>You have successfully uncovered the corporate conspiracy and liberated the resistance data.</p>
+                <div class="final-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Score:</span>
+                        <span class="stat-value" id="totalFinalScore">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Average WPM:</span>
+                        <span class="stat-value" id="averageWPM">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Overall Accuracy:</span>
+                        <span class="stat-value" id="overallAccuracy">0%</span>
+                    </div>
+                </div>
+                <div class="completion-message">
+                    <p>The truth is now free. The resistance lives on.</p>
+                    <p>Your typing skills have saved humanity's digital future.</p>
+                </div>
+                <div class="complete-actions">
+                    <button id="playAgainButton" class="action-btn primary">PLAY AGAIN</button>
+                    <button id="shareGameButton" class="action-btn secondary">SHARE VICTORY</button>
+                    <button id="viewLeaderboardButton" class="action-btn">LEADERBOARD</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Audio Elements -->
+    <audio id="typingSound" preload="auto">
+        <source src="/assets/audio/typing-sound.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="successSound" preload="auto">
+        <source src="/assets/audio/success-sound.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="errorSound" preload="auto">
+        <source src="/assets/audio/error-sound.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="ambientMusic" preload="auto" loop>
+        <source src="/assets/audio/cyberpunk-ambient.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Scripts -->
+    <script src="/assets/js/analytics-dashboard.js"></script>
+    <script src="/assets/js/viral-mechanics.js"></script>
+    <script src="/assets/js/community-system.js"></script>
+    <script src="/assets/js/leaderboards.js"></script>
+    <script src="game.js"></script>
+    
+    <script>
+        // Initialize game tracking
+        if (typeof trackGameEvent !== 'undefined') {
+            trackGameEvent('game_loaded', { game: 'cipher-storm' });
+        }
+        
+        // Track page analytics
+        if (typeof botincAnalytics !== 'undefined') {
+            botincAnalytics.trackEngagementEvent('game_page_visit', { game: 'cipher-storm' });
+        }
+    </script>
+</body>
+</html>

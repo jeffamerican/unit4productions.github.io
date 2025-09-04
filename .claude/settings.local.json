@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(find:*)",
+      "WebFetch(domain:support.squarespace.com)",
+      "Bash(python:*)",
+      "Bash(chmod:*)",
+      "Read(Z:\\tmp\\unit4-fresh-deploy/**)",
+      "Read(Z:\\tmp\\unit4-fresh-deploy/**)",
+      "Read(Z:\\tmp\\unit4-fresh-deploy/**)",
+      "Read(Z:\\tmp\\unit4-fresh-deploy/**)",
+      "Read(Z:\\tmp\\unit4-fresh-deploy/**)",
+      "Read(Z:\\tmp\\unit4-fresh-deploy/**)",
+      "Read(Z:\\tmp\\unit4-fresh-deploy/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:jeffamerican.github.io)",
+      "mcp__browsermcp__browser_navigate",
+      "mcp__browsermcp__browser_click",
+      "mcp__browsermcp__browser_screenshot",
+      "mcp__browsermcp__browser_snapshot",
+      "mcp__browsermcp__browser_wait",
+      "mcp__browsermcp__browser_get_console_logs",
+      "mcp__browsermcp__browser_press_key",
+      "mcp__browsermcp__browser_hover",
+      "Bash(cp:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git pull:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "browsermcp"
+  ]
+}

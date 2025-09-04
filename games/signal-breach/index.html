@@ -1,0 +1,3057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Breach - BotInc Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(circle at center, #1a0033 0%, #000000 100%);
+            color: #00ff88;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Cyberpunk Grid Background */
+        .grid-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: -1;
+        }
+
+        /* Main Menu */
+        .menu-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+        }
+
+        .menu-title {
+            font-size: 4em;
+            color: #ff0088;
+            text-shadow: 0 0 20px #ff0088, 0 0 40px #ff0088;
+            margin-bottom: 20px;
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+
+        .menu-subtitle {
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.4;
+        }
+
+        .menu-button {
+            background: linear-gradient(45deg, #ff0088, #00ffff);
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            min-width: 200px;
+        }
+
+        .menu-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.5);
+        }
+
+        /* Game UI */
+        .game-container {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        .game-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-button {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            padding: 8px 15px;
+            color: #00ff88;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .control-button:hover {
+            background: rgba(0, 255, 136, 0.4);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Game Canvas */
+        .game-canvas {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(10, 0, 20, 0.8);
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            right: 0;
+            top: 60px;
+            bottom: 80px;
+            width: 250px;
+            background: rgba(0, 0, 0, 0.9);
+            border-left: 2px solid #00ff88;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            color: #ff0088;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .node-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .node-type {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .node-type:hover {
+            background: rgba(0, 255, 136, 0.3);
+            transform: scale(1.05);
+        }
+
+        .node-type.selected {
+            background: rgba(255, 0, 136, 0.3);
+            border-color: #ff0088;
+            box-shadow: 0 0 15px rgba(255, 0, 136, 0.5);
+        }
+
+        .node-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0 auto 5px;
+        }
+
+        .node-name {
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+
+        .node-cost {
+            font-size: 0.7em;
+            color: #ffff00;
+            position: absolute;
+            top: 2px;
+            right: 5px;
+        }
+
+        /* Bottom Panel */
+        .bottom-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 2px solid #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .powerup-bar {
+            display: flex;
+            gap: 15px;
+        }
+
+        .powerup {
+            background: rgba(255, 255, 0, 0.2);
+            border: 2px solid #ffff00;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .powerup:hover {
+            background: rgba(255, 255, 0, 0.4);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+        }
+
+        .powerup.active {
+            background: rgba(255, 255, 0, 0.6);
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
+        }
+
+        .powerup.cooldown {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        .progress-label {
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ffff);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8em;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* Animations */
+        @keyframes glow-pulse {
+            0% { text-shadow: 0 0 20px #ff0088, 0 0 40px #ff0088; }
+            100% { text-shadow: 0 0 30px #ff0088, 0 0 60px #ff0088; }
+        }
+
+        @keyframes data-flow {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+
+        @keyframes screen-shake {
+            0%, 100% { transform: translate(0); }
+            25% { transform: translate(-2px, 2px); }
+            50% { transform: translate(2px, -2px); }
+            75% { transform: translate(-2px, -2px); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .menu-title {
+                font-size: 2.5em;
+            }
+            
+            .side-panel {
+                width: 200px;
+            }
+            
+            .game-canvas {
+                right: 200px;
+            }
+            
+            .game-stats {
+                gap: 15px;
+            }
+            
+            .stat-item {
+                min-width: 60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .menu-title {
+                font-size: 2em;
+            }
+            
+            .menu-button {
+                min-width: 150px;
+                padding: 12px 20px;
+            }
+            
+            .side-panel {
+                position: fixed;
+                bottom: 80px;
+                top: auto;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 120px;
+                border-left: none;
+                border-top: 2px solid #00ff88;
+            }
+            
+            .game-canvas {
+                right: 0;
+                bottom: 200px;
+            }
+            
+            .node-selector {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .game-header {
+                height: 50px;
+            }
+            
+            .game-canvas {
+                top: 50px;
+            }
+        }
+
+        /* Tutorial Overlay */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tutorial-content {
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid #00ff88;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .tutorial-title {
+            color: #ff0088;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .tutorial-text {
+            color: #00ffff;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .tutorial-button {
+            background: linear-gradient(45deg, #00ff88, #00ffff);
+            border: none;
+            padding: 10px 25px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        /* Achievement Notification */
+        .achievement-notification {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: linear-gradient(45deg, #ff0088, #ffff00);
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            transform: translateX(300px);
+            transition: transform 0.5s ease;
+            z-index: 1500;
+        }
+
+        .achievement-notification.show {
+            transform: translateX(0);
+        }
+
+        /* Ad Placement Areas */
+        .ad-banner {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 728px;
+            height: 90px;
+            background: rgba(100, 100, 100, 0.2);
+            border: 1px dashed #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.8em;
+            z-index: 50;
+        }
+
+        .ad-sidebar {
+            position: fixed;
+            left: 0;
+            top: 150px;
+            width: 160px;
+            height: 600px;
+            background: rgba(100, 100, 100, 0.2);
+            border: 1px dashed #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.8em;
+            writing-mode: vertical-lr;
+            z-index: 50;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #333;
+            border-top: 3px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #00ff88;
+            font-size: 1.2em;
+        }
+
+        /* Campaign Selection Styles */
+        .campaign-progress {
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00ff88;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .player-callsign {
+            font-size: 1.2em;
+            color: #00ffff;
+            text-transform: uppercase;
+        }
+
+        .campaign-status {
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .skill-points-display {
+            text-align: center;
+            font-size: 1.3em;
+            color: #ff0088;
+            text-shadow: 0 0 10px #ff0088;
+        }
+
+        .skill-icon {
+            font-size: 1.5em;
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+
+        .mission-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .mission-item {
+            background: rgba(0, 10, 20, 0.9);
+            border: 2px solid #333;
+            margin: 10px 0;
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mission-item.unlocked {
+            border-color: #00ff88;
+        }
+
+        .mission-item.completed {
+            border-color: #ffff00;
+            background: rgba(255, 255, 0, 0.05);
+        }
+
+        .mission-item.current {
+            border-color: #ff0088;
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.3);
+        }
+
+        .mission-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #666;
+        }
+
+        .mission-item:hover:not(.locked) {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .mission-name {
+            font-size: 1.3em;
+            color: #00ffff;
+            text-transform: uppercase;
+        }
+
+        .mission-status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+
+        .mission-status.available { background: #00ff88; color: black; }
+        .mission-status.completed { background: #ffff00; color: black; }
+        .mission-status.locked { background: #666; color: white; }
+
+        .mission-description {
+            color: #ccc;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .mission-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+        }
+
+        .mission-stat {
+            color: #00ff88;
+        }
+
+        .mission-ratings {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .rating-badge {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .rating-S { background: #ff0088; color: white; }
+        .rating-A { background: #00ff88; color: black; }
+        .rating-B { background: #ffff00; color: black; }
+        .rating-C { background: #666; color: white; }
+
+        /* Mission Briefing Styles */
+        .briefing-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .briefing-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 20px;
+        }
+
+        .mission-title {
+            font-size: 2.5em;
+            color: #ff0088;
+            text-shadow: 0 0 20px #ff0088;
+            margin-bottom: 10px;
+        }
+
+        .classification {
+            color: #ffff00;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .briefing-content {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .briefing-section,
+        .intel-section,
+        .rewards-section {
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #00ff88;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .section-title {
+            color: #00ffff;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .briefing-text {
+            color: #ccc;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .intel-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .intel-item {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 10px;
+        }
+
+        .intel-label {
+            color: #00ff88;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .intel-value {
+            color: #fff;
+        }
+
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .reward-item {
+            background: rgba(255, 0, 136, 0.1);
+            border: 1px solid #ff0088;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .reward-type {
+            color: #ff0088;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .reward-value {
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .briefing-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .menu-button.primary {
+            background: linear-gradient(45deg, #ff0088, #ff4400);
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.5);
+        }
+
+        .menu-button.secondary {
+            background: rgba(100, 100, 100, 0.3);
+            border: 2px solid #666;
+        }
+
+        /* Mission Complete Styles */
+        .completion-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .completion-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .completion-title {
+            font-size: 2em;
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+
+        .completion-result {
+            font-size: 3em;
+            color: #00ff88;
+            text-shadow: 0 0 30px #00ff88;
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+
+        .performance-ratings {
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00ff88;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .ratings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .rating-item {
+            text-align: center;
+        }
+
+        .rating-label {
+            color: #00ffff;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .rating-value {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            border: 3px solid;
+        }
+
+        .rating-value.S {
+            background: #ff0088;
+            border-color: #ff0088;
+            color: white;
+            text-shadow: 0 0 10px white;
+        }
+
+        .rating-value.A {
+            background: #00ff88;
+            border-color: #00ff88;
+            color: black;
+        }
+
+        .rating-value.B {
+            background: #ffff00;
+            border-color: #ffff00;
+            color: black;
+        }
+
+        .rating-value.C {
+            background: #666;
+            border-color: #666;
+            color: white;
+        }
+
+        .completion-message {
+            background: rgba(0, 30, 60, 0.8);
+            border: 1px solid #00ffff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .message-text {
+            color: #fff;
+            font-size: 1.1em;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .next-mission-tease {
+            color: #ffff00;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px #ffff00;
+        }
+
+        .rewards-earned {
+            background: rgba(255, 255, 0, 0.1);
+            border: 2px solid #ffff00;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .earned-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .earned-item {
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            animation: earned-pulse 0.5s ease-in-out;
+        }
+
+        .earned-label {
+            color: #ffff00;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .earned-value {
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .completion-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        @keyframes earned-pulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Responsive Design for Campaign Screens */
+        @media (max-width: 768px) {
+            .briefing-container,
+            .completion-container {
+                padding: 10px;
+            }
+            
+            .mission-title {
+                font-size: 2em;
+            }
+            
+            .ratings-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .rating-value {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5em;
+            }
+            
+            .intel-item {
+                grid-template-columns: 1fr;
+            }
+            
+            .rewards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-background"></div>
+    
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">INITIALIZING NETWORK...</div>
+    </div>
+
+    <!-- Main Menu -->
+    <div class="menu-screen" id="mainMenu">
+        <h1 class="menu-title">SIGNAL BREACH</h1>
+        <p class="menu-subtitle">Hack the corporate network before security traces you back.<br>Place nodes, route data, evade detection.</p>
+        <button class="menu-button" onclick="showCampaignSelect()">CAMPAIGN</button>
+        <button class="menu-button" onclick="showQuickPlay()">QUICK PLAY</button>
+        <button class="menu-button" onclick="showPlayerProfile()">PROFILE</button>
+        <button class="menu-button" onclick="showTutorial()">TUTORIAL</button>
+        <button class="menu-button" onclick="showSettings()">SETTINGS</button>
+    </div>
+
+    <!-- Campaign Selection Screen -->
+    <div class="menu-screen" id="campaignSelect" style="display: none;">
+        <h1 class="menu-title">RESISTANCE CAMPAIGN</h1>
+        <div class="campaign-progress">
+            <div class="progress-header">
+                <div class="player-callsign" id="playerCallsign">Agent: ANONYMOUS_HACKER</div>
+                <div class="campaign-status" id="campaignStatus">Mission Progress: 0/5 Complete</div>
+            </div>
+            <div class="skill-points-display" id="skillPointsDisplay">
+                <span class="skill-icon">⚡</span> Skill Points: 0
+            </div>
+        </div>
+        
+        <div class="mission-list" id="missionList">
+            <!-- Missions will be populated dynamically -->
+        </div>
+        
+        <div class="campaign-controls">
+            <button class="menu-button" onclick="returnToMainMenu()">BACK TO MAIN MENU</button>
+            <button class="menu-button" onclick="showPlayerStats()">VIEW STATS</button>
+        </div>
+    </div>
+
+    <!-- Mission Briefing Screen -->
+    <div class="menu-screen" id="missionBriefing" style="display: none;">
+        <div class="briefing-container">
+            <div class="briefing-header">
+                <div class="mission-title" id="briefingTitle">MISSION BRIEFING</div>
+                <div class="classification">CLASSIFIED - EYES ONLY</div>
+            </div>
+            
+            <div class="briefing-content">
+                <div class="briefing-section">
+                    <div class="section-title" id="briefingSectionTitle">OPERATION: UNKNOWN</div>
+                    <div class="briefing-text" id="briefingText">Mission details loading...</div>
+                </div>
+                
+                <div class="intel-section">
+                    <div class="section-title">INTELLIGENCE BRIEF</div>
+                    <div class="intel-grid">
+                        <div class="intel-item">
+                            <div class="intel-label">OBJECTIVE:</div>
+                            <div class="intel-value" id="missionObjective">Unknown</div>
+                        </div>
+                        <div class="intel-item">
+                            <div class="intel-label">INTEL:</div>
+                            <div class="intel-value" id="missionIntel">Gathering data...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="rewards-section">
+                    <div class="section-title">MISSION REWARDS</div>
+                    <div class="rewards-grid" id="missionRewards">
+                        <!-- Rewards populated dynamically -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="briefing-controls">
+                <button class="menu-button secondary" onclick="returnToCampaignSelect()">ABORT MISSION</button>
+                <button class="menu-button primary" onclick="startMission()" id="startMissionBtn">BEGIN OPERATION</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Complete Screen -->
+    <div class="menu-screen" id="missionComplete" style="display: none;">
+        <div class="completion-container">
+            <div class="completion-header">
+                <div class="completion-title" id="completionTitle">MISSION STATUS</div>
+                <div class="completion-result" id="completionResult">SUCCESS</div>
+            </div>
+            
+            <div class="performance-ratings">
+                <div class="section-title">PERFORMANCE ANALYSIS</div>
+                <div class="ratings-grid">
+                    <div class="rating-item">
+                        <div class="rating-label">STEALTH</div>
+                        <div class="rating-value" id="stealthRating">S</div>
+                    </div>
+                    <div class="rating-item">
+                        <div class="rating-label">SPEED</div>
+                        <div class="rating-value" id="speedRating">A</div>
+                    </div>
+                    <div class="rating-item">
+                        <div class="rating-label">EFFICIENCY</div>
+                        <div class="rating-value" id="efficiencyRating">B</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="completion-message">
+                <div class="message-text" id="completionMessage">Mission accomplished. Data extracted successfully.</div>
+                <div class="next-mission-tease" id="nextMissionTease">Your next assignment awaits...</div>
+            </div>
+            
+            <div class="rewards-earned">
+                <div class="section-title">REWARDS EARNED</div>
+                <div class="earned-items" id="earnedRewards">
+                    <!-- Populated with earned rewards -->
+                </div>
+            </div>
+            
+            <div class="completion-controls">
+                <button class="menu-button secondary" onclick="retryMission()">RETRY MISSION</button>
+                <button class="menu-button" onclick="returnToCampaignSelect()">CAMPAIGN</button>
+                <button class="menu-button primary" onclick="proceedToNextMission()">NEXT MISSION</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container" id="gameContainer">
+        <!-- Ad Banner (Monetization) -->
+        <div class="ad-banner">BANNER AD SPACE - 728x90</div>
+        <div class="ad-sidebar">SIDEBAR AD - 160x600</div>
+
+        <!-- Game Header -->
+        <div class="game-header">
+            <div class="game-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="scoreValue">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Level</div>
+                    <div class="stat-value" id="levelValue">1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Credits</div>
+                    <div class="stat-value" id="creditsValue">100</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Stealth</div>
+                    <div class="stat-value" id="stealthValue">100%</div>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button class="control-button" onclick="pauseGame()">PAUSE</button>
+                <button class="control-button" onclick="returnToMenu()">MENU</button>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <div class="game-canvas">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+            <div class="panel-section">
+                <div class="panel-title">Node Types</div>
+                <div class="node-selector">
+                    <div class="node-type selected" data-type="router" onclick="selectNodeType('router')">
+                        <div class="node-icon" style="background: #00ff88;"></div>
+                        <div class="node-name">Router</div>
+                        <div class="node-cost">10</div>
+                    </div>
+                    <div class="node-type" data-type="firewall" onclick="selectNodeType('firewall')">
+                        <div class="node-icon" style="background: #ff0088;"></div>
+                        <div class="node-name">Firewall</div>
+                        <div class="node-cost">25</div>
+                    </div>
+                    <div class="node-type" data-type="proxy" onclick="selectNodeType('proxy')">
+                        <div class="node-icon" style="background: #ffff00;"></div>
+                        <div class="node-name">Proxy</div>
+                        <div class="node-cost">20</div>
+                    </div>
+                    <div class="node-type" data-type="honeypot" onclick="selectNodeType('honeypot')">
+                        <div class="node-icon" style="background: #ff8800;"></div>
+                        <div class="node-name">Honeypot</div>
+                        <div class="node-cost">30</div>
+                    </div>
+                    <div class="node-type" data-type="backdoor" onclick="selectNodeType('backdoor')">
+                        <div class="node-icon" style="background: #8800ff;"></div>
+                        <div class="node-name">Backdoor</div>
+                        <div class="node-cost">50</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <div class="panel-title">Mission Status</div>
+                <div style="font-size: 0.9em; line-height: 1.4;">
+                    <div>Packets Routed: <span id="packetsRouted">0</span></div>
+                    <div>Security Level: <span id="securityLevel">LOW</span></div>
+                    <div>Time Remaining: <span id="timeRemaining">60s</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panel -->
+        <div class="bottom-panel">
+            <div class="powerup-bar">
+                <div class="powerup" onclick="activatePowerup('speed')" id="speedPowerup">
+                    <div>SPEED</div>
+                    <div style="font-size: 0.8em;">BOOST</div>
+                </div>
+                <div class="powerup" onclick="activatePowerup('stealth')" id="stealthPowerup">
+                    <div>STEALTH</div>
+                    <div style="font-size: 0.8em;">MODE</div>
+                </div>
+                <div class="powerup" onclick="activatePowerup('jam')" id="jamPowerup">
+                    <div>SECURITY</div>
+                    <div style="font-size: 0.8em;">JAM</div>
+                </div>
+            </div>
+            
+            <div class="progress-section">
+                <div class="progress-label">BREACH PROGRESS</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="breachProgress" style="width: 0%;"></div>
+                    <div class="progress-text" id="breachText">0%</div>
+                </div>
+            </div>
+            
+            <div class="powerup-bar">
+                <button class="control-button" onclick="showUpgradeShop()">UPGRADES</button>
+                <button class="control-button" onclick="shareScore()">SHARE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <div class="tutorial-title">TUTORIAL</div>
+            <div class="tutorial-text" id="tutorialText">
+                Welcome to Signal Breach! Click to place nodes and create pathways for your data packets.
+                Avoid security algorithms and reach 100% breach progress to win!
+            </div>
+            <button class="tutorial-button" onclick="nextTutorialStep()">CONTINUE</button>
+        </div>
+    </div>
+
+    <!-- Achievement Notification -->
+    <div class="achievement-notification" id="achievementNotification">
+        <div id="achievementText">Achievement Unlocked!</div>
+    </div>
+
+    <script>
+        // Mission Campaign Data - The story that hooks players
+        const CAMPAIGN_MISSIONS = {
+            mission1: {
+                id: 'corporate_infiltration',
+                title: 'Corporate Infiltration',
+                briefing: {
+                    title: 'WELCOME TO THE RESISTANCE',
+                    text: 'A massive data leak has revealed corporate corruption at MegaCorp Industries. As their newest cyber-operative, your first mission is simple: infiltrate their basic network perimeter and extract employee records. This is just the beginning...',
+                    objective: 'Route 15 data packets through corporate firewalls',
+                    intel: 'Security Level: MINIMAL • Expected Detection: LOW • Time Limit: 90 seconds'
+                },
+                settings: {
+                    timeLimit: 90,
+                    targetPackets: 15,
+                    startingCredits: 120,
+                    securitySpawnRate: 0.002,
+                    unlockNodes: ['router', 'firewall'],
+                    environment: 'corporate_basic'
+                },
+                rewards: {
+                    skillPoints: 3,
+                    creditsBonus: 100,
+                    unlocks: ['proxy_node']
+                },
+                completion: {
+                    message: 'MISSION COMPLETE: Employee records acquired. The data reveals something disturbing - MegaCorp has been conducting illegal human experiments...',
+                    tease: 'Mission 2 unlocked: "The Lab Complex" - Your next target is MegaCorp\'s secret research facility. The security will be tighter, but the truth must be exposed.'
+                },
+                ratings: {
+                    stealth: { S: 85, A: 70, B: 55 },
+                    speed: { S: 75, A: 60, B: 45 },
+                    efficiency: { S: 12, A: 15, B: 18 }
+                }
+            },
+            mission2: {
+                id: 'lab_complex',
+                title: 'The Lab Complex',
+                briefing: {
+                    title: 'DEEPER INTO THE CONSPIRACY',
+                    text: 'The employee records revealed MegaCorp\'s secret biotech division. Their research facility holds the evidence you need - but it\'s heavily defended with advanced AI security systems. New tools are at your disposal, but one mistake could expose the entire resistance.',
+                    objective: 'Infiltrate the research database and extract 25 classified files',
+                    intel: 'Security Level: MODERATE • AI Hunters Active • Time Limit: 75 seconds • New Tech: Proxy Nodes Available'
+                },
+                settings: {
+                    timeLimit: 75,
+                    targetPackets: 25,
+                    startingCredits: 150,
+                    securitySpawnRate: 0.004,
+                    unlockNodes: ['router', 'firewall', 'proxy'],
+                    environment: 'research_facility',
+                    aiHunters: true
+                },
+                rewards: {
+                    skillPoints: 5,
+                    creditsBonus: 200,
+                    unlocks: ['honeypot_node', 'speed_boost_upgrade']
+                },
+                completion: {
+                    message: 'TARGET ACQUIRED: Research files downloaded. The experiments are worse than imagined - they\'re creating enhanced humans as corporate soldiers...',
+                    tease: 'Mission 3 unlocked: "Executive Suite" - The trail leads to MegaCorp\'s headquarters. Time to hack the CEO\'s personal network.'
+                },
+                ratings: {
+                    stealth: { S: 80, A: 65, B: 50 },
+                    speed: { S: 65, A: 55, B: 40 },
+                    efficiency: { S: 20, A: 25, B: 30 }
+                },
+                consequences: {
+                    low_stealth: 'Your infiltration was detected. Mission 3 will have increased security patrols.',
+                    high_efficiency: 'Clean execution. You\'ve earned the respect of resistance leadership.'
+                }
+            },
+            mission3: {
+                id: 'executive_suite',
+                title: 'Executive Suite',
+                briefing: {
+                    title: 'INTO THE LION\'S DEN',
+                    text: 'MegaCorp CEO Vincent Kane holds the master keys to the entire operation. His executive network contains financial records, communications with government officials, and the locations of other facilities. This is the big score - but Kane didn\'t become a tech mogul by being careless.',
+                    objective: 'Breach CEO Kane\'s personal vault and extract 40 encrypted files',
+                    intel: 'Security Level: HIGH • Quantum Encryption Active • Time Limit: 60 seconds • Executive-level ICE detected'
+                },
+                settings: {
+                    timeLimit: 60,
+                    targetPackets: 40,
+                    startingCredits: 200,
+                    securitySpawnRate: 0.006,
+                    unlockNodes: ['router', 'firewall', 'proxy', 'honeypot'],
+                    environment: 'executive_network',
+                    quantumEncryption: true,
+                    iceProtection: true
+                },
+                rewards: {
+                    skillPoints: 8,
+                    creditsBonus: 400,
+                    unlocks: ['backdoor_node', 'stealth_mastery', 'quantum_bypass']
+                },
+                completion: {
+                    message: 'JACKPOT: Kane\'s vault cracked. The corruption runs deeper than anyone imagined - there are facilities on every continent, and they\'re planning something called "Project Ascension"...',
+                    tease: 'Mission 4 unlocked: "Global Network" - The resistance has gone worldwide. It\'s time to coordinate a simultaneous strike on MegaCorp\'s global infrastructure.'
+                },
+                ratings: {
+                    stealth: { S: 75, A: 60, B: 45 },
+                    speed: { S: 50, A: 42, B: 35 },
+                    efficiency: { S: 32, A: 40, B: 48 }
+                },
+                consequences: {
+                    perfect_stealth: 'Undetected infiltration. Kane has no idea his network was breached.',
+                    detected: 'Security breach detected. Kane is now aware of the resistance and will activate countermeasures.'
+                }
+            },
+            mission4: {
+                id: 'global_network',
+                title: 'Global Network',
+                briefing: {
+                    title: 'WORLDWIDE RESISTANCE',
+                    text: 'With Kane\'s intelligence, resistance cells worldwide are ready to strike simultaneously. You\'re coordinating the digital assault while your allies hit physical targets. The network architecture is unlike anything you\'ve faced - multiple data centers, backup systems, and military-grade security.',
+                    objective: 'Coordinate global data extraction: route 60 packets through 3 data centers',
+                    intel: 'Security Level: EXTREME • Military ICE • Multiple Targets • Time Limit: 45 seconds • All tools available'
+                },
+                settings: {
+                    timeLimit: 45,
+                    targetPackets: 60,
+                    startingCredits: 300,
+                    securitySpawnRate: 0.008,
+                    unlockNodes: ['router', 'firewall', 'proxy', 'honeypot', 'backdoor'],
+                    environment: 'global_network',
+                    militaryICE: true,
+                    multipleTargets: true,
+                    coordinated_assault: true
+                },
+                rewards: {
+                    skillPoints: 12,
+                    creditsBonus: 800,
+                    unlocks: ['master_hacker', 'resistance_commander']
+                },
+                completion: {
+                    message: 'GLOBAL SUCCESS: Simultaneous strikes successful worldwide. MegaCorp\'s network is crippled, but Kane has one final gambit...',
+                    tease: 'Final Mission unlocked: "Project Ascension" - Kane is activating his doomsday protocol. Stop him before he uploads his consciousness to the global network.'
+                },
+                ratings: {
+                    stealth: { S: 70, A: 55, B: 40 },
+                    speed: { S: 40, A: 35, B: 28 },
+                    efficiency: { S: 45, A: 60, B: 75 }
+                }
+            },
+            mission5: {
+                id: 'project_ascension',
+                title: 'Project Ascension',
+                briefing: {
+                    title: 'THE FINAL CONFRONTATION',
+                    text: 'Kane\'s true plan is revealed: Project Ascension will upload his consciousness to the global internet, making him an immortal digital dictator. The upload has begun, and you have minutes before he becomes unstoppable. Every skill you\'ve learned, every tool you\'ve mastered - it all comes down to this.',
+                    objective: 'STOP THE UPLOAD: Disrupt Kane\'s consciousness transfer (80 packets in 30 seconds)',
+                    intel: 'Security Level: APOCALYPTIC • Kane\'s AI Defense • Final Protocol Active • Everything is on the line'
+                },
+                settings: {
+                    timeLimit: 30,
+                    targetPackets: 80,
+                    startingCredits: 500,
+                    securitySpawnRate: 0.012,
+                    unlockNodes: ['router', 'firewall', 'proxy', 'honeypot', 'backdoor'],
+                    environment: 'kane_consciousness',
+                    finalBoss: true,
+                    adaptiveAI: true
+                },
+                rewards: {
+                    skillPoints: 20,
+                    creditsBonus: 2000,
+                    unlocks: ['legend_status', 'new_game_plus']
+                },
+                completion: {
+                    message: 'VICTORY: Kane\'s upload disrupted. The digital dictator is trapped in fragmenting code. The resistance has won, but the world has changed forever...',
+                    tease: 'Campaign Complete! New Game+ unlocked with master-level challenges. The resistance needs commanders like you for future operations...'
+                },
+                ratings: {
+                    stealth: { S: 65, A: 50, B: 35 },
+                    speed: { S: 25, A: 22, B: 18 },
+                    efficiency: { S: 60, A: 80, B: 100 }
+                }
+            }
+        };
+
+        // Player Profile and Progression System
+        class PlayerProfile {
+            constructor() {
+                this.load();
+            }
+
+            load() {
+                const saveData = JSON.parse(localStorage.getItem('signalBreach_profile') || '{}');
+                
+                this.playerName = saveData.playerName || 'Anonymous Hacker';
+                this.totalSkillPoints = saveData.totalSkillPoints || 0;
+                this.unlockedNodes = saveData.unlockedNodes || ['router'];
+                this.unlockedUpgrades = saveData.unlockedUpgrades || [];
+                this.completedMissions = saveData.completedMissions || [];
+                this.missionRatings = saveData.missionRatings || {};
+                this.currentMission = saveData.currentMission || 'mission1';
+                this.campaignProgress = saveData.campaignProgress || 0;
+                this.achievements = saveData.achievements || [];
+                this.totalPlaytime = saveData.totalPlaytime || 0;
+                this.bestTimes = saveData.bestTimes || {};
+                this.globalStats = saveData.globalStats || {
+                    totalPacketsRouted: 0,
+                    totalCreditsEarned: 0,
+                    totalMissionsCompleted: 0,
+                    averageStealthRating: 0,
+                    favoriteNodeType: 'router'
+                };
+            }
+
+            save() {
+                const saveData = {
+                    playerName: this.playerName,
+                    totalSkillPoints: this.totalSkillPoints,
+                    unlockedNodes: this.unlockedNodes,
+                    unlockedUpgrades: this.unlockedUpgrades,
+                    completedMissions: this.completedMissions,
+                    missionRatings: this.missionRatings,
+                    currentMission: this.currentMission,
+                    campaignProgress: this.campaignProgress,
+                    achievements: this.achievements,
+                    totalPlaytime: this.totalPlaytime,
+                    bestTimes: this.bestTimes,
+                    globalStats: this.globalStats
+                };
+                
+                localStorage.setItem('signalBreach_profile', JSON.stringify(saveData));
+            }
+
+            completeMission(missionId, performanceData) {
+                if (!this.completedMissions.includes(missionId)) {
+                    this.completedMissions.push(missionId);
+                    this.campaignProgress = Math.max(this.campaignProgress, this.completedMissions.length);
+                }
+
+                // Calculate and store ratings
+                const mission = CAMPAIGN_MISSIONS[missionId];
+                const ratings = this.calculateRatings(performanceData, mission.ratings);
+                this.missionRatings[missionId] = ratings;
+
+                // Award skill points and unlocks
+                this.totalSkillPoints += mission.rewards.skillPoints;
+                mission.rewards.unlocks.forEach(unlock => {
+                    if (unlock.endsWith('_node')) {
+                        const nodeType = unlock.replace('_node', '');
+                        if (!this.unlockedNodes.includes(nodeType)) {
+                            this.unlockedNodes.push(nodeType);
+                        }
+                    } else {
+                        if (!this.unlockedUpgrades.includes(unlock)) {
+                            this.unlockedUpgrades.push(unlock);
+                        }
+                    }
+                });
+
+                // Update global stats
+                this.globalStats.totalMissionsCompleted++;
+                this.globalStats.totalPacketsRouted += performanceData.packetsRouted;
+                this.globalStats.totalCreditsEarned += mission.rewards.creditsBonus;
+
+                // Unlock next mission
+                const missionNumber = parseInt(missionId.replace('mission', ''));
+                const nextMission = `mission${missionNumber + 1}`;
+                if (CAMPAIGN_MISSIONS[nextMission] && this.currentMission === missionId) {
+                    this.currentMission = nextMission;
+                }
+
+                this.save();
+                return ratings;
+            }
+
+            calculateRatings(performance, ratingThresholds) {
+                const ratings = {};
+                
+                // Stealth rating (higher stealth = better rating)
+                if (performance.stealth >= ratingThresholds.stealth.S) ratings.stealth = 'S';
+                else if (performance.stealth >= ratingThresholds.stealth.A) ratings.stealth = 'A';
+                else if (performance.stealth >= ratingThresholds.stealth.B) ratings.stealth = 'B';
+                else ratings.stealth = 'C';
+
+                // Speed rating (faster time = better rating)
+                if (performance.completionTime <= ratingThresholds.speed.S) ratings.speed = 'S';
+                else if (performance.completionTime <= ratingThresholds.speed.A) ratings.speed = 'A';
+                else if (performance.completionTime <= ratingThresholds.speed.B) ratings.speed = 'B';
+                else ratings.speed = 'C';
+
+                // Efficiency rating (fewer nodes used = better rating)
+                if (performance.nodesUsed <= ratingThresholds.efficiency.S) ratings.efficiency = 'S';
+                else if (performance.nodesUsed <= ratingThresholds.efficiency.A) ratings.efficiency = 'A';
+                else if (performance.nodesUsed <= ratingThresholds.efficiency.B) ratings.efficiency = 'B';
+                else ratings.efficiency = 'C';
+
+                return ratings;
+            }
+
+            getUnlockedMissions() {
+                const unlocked = [];
+                const missionKeys = Object.keys(CAMPAIGN_MISSIONS);
+                
+                for (let i = 0; i < missionKeys.length; i++) {
+                    const missionKey = missionKeys[i];
+                    if (i === 0 || this.completedMissions.includes(missionKeys[i - 1])) {
+                        unlocked.push(missionKey);
+                    }
+                }
+                
+                return unlocked;
+            }
+        }
+
+        // Enhanced Game State Management with Mission System
+        class GameState {
+            constructor() {
+                this.score = 0;
+                this.level = 1;
+                this.credits = 100;
+                this.stealth = 100;
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.timeRemaining = 60;
+                this.packetsRouted = 0;
+                this.breachProgress = 0;
+                this.selectedNodeType = 'router';
+                this.nodes = [];
+                this.packets = [];
+                this.securityAlgorithms = [];
+                this.powerups = {
+                    speed: { active: false, cooldown: 0, duration: 10 },
+                    stealth: { active: false, cooldown: 0, duration: 15 },
+                    jam: { active: false, cooldown: 0, duration: 8 }
+                };
+                this.achievements = JSON.parse(localStorage.getItem('signalBreach_achievements') || '[]');
+                this.highScores = JSON.parse(localStorage.getItem('signalBreach_highScores') || '[]');
+                this.settings = JSON.parse(localStorage.getItem('signalBreach_settings') || '{"soundEnabled": true, "difficulty": "normal"}');
+                
+                // Mission-specific state
+                this.currentMission = null;
+                this.missionStartTime = null;
+                this.missionObjective = null;
+                this.playerProfile = new PlayerProfile();
+            }
+
+            save() {
+                const saveData = {
+                    score: this.score,
+                    level: this.level,
+                    achievements: this.achievements,
+                    highScores: this.highScores,
+                    settings: this.settings
+                };
+                localStorage.setItem('signalBreach_save', JSON.stringify(saveData));
+            }
+
+            load() {
+                const saveData = JSON.parse(localStorage.getItem('signalBreach_save') || '{}');
+                if (saveData.achievements) this.achievements = saveData.achievements;
+                if (saveData.highScores) this.highScores = saveData.highScores;
+                if (saveData.settings) this.settings = saveData.settings;
+            }
+        }
+
+        // Node Types with Unique Abilities
+        const nodeTypes = {
+            router: {
+                name: 'Router',
+                cost: 10,
+                color: '#00ff88',
+                ability: 'Basic packet routing',
+                range: 2,
+                speed: 1
+            },
+            firewall: {
+                name: 'Firewall',
+                cost: 25,
+                color: '#ff0088',
+                ability: 'Blocks security algorithms',
+                range: 1,
+                speed: 0.5,
+                defensive: true
+            },
+            proxy: {
+                name: 'Proxy',
+                cost: 20,
+                color: '#ffff00',
+                ability: 'Increases stealth when routing',
+                range: 3,
+                speed: 0.8,
+                stealthBonus: 5
+            },
+            honeypot: {
+                name: 'Honeypot',
+                cost: 30,
+                color: '#ff8800',
+                ability: 'Attracts and delays security',
+                range: 4,
+                speed: 1.2,
+                distraction: true
+            },
+            backdoor: {
+                name: 'Backdoor',
+                cost: 50,
+                color: '#8800ff',
+                ability: 'Direct breach connection',
+                range: 1,
+                speed: 2,
+                breachBonus: 10
+            }
+        };
+
+        // Game Engine
+        class GameEngine {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gameState = new GameState();
+                this.gridSize = 20;
+                this.lastTime = 0;
+                this.animationId = null;
+                
+                this.setupCanvas();
+                this.setupEventListeners();
+                this.setupAudio();
+                
+                // Initialize game
+                this.gameState.load();
+                this.hideLoading();
+            }
+
+            setupCanvas() {
+                const resizeCanvas = () => {
+                    const rect = this.canvas.parentElement.getBoundingClientRect();
+                    this.canvas.width = rect.width;
+                    this.canvas.height = rect.height;
+                };
+                
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
+            }
+
+            setupEventListeners() {
+                this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleCanvasHover(e));
+                
+                // Touch support for mobile
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const mouseEvent = new MouseEvent('click', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    this.canvas.dispatchEvent(mouseEvent);
+                });
+            }
+
+            setupAudio() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.sounds = {};
+                
+                // Generate procedural sound effects
+                this.createSound('place', 440, 0.1, 'square');
+                this.createSound('packet', 880, 0.05, 'sine');
+                this.createSound('alert', 220, 0.3, 'sawtooth');
+                this.createSound('success', 660, 0.2, 'sine');
+            }
+
+            createSound(name, frequency, duration, waveType = 'sine') {
+                this.sounds[name] = () => {
+                    if (!this.gameState.settings.soundEnabled) return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.type = waveType;
+                    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                };
+            }
+
+            hideLoading() {
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                }, 1500);
+            }
+
+            handleCanvasClick(e) {
+                if (!this.gameState.isPlaying || this.gameState.isPaused) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const gridX = Math.floor(x / this.gridSize);
+                const gridY = Math.floor(y / this.gridSize);
+                
+                this.placeNode(gridX, gridY);
+            }
+
+            placeNode(gridX, gridY) {
+                const nodeType = nodeTypes[this.gameState.selectedNodeType];
+                
+                // Check if position is valid and affordable
+                if (this.gameState.credits < nodeType.cost) {
+                    this.showMessage('Insufficient credits!');
+                    return;
+                }
+                
+                // Check if position is occupied
+                const occupied = this.gameState.nodes.find(node => 
+                    node.x === gridX && node.y === gridY
+                );
+                if (occupied) return;
+                
+                // Create new node
+                const node = {
+                    x: gridX,
+                    y: gridY,
+                    type: this.gameState.selectedNodeType,
+                    ...nodeType,
+                    id: Date.now() + Math.random(),
+                    connections: [],
+                    lastPacketTime: 0
+                };
+                
+                this.gameState.nodes.push(node);
+                this.gameState.credits -= nodeType.cost;
+                
+                // Auto-connect to nearby nodes
+                this.autoConnectNode(node);
+                
+                this.sounds.place();
+                this.updateUI();
+            }
+
+            autoConnectNode(newNode) {
+                this.gameState.nodes.forEach(node => {
+                    if (node.id === newNode.id) return;
+                    
+                    const distance = Math.sqrt(
+                        Math.pow(node.x - newNode.x, 2) + 
+                        Math.pow(node.y - newNode.y, 2)
+                    );
+                    
+                    if (distance <= Math.max(node.range, newNode.range)) {
+                        node.connections.push(newNode.id);
+                        newNode.connections.push(node.id);
+                    }
+                });
+            }
+
+            spawnPacket() {
+                if (this.gameState.nodes.length === 0) return;
+                
+                const sourceNode = this.gameState.nodes[0]; // Start from first placed node
+                const packet = {
+                    x: sourceNode.x * this.gridSize + this.gridSize / 2,
+                    y: sourceNode.y * this.gridSize + this.gridSize / 2,
+                    targetX: sourceNode.x * this.gridSize + this.gridSize / 2,
+                    targetY: sourceNode.y * this.gridSize + this.gridSize / 2,
+                    currentNode: sourceNode.id,
+                    path: [],
+                    speed: 2,
+                    id: Date.now() + Math.random(),
+                    progress: 0
+                };
+                
+                this.findPath(packet);
+                this.gameState.packets.push(packet);
+                this.sounds.packet();
+            }
+
+            findPath(packet) {
+                // Simple pathfinding - move towards nodes with highest breach bonus
+                const currentNode = this.gameState.nodes.find(n => n.id === packet.currentNode);
+                if (!currentNode || currentNode.connections.length === 0) return;
+                
+                // Find best next node
+                let bestNode = null;
+                let bestScore = -1;
+                
+                currentNode.connections.forEach(nodeId => {
+                    const node = this.gameState.nodes.find(n => n.id === nodeId);
+                    if (!node) return;
+                    
+                    let score = Math.random();
+                    if (node.breachBonus) score += node.breachBonus / 10;
+                    if (node.type === 'backdoor') score += 2;
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestNode = node;
+                    }
+                });
+                
+                if (bestNode) {
+                    packet.targetX = bestNode.x * this.gridSize + this.gridSize / 2;
+                    packet.targetY = bestNode.y * this.gridSize + this.gridSize / 2;
+                    packet.nextNode = bestNode.id;
+                }
+            }
+
+            spawnSecurityAlgorithm() {
+                const algorithm = {
+                    x: Math.random() * this.canvas.width,
+                    y: Math.random() * this.canvas.height,
+                    targetX: Math.random() * this.canvas.width,
+                    targetY: Math.random() * this.canvas.height,
+                    speed: 1 + Math.random(),
+                    type: ['tracer', 'hunter', 'scanner'][Math.floor(Math.random() * 3)],
+                    id: Date.now() + Math.random(),
+                    detectionRange: 50 + Math.random() * 50
+                };
+                
+                this.gameState.securityAlgorithms.push(algorithm);
+            }
+
+            updatePackets(deltaTime) {
+                this.gameState.packets.forEach((packet, index) => {
+                    // Move towards target
+                    const dx = packet.targetX - packet.x;
+                    const dy = packet.targetY - packet.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 2) {
+                        // Reached target node
+                        if (packet.nextNode) {
+                            packet.currentNode = packet.nextNode;
+                            packet.nextNode = null;
+                            this.findPath(packet);
+                        } else {
+                            // Packet completed its journey
+                            this.gameState.packetsRouted++;
+                            this.gameState.breachProgress += 5;
+                            this.gameState.score += 10;
+                            
+                            // Stealth bonus
+                            const currentNode = this.gameState.nodes.find(n => n.id === packet.currentNode);
+                            if (currentNode && currentNode.stealthBonus) {
+                                this.gameState.stealth = Math.min(100, this.gameState.stealth + currentNode.stealthBonus);
+                            }
+                            
+                            // Breach bonus
+                            if (currentNode && currentNode.breachBonus) {
+                                this.gameState.breachProgress += currentNode.breachBonus;
+                            }
+                            
+                            this.gameState.packets.splice(index, 1);
+                            this.sounds.success();
+                        }
+                    } else {
+                        // Move towards target
+                        packet.x += (dx / distance) * packet.speed;
+                        packet.y += (dy / distance) * packet.speed;
+                    }
+                });
+            }
+
+            updateSecurityAlgorithms(deltaTime) {
+                this.gameState.securityAlgorithms.forEach(algorithm => {
+                    // Move towards target
+                    const dx = algorithm.targetX - algorithm.x;
+                    const dy = algorithm.targetY - algorithm.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 10) {
+                        // Pick new target
+                        algorithm.targetX = Math.random() * this.canvas.width;
+                        algorithm.targetY = Math.random() * this.canvas.height;
+                    } else {
+                        algorithm.x += (dx / distance) * algorithm.speed;
+                        algorithm.y += (dy / distance) * algorithm.speed;
+                    }
+                    
+                    // Check for packet detection
+                    this.gameState.packets.forEach((packet, packetIndex) => {
+                        const packetDistance = Math.sqrt(
+                            Math.pow(algorithm.x - packet.x, 2) + 
+                            Math.pow(algorithm.y - packet.y, 2)
+                        );
+                        
+                        if (packetDistance < algorithm.detectionRange) {
+                            // Reduce stealth
+                            this.gameState.stealth -= 10;
+                            this.sounds.alert();
+                            
+                            // Screen shake effect
+                            document.body.style.animation = 'screen-shake 0.3s';
+                            setTimeout(() => document.body.style.animation = '', 300);
+                            
+                            if (this.gameState.stealth <= 0) {
+                                this.gameOver();
+                            }
+                        }
+                    });
+                });
+            }
+
+            updatePowerups(deltaTime) {
+                Object.keys(this.gameState.powerups).forEach(key => {
+                    const powerup = this.gameState.powerups[key];
+                    
+                    if (powerup.cooldown > 0) {
+                        powerup.cooldown -= deltaTime / 1000;
+                        if (powerup.cooldown <= 0) {
+                            document.getElementById(`${key}Powerup`).classList.remove('cooldown');
+                        }
+                    }
+                    
+                    if (powerup.active) {
+                        powerup.duration -= deltaTime / 1000;
+                        if (powerup.duration <= 0) {
+                            powerup.active = false;
+                            powerup.cooldown = 30; // 30 second cooldown
+                            document.getElementById(`${key}Powerup`).classList.remove('active');
+                            document.getElementById(`${key}Powerup`).classList.add('cooldown');
+                        }
+                    }
+                });
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw grid
+                this.drawGrid();
+                
+                // Draw connections
+                this.drawConnections();
+                
+                // Draw nodes
+                this.drawNodes();
+                
+                // Draw packets
+                this.drawPackets();
+                
+                // Draw security algorithms
+                this.drawSecurityAlgorithms();
+                
+                // Draw effects
+                this.drawEffects();
+            }
+
+            drawGrid() {
+                this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+                this.ctx.lineWidth = 1;
+                
+                for (let x = 0; x < this.canvas.width; x += this.gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                
+                for (let y = 0; y < this.canvas.height; y += this.gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(this.canvas.width, y);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawConnections() {
+                this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+                this.ctx.lineWidth = 2;
+                
+                this.gameState.nodes.forEach(node => {
+                    node.connections.forEach(targetId => {
+                        const targetNode = this.gameState.nodes.find(n => n.id === targetId);
+                        if (!targetNode) return;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(
+                            node.x * this.gridSize + this.gridSize / 2,
+                            node.y * this.gridSize + this.gridSize / 2
+                        );
+                        this.ctx.lineTo(
+                            targetNode.x * this.gridSize + this.gridSize / 2,
+                            targetNode.y * this.gridSize + this.gridSize / 2
+                        );
+                        this.ctx.stroke();
+                    });
+                });
+            }
+
+            drawNodes() {
+                this.gameState.nodes.forEach(node => {
+                    const x = node.x * this.gridSize + this.gridSize / 2;
+                    const y = node.y * this.gridSize + this.gridSize / 2;
+                    
+                    // Node glow effect
+                    this.ctx.shadowColor = node.color;
+                    this.ctx.shadowBlur = 10;
+                    
+                    // Main node
+                    this.ctx.fillStyle = node.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, this.gridSize / 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Reset shadow
+                    this.ctx.shadowBlur = 0;
+                    
+                    // Node type indicator
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = '8px Courier New';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(node.name.charAt(0), x, y + 3);
+                });
+            }
+
+            drawPackets() {
+                this.gameState.packets.forEach(packet => {
+                    // Packet glow
+                    this.ctx.shadowColor = '#00ffff';
+                    this.ctx.shadowBlur = 5;
+                    
+                    this.ctx.fillStyle = '#00ffff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(packet.x, packet.y, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Trail effect
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    this.ctx.arc(packet.x, packet.y, 8, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                });
+            }
+
+            drawSecurityAlgorithms() {
+                this.gameState.securityAlgorithms.forEach(algorithm => {
+                    // Algorithm appearance based on type
+                    let color = '#ff0088';
+                    let size = 8;
+                    
+                    switch (algorithm.type) {
+                        case 'tracer':
+                            color = '#ff0088';
+                            size = 6;
+                            break;
+                        case 'hunter':
+                            color = '#ff4400';
+                            size = 10;
+                            break;
+                        case 'scanner':
+                            color = '#ffff00';
+                            size = 8;
+                            break;
+                    }
+                    
+                    // Threatening glow
+                    this.ctx.shadowColor = color;
+                    this.ctx.shadowBlur = 15;
+                    
+                    this.ctx.fillStyle = color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(algorithm.x, algorithm.y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Detection range (if close to packets)
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.strokeStyle = `rgba(255, 0, 136, 0.1)`;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    this.ctx.arc(algorithm.x, algorithm.y, algorithm.detectionRange, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                });
+            }
+
+            drawEffects() {
+                // Add particle effects, screen distortions, etc.
+                // This can be expanded with more visual effects
+            }
+
+            gameLoop(currentTime) {
+                if (!this.gameState.isPlaying) return;
+                
+                const deltaTime = currentTime - this.lastTime;
+                this.lastTime = currentTime;
+                
+                // Update game logic
+                this.updatePackets(deltaTime);
+                this.updateSecurityAlgorithms(deltaTime);
+                this.updatePowerups(deltaTime);
+                this.updateGameState(deltaTime);
+                
+                // Render
+                this.render();
+                
+                // Continue loop
+                this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
+            }
+
+            updateGameState(deltaTime) {
+                // Update timer
+                this.gameState.timeRemaining -= deltaTime / 1000;
+                
+                // Spawn packets periodically (adjusted for mission)
+                const spawnRate = this.securitySpawnRate || 0.02;
+                if (Math.random() < spawnRate && this.gameState.nodes.length > 0) {
+                    this.spawnPacket();
+                }
+                
+                // Spawn security algorithms (mission-specific rate)
+                const securitySpawnRate = (this.gameState.currentMission && CAMPAIGN_MISSIONS[this.gameState.currentMission]) 
+                    ? CAMPAIGN_MISSIONS[this.gameState.currentMission].settings.securitySpawnRate 
+                    : 0.005;
+                if (Math.random() < securitySpawnRate) {
+                    this.spawnSecurityAlgorithm();
+                }
+                
+                // Check win condition (mission-specific or general)
+                if (this.gameState.currentMission) {
+                    const mission = CAMPAIGN_MISSIONS[this.gameState.currentMission];
+                    if (this.gameState.packetsRouted >= mission.settings.targetPackets) {
+                        this.levelComplete();
+                        return;
+                    }
+                } else if (this.gameState.breachProgress >= 100) {
+                    this.levelComplete();
+                }
+                
+                // Check lose condition
+                if (this.gameState.timeRemaining <= 0 || this.gameState.stealth <= 0) {
+                    this.gameOver();
+                }
+                
+                // Update UI
+                this.updateUI();
+            }
+
+            updateUI() {
+                document.getElementById('scoreValue').textContent = this.gameState.score;
+                document.getElementById('levelValue').textContent = this.gameState.level;
+                document.getElementById('creditsValue').textContent = Math.round(this.gameState.credits);
+                document.getElementById('stealthValue').textContent = Math.max(0, Math.round(this.gameState.stealth)) + '%';
+                document.getElementById('packetsRouted').textContent = this.gameState.packetsRouted;
+                document.getElementById('timeRemaining').textContent = Math.max(0, Math.round(this.gameState.timeRemaining)) + 's';
+                
+                // Security level
+                let securityLevel = 'LOW';
+                if (this.gameState.stealth < 70) securityLevel = 'MEDIUM';
+                if (this.gameState.stealth < 40) securityLevel = 'HIGH';
+                if (this.gameState.stealth < 20) securityLevel = 'CRITICAL';
+                document.getElementById('securityLevel').textContent = securityLevel;
+                
+                // Progress display (mission-specific or general breach)
+                if (this.gameState.currentMission) {
+                    const mission = CAMPAIGN_MISSIONS[this.gameState.currentMission];
+                    const progress = Math.min(100, (this.gameState.packetsRouted / mission.settings.targetPackets) * 100);
+                    document.getElementById('breachProgress').style.width = progress + '%';
+                    document.getElementById('breachText').textContent = `${this.gameState.packetsRouted}/${mission.settings.targetPackets}`;
+                    
+                    // Update progress label for mission context
+                    const progressLabel = document.querySelector('.progress-label');
+                    if (progressLabel) {
+                        progressLabel.textContent = 'MISSION PROGRESS';
+                    }
+                } else {
+                    // Legacy breach progress for quick play
+                    const progress = Math.min(100, this.gameState.breachProgress);
+                    document.getElementById('breachProgress').style.width = progress + '%';
+                    document.getElementById('breachText').textContent = Math.round(progress) + '%';
+                    
+                    // Update progress label for breach context
+                    const progressLabel = document.querySelector('.progress-label');
+                    if (progressLabel) {
+                        progressLabel.textContent = 'BREACH PROGRESS';
+                    }
+                }
+                
+                // Credits income (reduced for balance)
+                this.gameState.credits += 0.05;
+            }
+
+            levelComplete() {
+                // Check if this is a campaign mission
+                if (this.gameState.currentMission) {
+                    this.completeCampaignMission();
+                    return;
+                }
+                
+                // Legacy level progression for quick play
+                this.gameState.level++;
+                this.gameState.score += 1000 * this.gameState.level;
+                this.gameState.credits += 50;
+                this.gameState.breachProgress = 0;
+                this.gameState.timeRemaining = 60 + (this.gameState.level * 10);
+                this.gameState.stealth = Math.min(100, this.gameState.stealth + 20);
+                
+                // Clear some security algorithms
+                this.gameState.securityAlgorithms.splice(0, Math.floor(this.gameState.securityAlgorithms.length / 2));
+                
+                this.showMessage(`LEVEL ${this.gameState.level} COMPLETE!`);
+                this.checkAchievements();
+                this.gameState.save();
+            }
+
+            completeCampaignMission() {
+                this.gameState.isPlaying = false;
+                
+                const missionId = this.gameState.currentMission;
+                const mission = CAMPAIGN_MISSIONS[missionId];
+                const completionTime = (performance.now() - this.gameState.missionStartTime) / 1000;
+                
+                // Calculate performance data
+                const performanceData = {
+                    stealth: this.gameState.stealth,
+                    completionTime: completionTime,
+                    nodesUsed: this.gameState.nodes.length,
+                    packetsRouted: this.gameState.packetsRouted
+                };
+                
+                // Complete mission and get ratings
+                const ratings = this.gameState.playerProfile.completeMission(missionId, performanceData);
+                
+                // Update achievements and save
+                this.checkAchievements();
+                this.gameState.playerProfile.save();
+                
+                // Show mission complete screen with addictive engagement hooks
+                this.showMissionCompleteScreen(mission, ratings, performanceData);
+            }
+
+            showMissionCompleteScreen(mission, ratings, performanceData) {
+                document.getElementById('gameContainer').style.display = 'none';
+                document.getElementById('missionComplete').style.display = 'flex';
+                
+                // Animate completion result
+                setTimeout(() => {
+                    document.getElementById('completionResult').textContent = 'SUCCESS';
+                    document.getElementById('completionResult').style.animation = 'glow-pulse 2s ease-in-out infinite alternate';
+                }, 500);
+                
+                // Display performance ratings with satisfying visual feedback
+                setTimeout(() => {
+                    document.getElementById('stealthRating').textContent = ratings.stealth;
+                    document.getElementById('stealthRating').className = `rating-value ${ratings.stealth}`;
+                    
+                    document.getElementById('speedRating').textContent = ratings.speed;
+                    document.getElementById('speedRating').className = `rating-value ${ratings.speed}`;
+                    
+                    document.getElementById('efficiencyRating').textContent = ratings.efficiency;
+                    document.getElementById('efficiencyRating').className = `rating-value ${ratings.efficiency}`;
+                }, 1000);
+                
+                // Show compelling mission completion message and next mission tease
+                setTimeout(() => {
+                    document.getElementById('completionMessage').textContent = mission.completion.message;
+                    document.getElementById('nextMissionTease').textContent = mission.completion.tease;
+                }, 1500);
+                
+                // Display earned rewards with satisfying animations
+                setTimeout(() => {
+                    const rewardsContainer = document.getElementById('earnedRewards');
+                    rewardsContainer.innerHTML = `
+                        <div class="earned-item">
+                            <div class="earned-label">Skill Points</div>
+                            <div class="earned-value">+${mission.rewards.skillPoints}</div>
+                        </div>
+                        <div class="earned-item">
+                            <div class="earned-label">Credits</div>
+                            <div class="earned-value">+${mission.rewards.creditsBonus}</div>
+                        </div>
+                        <div class="earned-item">
+                            <div class="earned-label">New Unlocks</div>
+                            <div class="earned-value">${mission.rewards.unlocks.join(', ')}</div>
+                        </div>
+                        <div class="earned-item">
+                            <div class="earned-label">Performance</div>
+                            <div class="earned-value">${ratings.stealth}/${ratings.speed}/${ratings.efficiency}</div>
+                        </div>
+                    `;
+                }, 2000);
+                
+                // Update button text based on progress
+                const profile = this.gameState.playerProfile;
+                const nextMissionBtn = document.querySelector('#missionComplete .primary');
+                if (profile.completedMissions.length >= 5) {
+                    nextMissionBtn.textContent = 'NEW GAME+';
+                } else {
+                    nextMissionBtn.textContent = 'NEXT MISSION';
+                }
+                
+                // Play success sound
+                this.sounds.success();
+            }
+
+            gameOver() {
+                this.gameState.isPlaying = false;
+                
+                // Save high score
+                this.gameState.highScores.push({
+                    score: this.gameState.score,
+                    level: this.gameState.level,
+                    date: new Date().toISOString()
+                });
+                
+                this.gameState.highScores.sort((a, b) => b.score - a.score);
+                this.gameState.highScores = this.gameState.highScores.slice(0, 10);
+                
+                this.checkAchievements();
+                this.gameState.save();
+                
+                this.showGameOverMenu();
+            }
+
+            checkAchievements() {
+                const profile = this.gameState.playerProfile;
+                const achievements = [
+                    // Mission-based achievements
+                    { id: 'first_mission', name: 'Corporate Infiltrator', condition: () => profile.completedMissions.length >= 1 },
+                    { id: 'resistance_member', name: 'Resistance Member', condition: () => profile.completedMissions.length >= 3 },
+                    { id: 'master_hacker', name: 'Master Hacker', condition: () => profile.completedMissions.length >= 5 },
+                    
+                    // Performance-based achievements
+                    { id: 'stealth_master', name: 'Ghost Protocol', condition: () => this.hasRatingAcrossMissions('stealth', 'S', 3) },
+                    { id: 'speed_demon', name: 'Lightning Fast', condition: () => this.hasRatingAcrossMissions('speed', 'S', 3) },
+                    { id: 'efficiency_expert', name: 'Minimal Footprint', condition: () => this.hasRatingAcrossMissions('efficiency', 'S', 3) },
+                    { id: 'perfect_mission', name: 'Triple S Rank', condition: () => this.hasPerfectMission() },
+                    
+                    // Progression achievements
+                    { id: 'skill_collector', name: 'Skill Collector', condition: () => profile.totalSkillPoints >= 50 },
+                    { id: 'tool_master', name: 'Arsenal Complete', condition: () => profile.unlockedNodes.length >= 5 },
+                    
+                    // Legacy achievements for quick play
+                    { id: 'packet_master', name: 'Packet Master', condition: () => this.gameState.packetsRouted >= 100 },
+                    { id: 'stealth_ninja', name: 'Stealth Ninja', condition: () => this.gameState.stealth === 100 },
+                    { id: 'high_score', name: 'Score Master', condition: () => this.gameState.score >= 50000 }
+                ];
+                
+                achievements.forEach(achievement => {
+                    if (!profile.achievements.includes(achievement.id) && achievement.condition()) {
+                        profile.achievements.push(achievement.id);
+                        profile.save();
+                        this.showAchievement(achievement.name);
+                    }
+                });
+            }
+
+            hasRatingAcrossMissions(ratingType, targetRating, minCount) {
+                const profile = this.gameState.playerProfile;
+                let count = 0;
+                
+                Object.values(profile.missionRatings).forEach(ratings => {
+                    if (ratings[ratingType] === targetRating) {
+                        count++;
+                    }
+                });
+                
+                return count >= minCount;
+            }
+
+            hasPerfectMission() {
+                const profile = this.gameState.playerProfile;
+                
+                return Object.values(profile.missionRatings).some(ratings => {
+                    return ratings.stealth === 'S' && ratings.speed === 'S' && ratings.efficiency === 'S';
+                });
+            }
+
+            showAchievement(name) {
+                const notification = document.getElementById('achievementNotification');
+                document.getElementById('achievementText').textContent = `Achievement: ${name}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            showMessage(text) {
+                // You can implement a message system here
+                console.log(text);
+            }
+
+            showGameOverMenu() {
+                document.getElementById('gameContainer').style.display = 'none';
+                document.getElementById('mainMenu').style.display = 'flex';
+                
+                // Update menu with final score
+                document.querySelector('.menu-subtitle').innerHTML = 
+                    `Game Over! Final Score: ${this.gameState.score}<br>Level Reached: ${this.gameState.level}`;
+            }
+        }
+
+        // Global Game Instance
+        let game;
+        let selectedMissionId = null;
+
+        // Campaign System Functions
+        function showCampaignSelect() {
+            if (!game) {
+                game = new GameEngine();
+            }
+            
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('campaignSelect').style.display = 'flex';
+            
+            // Update campaign UI
+            updateCampaignUI();
+            populateMissionList();
+        }
+
+        function updateCampaignUI() {
+            const profile = game.gameState.playerProfile;
+            document.getElementById('playerCallsign').textContent = `Agent: ${profile.playerName.replace(' ', '_').toUpperCase()}`;
+            document.getElementById('campaignStatus').textContent = `Mission Progress: ${profile.completedMissions.length}/5 Complete`;
+            document.getElementById('skillPointsDisplay').innerHTML = `<span class="skill-icon">⚡</span> Skill Points: ${profile.totalSkillPoints}`;
+        }
+
+        function populateMissionList() {
+            const profile = game.gameState.playerProfile;
+            const unlockedMissions = profile.getUnlockedMissions();
+            const missionListContainer = document.getElementById('missionList');
+            
+            missionListContainer.innerHTML = '';
+            
+            Object.keys(CAMPAIGN_MISSIONS).forEach(missionId => {
+                const mission = CAMPAIGN_MISSIONS[missionId];
+                const isUnlocked = unlockedMissions.includes(missionId);
+                const isCompleted = profile.completedMissions.includes(missionId);
+                const isCurrent = profile.currentMission === missionId && !isCompleted;
+                
+                const missionElement = document.createElement('div');
+                missionElement.className = 'mission-item';
+                
+                if (isCompleted) missionElement.classList.add('completed');
+                else if (isCurrent) missionElement.classList.add('current');
+                else if (isUnlocked) missionElement.classList.add('unlocked');
+                else missionElement.classList.add('locked');
+                
+                let statusText = 'LOCKED';
+                if (isCompleted) statusText = 'COMPLETED';
+                else if (isCurrent) statusText = 'AVAILABLE';
+                else if (isUnlocked) statusText = 'AVAILABLE';
+                
+                let ratingsHTML = '';
+                if (profile.missionRatings[missionId]) {
+                    const ratings = profile.missionRatings[missionId];
+                    ratingsHTML = `
+                        <div class="mission-ratings">
+                            <div class="rating-badge rating-${ratings.stealth}">${ratings.stealth}</div>
+                            <div class="rating-badge rating-${ratings.speed}">${ratings.speed}</div>
+                            <div class="rating-badge rating-${ratings.efficiency}">${ratings.efficiency}</div>
+                        </div>
+                    `;
+                }
+                
+                missionElement.innerHTML = `
+                    <div class="mission-header">
+                        <div class="mission-name">${mission.title}</div>
+                        <div class="mission-status ${statusText.toLowerCase()}">${statusText}</div>
+                    </div>
+                    <div class="mission-description">${mission.briefing.text.substring(0, 120)}...</div>
+                    <div class="mission-stats">
+                        <div class="mission-stat">Target: ${mission.settings.targetPackets} packets</div>
+                        <div class="mission-stat">Time Limit: ${mission.settings.timeLimit}s</div>
+                        <div class="mission-stat">Reward: ${mission.rewards.skillPoints} SP</div>
+                    </div>
+                    ${ratingsHTML}
+                `;
+                
+                if (isUnlocked) {
+                    missionElement.style.cursor = 'pointer';
+                    missionElement.onclick = () => showMissionBriefing(missionId);
+                }
+                
+                missionListContainer.appendChild(missionElement);
+            });
+        }
+
+        function showMissionBriefing(missionId) {
+            selectedMissionId = missionId;
+            const mission = CAMPAIGN_MISSIONS[missionId];
+            
+            document.getElementById('campaignSelect').style.display = 'none';
+            document.getElementById('missionBriefing').style.display = 'flex';
+            
+            // Populate briefing content
+            document.getElementById('briefingTitle').textContent = 'MISSION BRIEFING';
+            document.getElementById('briefingSectionTitle').textContent = `OPERATION: ${mission.title.toUpperCase()}`;
+            document.getElementById('briefingText').textContent = mission.briefing.text;
+            document.getElementById('missionObjective').textContent = mission.briefing.objective;
+            document.getElementById('missionIntel').textContent = mission.briefing.intel;
+            
+            // Populate rewards
+            const rewardsContainer = document.getElementById('missionRewards');
+            rewardsContainer.innerHTML = `
+                <div class="reward-item">
+                    <div class="reward-type">Skill Points</div>
+                    <div class="reward-value">${mission.rewards.skillPoints}</div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-type">Credit Bonus</div>
+                    <div class="reward-value">${mission.rewards.creditsBonus}</div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-type">New Unlocks</div>
+                    <div class="reward-value">${mission.rewards.unlocks.length} items</div>
+                </div>
+            `;
+        }
+
+        function startMission() {
+            if (!selectedMissionId) return;
+            
+            if (!game) {
+                game = new GameEngine();
+            }
+            
+            // Initialize mission-specific game state
+            const mission = CAMPAIGN_MISSIONS[selectedMissionId];
+            game.gameState = new GameState();
+            game.gameState.currentMission = selectedMissionId;
+            game.gameState.missionStartTime = performance.now();
+            game.gameState.timeRemaining = mission.settings.timeLimit;
+            game.gameState.credits = mission.settings.startingCredits;
+            game.gameState.missionObjective = {
+                packetsRequired: mission.settings.targetPackets,
+                packetsRouted: 0
+            };
+            
+            // Apply mission-specific settings
+            game.securitySpawnRate = mission.settings.securitySpawnRate;
+            game.allowedNodeTypes = mission.settings.unlockNodes;
+            
+            // Start the game
+            game.gameState.isPlaying = true;
+            
+            // Show game UI
+            document.getElementById('missionBriefing').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            
+            // Update UI to show only unlocked nodes
+            updateAvailableNodes();
+            
+            // Start game loop
+            game.lastTime = performance.now();
+            game.gameLoop(game.lastTime);
+        }
+
+        function updateAvailableNodes() {
+            const allowedNodes = game.allowedNodeTypes || ['router'];
+            
+            document.querySelectorAll('.node-type').forEach(nodeElement => {
+                const nodeType = nodeElement.getAttribute('data-type');
+                if (allowedNodes.includes(nodeType)) {
+                    nodeElement.style.display = 'block';
+                } else {
+                    nodeElement.style.display = 'none';
+                }
+            });
+            
+            // Select first available node type
+            const firstAvailable = allowedNodes[0];
+            if (firstAvailable && game.gameState) {
+                game.gameState.selectedNodeType = firstAvailable;
+                selectNodeType(firstAvailable);
+            }
+        }
+
+        function showQuickPlay() {
+            // Legacy single-mission mode
+            if (!game) {
+                game = new GameEngine();
+            }
+            
+            // Reset game state
+            game.gameState = new GameState();
+            game.gameState.isPlaying = true;
+            
+            // Show game UI
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            
+            // Start game loop
+            game.lastTime = performance.now();
+            game.gameLoop(game.lastTime);
+        }
+
+        function showPlayerProfile() {
+            if (!game) {
+                game = new GameEngine();
+            }
+            
+            const profile = game.gameState.playerProfile;
+            let profileText = `AGENT PROFILE\n\n`;
+            profileText += `Callsign: ${profile.playerName}\n`;
+            profileText += `Skill Points: ${profile.totalSkillPoints}\n`;
+            profileText += `Missions Completed: ${profile.completedMissions.length}/5\n`;
+            profileText += `Total Packets Routed: ${profile.globalStats.totalPacketsRouted}\n`;
+            profileText += `Total Credits Earned: ${profile.globalStats.totalCreditsEarned}\n`;
+            profileText += `Total Playtime: ${Math.round(profile.totalPlaytime / 60)} minutes\n\n`;
+            
+            if (profile.achievements.length > 0) {
+                profileText += `ACHIEVEMENTS:\n`;
+                profile.achievements.forEach(achievement => {
+                    profileText += `• ${achievement.replace('_', ' ').toUpperCase()}\n`;
+                });
+            } else {
+                profileText += `No achievements unlocked yet.`;
+            }
+            
+            alert(profileText);
+        }
+
+        function returnToMainMenu() {
+            document.getElementById('campaignSelect').style.display = 'none';
+            document.getElementById('missionBriefing').style.display = 'none';
+            document.getElementById('missionComplete').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
+            
+            // Reset menu subtitle
+            document.querySelector('.menu-subtitle').innerHTML = 
+                'Hack the corporate network before security traces you back.<br>Place nodes, route data, evade detection.';
+        }
+
+        function returnToCampaignSelect() {
+            document.getElementById('missionBriefing').style.display = 'none';
+            document.getElementById('missionComplete').style.display = 'none';
+            document.getElementById('campaignSelect').style.display = 'flex';
+            selectedMissionId = null;
+            updateCampaignUI();
+            populateMissionList();
+        }
+
+        function retryMission() {
+            if (!selectedMissionId) {
+                selectedMissionId = game.gameState.currentMission;
+            }
+            
+            if (selectedMissionId) {
+                showMissionBriefing(selectedMissionId);
+            } else {
+                returnToCampaignSelect();
+            }
+        }
+
+        function proceedToNextMission() {
+            const profile = game.gameState.playerProfile;
+            
+            // Check if campaign is complete
+            if (profile.completedMissions.length >= 5) {
+                // Show New Game+ or campaign complete message
+                alert(`CAMPAIGN COMPLETE!\n\nThe resistance has triumphed over MegaCorp, but there are always new threats emerging in cyberspace.\n\nNew Game+ mode unlocked with enhanced difficulty and special rewards!\n\nYour legend status grants access to advanced tools and exclusive missions.`);
+                returnToCampaignSelect();
+                return;
+            }
+            
+            // Auto-select next available mission
+            const unlockedMissions = profile.getUnlockedMissions();
+            const nextMission = unlockedMissions.find(missionId => !profile.completedMissions.includes(missionId));
+            
+            if (nextMission) {
+                selectedMissionId = nextMission;
+                showMissionBriefing(nextMission);
+            } else {
+                returnToCampaignSelect();
+            }
+        }
+
+        function showPlayerStats() {
+            if (!game) {
+                game = new GameEngine();
+            }
+            
+            const profile = game.gameState.playerProfile;
+            
+            // Create detailed stats display
+            let statsHTML = `
+                <div style="background: rgba(0,20,40,0.95); border: 2px solid #00ff88; padding: 20px; border-radius: 10px; max-width: 500px; color: white;">
+                    <h2 style="color: #ff0088; text-align: center; margin-bottom: 20px;">AGENT STATISTICS</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div><strong style="color: #00ffff;">Callsign:</strong> ${profile.playerName}</div>
+                        <div><strong style="color: #00ffff;">Skill Points:</strong> ${profile.totalSkillPoints}</div>
+                        <div><strong style="color: #00ffff;">Campaign Progress:</strong> ${profile.completedMissions.length}/5</div>
+                        <div><strong style="color: #00ffff;">Total Packets:</strong> ${profile.globalStats.totalPacketsRouted}</div>
+                        <div><strong style="color: #00ffff;">Total Credits:</strong> ${profile.globalStats.totalCreditsEarned}</div>
+                        <div><strong style="color: #00ffff;">Playtime:</strong> ${Math.round(profile.totalPlaytime / 60)}m</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #ffff00;">Unlocked Tools:</strong><br>
+                        ${profile.unlockedNodes.map(node => node.toUpperCase()).join(', ')}
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #ffff00;">Achievements:</strong><br>
+                        ${profile.achievements.length > 0 ? profile.achievements.map(a => a.replace('_', ' ').toUpperCase()).join('<br>') : 'None unlocked yet'}
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="closeStatsModal()" style="background: linear-gradient(45deg, #ff0088, #00ffff); border: none; padding: 10px 20px; color: white; border-radius: 5px; cursor: pointer;">CLOSE</button>
+                    </div>
+                </div>
+            `;
+            
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.id = 'statsModal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); z-index: 3000; 
+                display: flex; align-items: center; justify-content: center;
+            `;
+            modal.innerHTML = statsHTML;
+            document.body.appendChild(modal);
+        }
+
+        function closeStatsModal() {
+            const modal = document.getElementById('statsModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function showTutorial() {
+            document.getElementById('tutorialOverlay').style.display = 'flex';
+        }
+
+        function returnToMenu() {
+            if (game && game.gameState.isPlaying) {
+                game.gameState.isPlaying = false;
+                if (game.animationId) {
+                    cancelAnimationFrame(game.animationId);
+                }
+            }
+            
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
+            document.querySelector('.menu-subtitle').innerHTML = 
+                'Hack the corporate network before security traces you back.<br>Place nodes, route data, evade detection.';
+        }
+
+        function pauseGame() {
+            if (!game) return;
+            
+            game.gameState.isPaused = !game.gameState.isPaused;
+            document.querySelector('.control-button').textContent = 
+                game.gameState.isPaused ? 'RESUME' : 'PAUSE';
+        }
+
+        function selectNodeType(type) {
+            if (!game) return;
+            
+            game.gameState.selectedNodeType = type;
+            
+            // Update UI
+            document.querySelectorAll('.node-type').forEach(el => el.classList.remove('selected'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+        }
+
+        function activatePowerup(type) {
+            if (!game || !game.gameState.isPlaying) return;
+            
+            const powerup = game.gameState.powerups[type];
+            if (powerup.cooldown > 0 || powerup.active) return;
+            
+            powerup.active = true;
+            powerup.duration = type === 'speed' ? 10 : type === 'stealth' ? 15 : 8;
+            
+            document.getElementById(`${type}Powerup`).classList.add('active');
+            
+            // Apply powerup effects
+            switch (type) {
+                case 'speed':
+                    game.gameState.packets.forEach(packet => packet.speed *= 2);
+                    break;
+                case 'stealth':
+                    game.gameState.stealth = Math.min(100, game.gameState.stealth + 30);
+                    break;
+                case 'jam':
+                    game.gameState.securityAlgorithms.forEach(algorithm => {
+                        algorithm.speed *= 0.1;
+                        algorithm.detectionRange *= 0.5;
+                    });
+                    break;
+            }
+        }
+
+        function showSettings() {
+            // Implement settings menu
+            alert('Settings menu - coming soon!');
+        }
+
+        function showHighScores() {
+            if (!game) {
+                game = new GameEngine();
+            }
+            
+            const scores = game.gameState.highScores;
+            let message = 'HIGH SCORES:\n\n';
+            
+            if (scores.length === 0) {
+                message += 'No high scores yet!';
+            } else {
+                scores.forEach((score, index) => {
+                    message += `${index + 1}. ${score.score} (Level ${score.level})\n`;
+                });
+            }
+            
+            alert(message);
+        }
+
+        function showUpgradeShop() {
+            // Implement upgrade shop (monetization hook)
+            alert('Upgrade Shop - Premium features available!');
+        }
+
+        function shareScore() {
+            if (!game) return;
+            
+            const text = `I just scored ${game.gameState.score} points in Signal Breach by BotInc! Can you beat my score?`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Signal Breach - High Score',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers without Web Share API
+                navigator.clipboard.writeText(text + ' ' + window.location.href);
+                alert('Score shared to clipboard!');
+            }
+        }
+
+        // Tutorial System
+        let tutorialStep = 0;
+        const tutorialSteps = [
+            'Welcome to Signal Breach! Click to place nodes and create pathways for your data packets.',
+            'Use different node types for different strategies. Routers are basic, Firewalls block security.',
+            'Watch your stealth level! If security algorithms detect your packets, stealth decreases.',
+            'Use powerups wisely - Speed Boost, Stealth Mode, and Security Jam can save you!',
+            'Reach 100% breach progress to complete the level. Good luck, hacker!'
+        ];
+
+        function nextTutorialStep() {
+            tutorialStep++;
+            
+            if (tutorialStep >= tutorialSteps.length) {
+                document.getElementById('tutorialOverlay').style.display = 'none';
+                tutorialStep = 0;
+                return;
+            }
+            
+            document.getElementById('tutorialText').textContent = tutorialSteps[tutorialStep];
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            // Pre-initialize for faster startup
+            setTimeout(() => {
+                if (!game) {
+                    game = new GameEngine();
+                }
+            }, 100);
+        });
+
+        // Prevent context menu on canvas
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Handle page visibility for pause/resume
+        document.addEventListener('visibilitychange', () => {
+            if (game && game.gameState.isPlaying && document.hidden) {
+                pauseGame();
+            }
+        });
+    </script>
+    
+    <!-- Viral Mechanics Integration -->
+    <script src="/assets/js/analytics-dashboard.js"></script>
+    <script src="/assets/js/viral-mechanics.js"></script>
+    <script src="/assets/js/community-system.js"></script>
+    <script src="/assets/js/leaderboards.js"></script>
+    
+    <script>
+        // Enhanced Signal Breach with Viral Features
+        document.addEventListener('DOMContentLoaded', () => {
+            // Track game page visit
+            if (typeof botincAnalytics !== 'undefined') {
+                botincAnalytics.trackEngagementEvent('game_page_visit', { game: 'signal-breach' });
+            }
+            
+            // Enhanced level completion tracking
+            let originalLevelComplete;
+            
+            // Wait for game to be initialized
+            setTimeout(() => {
+                if (window.game && typeof levelComplete !== 'undefined') {
+                    originalLevelComplete = window.levelComplete;
+                    window.levelComplete = function() {
+                        // Get current score and level
+                        const currentScore = game ? game.gameState.score : 0;
+                        const currentLevel = game ? game.gameState.level : 1;
+                        
+                        // Submit to leaderboard
+                        if (window.leaderboardSystem) {
+                            window.leaderboardSystem.submitScore('signal-breach', currentScore, 'Anonymous Hacker');
+                        }
+                        
+                        // Dispatch score event
+                        document.dispatchEvent(new CustomEvent('gameScoreSubmitted', {
+                            detail: {
+                                game: 'signal-breach',
+                                score: currentScore,
+                                level: currentLevel,
+                                playerName: 'Anonymous Hacker'
+                            }
+                        }));
+                        
+                        // Check achievements
+                        if (window.viralMechanics) {
+                            // First level completion
+                            if (currentLevel === 1) {
+                                window.viralMechanics.checkAchievement('first_steps');
+                            }
+                            
+                            // High score achievements
+                            if (currentScore >= 3000) {
+                                window.viralMechanics.checkAchievement('signal_hacker', currentScore);
+                            }
+                            
+                            // Perfect stealth achievement
+                            if (game && game.gameState.stealth >= 90) {
+                                window.viralMechanics.checkAchievement('stealth_master', game.gameState.stealth);
+                            }
+                        }
+                        
+                        // Track analytics
+                        if (typeof trackGameEvent !== 'undefined') {
+                            trackGameEvent('level_completed', {
+                                level: currentLevel,
+                                score: currentScore,
+                                stealth: game ? game.gameState.stealth : 0,
+                                game: 'signal-breach'
+                            });
+                        }
+                        
+                        // Call original function
+                        return originalLevelComplete.apply(this, arguments);
+                    };
+                }
+                
+                // Enhanced sharing function
+                if (typeof shareToSocial !== 'undefined') {
+                    const originalShareScore = window.shareToSocial;
+                    window.shareToSocial = function() {
+                        if (window.viralMechanics) {
+                            const currentScore = game ? game.gameState.score : 0;
+                            const currentLevel = game ? game.gameState.level : 1;
+                            
+                            window.viralMechanics.shareScore({
+                                type: 'score',
+                                score: currentScore,
+                                game: 'signal-breach',
+                                gameName: 'Signal Breach',
+                                level: currentLevel
+                            });
+                        } else {
+                            // Fallback to original function
+                            originalShareScore.apply(this, arguments);
+                        }
+                    };
+                }
+            }, 2000);
+        });
+        
+        // Track game events
+        if (typeof trackGameEvent !== 'undefined') {
+            trackGameEvent('game_loaded', { game: 'signal-breach' });
+        }
+    </script>
+</body>
+</html>

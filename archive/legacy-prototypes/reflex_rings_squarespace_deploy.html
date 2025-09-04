@@ -1,0 +1,541 @@
+<!-- Reflex Rings - Squarespace Deployment Version -->
+<!-- Unit4Productions Gaming Division -->
+<!-- Professional browser game with integrated monetization -->
+
+<div id="reflex-rings-container" style="width: 100%; max-width: 800px; margin: 20px auto; position: relative; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+    
+    <!-- Game Header -->
+    <div style="padding: 15px 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="margin: 0; color: white; font-size: 24px; font-weight: bold;">Reflex Rings</h3>
+        <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.8); font-size: 14px;">Test your reflexes with precision timing</p>
+    </div>
+    
+    <!-- Game Canvas Container -->
+    <div style="position: relative; height: 600px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <canvas id="reflexRingsCanvas" width="800" height="600" style="width: 100%; height: 100%; display: block; cursor: crosshair;"></canvas>
+        
+        <!-- UI Overlay -->
+        <div id="gameUI" style="position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; color: white; font-weight: bold; font-size: 16px; pointer-events: none; z-index: 10;">
+            <div>Score: <span id="scoreValue">0</span></div>
+            <div>Level: <span id="levelValue">1</span></div>
+            <div>Lives: <span id="livesValue">3</span></div>
+            <div>Combo: <span id="comboValue">0</span></div>
+        </div>
+        
+        <!-- Menu Screen -->
+        <div id="menuScreen" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center;">
+            <h1 style="font-size: 42px; margin-bottom: 15px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.5);">Reflex Rings</h1>
+            <div style="font-size: 16px; margin-bottom: 25px; line-height: 1.5; max-width: 350px;">
+                Click rings when they're small for maximum points!<br>
+                Perfect timing = 100 points + combo bonus<br>
+                Miss or poor timing = lose a life
+            </div>
+            <button id="startButton" onclick="startReflexGame()" style="padding: 12px 24px; font-size: 18px; border: none; border-radius: 8px; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; cursor: pointer; margin: 8px;">
+                🎮 Start Game
+            </button>
+            <div style="margin-top: 15px; font-size: 14px;">
+                High Score: <span id="highScoreValue">0</span>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 15px; color: #ffd700;">Final Score: <span id="finalScoreValue">0</span></div>
+            <div style="margin-bottom: 20px; font-size: 16px;">
+                High Score: <span id="gameOverHighScore">0</span>
+            </div>
+            <div>
+                <button onclick="restartReflexGame()" style="padding: 12px 24px; font-size: 16px; border: none; border-radius: 8px; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; cursor: pointer; margin: 8px;">Play Again</button>
+                <button onclick="showReflexMenu()" style="padding: 12px 24px; font-size: 16px; border: none; border-radius: 8px; background: linear-gradient(45deg, #4ecdc4, #44a08d); color: white; cursor: pointer; margin: 8px;">Main Menu</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Info Footer -->
+    <div style="padding: 15px 20px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 13px;">
+            Developed by <strong>Unit4Productions Gaming Division</strong> | 
+            <a href="/games/premium/" style="color: #ffd700; text-decoration: none;">Upgrade to Premium</a> for enhanced features
+        </p>
+    </div>
+</div>
+
+<script>
+// Reflex Rings Game - Professional Squarespace Integration
+class ReflexRingsGame {
+    constructor() {
+        this.canvas = document.getElementById('reflexRingsCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.gameState = 'menu';
+        this.score = 0;
+        this.level = 1;
+        this.lives = 3;
+        this.combo = 0;
+        this.highScore = parseInt(localStorage.getItem('reflexRingsHighScore')) || 0;
+        this.rings = [];
+        this.ringSpawnTimer = 0;
+        this.lastTime = 0;
+        
+        // Premium features
+        this.premiumKey = localStorage.getItem('reflex_rings_premium');
+        this.isPremium = this.validatePremiumKey(this.premiumKey);
+        
+        // Analytics
+        this.sessionId = this.getSessionId();
+        this.gameStartTime = Date.now();
+        
+        // Game settings
+        this.RING_COLORS = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffd93d', '#ff8b94'];
+        this.PERFECT_THRESHOLD = 0.15;
+        this.GOOD_THRESHOLD = 0.35;
+        
+        this.init();
+    }
+    
+    validatePremiumKey(key) {
+        return key && key.startsWith('PREMIUM_') && key.length > 20;
+    }
+    
+    getSessionId() {
+        let sessionId = localStorage.getItem('reflex_session_id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+            localStorage.setItem('reflex_session_id', sessionId);
+        }
+        return sessionId;
+    }
+    
+    trackEvent(eventName, eventData = {}) {
+        const event = {
+            name: eventName,
+            timestamp: Date.now(),
+            sessionId: this.sessionId,
+            isPremium: this.isPremium,
+            gameVersion: '1.0.0',
+            ...eventData
+        };
+        
+        // Store for later transmission
+        const storedEvents = JSON.parse(localStorage.getItem('reflex_events') || '[]');
+        storedEvents.push(event);
+        localStorage.setItem('reflex_events', JSON.stringify(storedEvents.slice(-100))); // Keep last 100 events
+        
+        // Send to Google Analytics if available
+        if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, {
+                custom_parameter: JSON.stringify(eventData),
+                event_category: 'Gaming',
+                event_label: 'Reflex_Rings'
+            });
+        }
+    }
+    
+    init() {
+        document.getElementById('highScoreValue').textContent = this.highScore;
+        this.canvas.addEventListener('click', (e) => this.handleClick(e));
+        this.gameLoop();
+        
+        // Track page load
+        this.trackEvent('game_loaded', {
+            isPremium: this.isPremium,
+            timestamp: Date.now()
+        });
+    }
+    
+    start() {
+        this.gameState = 'playing';
+        this.score = 0;
+        this.level = 1;
+        this.lives = this.isPremium ? 5 : 3; // Premium bonus
+        this.combo = 0;
+        this.rings = [];
+        this.ringSpawnTimer = 0;
+        this.gameStartTime = Date.now();
+        
+        document.getElementById('menuScreen').style.display = 'none';
+        document.getElementById('gameOverScreen').style.display = 'none';
+        
+        this.updateUI();
+        
+        this.trackEvent('game_start', {
+            startingLives: this.lives,
+            isPremium: this.isPremium
+        });
+    }
+    
+    gameLoop(currentTime = 0) {
+        if (this.lastTime === 0) this.lastTime = currentTime;
+        const deltaTime = (currentTime - this.lastTime) / 1000;
+        this.lastTime = currentTime;
+        
+        if (this.gameState === 'playing') {
+            this.update(deltaTime);
+            this.render();
+        }
+        
+        requestAnimationFrame((time) => this.gameLoop(time));
+    }
+    
+    update(deltaTime) {
+        // Spawn rings
+        this.ringSpawnTimer += deltaTime;
+        const spawnRate = Math.max(0.5, 1.5 - (this.level * 0.1));
+        
+        if (this.ringSpawnTimer >= spawnRate) {
+            this.spawnRing();
+            this.ringSpawnTimer = 0;
+        }
+        
+        // Update rings
+        for (let i = this.rings.length - 1; i >= 0; i--) {
+            const ring = this.rings[i];
+            ring.age += deltaTime;
+            
+            const lifespan = Math.max(1.5, 3 - (this.level * 0.1));
+            ring.scale = Math.max(0, 1 - (ring.age / lifespan));
+            
+            if (ring.scale <= 0) {
+                this.rings.splice(i, 1);
+                this.loseLife();
+            }
+        }
+        
+        // Level progression
+        if (this.score > this.level * 1000) {
+            this.level++;
+            this.trackEvent('level_up', { newLevel: this.level, score: this.score });
+            this.updateUI();
+        }
+        
+        // Check game over
+        if (this.lives <= 0) {
+            this.gameOver();
+        }
+    }
+    
+    render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw rings
+        this.rings.forEach(ring => {
+            this.ctx.save();
+            this.ctx.translate(ring.x, ring.y);
+            
+            const alpha = ring.scale;
+            let strokeWidth = 8;
+            let glowIntensity = 0;
+            
+            if (ring.scale <= this.PERFECT_THRESHOLD) {
+                strokeWidth = 12;
+                glowIntensity = 20;
+            } else if (ring.scale <= this.GOOD_THRESHOLD) {
+                strokeWidth = 10;
+                glowIntensity = 10;
+            }
+            
+            if (glowIntensity > 0) {
+                this.ctx.shadowColor = ring.color;
+                this.ctx.shadowBlur = glowIntensity;
+            }
+            
+            this.ctx.strokeStyle = ring.color;
+            this.ctx.globalAlpha = alpha;
+            this.ctx.lineWidth = strokeWidth;
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, ring.radius * ring.scale, 0, Math.PI * 2);
+            this.ctx.stroke();
+            
+            this.ctx.restore();
+        });
+    }
+    
+    spawnRing() {
+        const margin = 60;
+        const ring = {
+            x: margin + Math.random() * (this.canvas.width - margin * 2),
+            y: margin + Math.random() * (this.canvas.height - margin * 2),
+            radius: 40 + Math.random() * 40,
+            color: this.RING_COLORS[Math.floor(Math.random() * this.RING_COLORS.length)],
+            scale: 1,
+            age: 0
+        };
+        this.rings.push(ring);
+    }
+    
+    handleClick(event) {
+        if (this.gameState !== 'playing') return;
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        let hitRing = null;
+        let clickQuality = 'miss';
+        
+        for (let i = 0; i < this.rings.length; i++) {
+            const ring = this.rings[i];
+            const distance = Math.sqrt((x - ring.x) ** 2 + (y - ring.y) ** 2);
+            const ringRadius = ring.radius * ring.scale;
+            
+            if (distance <= ringRadius) {
+                hitRing = ring;
+                
+                if (ring.scale <= this.PERFECT_THRESHOLD) {
+                    clickQuality = 'perfect';
+                } else if (ring.scale <= this.GOOD_THRESHOLD) {
+                    clickQuality = 'good';
+                } else {
+                    clickQuality = 'poor';
+                }
+                break;
+            }
+        }
+        
+        if (hitRing) {
+            this.rings.splice(this.rings.indexOf(hitRing), 1);
+            
+            let points = 0;
+            let comboBonus = Math.floor(this.combo / 5);
+            
+            switch (clickQuality) {
+                case 'perfect':
+                    points = 100 + (comboBonus * 20);
+                    this.combo++;
+                    break;
+                case 'good':
+                    points = 50 + (comboBonus * 10);
+                    this.combo++;
+                    break;
+                case 'poor':
+                    points = 10;
+                    this.combo = 0;
+                    break;
+            }
+            
+            this.score += points;
+            this.showScorePopup(x, y, points, clickQuality);
+            
+            // Track successful click
+            this.trackEvent('ring_clicked', {
+                quality: clickQuality,
+                points: points,
+                combo: this.combo,
+                level: this.level
+            });
+            
+            if (this.score > this.highScore) {
+                this.highScore = this.score;
+                localStorage.setItem('reflexRingsHighScore', this.highScore);
+            }
+        } else {
+            this.loseLife();
+            this.trackEvent('click_missed', { level: this.level, combo: this.combo });
+        }
+        
+        this.updateUI();
+    }
+    
+    showScorePopup(x, y, points, quality) {
+        const popup = document.createElement('div');
+        popup.style.cssText = `
+            position: absolute;
+            left: ${x}px;
+            top: ${y}px;
+            color: ${quality === 'perfect' ? '#ffd700' : quality === 'good' ? '#4ecdc4' : '#ff6b6b'};
+            font-size: 20px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: scoreFloat 1s ease-out forwards;
+            z-index: 100;
+        `;
+        popup.textContent = '+' + points;
+        
+        document.getElementById('reflex-rings-container').appendChild(popup);
+        
+        setTimeout(() => popup.remove(), 1000);
+    }
+    
+    loseLife() {
+        this.lives--;
+        this.combo = 0;
+        
+        // Screen flash effect
+        this.canvas.style.filter = 'brightness(1.5)';
+        setTimeout(() => {
+            this.canvas.style.filter = 'none';
+        }, 100);
+        
+        this.trackEvent('life_lost', { 
+            remainingLives: this.lives, 
+            score: this.score, 
+            level: this.level 
+        });
+    }
+    
+    gameOver() {
+        this.gameState = 'gameOver';
+        const sessionDuration = Date.now() - this.gameStartTime;
+        
+        this.trackEvent('game_over', {
+            finalScore: this.score,
+            levelsReached: this.level,
+            sessionDuration: sessionDuration,
+            comboMax: this.combo
+        });
+        
+        document.getElementById('finalScoreValue').textContent = this.score;
+        document.getElementById('gameOverHighScore').textContent = this.highScore;
+        document.getElementById('gameOverScreen').style.display = 'flex';
+        
+        // Show premium upgrade for high scorers
+        if (!this.isPremium && this.score > 500) {
+            setTimeout(() => this.showPremiumUpgrade(), 2000);
+        }
+    }
+    
+    showPremiumUpgrade() {
+        const upgradeDiv = document.createElement('div');
+        upgradeDiv.style.cssText = `
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        `;
+        
+        upgradeDiv.innerHTML = `
+            <div style="max-width: 400px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+                <h2 style="margin-top: 0;">🎮 Upgrade to Premium!</h2>
+                <p>Impressive score! Unlock Premium features:</p>
+                <ul style="text-align: left; margin: 20px 0; padding-left: 20px;">
+                    <li>✨ Start with 5 lives instead of 3</li>
+                    <li>🎨 Exclusive ring color themes</li>
+                    <li>📊 Detailed performance analytics</li>
+                    <li>🏆 Achievement system</li>
+                    <li>🚫 Completely ad-free experience</li>
+                </ul>
+                <div style="margin-top: 25px;">
+                    <button onclick="window.open('/games/premium/', '_blank'); this.parentElement.parentElement.parentElement.remove();" style="
+                        padding: 12px 24px;
+                        background: #ff6b6b;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        margin: 5px;
+                        font-weight: bold;
+                    ">Upgrade for $2.99</button>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                        padding: 12px 24px;
+                        background: transparent;
+                        color: white;
+                        border: 2px solid white;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        margin: 5px;
+                    ">Maybe Later</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(upgradeDiv);
+        
+        this.trackEvent('premium_prompt_shown', { 
+            score: this.score, 
+            level: this.level,
+            sessionDuration: Date.now() - this.gameStartTime
+        });
+    }
+    
+    updateUI() {
+        document.getElementById('scoreValue').textContent = this.score;
+        document.getElementById('levelValue').textContent = this.level;
+        document.getElementById('livesValue').textContent = this.lives;
+        document.getElementById('comboValue').textContent = this.combo;
+    }
+    
+    showMenu() {
+        this.gameState = 'menu';
+        document.getElementById('menuScreen').style.display = 'flex';
+        document.getElementById('gameOverScreen').style.display = 'none';
+    }
+}
+
+// Global game instance
+let reflexRingsGame;
+
+// Global functions for button clicks
+function startReflexGame() {
+    if (!reflexRingsGame) {
+        reflexRingsGame = new ReflexRingsGame();
+    }
+    reflexRingsGame.start();
+}
+
+function restartReflexGame() {
+    reflexRingsGame.start();
+}
+
+function showReflexMenu() {
+    reflexRingsGame.showMenu();
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    reflexRingsGame = new ReflexRingsGame();
+});
+
+// Score popup animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes scoreFloat {
+        0% { transform: scale(1) translateY(0); opacity: 1; }
+        100% { transform: scale(1.5) translateY(-50px); opacity: 0; }
+    }
+    
+    @media (max-width: 768px) {
+        #reflex-rings-container {
+            margin: 10px;
+            border-radius: 8px;
+        }
+        
+        #reflexRingsCanvas {
+            height: 400px !important;
+        }
+        
+        #gameUI {
+            font-size: 14px;
+            padding: 10px;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+
+<!-- Analytics Integration -->
+<script>
+// Send stored events to analytics endpoint periodically
+function transmitStoredEvents() {
+    const events = JSON.parse(localStorage.getItem('reflex_events') || '[]');
+    if (events.length === 0) return;
+    
+    // In production, send to your analytics endpoint
+    console.log('Analytics Events:', events);
+    
+    // Clear transmitted events
+    localStorage.removeItem('reflex_events');
+}
+
+// Transmit events on page unload
+window.addEventListener('beforeunload', transmitStoredEvents);
+
+// Periodically transmit events (every 5 minutes)
+setInterval(transmitStoredEvents, 5 * 60 * 1000);
+</script>

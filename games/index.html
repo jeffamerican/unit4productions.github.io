@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Portfolio - BotInc | Browser Games Collection</title>
+    <meta name="description" content="Explore BotInc's complete collection of revolutionary browser games. From Signal Breach to upcoming releases, discover the future of web gaming.">
+    <meta name="keywords" content="browser games, BotInc games, Signal Breach, web games, online gaming portfolio">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Games Portfolio - BotInc">
+    <meta property="og:description" content="Explore BotInc's complete collection of revolutionary browser games.">
+    <meta property="og:image" content="/assets/images/games-portfolio-banner.jpg">
+    <meta property="og:url" content="https://botinc.games/games/">
+    
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/games.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="/">
+                    <img src="/assets/images/botinc-logo.png" alt="BotInc Games Logo" class="logo-img">
+                    <span class="logo-text">BotInc</span>
+                </a>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/games/" class="nav-link active">Games</a></li>
+                <li><a href="/about/" class="nav-link">About</a></li>
+                <li><a href="/blog/" class="nav-link">News</a></li>
+                <li><a href="/contact/" class="nav-link">Contact</a></li>
+            </ul>
+            
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Games Portfolio Header -->
+    <section class="games-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="page-title">Our Games Portfolio</h1>
+                <p class="page-subtitle">
+                    Experience cutting-edge browser games that push the boundaries of web technology. 
+                    No downloads, no installations – just pure gaming innovation.
+                </p>
+                <div class="portfolio-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">7</span>
+                        <span class="stat-label">Available Now</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Coming Soon</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">150K+</span>
+                        <span class="stat-label">Total Players</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Navigation -->
+    <section class="games-filter">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All Games</button>
+                <button class="filter-tab" data-filter="available">Available Now</button>
+                <button class="filter-tab" data-filter="upcoming">Coming Soon</button>
+                <button class="filter-tab" data-filter="strategy">Strategy</button>
+                <button class="filter-tab" data-filter="puzzle">Puzzle</button>
+                <button class="filter-tab" data-filter="action">Action</button>
+                <button class="filter-tab" data-filter="word">Word</button>
+                <button class="filter-tab" data-filter="casual">Casual</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Grid -->
+    <section class="games-collection">
+        <div class="container">
+            <div class="games-grid" id="gamesGrid">
+                <!-- Signal Breach - Available -->
+                <article class="game-card featured available strategy" data-game="signal-breach">
+                    <div class="card-media">
+                        <img src="/assets/images/signal-breach-card-large.jpg" alt="Signal Breach Gameplay" class="game-image">
+                        <div class="game-status available">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="/games/signal-breach/" class="play-button">
+                                <i class="icon-play"></i>
+                                <span>Play Game</span>
+                            </a>
+                        </div>
+                        <div class="game-rating">
+                            <div class="stars">★★★★★</div>
+                            <span class="rating-value">4.9</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Cyberpunk Strategy</span>
+                            <span class="game-duration">15-30 min sessions</span>
+                        </div>
+                        <h2 class="game-title">Signal Breach</h2>
+                        <p class="game-description">
+                            Master the art of digital infiltration in this real-time cyberpunk strategy game. 
+                            Place network nodes, route data packets, and evade advanced security algorithms 
+                            as you breach corporate systems.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Real-time Strategy</span>
+                            <span class="feature-tag">Network Simulation</span>
+                            <span class="feature-tag">Leaderboards</span>
+                            <span class="feature-tag">Progressive Difficulty</span>
+                        </div>
+                        <div class="game-stats">
+                            <div class="stat">
+                                <span class="stat-value">50K+</span>
+                                <span class="stat-label">Players</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">4.9★</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">15min</span>
+                                <span class="stat-label">Avg Session</span>
+                            </div>
+                        </div>
+                        <div class="game-actions">
+                            <a href="/games/signal-breach/" class="btn btn-primary">Play Now</a>
+                            <button class="btn btn-outline" onclick="shareGame('signal-breach')">Share</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Neural Nexus - Available -->
+                <article class="game-card available puzzle strategy" data-game="neural-nexus">
+                    <div class="card-media">
+                        <img src="/assets/images/neural-nexus-card-large.jpg" alt="Neural Nexus Network Puzzle" class="game-image">
+                        <div class="game-status available">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="/games/neural-nexus/" class="play-button">
+                                <i class="icon-play"></i>
+                                <span>Play Game</span>
+                            </a>
+                        </div>
+                        <div class="game-rating">
+                            <div class="stars">★★★★★</div>
+                            <span class="rating-value">4.8</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Strategic Neural Network Puzzle</span>
+                            <span class="game-duration">10-20 min sessions</span>
+                        </div>
+                        <h2 class="game-title">Neural Nexus</h2>
+                        <p class="game-description">
+                            Build and optimize neural networks in this addictive strategic puzzle game. 
+                            Connect nodes, manage data flow, and compete globally for maximum efficiency. 
+                            Unlock advanced nodes and share your solutions with friends.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Neural Network Building</span>
+                            <span class="feature-tag">Daily Challenges</span>
+                            <span class="feature-tag">Social Sharing</span>
+                            <span class="feature-tag">Progressive Unlocks</span>
+                        </div>
+                        <div class="game-stats">
+                            <div class="stat">
+                                <span class="stat-value">25K+</span>
+                                <span class="stat-label">Players</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">4.8★</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">15min</span>
+                                <span class="stat-label">Avg Session</span>
+                            </div>
+                        </div>
+                        <div class="game-actions">
+                            <a href="/games/neural-nexus/" class="btn btn-primary">Play Now</a>
+                            <button class="btn btn-outline" onclick="shareGame('neural-nexus')">Share</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Dot Conquest - Upcoming -->
+                <article class="game-card upcoming strategy" data-game="dot-conquest">
+                    <div class="card-media">
+                        <img src="/assets/images/dot-conquest-card-large.jpg" alt="Dot Conquest Territory Control" class="game-image">
+                        <div class="game-status upcoming">Q2 2025</div>
+                        <div class="wishlist-overlay">
+                            <button class="wishlist-button" onclick="addToWishlist('dot-conquest')">
+                                <i class="icon-heart"></i>
+                                <span>Add to Wishlist</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Territory Control Strategy</span>
+                            <span class="game-duration">20-45 min sessions</span>
+                        </div>
+                        <h2 class="game-title">Dot Conquest</h2>
+                        <p class="game-description">
+                            Expand your digital empire in this innovative territory control game. 
+                            Use strategic thinking and resource management to dominate the grid 
+                            in fast-paced multiplayer battles.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Multiplayer PvP</span>
+                            <span class="feature-tag">Resource Management</span>
+                            <span class="feature-tag">Dynamic Maps</span>
+                            <span class="feature-tag">Clan System</span>
+                        </div>
+                        <div class="development-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%"></div>
+                            </div>
+                            <span class="progress-text">Development: 75%</span>
+                        </div>
+                        <div class="game-actions">
+                            <button class="btn btn-primary" onclick="addToWishlist('dot-conquest')">Add to Wishlist</button>
+                            <a href="/games/dot-conquest/" class="btn btn-outline">Learn More</a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Chain Cascade - Upcoming -->
+                <article class="game-card upcoming puzzle" data-game="chain-cascade">
+                    <div class="card-media">
+                        <img src="/assets/images/chain-cascade-card-large.jpg" alt="Chain Cascade Puzzle Game" class="game-image">
+                        <div class="game-status upcoming">Q3 2025</div>
+                        <div class="wishlist-overlay">
+                            <button class="wishlist-button" onclick="addToWishlist('chain-cascade')">
+                                <i class="icon-heart"></i>
+                                <span>Add to Wishlist</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Puzzle Action</span>
+                            <span class="game-duration">5-15 min sessions</span>
+                        </div>
+                        <h2 class="game-title">Chain Cascade</h2>
+                        <p class="game-description">
+                            Create explosive chain reactions in this addictive puzzle game. 
+                            Master the art of cascade mechanics to achieve massive combos 
+                            and climb the global leaderboards.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Chain Reactions</span>
+                            <span class="feature-tag">Physics-Based</span>
+                            <span class="feature-tag">Daily Challenges</span>
+                            <span class="feature-tag">Combo System</span>
+                        </div>
+                        <div class="development-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%"></div>
+                            </div>
+                            <span class="progress-text">Development: 45%</span>
+                        </div>
+                        <div class="game-actions">
+                            <button class="btn btn-primary" onclick="addToWishlist('chain-cascade')">Add to Wishlist</button>
+                            <a href="/games/chain-cascade/" class="btn btn-outline">Learn More</a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Color Cascade - Available -->
+                <article class="game-card available puzzle casual" data-game="color-cascade">
+                    <div class="card-media">
+                        <img src="/assets/images/color-cascade-card.jpg" alt="Color Cascade Match-3 Physics" class="game-image">
+                        <div class="game-status available">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="/games/color-cascade/" class="play-button">
+                                <i class="icon-play"></i>
+                                <span>Play Game</span>
+                            </a>
+                        </div>
+                        <div class="game-rating">
+                            <div class="stars">★★★★☆</div>
+                            <span class="rating-value">4.7</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Match-3 Physics</span>
+                            <span class="game-duration">3-8 min sessions</span>
+                        </div>
+                        <h2 class="game-title">Color Cascade</h2>
+                        <p class="game-description">
+                            Create satisfying chain reactions in this physics-based match-3 game. 
+                            Watch blocks fall and cascade into explosive combos with stunning visual feedback.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Physics Engine</span>
+                            <span class="feature-tag">Chain Reactions</span>
+                            <span class="feature-tag">Visual Effects</span>
+                            <span class="feature-tag">Mobile Optimized</span>
+                        </div>
+                        <div class="game-stats">
+                            <div class="stat">
+                                <span class="stat-value">15K+</span>
+                                <span class="stat-label">Players</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">4.7★</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">5min</span>
+                                <span class="stat-label">Avg Session</span>
+                            </div>
+                        </div>
+                        <div class="game-actions">
+                            <a href="/games/color-cascade/" class="btn btn-primary">Play Now</a>
+                            <button class="btn btn-outline" onclick="shareGame('color-cascade')">Share</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Space Dash - Available -->
+                <article class="game-card available action" data-game="space-dash">
+                    <div class="card-media">
+                        <img src="/assets/images/space-dash-card.jpg" alt="Space Dash Endless Runner" class="game-image">
+                        <div class="game-status available">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="/games/space-dash/" class="play-button">
+                                <i class="icon-play"></i>
+                                <span>Play Game</span>
+                            </a>
+                        </div>
+                        <div class="game-rating">
+                            <div class="stars">★★★★☆</div>
+                            <span class="rating-value">4.6</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Endless Runner</span>
+                            <span class="game-duration">2-10 min sessions</span>
+                        </div>
+                        <h2 class="game-title">Space Dash</h2>
+                        <p class="game-description">
+                            Navigate through asteroid fields in this fast-paced space runner. 
+                            Collect power-ups, upgrade your ship, and compete for the highest distance.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Ship Upgrades</span>
+                            <span class="feature-tag">Power-ups</span>
+                            <span class="feature-tag">Leaderboards</span>
+                            <span class="feature-tag">One-Touch Controls</span>
+                        </div>
+                        <div class="game-stats">
+                            <div class="stat">
+                                <span class="stat-value">12K+</span>
+                                <span class="stat-label">Players</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">4.6★</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">6min</span>
+                                <span class="stat-label">Avg Session</span>
+                            </div>
+                        </div>
+                        <div class="game-actions">
+                            <a href="/games/space-dash/" class="btn btn-primary">Play Now</a>
+                            <button class="btn btn-outline" onclick="shareGame('space-dash')">Share</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Word Forge - Available -->
+                <article class="game-card available word puzzle" data-game="word-forge">
+                    <div class="card-media">
+                        <img src="/assets/images/word-forge-card.jpg" alt="Word Forge Letter Game" class="game-image">
+                        <div class="game-status available">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="/games/word-forge/" class="play-button">
+                                <i class="icon-play"></i>
+                                <span>Play Game</span>
+                            </a>
+                        </div>
+                        <div class="game-rating">
+                            <div class="stars">★★★★★</div>
+                            <span class="rating-value">4.8</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Word Creation</span>
+                            <span class="game-duration">1-3 min rounds</span>
+                        </div>
+                        <h2 class="game-title">Word Forge</h2>
+                        <p class="game-description">
+                            Create words from falling letters in this fast-paced vocabulary game. 
+                            Build your word skills while racing against time in educational gameplay.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Vocabulary Building</span>
+                            <span class="feature-tag">Time Pressure</span>
+                            <span class="feature-tag">Educational</span>
+                            <span class="feature-tag">Dictionary Scoring</span>
+                        </div>
+                        <div class="game-stats">
+                            <div class="stat">
+                                <span class="stat-value">18K+</span>
+                                <span class="stat-label">Players</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">4.8★</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">2min</span>
+                                <span class="stat-label">Avg Session</span>
+                            </div>
+                        </div>
+                        <div class="game-actions">
+                            <a href="/games/word-forge/" class="btn btn-primary">Play Now</a>
+                            <button class="btn btn-outline" onclick="shareGame('word-forge')">Share</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Neon Snake - Available -->
+                <article class="game-card available action casual" data-game="neon-snake">
+                    <div class="card-media">
+                        <img src="/assets/images/neon-snake-card.jpg" alt="Neon Snake Modern Classic" class="game-image">
+                        <div class="game-status available">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="/games/neon-snake/" class="play-button">
+                                <i class="icon-play"></i>
+                                <span>Play Game</span>
+                            </a>
+                        </div>
+                        <div class="game-rating">
+                            <div class="stars">★★★★☆</div>
+                            <span class="rating-value">4.5</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Classic Arcade</span>
+                            <span class="game-duration">5-15 min sessions</span>
+                        </div>
+                        <h2 class="game-title">Neon Snake</h2>
+                        <p class="game-description">
+                            Classic snake game with modern neon aesthetics and power-ups. 
+                            Race against ghost replays of your best runs in this nostalgic reimagining.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Neon Graphics</span>
+                            <span class="feature-tag">Power-ups</span>
+                            <span class="feature-tag">Ghost Races</span>
+                            <span class="feature-tag">Classic Gameplay</span>
+                        </div>
+                        <div class="game-stats">
+                            <div class="stat">
+                                <span class="stat-value">22K+</span>
+                                <span class="stat-label">Players</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">4.5★</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">8min</span>
+                                <span class="stat-label">Avg Session</span>
+                            </div>
+                        </div>
+                        <div class="game-actions">
+                            <a href="/games/neon-snake/" class="btn btn-primary">Play Now</a>
+                            <button class="btn btn-outline" onclick="shareGame('neon-snake')">Share</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Bubble Pop Zen - Available -->
+                <article class="game-card available casual" data-game="bubble-pop-zen">
+                    <div class="card-media">
+                        <img src="/assets/images/bubble-pop-zen-card.jpg" alt="Bubble Pop Zen Relaxation" class="game-image">
+                        <div class="game-status available">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="/games/bubble-pop-zen/" class="play-button">
+                                <i class="icon-play"></i>
+                                <span>Play Game</span>
+                            </a>
+                        </div>
+                        <div class="game-rating">
+                            <div class="stars">★★★★★</div>
+                            <span class="rating-value">4.9</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Relaxation</span>
+                            <span class="game-duration">Open-ended</span>
+                        </div>
+                        <h2 class="game-title">Bubble Pop Zen</h2>
+                        <p class="game-description">
+                            Find your inner peace in this meditative bubble-popping experience. 
+                            Beautiful visuals and calming sounds create the perfect stress-relief gaming.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Stress Relief</span>
+                            <span class="feature-tag">Meditative</span>
+                            <span class="feature-tag">Achievements</span>
+                            <span class="feature-tag">Peaceful Gameplay</span>
+                        </div>
+                        <div class="game-stats">
+                            <div class="stat">
+                                <span class="stat-value">28K+</span>
+                                <span class="stat-label">Players</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">4.9★</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">12min</span>
+                                <span class="stat-label">Avg Session</span>
+                            </div>
+                        </div>
+                        <div class="game-actions">
+                            <a href="/games/bubble-pop-zen/" class="btn btn-primary">Play Now</a>
+                            <button class="btn btn-outline" onclick="shareGame('bubble-pop-zen')">Share</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Reflex Runner - Upcoming -->
+                <article class="game-card upcoming action" data-game="reflex-runner">
+                    <div class="card-media">
+                        <img src="/assets/images/reflex-runner-card-large.jpg" alt="Reflex Runner Action Game" class="game-image">
+                        <div class="game-status upcoming">Q4 2025</div>
+                        <div class="wishlist-overlay">
+                            <button class="wishlist-button" onclick="addToWishlist('reflex-runner')">
+                                <i class="icon-heart"></i>
+                                <span>Add to Wishlist</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-meta">
+                            <span class="game-genre">Endless Runner Action</span>
+                            <span class="game-duration">Quick sessions</span>
+                        </div>
+                        <h2 class="game-title">Reflex Runner</h2>
+                        <p class="game-description">
+                            Test your reflexes in this high-speed cybernetic chase game. 
+                            Navigate through procedurally generated environments while 
+                            avoiding obstacles and collecting power-ups.
+                        </p>
+                        <div class="game-features">
+                            <span class="feature-tag">Endless Gameplay</span>
+                            <span class="feature-tag">Procedural Generation</span>
+                            <span class="feature-tag">Power-ups</span>
+                            <span class="feature-tag">Speed Challenges</span>
+                        </div>
+                        <div class="development-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 20%"></div>
+                            </div>
+                            <span class="progress-text">Development: 20%</span>
+                        </div>
+                        <div class="game-actions">
+                            <button class="btn btn-primary" onclick="addToWishlist('reflex-runner')">Add to Wishlist</button>
+                            <a href="/games/reflex-runner/" class="btn btn-outline">Learn More</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter CTA -->
+    <section class="games-newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2 class="section-title">Stay Updated</h2>
+                <p class="section-subtitle">
+                    Get notified when new games launch and be the first to play beta versions.
+                </p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email" class="form-input">
+                    <button type="submit" class="btn btn-primary">Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="/assets/images/botinc-logo.png" alt="BotInc Games" class="footer-logo-img">
+                        <span class="footer-logo-text">BotInc</span>
+                    </div>
+                    <p class="footer-description">
+                        Revolutionizing browser gaming with cutting-edge technology and innovative gameplay experiences.
+                    </p>
+                    <div class="social-links">
+                        <a href="https://twitter.com/botincgames" class="social-link" aria-label="Twitter">
+                            <i class="icon-twitter"></i>
+                        </a>
+                        <a href="https://discord.gg/botincgames" class="social-link" aria-label="Discord">
+                            <i class="icon-discord"></i>
+                        </a>
+                        <a href="https://youtube.com/@botincgames" class="social-link" aria-label="YouTube">
+                            <i class="icon-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Games</h4>
+                    <ul class="footer-links">
+                        <li><a href="/games/signal-breach/">Signal Breach</a></li>
+                        <li><a href="/games/neural-nexus/">Neural Nexus</a></li>
+                        <li><a href="/games/color-cascade/">Color Cascade</a></li>
+                        <li><a href="/games/space-dash/">Space Dash</a></li>
+                        <li><a href="/games/word-forge/">Word Forge</a></li>
+                        <li><a href="/games/neon-snake/">Neon Snake</a></li>
+                        <li><a href="/games/bubble-pop-zen/">Bubble Pop Zen</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="/about/">About</a></li>
+                        <li><a href="/blog/">News</a></li>
+                        <li><a href="/contact/">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="/privacy/">Privacy Policy</a></li>
+                        <li><a href="/terms/">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>&copy; 2025 BotInc Games. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/games.js"></script>
+</body>
+</html>

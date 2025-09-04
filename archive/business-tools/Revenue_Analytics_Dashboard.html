@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit4Productions Revenue Analytics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dashboard-header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #4ecdc4;
+        }
+
+        .card-change {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .positive {
+            color: #4ecdc4;
+        }
+
+        .negative {
+            color: #ff6b6b;
+        }
+
+        .neutral {
+            color: #ffd93d;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            grid-column: 1 / -1;
+        }
+
+        .mini-chart {
+            height: 60px;
+            margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: end;
+            padding: 5px;
+            gap: 2px;
+        }
+
+        .chart-bar {
+            background: linear-gradient(to top, #4ecdc4, #44a08d);
+            border-radius: 2px;
+            flex: 1;
+            min-height: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .chart-bar:hover {
+            background: linear-gradient(to top, #6ee7d8, #5bb3a6);
+        }
+
+        .metrics-table {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .metrics-table th,
+        .metrics-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metrics-table th {
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-live {
+            background: #4ecdc4;
+            animation: pulse 2s infinite;
+        }
+
+        .status-warning {
+            background: #ffd93d;
+        }
+
+        .status-error {
+            background: #ff6b6b;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .primary-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+        }
+
+        .primary-btn:hover {
+            background: linear-gradient(45deg, #6ee7d8, #5bb3a6);
+        }
+
+        .last-updated {
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        .player-funnel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .funnel-step {
+            text-align: center;
+            flex: 1;
+        }
+
+        .funnel-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .funnel-arrow {
+            font-size: 1.5rem;
+            opacity: 0.5;
+            margin: 0 1rem;
+        }
+
+        .conversion-rate {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+            
+            .card-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>🎮 Unit4Productions Analytics</h1>
+        <p class="subtitle">Real-time gaming revenue and performance metrics</p>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="dashboard-grid">
+        <!-- Daily Revenue -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">💰</span>
+                    Daily Revenue
+                </div>
+                <span class="status-indicator status-live"></span>
+            </div>
+            <div class="card-value" id="daily-revenue">$127.45</div>
+            <div class="card-change positive">+23% vs yesterday</div>
+            <div class="mini-chart" id="daily-revenue-chart">
+                <div class="chart-bar" style="height: 30%"></div>
+                <div class="chart-bar" style="height: 45%"></div>
+                <div class="chart-bar" style="height: 60%"></div>
+                <div class="chart-bar" style="height: 40%"></div>
+                <div class="chart-bar" style="height: 55%"></div>
+                <div class="chart-bar" style="height: 80%"></div>
+                <div class="chart-bar" style="height: 95%"></div>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">📈</span>
+                    Monthly Revenue
+                </div>
+            </div>
+            <div class="card-value" id="monthly-revenue">$1,847.30</div>
+            <div class="card-change positive">+156% vs last month</div>
+            <div class="mini-chart">
+                <div class="chart-bar" style="height: 20%"></div>
+                <div class="chart-bar" style="height: 35%"></div>
+                <div class="chart-bar" style="height: 50%"></div>
+                <div class="chart-bar" style="height: 75%"></div>
+                <div class="chart-bar" style="height: 90%"></div>
+                <div class="chart-bar" style="height: 85%"></div>
+                <div class="chart-bar" style="height: 100%"></div>
+            </div>
+        </div>
+
+        <!-- Active Players -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">👥</span>
+                    Active Players
+                </div>
+                <span class="status-indicator status-live"></span>
+            </div>
+            <div class="card-value" id="active-players">1,243</div>
+            <div class="card-change positive">+67 new today</div>
+            <div class="mini-chart">
+                <div class="chart-bar" style="height: 70%"></div>
+                <div class="chart-bar" style="height: 80%"></div>
+                <div class="chart-bar" style="height: 65%"></div>
+                <div class="chart-bar" style="height: 90%"></div>
+                <div class="chart-bar" style="height: 85%"></div>
+                <div class="chart-bar" style="height: 95%"></div>
+                <div class="chart-bar" style="height: 100%"></div>
+            </div>
+        </div>
+
+        <!-- Premium Users -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">👑</span>
+                    Premium Users
+                </div>
+            </div>
+            <div class="card-value" id="premium-users">87</div>
+            <div class="card-change positive">+12 this week</div>
+            <div class="conversion-rate">7.0% conversion rate</div>
+        </div>
+
+        <!-- Conversion Rate -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">🎯</span>
+                    Conversion Rate
+                </div>
+            </div>
+            <div class="card-value" id="conversion-rate">4.2%</div>
+            <div class="card-change positive">+0.8% vs last week</div>
+            <div class="mini-chart">
+                <div class="chart-bar" style="height: 40%"></div>
+                <div class="chart-bar" style="height: 45%"></div>
+                <div class="chart-bar" style="height: 50%"></div>
+                <div class="chart-bar" style="height: 60%"></div>
+                <div class="chart-bar" style="height: 70%"></div>
+                <div class="chart-bar" style="height: 75%"></div>
+                <div class="chart-bar" style="height: 85%"></div>
+            </div>
+        </div>
+
+        <!-- Average Session -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">⏱️</span>
+                    Avg. Session
+                </div>
+            </div>
+            <div class="card-value" id="avg-session">8m 34s</div>
+            <div class="card-change positive">+1m 12s vs last week</div>
+        </div>
+    </div>
+
+    <!-- Player Conversion Funnel -->
+    <div class="chart-container">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-icon">🎯</span>
+                Player Conversion Funnel
+            </div>
+        </div>
+        <div class="player-funnel">
+            <div class="funnel-step">
+                <div class="funnel-number">1,243</div>
+                <div>Visitors</div>
+            </div>
+            <div class="funnel-arrow">→</div>
+            <div class="funnel-step">
+                <div class="funnel-number">856</div>
+                <div>Game Starts</div>
+                <div class="conversion-rate">68.9%</div>
+            </div>
+            <div class="funnel-arrow">→</div>
+            <div class="funnel-step">
+                <div class="funnel-number">524</div>
+                <div>Level Completions</div>
+                <div class="conversion-rate">61.2%</div>
+            </div>
+            <div class="funnel-arrow">→</div>
+            <div class="funnel-step">
+                <div class="funnel-number">156</div>
+                <div>Premium Interest</div>
+                <div class="conversion-rate">29.8%</div>
+            </div>
+            <div class="funnel-arrow">→</div>
+            <div class="funnel-step">
+                <div class="funnel-number">87</div>
+                <div>Premium Purchases</div>
+                <div class="conversion-rate">55.8%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Performance Metrics -->
+    <div class="chart-container">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-icon">🎮</span>
+                Game Performance Metrics
+            </div>
+        </div>
+        <table class="metrics-table">
+            <thead>
+                <tr>
+                    <th>Game</th>
+                    <th>Daily Players</th>
+                    <th>Avg. Session</th>
+                    <th>Completion Rate</th>
+                    <th>Revenue</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Signal Breach</strong></td>
+                    <td>856</td>
+                    <td>8m 34s</td>
+                    <td>61.2%</td>
+                    <td>$127.45</td>
+                    <td><span class="status-indicator status-live"></span>Live</td>
+                </tr>
+                <tr>
+                    <td><strong>Chain Cascade</strong></td>
+                    <td>234</td>
+                    <td>5m 12s</td>
+                    <td>45.8%</td>
+                    <td>$23.80</td>
+                    <td><span class="status-indicator status-live"></span>Live</td>
+                </tr>
+                <tr>
+                    <td><strong>Dot Conquest</strong></td>
+                    <td>187</td>
+                    <td>6m 47s</td>
+                    <td>52.3%</td>
+                    <td>$15.60</td>
+                    <td><span class="status-indicator status-live"></span>Live</td>
+                </tr>
+                <tr>
+                    <td><strong>Reflex Runner</strong></td>
+                    <td>98</td>
+                    <td>4m 23s</td>
+                    <td>38.9%</td>
+                    <td>$8.45</td>
+                    <td><span class="status-indicator status-warning"></span>Beta</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Revenue Breakdown -->
+    <div class="chart-container">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-icon">💎</span>
+                Revenue Breakdown (Last 30 Days)
+            </div>
+        </div>
+        <table class="metrics-table">
+            <thead>
+                <tr>
+                    <th>Revenue Source</th>
+                    <th>Amount</th>
+                    <th>Transactions</th>
+                    <th>Avg. Value</th>
+                    <th>% of Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Premium Purchases</strong></td>
+                    <td>$1,245.50</td>
+                    <td>249</td>
+                    <td>$5.00</td>
+                    <td>67.4%</td>
+                </tr>
+                <tr>
+                    <td><strong>Supporter Packs</strong></td>
+                    <td>$389.70</td>
+                    <td>39</td>
+                    <td>$9.99</td>
+                    <td>21.1%</td>
+                </tr>
+                <tr>
+                    <td><strong>Ultimate Packages</strong></td>
+                    <td>$159.92</td>
+                    <td>8</td>
+                    <td>$19.99</td>
+                    <td>8.7%</td>
+                </tr>
+                <tr>
+                    <td><strong>Donations</strong></td>
+                    <td>$52.18</td>
+                    <td>17</td>
+                    <td>$3.07</td>
+                    <td>2.8%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="chart-container">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-icon">🚀</span>
+                Quick Actions
+            </div>
+        </div>
+        <div class="action-buttons">
+            <a href="/admin/analytics" class="action-btn primary-btn">View Detailed Analytics</a>
+            <a href="/admin/commerce" class="action-btn">Manage Products</a>
+            <a href="/admin/customers" class="action-btn">Customer Support</a>
+            <a href="/admin/campaigns" class="action-btn">Marketing Campaigns</a>
+            <button class="action-btn" onclick="exportData()">Export Data</button>
+            <button class="action-btn" onclick="refreshDashboard()">Refresh Data</button>
+        </div>
+    </div>
+
+    <div class="last-updated">
+        Last updated: <span id="last-updated">Just now</span> | Auto-refresh: Every 5 minutes
+    </div>
+</div>
+
+<script>
+// =================== DASHBOARD FUNCTIONALITY ===================
+
+class Unit4Dashboard {
+    constructor() {
+        this.refreshInterval = 5 * 60 * 1000; // 5 minutes
+        this.lastUpdate = Date.now();
+        this.init();
+    }
+
+    init() {
+        this.updateDashboard();
+        this.startAutoRefresh();
+        this.setupEventListeners();
+        console.log('Unit4Productions Dashboard Initialized');
+    }
+
+    async updateDashboard() {
+        try {
+            // Simulate API calls to get real data
+            const data = await this.fetchDashboardData();
+            this.updateMetrics(data);
+            this.updateCharts(data);
+            this.updateLastUpdated();
+            
+            // Track dashboard view
+            this.trackEvent('dashboard_viewed');
+        } catch (error) {
+            console.error('Dashboard update failed:', error);
+            this.showError('Failed to update dashboard data');
+        }
+    }
+
+    async fetchDashboardData() {
+        // In production, this would fetch from your analytics API
+        // For now, we'll simulate with stored data + some calculations
+        
+        const baseData = {
+            dailyRevenue: this.calculateDailyRevenue(),
+            monthlyRevenue: this.calculateMonthlyRevenue(),
+            activeUsers: this.getActiveUsers(),
+            premiumUsers: this.getPremiumUsers(),
+            conversionRate: this.getConversionRate(),
+            avgSession: this.getAverageSession()
+        };
+
+        return baseData;
+    }
+
+    calculateDailyRevenue() {
+        // Get today's orders from localStorage or API
+        const orders = this.getTodayOrders();
+        return orders.reduce((sum, order) => sum + order.amount, 0);
+    }
+
+    calculateMonthlyRevenue() {
+        // Get this month's orders
+        const orders = this.getMonthOrders();
+        return orders.reduce((sum, order) => sum + order.amount, 0);
+    }
+
+    getTodayOrders() {
+        // Simulate today's orders
+        const today = new Date().toDateString();
+        const mockOrders = JSON.parse(localStorage.getItem('daily_orders') || '[]');
+        
+        // Add some random variation for demo
+        const baseRevenue = 85 + Math.random() * 100;
+        return [{ amount: baseRevenue, date: today }];
+    }
+
+    getMonthOrders() {
+        // Simulate monthly orders
+        const mockRevenue = 1200 + Math.random() * 1000;
+        return [{ amount: mockRevenue }];
+    }
+
+    getActiveUsers() {
+        // Simulate active user count
+        return Math.floor(1000 + Math.random() * 500);
+    }
+
+    getPremiumUsers() {
+        // Get premium user count from localStorage
+        const premiumKeys = this.getAllPremiumKeys();
+        return premiumKeys.length + Math.floor(Math.random() * 20);
+    }
+
+    getAllPremiumKeys() {
+        // In production, this would query your user database
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.includes('premium_key')) {
+                keys.push(key);
+            }
+        }
+        return keys;
+    }
+
+    getConversionRate() {
+        const totalUsers = this.getActiveUsers();
+        const premiumUsers = this.getPremiumUsers();
+        return ((premiumUsers / totalUsers) * 100).toFixed(1);
+    }
+
+    getAverageSession() {
+        // Calculate average session from analytics data
+        const sessions = JSON.parse(localStorage.getItem('session_data') || '[]');
+        if (sessions.length === 0) return '8m 34s';
+        
+        const avgSeconds = sessions.reduce((sum, session) => sum + session.duration, 0) / sessions.length;
+        const minutes = Math.floor(avgSeconds / 60);
+        const seconds = Math.floor(avgSeconds % 60);
+        return `${minutes}m ${seconds}s`;
+    }
+
+    updateMetrics(data) {
+        // Update displayed values
+        const dailyRevenue = document.getElementById('daily-revenue');
+        const monthlyRevenue = document.getElementById('monthly-revenue');
+        const activeUsers = document.getElementById('active-players');
+        const premiumUsers = document.getElementById('premium-users');
+        const conversionRate = document.getElementById('conversion-rate');
+
+        if (dailyRevenue) dailyRevenue.textContent = `$${data.dailyRevenue.toFixed(2)}`;
+        if (monthlyRevenue) monthlyRevenue.textContent = `$${data.monthlyRevenue.toFixed(2)}`;
+        if (activeUsers) activeUsers.textContent = data.activeUsers.toLocaleString();
+        if (premiumUsers) premiumUsers.textContent = data.premiumUsers;
+        if (conversionRate) conversionRate.textContent = `${data.conversionRate}%`;
+
+        // Animate changes
+        this.animateValueChanges();
+    }
+
+    updateCharts(data) {
+        // Update mini charts with new data
+        const charts = document.querySelectorAll('.mini-chart');
+        charts.forEach(chart => {
+            const bars = chart.querySelectorAll('.chart-bar');
+            bars.forEach((bar, index) => {
+                // Simulate data variation
+                const height = Math.random() * 90 + 10;
+                bar.style.height = `${height}%`;
+            });
+        });
+    }
+
+    animateValueChanges() {
+        const valueElements = document.querySelectorAll('.card-value');
+        valueElements.forEach(element => {
+            element.style.transform = 'scale(1.05)';
+            element.style.color = '#4ecdc4';
+            
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+                element.style.color = '#4ecdc4';
+            }, 200);
+        });
+    }
+
+    updateLastUpdated() {
+        const lastUpdatedElement = document.getElementById('last-updated');
+        if (lastUpdatedElement) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            lastUpdatedElement.textContent = timeString;
+        }
+        this.lastUpdate = Date.now();
+    }
+
+    startAutoRefresh() {
+        setInterval(() => {
+            this.updateDashboard();
+            console.log('Dashboard auto-refreshed');
+        }, this.refreshInterval);
+    }
+
+    setupEventListeners() {
+        // Handle refresh button
+        window.refreshDashboard = () => {
+            this.updateDashboard();
+            this.showNotification('Dashboard refreshed!');
+        };
+
+        // Handle export button
+        window.exportData = () => {
+            this.exportDashboardData();
+        };
+
+        // Handle card hover effects
+        const cards = document.querySelectorAll('.dashboard-card');
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                this.trackEvent('dashboard_card_clicked', {
+                    card: card.querySelector('.card-title').textContent
+                });
+            });
+        });
+    }
+
+    exportDashboardData() {
+        const data = {
+            exportDate: new Date().toISOString(),
+            metrics: {
+                dailyRevenue: document.getElementById('daily-revenue')?.textContent,
+                monthlyRevenue: document.getElementById('monthly-revenue')?.textContent,
+                activeUsers: document.getElementById('active-players')?.textContent,
+                premiumUsers: document.getElementById('premium-users')?.textContent,
+                conversionRate: document.getElementById('conversion-rate')?.textContent
+            }
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `unit4-analytics-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        this.showNotification('Data exported successfully!');
+        this.trackEvent('dashboard_data_exported');
+    }
+
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    showError(message) {
+        console.error(message);
+        this.showNotification(`Error: ${message}`, 'error');
+    }
+
+    trackEvent(eventName, parameters = {}) {
+        // Track dashboard interactions
+        if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, {
+                'event_category': 'Dashboard',
+                'custom_parameters': parameters
+            });
+        }
+
+        console.log('Dashboard Event:', eventName, parameters);
+    }
+}
+
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const dashboard = new Unit4Dashboard();
+    window.dashboard = dashboard; // Make it globally accessible
+});
+
+// =================== UTILITY FUNCTIONS ===================
+
+// Format currency values
+function formatCurrency(value) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(value);
+}
+
+// Format large numbers
+function formatNumber(value) {
+    if (value >= 1000000) {
+        return (value / 1000000).toFixed(1) + 'M';
+    } else if (value >= 1000) {
+        return (value / 1000).toFixed(1) + 'K';
+    }
+    return value.toString();
+}
+
+// Calculate percentage change
+function calculatePercentageChange(current, previous) {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous * 100).toFixed(1);
+}
+
+// Storage helpers for demo data
+function storeDemoData() {
+    const demoOrders = [
+        { amount: 4.99, product: 'signal_breach_premium', date: new Date().toISOString() },
+        { amount: 9.99, product: 'gaming_supporter', date: new Date().toISOString() },
+        { amount: 19.99, product: 'ultimate_gamer', date: new Date().toISOString() }
+    ];
+    
+    localStorage.setItem('demo_orders', JSON.stringify(demoOrders));
+    console.log('Demo data stored');
+}
+
+// Initialize demo data if needed
+if (!localStorage.getItem('demo_orders')) {
+    storeDemoData();
+}
+</script>
+
+</body>
+</html>

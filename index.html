@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotInc - Revolutionary Browser Gaming | Signal Breach & More</title>
+    <meta name="description" content="BotInc creates cutting-edge browser games that push the boundaries of web technology. Experience Signal Breach and our upcoming revolutionary games.">
+    <meta name="keywords" content="browser games, web games, Signal Breach, BotInc, online gaming, cyberpunk games, strategy games">
+    <meta name="author" content="BotInc Games">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="BotInc - Revolutionary Browser Gaming">
+    <meta property="og:description" content="Experience cutting-edge browser games that push the boundaries of web technology. Play Signal Breach and discover our gaming universe.">
+    <meta property="og:image" content="/assets/images/botinc-banner.jpg">
+    <meta property="og:url" content="https://botinc.games">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="BotInc - Revolutionary Browser Gaming">
+    <meta name="twitter:description" content="Experience cutting-edge browser games that push the boundaries of web technology.">
+    <meta name="twitter:image" content="/assets/images/botinc-banner.jpg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/assets/css/main.css" as="style">
+    <link rel="preload" href="/assets/js/main.js" as="script">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BOTINC2025"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-BOTINC2025', {
+            custom_map: {
+                'custom_parameter_1': 'game_type',
+                'custom_parameter_2': 'player_level',
+                'custom_parameter_3': 'session_length'
+            }
+        });
+        
+        // Enhanced Analytics Functions
+        window.trackGameEvent = function(action, game, details = {}) {
+            gtag('event', action, {
+                'event_category': 'game_interaction',
+                'event_label': game,
+                'custom_parameter_1': details.game_type || 'browser_game',
+                'custom_parameter_2': details.player_level || '1',
+                'custom_parameter_3': details.session_length || '0',
+                'value': details.score || 0,
+                'engagement_time_msec': details.engagement_time || 0
+            });
+        };
+        
+        window.trackSocialShare = function(platform, game, score) {
+            gtag('event', 'share', {
+                'method': platform,
+                'content_type': 'game_score',
+                'content_id': game,
+                'value': score
+            });
+        };
+        
+        window.trackAchievement = function(achievement_id, game, value) {
+            gtag('event', 'unlock_achievement', {
+                'achievement_id': achievement_id,
+                'event_category': 'achievements',
+                'event_label': game,
+                'value': value
+            });
+        };
+        
+        // Session tracking
+        let sessionStartTime = Date.now();
+        let engagementEvents = [];
+        
+        window.trackEngagement = function(eventType, data = {}) {
+            let eventTime = Date.now();
+            let sessionTime = Math.floor((eventTime - sessionStartTime) / 1000);
+            
+            engagementEvents.push({
+                event: eventType,
+                time: sessionTime,
+                data: data
+            });
+            
+            gtag('event', 'custom_engagement', {
+                'event_category': 'user_engagement',
+                'event_label': eventType,
+                'session_time': sessionTime,
+                'total_events': engagementEvents.length
+            });
+        };
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="/assets/images/botinc-logo.png" alt="BotInc Games Logo" class="logo-img">
+                <span class="logo-text">BotInc</span>
+            </div>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#games" class="nav-link">Games</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="/blog/" class="nav-link">News</a></li>
+                <li><a href="/contact/" class="nav-link">Contact</a></li>
+                <li><a href="#newsletter" class="nav-link cta-link">Join Beta</a></li>
+            </ul>
+            
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-background">
+            <div class="hero-grid"></div>
+            <canvas id="heroCanvas" class="hero-canvas"></canvas>
+        </div>
+        
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span>New Release</span>
+            </div>
+            <h1 class="hero-title">
+                <span class="highlight">Revolutionary</span><br>
+                Browser Gaming
+            </h1>
+            <p class="hero-description">
+                BotInc pushes the boundaries of what's possible in your browser. Experience cutting-edge games with console-quality graphics and gameplay that runs anywhere, anytime.
+            </p>
+            <div class="hero-actions">
+                <a href="/signal-breach.html" class="btn btn-primary">
+                    <span>Play Signal Breach</span>
+                    <i class="icon-play"></i>
+                </a>
+                <a href="#games" class="btn btn-secondary">
+                    <span>Explore Games</span>
+                    <i class="icon-arrow-down"></i>
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">100K+</div>
+                    <div class="stat-label">Players</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4.8★</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">Zero</div>
+                    <div class="stat-label">Downloads</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- Featured Game Showcase -->
+    <section class="featured-game">
+        <div class="container">
+            <div class="featured-content">
+                <div class="featured-info">
+                    <div class="game-badge">Flagship Game</div>
+                    <h2 class="section-title">Signal Breach</h2>
+                    <p class="game-description">
+                        Hack corporate networks in this intense cyberpunk strategy game. Place nodes, route data packets, and evade security algorithms in real-time. Every decision matters when you're one trace away from detection.
+                    </p>
+                    <div class="game-features">
+                        <div class="feature-item">
+                            <i class="icon-strategy"></i>
+                            <span>Real-time Strategy</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="icon-network"></i>
+                            <span>Network Simulation</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="icon-cyberpunk"></i>
+                            <span>Cyberpunk Aesthetic</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="icon-multiplayer"></i>
+                            <span>Competitive Leaderboards</span>
+                        </div>
+                    </div>
+                    <div class="game-actions">
+                        <a href="/signal-breach.html" class="btn btn-primary btn-large">
+                            Play Now
+                        </a>
+                        <a href="#" class="btn btn-outline">
+                            Watch Trailer
+                        </a>
+                    </div>
+                    <div class="game-stats">
+                        <div class="stat">
+                            <span class="stat-value">50K+</span>
+                            <span class="stat-label">Players</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">4.9★</span>
+                            <span class="stat-label">Rating</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">15min</span>
+                            <span class="stat-label">Avg Session</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="featured-visual">
+                    <div class="game-mockup">
+                        <div class="mockup-screen">
+                            <img src="/assets/images/signal-breach-screenshot.jpg" alt="Signal Breach Gameplay Screenshot" class="game-screenshot">
+                            <div class="play-overlay">
+                                <button class="play-button" onclick="playGameDemo()">
+                                    <i class="icon-play-large"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mockup-glow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Portfolio -->
+    <section id="games" class="games-portfolio">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Our Gaming Universe</h2>
+                <p class="section-subtitle">
+                    From cyberpunk strategy to arcade action, discover games that push the boundaries of browser technology.
+                </p>
+            </div>
+            
+            <div class="games-grid">
+                <!-- Signal Breach - Featured -->
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="/assets/images/signal-breach-card.jpg" alt="Signal Breach" class="game-image">
+                        <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="/signal-breach.html" class="play-btn">Play Game</a>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="game-title">Signal Breach</h3>
+                        <p class="game-genre">Cyberpunk Strategy</p>
+                        <p class="game-short-desc">Hack networks, evade detection, master the digital underground.</p>
+                        <div class="game-rating">
+                            <div class="stars">★★★★★</div>
+                            <span class="rating-text">4.9/5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- New Release - Cipher Storm -->
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="/assets/images/cipher-storm-card.jpg" alt="Cipher Storm" class="game-image">
+                        <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="/cipher-storm.html" class="play-btn">Play Game</a>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="game-title">Cipher Storm</h3>
+                        <p class="game-genre">Narrative Typing</p>
+                        <p class="game-short-desc">Master cyberpunk typing and uncover digital mysteries in this story-driven adventure.</p>
+                        <div class="game-rating">
+                            <div class="stars">★★★★★</div>
+                            <span class="rating-text">4.8/5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Games -->
+                <div class="game-card upcoming">
+                    <div class="card-media">
+                        <img src="/assets/images/dot-conquest-card.jpg" alt="Dot Conquest" class="game-image">
+                        <div class="game-badge">Coming Q2 2025</div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="game-title">Dot Conquest</h3>
+                        <p class="game-genre">Territory Control</p>
+                        <p class="game-short-desc">Expand your digital territory in this real-time strategy masterpiece.</p>
+                        <div class="wishlist-btn">
+                            <button class="btn btn-outline">Add to Wishlist</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="game-card upcoming">
+                    <div class="card-media">
+                        <img src="/assets/images/chain-cascade-card.jpg" alt="Chain Cascade" class="game-image">
+                        <div class="game-badge">Coming Q3 2025</div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="game-title">Chain Cascade</h3>
+                        <p class="game-genre">Puzzle Action</p>
+                        <p class="game-short-desc">Create explosive chain reactions in this addictive puzzle game.</p>
+                        <div class="wishlist-btn">
+                            <button class="btn btn-outline">Add to Wishlist</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="game-card upcoming">
+                    <div class="card-media">
+                        <img src="/assets/images/reflex-runner-card.jpg" alt="Reflex Runner" class="game-image">
+                        <div class="game-badge">Coming Q4 2025</div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="game-title">Reflex Runner</h3>
+                        <p class="game-genre">Endless Runner</p>
+                        <p class="game-short-desc">Test your reflexes in this high-speed cybernetic chase.</p>
+                        <div class="wishlist-btn">
+                            <button class="btn btn-outline">Add to Wishlist</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="games-cta">
+                <a href="#games" class="btn btn-secondary">View All Games</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Company Mission -->
+    <section id="about" class="company-mission">
+        <div class="container">
+            <div class="mission-content">
+                <div class="mission-text">
+                    <h2 class="section-title">Redefining Browser Gaming</h2>
+                    <p class="mission-statement">
+                        At BotInc, we believe the future of gaming lies in accessibility without compromise. Our mission is to create console-quality experiences that run instantly in any browser, breaking down barriers between players and great games.
+                    </p>
+                    <div class="company-values">
+                        <div class="value-item">
+                            <i class="icon-innovation"></i>
+                            <h4>Innovation First</h4>
+                            <p>Pushing web technology to its limits with every release.</p>
+                        </div>
+                        <div class="value-item">
+                            <i class="icon-accessibility"></i>
+                            <h4>Universal Access</h4>
+                            <p>Great games should be available to everyone, everywhere.</p>
+                        </div>
+                        <div class="value-item">
+                            <i class="icon-quality"></i>
+                            <h4>Quality Focus</h4>
+                            <p>Every pixel, every frame, every interaction crafted to perfection.</p>
+                        </div>
+                    </div>
+                    <a href="/about/" class="btn btn-outline">Learn More About Us</a>
+                </div>
+                
+                <div class="mission-visual">
+                    <div class="tech-showcase">
+                        <div class="tech-item">
+                            <span class="tech-label">HTML5 Canvas</span>
+                            <div class="tech-bar">
+                                <div class="tech-progress" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <span class="tech-label">WebGL</span>
+                            <div class="tech-bar">
+                                <div class="tech-progress" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <span class="tech-label">WebAssembly</span>
+                            <div class="tech-bar">
+                                <div class="tech-progress" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <span class="tech-label">Service Workers</span>
+                            <div class="tech-bar">
+                                <div class="tech-progress" style="width: 88%"></div>
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <span class="tech-label">Web Audio API</span>
+                            <div class="tech-bar">
+                                <div class="tech-progress" style="width: 92%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Signup -->
+    <section id="newsletter" class="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <div class="newsletter-text">
+                    <h2 class="section-title">Join the Gaming Revolution</h2>
+                    <p class="newsletter-description">
+                        Be the first to experience our latest games, get exclusive beta access, and receive updates on the future of browser gaming.
+                    </p>
+                </div>
+                
+                <form class="newsletter-form" id="newsletterForm">
+                    <div class="form-group">
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="Enter your email address" 
+                            required
+                            class="form-input"
+                        >
+                        <button type="submit" class="btn btn-primary">
+                            Join Beta
+                        </button>
+                    </div>
+                    <div class="form-benefits">
+                        <div class="benefit-item">
+                            <i class="icon-early-access"></i>
+                            <span>Early Access</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="icon-exclusive"></i>
+                            <span>Exclusive Content</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="icon-community"></i>
+                            <span>Community Updates</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="/assets/images/botinc-logo.png" alt="BotInc Games" class="footer-logo-img">
+                        <span class="footer-logo-text">BotInc</span>
+                    </div>
+                    <p class="footer-description">
+                        Revolutionizing browser gaming with cutting-edge technology and innovative gameplay experiences.
+                    </p>
+                    <div class="social-links">
+                        <a href="https://twitter.com/botincgames" class="social-link" aria-label="Twitter">
+                            <i class="icon-twitter"></i>
+                        </a>
+                        <a href="https://discord.gg/botincgames" class="social-link" aria-label="Discord">
+                            <i class="icon-discord"></i>
+                        </a>
+                        <a href="https://youtube.com/@botincgames" class="social-link" aria-label="YouTube">
+                            <i class="icon-youtube"></i>
+                        </a>
+                        <a href="https://github.com/botincgames" class="social-link" aria-label="GitHub">
+                            <i class="icon-github"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Games</h4>
+                    <ul class="footer-links">
+                        <li><a href="/signal-breach.html">Signal Breach</a></li>
+                        <li><a href="/dot-conquest.html">Dot Conquest</a></li>
+                        <li><a href="/chain-cascade.html">Chain Cascade</a></li>
+                        <li><a href="/reflex-runner.html">Reflex Runner</a></li>
+                        <li><a href="#games">All Games</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="/about/">About Us</a></li>
+                        <li><a href="/blog/">News & Blog</a></li>
+                        <li><a href="/careers/">Careers</a></li>
+                        <li><a href="/press/">Press Kit</a></li>
+                        <li><a href="/contact/">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="/help/">Help Center</a></li>
+                        <li><a href="/privacy/">Privacy Policy</a></li>
+                        <li><a href="/terms/">Terms of Service</a></li>
+                        <li><a href="/cookies/">Cookie Policy</a></li>
+                        <li><a href="/contact/">Contact Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>&copy; 2025 BotInc Games. All rights reserved.</p>
+                </div>
+                <div class="footer-legal">
+                    <a href="/privacy/">Privacy</a>
+                    <a href="/terms/">Terms</a>
+                    <a href="/cookies/">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Ad Placement Areas (for monetization) -->
+    <div class="ad-sidebar-left" id="adSidebarLeft">
+        <!-- Left sidebar ad space - 160x600 -->
+        <div class="ad-placeholder">AD SPACE</div>
+    </div>
+    
+    <div class="ad-sidebar-right" id="adSidebarRight">
+        <!-- Right sidebar ad space - 160x600 -->
+        <div class="ad-placeholder">AD SPACE</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/analytics-dashboard.js"></script>
+    <script src="/assets/js/viral-mechanics.js"></script>
+    <script src="/assets/js/community-system.js"></script>
+    <script src="/assets/js/leaderboards.js"></script>
+    <script src="/assets/js/mobile-optimization.js"></script>
+    <script src="/assets/js/ab-testing.js"></script>
+    <script src="/assets/js/influencer-tools.js"></script>
+    <script src="/assets/js/viral-integration.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('SW registered:', registration))
+                .catch(error => console.log('SW registration failed:', error));
+        }
+    </script>
+</body>
+</html>

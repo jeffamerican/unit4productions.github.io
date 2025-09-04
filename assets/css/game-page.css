@@ -1,0 +1,490 @@
+/* ============================================
+   Individual Game Page Styles
+   ============================================ */
+
+.game-hero {
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    margin-top: 80px;
+}
+
+.game-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.hero-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(26, 0, 51, 0.6) 50%,
+        rgba(0, 0, 0, 0.8) 100%
+    );
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.game-status-badge {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+}
+
+.game-status-badge.available {
+    background: linear-gradient(45deg, #00ff88, #00ffff);
+    color: #000;
+    animation: pulse-available 2s ease-in-out infinite;
+}
+
+.game-status-badge.upcoming {
+    background: linear-gradient(45deg, #ff8800, #ffff00);
+    color: #000;
+    animation: pulse-upcoming 3s ease-in-out infinite;
+}
+
+@keyframes pulse-available {
+    0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(0, 255, 136, 0.8); }
+}
+
+@keyframes pulse-upcoming {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 136, 0, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(255, 136, 0, 0.8); }
+}
+
+.game-title {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: 1rem;
+    text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+    background: linear-gradient(45deg, #ffffff, #00ff88);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.game-tagline {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.game-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+}
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   Game Overview Section
+   ============================================ */
+
+.game-overview {
+    padding: 6rem 0;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.overview-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.overview-text h2 {
+    color: #00ff88;
+    margin-bottom: 1.5rem;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+}
+
+.overview-text p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.feature-highlights {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.feature-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    border-left: 4px solid #00ff88;
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    background: rgba(0, 255, 136, 0.05);
+    transform: translateX(5px);
+}
+
+.feature-item i {
+    color: #00ff88;
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+}
+
+.feature-item h4 {
+    color: #00ff88;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.feature-item p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+.gameplay-image {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.gameplay-image:hover {
+    border-color: rgba(0, 255, 136, 0.6);
+    box-shadow: 0 25px 50px rgba(0, 255, 136, 0.1);
+}
+
+/* ============================================
+   Development Status Section
+   ============================================ */
+
+.development-status {
+    padding: 6rem 0;
+    background: linear-gradient(135deg, rgba(255, 136, 0, 0.05), rgba(255, 255, 0, 0.05));
+}
+
+.development-status .section-title {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #ff8800;
+}
+
+.progress-timeline {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.progress-timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #ff8800, #ffff00);
+    transform: translateX(-50%);
+}
+
+.timeline-item {
+    position: relative;
+    margin: 2rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-item:nth-child(odd) {
+    justify-content: flex-end;
+}
+
+.timeline-item:nth-child(odd) .timeline-content {
+    text-align: right;
+    margin-right: 3rem;
+}
+
+.timeline-item:nth-child(even) .timeline-content {
+    text-align: left;
+    margin-left: 3rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.timeline-item.completed .timeline-marker {
+    background: linear-gradient(45deg, #00ff88, #00ffff);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+}
+
+.timeline-item.in-progress .timeline-marker {
+    background: linear-gradient(45deg, #ff8800, #ffff00);
+    box-shadow: 0 0 15px rgba(255, 136, 0, 0.5);
+    animation: pulse-progress 2s ease-in-out infinite;
+}
+
+.timeline-item.upcoming .timeline-marker {
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+@keyframes pulse-progress {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.2); }
+}
+
+.timeline-content {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 136, 0, 0.3);
+    max-width: 300px;
+    backdrop-filter: blur(10px);
+}
+
+.timeline-item.completed .timeline-content {
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.timeline-item.in-progress .timeline-content {
+    border-color: rgba(255, 136, 0, 0.6);
+    background: rgba(255, 136, 0, 0.1);
+}
+
+.timeline-content h4 {
+    color: #ff8800;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.timeline-item.completed .timeline-content h4 {
+    color: #00ff88;
+}
+
+.timeline-content p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   Game Newsletter Section
+   ============================================ */
+
+.game-newsletter {
+    padding: 4rem 0;
+    background: linear-gradient(45deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 255, 0.05));
+    text-align: center;
+}
+
+.game-newsletter h2 {
+    color: #00ff88;
+    margin-bottom: 1rem;
+}
+
+.game-newsletter p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.game-newsletter .newsletter-form {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.game-newsletter .form-input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
+}
+
+.game-newsletter .form-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.game-newsletter .form-input:focus {
+    outline: none;
+    border-color: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+/* ============================================
+   Responsive Design for Game Pages
+   ============================================ */
+
+@media (max-width: 768px) {
+    .game-hero {
+        min-height: 70vh;
+        margin-top: 70px;
+    }
+
+    .hero-content {
+        padding: 1rem;
+    }
+
+    .game-meta {
+        gap: 1rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .overview-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .progress-timeline::before {
+        left: 20px;
+    }
+
+    .timeline-item {
+        justify-content: flex-start !important;
+    }
+
+    .timeline-item .timeline-content {
+        text-align: left !important;
+        margin-left: 3rem !important;
+        margin-right: 0 !important;
+    }
+
+    .timeline-marker {
+        left: 20px !important;
+    }
+
+    .game-newsletter .newsletter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-hero {
+        min-height: 60vh;
+    }
+
+    .game-meta {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .feature-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .timeline-content {
+        max-width: 250px;
+        padding: 1rem;
+    }
+}
+
+/* ============================================
+   Icon Classes (placeholder for icon font)
+   ============================================ */
+
+.icon-play::before { content: "▶"; }
+.icon-arrow-down::before { content: "↓"; }
+.icon-strategy::before { content: "⚡"; }
+.icon-network::before { content: "🌐"; }
+.icon-cyberpunk::before { content: "💻"; }
+.icon-multiplayer::before { content: "👥"; }
+.icon-physics::before { content: "⚛"; }
+.icon-combo::before { content: "🔥"; }
+.icon-challenge::before { content: "🏆"; }
+.icon-speed::before { content = "⚡"; }
+.icon-procedural::before { content: "🔄"; }
+.icon-powerups::before { content: "⭐"; }
+.icon-heart::before { content: "♥"; }
+.icon-play-large::before { content: "▶"; font-size: 2rem; }
+.icon-innovation::before { content: "💡"; }
+.icon-accessibility::before { content: "🌍"; }
+.icon-quality::before { content: "✨"; }
+.icon-early-access::before { content: "🚀"; }
+.icon-exclusive::before { content: "👑"; }
+.icon-community::before { content: "📢"; }
+.icon-twitter::before { content: "🐦"; }
+.icon-discord::before { content: "💬"; }
+.icon-youtube::before { content: "📺"; }
+.icon-github::before { content: "🔗"; }
+
+/* Make icons more prominent */
+[class^="icon-"]::before,
+[class*=" icon-"]::before {
+    font-style: normal;
+    font-weight: normal;
+    display: inline-block;
+    text-decoration: none;
+}

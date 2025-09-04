@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit4Productions Payment Integration System</title>
+    <style>
+        /* Squarespace-Compatible Payment Styling */
+        .payment-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .payment-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .payment-header h2 {
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .payment-options {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .payment-option {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .payment-option:hover {
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .payment-option h3 {
+            margin: 0 0 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .price-tag {
+            background: #ff6b6b;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        
+        .features-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .features-list li:before {
+            content: "✓";
+            color: #4ecdc4;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .payment-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .payment-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            min-width: 150px;
+        }
+        
+        .paypal-btn {
+            background: #0070ba;
+            color: white;
+        }
+        
+        .paypal-btn:hover {
+            background: #005ea6;
+            transform: scale(1.05);
+        }
+        
+        .kofi-btn {
+            background: #ff5e5b;
+            color: white;
+        }
+        
+        .kofi-btn:hover {
+            background: #ff4444;
+            transform: scale(1.05);
+        }
+        
+        .stripe-btn {
+            background: #6772e5;
+            color: white;
+        }
+        
+        .stripe-btn:hover {
+            background: #5469d4;
+            transform: scale(1.05);
+        }
+        
+        .support-section {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .donation-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .donation-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 0.75rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .donation-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        .premium-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ffd700;
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transform: rotate(10deg);
+        }
+        
+        .relative {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+<!-- SECTION 1: PREMIUM GAME FEATURES -->
+<div class="payment-container">
+    <div class="payment-header">
+        <h2>🎮 Upgrade Your Gaming Experience</h2>
+        <p>Unlock premium features and support indie game development</p>
+    </div>
+    
+    <div class="payment-options">
+        <!-- Premium Tier 1 -->
+        <div class="payment-option relative">
+            <h3>
+                Signal Breach Premium
+                <span class="price-tag">$4.99</span>
+            </h3>
+            <ul class="features-list">
+                <li>Unlimited Lives - Never wait to play</li>
+                <li>10 Exclusive Levels - Unique challenges</li>
+                <li>15 Custom Themes - Personalize your game</li>
+                <li>Ad-Free Experience - Pure gaming</li>
+                <li>Priority Support - Direct developer contact</li>
+                <li>Statistics Dashboard - Track your progress</li>
+            </ul>
+            <div class="payment-buttons">
+                <!-- PayPal Button -->
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+                    <input type="hidden" name="cmd" value="_s-xclick">
+                    <input type="hidden" name="hosted_button_id" value="PREMIUM_SIGNAL_BREACH">
+                    <input type="hidden" name="custom" value="signal_breach_premium">
+                    <input type="submit" class="payment-btn paypal-btn" value="Buy with PayPal" onclick="trackPurchaseIntent('signal_breach_premium', 4.99)">
+                </form>
+                
+                <!-- Squarespace Commerce Link -->
+                <a href="/premium-signal-breach" class="payment-btn stripe-btn" onclick="trackPurchaseIntent('signal_breach_premium', 4.99)">
+                    Buy with Card
+                </a>
+            </div>
+        </div>
+        
+        <!-- Gaming Supporter Tier -->
+        <div class="payment-option relative">
+            <div class="premium-badge">POPULAR</div>
+            <h3>
+                Gaming Supporter
+                <span class="price-tag">$9.99</span>
+            </h3>
+            <ul class="features-list">
+                <li>All Signal Breach Premium Features</li>
+                <li>Premium Access to All Games</li>
+                <li>Early Access to New Releases</li>
+                <li>Exclusive Developer Discord Channel</li>
+                <li>Monthly Developer Updates</li>
+                <li>Vote on New Game Features</li>
+                <li>Special Supporter Badge</li>
+            </ul>
+            <div class="payment-buttons">
+                <!-- PayPal Button -->
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+                    <input type="hidden" name="cmd" value="_s-xclick">
+                    <input type="hidden" name="hosted_button_id" value="GAMING_SUPPORTER">
+                    <input type="hidden" name="custom" value="gaming_supporter">
+                    <input type="submit" class="payment-btn paypal-btn" value="Support with PayPal" onclick="trackPurchaseIntent('gaming_supporter', 9.99)">
+                </form>
+                
+                <!-- Squarespace Commerce Link -->
+                <a href="/gaming-supporter" class="payment-btn stripe-btn" onclick="trackPurchaseIntent('gaming_supporter', 9.99)">
+                    Support with Card
+                </a>
+            </div>
+        </div>
+        
+        <!-- Ultimate Gamer Tier -->
+        <div class="payment-option relative">
+            <h3>
+                Ultimate Gamer
+                <span class="price-tag">$19.99</span>
+            </h3>
+            <ul class="features-list">
+                <li>All Previous Features Included</li>
+                <li>Monthly Exclusive Game Release</li>
+                <li>Direct 1-on-1 Developer Feedback</li>
+                <li>Beta Testing Privileges</li>
+                <li>Revenue Sharing on Popular Ideas</li>
+                <li>Lifetime 20% Discount on Future Games</li>
+                <li>Personal Thanks in Game Credits</li>
+            </ul>
+            <div class="payment-buttons">
+                <!-- PayPal Button -->
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+                    <input type="hidden" name="cmd" value="_s-xclick">
+                    <input type="hidden" name="hosted_button_id" value="ULTIMATE_GAMER">
+                    <input type="hidden" name="custom" value="ultimate_gamer">
+                    <input type="submit" class="payment-btn paypal-btn" value="Ultimate with PayPal" onclick="trackPurchaseIntent('ultimate_gamer', 19.99)">
+                </form>
+                
+                <!-- Squarespace Commerce Link -->
+                <a href="/ultimate-gamer" class="payment-btn stripe-btn" onclick="trackPurchaseIntent('ultimate_gamer', 19.99)">
+                    Ultimate with Card
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 2: SUPPORT & DONATIONS -->
+<div class="payment-container">
+    <div class="support-section">
+        <h3>💖 Support Indie Development</h3>
+        <p>Every contribution helps us create more amazing games for you to enjoy!</p>
+        
+        <div class="donation-buttons">
+            <!-- Ko-fi Integration -->
+            <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+            <script type='text/javascript'>
+                kofiwidget2.init('Support Unit4Productions', '#29abe0', 'YOUR_KOFI_ID');
+                kofiwidget2.draw();
+            </script>
+            
+            <!-- PayPal Donation Buttons -->
+            <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                <input type="hidden" name="hosted_button_id" value="COFFEE_DONATION">
+                <input type="submit" class="donation-btn" value="☕ Buy Me Coffee ($3)" onclick="trackDonation(3, 'paypal')">
+            </form>
+            
+            <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                <input type="hidden" name="hosted_button_id" value="BEER_DONATION">
+                <input type="submit" class="donation-btn" value="🍺 Buy Me Beer ($5)" onclick="trackDonation(5, 'paypal')">
+            </form>
+            
+            <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                <input type="hidden" name="hosted_button_id" value="PIZZA_DONATION">
+                <input type="submit" class="donation-btn" value="🍕 Buy Me Pizza ($10)" onclick="trackDonation(10, 'paypal')">
+            </form>
+        </div>
+        
+        <p style="margin-top: 1.5rem; font-size: 0.9rem; opacity: 0.8;">
+            Your support helps keep our games free-to-play while funding new development!
+        </p>
+    </div>
+</div>
+
+<!-- SECTION 3: PAYMENT SUCCESS HANDLER -->
+<script>
+// =================== PAYMENT TRACKING & SUCCESS HANDLING ===================
+
+// Track purchase intent when user clicks buy button
+function trackPurchaseIntent(product, price) {
+    if (typeof Unit4Track !== 'undefined') {
+        Unit4Track.purchase(product, price, 'intent_' + Date.now());
+    }
+    
+    // Store purchase intent for success page
+    localStorage.setItem('purchase_intent', JSON.stringify({
+        product: product,
+        price: price,
+        timestamp: Date.now()
+    }));
+}
+
+// Track donation clicks
+function trackDonation(amount, platform) {
+    if (typeof Unit4Track !== 'undefined') {
+        Unit4Track.donation(amount, platform);
+    }
+}
+
+// Handle successful purchases (call this from PayPal/Squarespace success pages)
+function handlePurchaseSuccess(transactionId, product, price) {
+    // Track the successful purchase
+    if (typeof Unit4Track !== 'undefined') {
+        Unit4Track.purchase(product, price, transactionId);
+    }
+    
+    // Set premium status
+    const premiumKey = 'PREMIUM_' + Date.now() + '_' + product.toUpperCase();
+    localStorage.setItem('premium_key', premiumKey);
+    localStorage.setItem('premium_product', product);
+    localStorage.setItem('purchase_date', new Date().toISOString());
+    localStorage.setItem('transaction_id', transactionId);
+    
+    // Show success message
+    showPurchaseSuccess(product);
+    
+    // Redirect to premium content
+    setTimeout(() => {
+        window.location.href = '/games/signal-breach?premium=true';
+    }, 3000);
+}
+
+// Show purchase success modal
+function showPurchaseSuccess(product) {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        ">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+            <h2 style="margin: 0 0 1rem 0;">Welcome to Premium!</h2>
+            <p style="margin-bottom: 2rem;">
+                Thank you for supporting Unit4Productions! Your premium features are now active.
+            </p>
+            <div style="
+                background: rgba(255,255,255,0.1);
+                padding: 1.5rem;
+                border-radius: 10px;
+                margin-bottom: 2rem;
+                text-align: left;
+            ">
+                <h3 style="margin-top: 0;">Your New Features:</h3>
+                <div style="display: grid; gap: 0.5rem;">
+                    <div>🔋 Unlimited Lives</div>
+                    <div>🎮 Exclusive Levels</div>
+                    <div>🎨 Custom Themes</div>
+                    <div>🚫 No More Ads</div>
+                    <div>📊 Premium Statistics</div>
+                    <div>💬 Priority Support</div>
+                </div>
+            </div>
+            <button onclick="this.closest('div').parentElement.remove()" style="
+                background: #4ecdc4;
+                color: white;
+                border: none;
+                padding: 1rem 2rem;
+                border-radius: 25px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 1.1rem;
+            ">
+                Start Playing Premium!
+            </button>
+            <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.8;">
+                Redirecting to your premium game in 3 seconds...
+            </p>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Check for premium status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Check URL parameters for successful payments
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('payment') === 'success') {
+        const product = urlParams.get('product') || 'signal_breach_premium';
+        const price = parseFloat(urlParams.get('price')) || 4.99;
+        const txnId = urlParams.get('txn_id') || 'txn_' + Date.now();
+        
+        handlePurchaseSuccess(txnId, product, price);
+    }
+    
+    // Check if user is already premium
+    const premiumKey = localStorage.getItem('premium_key');
+    if (premiumKey) {
+        // Hide ads and show premium features
+        const ads = document.querySelectorAll('.adsbygoogle');
+        ads.forEach(ad => ad.style.display = 'none');
+        
+        // Add premium indicator to page
+        const premiumIndicator = document.createElement('div');
+        premiumIndicator.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        `;
+        premiumIndicator.textContent = '👑 Premium Member';
+        document.body.appendChild(premiumIndicator);
+    }
+});
+
+// =================== PAYPAL INTEGRATION HELPERS ===================
+
+// PayPal success callback
+function onPayPalSuccess(details, data) {
+    const product = data.custom || 'signal_breach_premium';
+    const price = parseFloat(details.purchase_units[0].amount.value);
+    const txnId = details.id;
+    
+    handlePurchaseSuccess(txnId, product, price);
+}
+
+// PayPal error callback
+function onPayPalError(err) {
+    console.error('PayPal payment error:', err);
+    alert('Payment failed. Please try again or contact support.');
+    
+    if (typeof Unit4Track !== 'undefined') {
+        gtag('event', 'payment_error', {
+            'event_category': 'Ecommerce',
+            'error_message': err.message || 'Unknown PayPal error'
+        });
+    }
+}
+
+// =================== SQUARESPACE COMMERCE INTEGRATION ===================
+
+// Handle Squarespace Commerce webhooks
+function handleSquarespaceWebhook(orderData) {
+    const product = orderData.items[0].sku;
+    const price = orderData.grandTotal;
+    const txnId = orderData.id;
+    
+    handlePurchaseSuccess(txnId, product, price);
+}
+
+// =================== PREMIUM VALIDATION ===================
+
+function validatePremiumAccess() {
+    const premiumKey = localStorage.getItem('premium_key');
+    const purchaseDate = localStorage.getItem('purchase_date');
+    
+    if (!premiumKey || !purchaseDate) {
+        return false;
+    }
+    
+    // Check if purchase is still valid (not expired)
+    const daysSincePurchase = (Date.now() - new Date(purchaseDate)) / (1000 * 60 * 60 * 24);
+    return daysSincePurchase < 365; // 1 year validity
+}
+
+// Export functions for global use
+window.PremiumManager = {
+    isPremium: validatePremiumAccess(),
+    handleSuccess: handlePurchaseSuccess,
+    trackIntent: trackPurchaseIntent,
+    trackDonation: trackDonation
+};
+</script>
+
+</body>
+</html>

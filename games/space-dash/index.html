@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Dash - Endless Runner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: radial-gradient(ellipse at center, #0f0f23 0%, #000000 70%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            color: white;
+        }
+
+        .game-container {
+            width: 400px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2);
+        }
+
+        .game-header {
+            padding: 15px 20px;
+            text-align: center;
+            background: rgba(0, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score, .distance {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .game-canvas {
+            width: 100%;
+            height: 540px;
+            background: linear-gradient(180deg, #001122 0%, #000000 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ship {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            left: 50px;
+            bottom: 50px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            clip-path: polygon(0% 100%, 50% 0%, 100% 100%, 75% 85%, 25% 85%);
+            box-shadow: 0 0 15px #00ffff;
+            transition: all 0.1s ease;
+            z-index: 100;
+        }
+
+        .ship.boosting {
+            transform: scale(1.2);
+            box-shadow: 0 0 25px #00ffff, 0 0 50px #00ffff;
+        }
+
+        .asteroid {
+            position: absolute;
+            background: radial-gradient(circle, #666 0%, #333 70%, #111 100%);
+            border-radius: 50%;
+            border: 1px solid #888;
+        }
+
+        .asteroid.large {
+            width: 50px;
+            height: 50px;
+        }
+
+        .asteroid.medium {
+            width: 35px;
+            height: 35px;
+        }
+
+        .asteroid.small {
+            width: 25px;
+            height: 25px;
+        }
+
+        .powerup {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .powerup.shield {
+            background: radial-gradient(circle, #00ff00, #008800);
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        .powerup.boost {
+            background: radial-gradient(circle, #ffff00, #cc8800);
+            box-shadow: 0 0 15px #ffff00;
+        }
+
+        .powerup.score {
+            background: radial-gradient(circle, #ff0080, #880044);
+            box-shadow: 0 0 15px #ff0080;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .trail {
+            position: absolute;
+            width: 3px;
+            height: 15px;
+            background: linear-gradient(180deg, #00ffff, transparent);
+            animation: trail 0.3s ease-out forwards;
+        }
+
+        .explosion {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ff4444 0%, #ff8800 50%, transparent 70%);
+            border-radius: 50%;
+            animation: explode 0.5s ease-out forwards;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .game-over h2 {
+            font-size: 28px;
+            color: #00ffff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .stats {
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        .stats div {
+            margin: 5px 0;
+        }
+
+        .upgrade-shop {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            max-width: 300px;
+        }
+
+        .upgrade-shop h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #00ffff;
+        }
+
+        .upgrade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .upgrade-btn {
+            background: #00ffff;
+            color: #000;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .upgrade-btn:disabled {
+            background: #666;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-buttons button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .share-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .status-bar {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            z-index: 200;
+        }
+
+        .shield-indicator {
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .boost-indicator {
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+
+        @keyframes trail {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-20px) scale(0.5); }
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                width: 95vw;
+                height: 85vh;
+            }
+            
+            .game-canvas {
+                height: calc(85vh - 60px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <button class="share-button" onclick="shareScore()">Share</button>
+        <div class="game-header">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="distance">Distance: <span id="distance">0</span>m</div>
+        </div>
+        <div class="game-canvas" id="gameCanvas">
+            <div class="ship" id="ship"></div>
+            <div class="status-bar">
+                <div id="shieldStatus" class="shield-indicator" style="display: none;">Shield Active</div>
+                <div id="boostStatus" class="boost-indicator" style="display: none;">Boost Active</div>
+            </div>
+            <div class="controls">
+                Tap/Click to move up • Hold to boost
+            </div>
+        </div>
+        <div class="game-over" id="gameOver">
+            <h2>Mission Complete!</h2>
+            <div class="stats">
+                <div>Final Score: <span id="finalScore">0</span></div>
+                <div>Distance Traveled: <span id="finalDistance">0</span>m</div>
+                <div>Asteroids Dodged: <span id="asteroidsCount">0</span></div>
+                <div>Powerups Collected: <span id="powerupsCount">0</span></div>
+            </div>
+            <div class="upgrade-shop" id="upgradeShop">
+                <h3>Ship Upgrades</h3>
+                <div class="upgrade-item">
+                    <span>Speed Boost (+20%)</span>
+                    <button class="upgrade-btn" onclick="buyUpgrade('speed')">100 pts</button>
+                </div>
+                <div class="upgrade-item">
+                    <span>Shield Duration (+50%)</span>
+                    <button class="upgrade-btn" onclick="buyUpgrade('shield')">150 pts</button>
+                </div>
+                <div class="upgrade-item">
+                    <span>Score Multiplier (+25%)</span>
+                    <button class="upgrade-btn" onclick="buyUpgrade('multiplier')">200 pts</button>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="restartGame()">Launch Again</button>
+                <button onclick="shareScore()">Share Score</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SpaceDash {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ship = document.getElementById('ship');
+                this.score = 0;
+                this.distance = 0;
+                this.gameRunning = true;
+                this.shipY = 250;
+                this.shipVY = 0;
+                this.gravity = 0.5;
+                this.thrust = -8;
+                this.gameSpeed = 2;
+                this.asteroids = [];
+                this.powerups = [];
+                this.stars = [];
+                this.trails = [];
+                this.particles = [];
+                
+                // Power-up states
+                this.hasShield = false;
+                this.shieldTime = 0;
+                this.hasBoost = false;
+                this.boostTime = 0;
+                this.scoreMultiplier = 1;
+                
+                // Stats
+                this.asteroidsCount = 0;
+                this.powerupsCount = 0;
+                
+                // Upgrades
+                this.upgrades = {
+                    speed: 1,
+                    shield: 1,
+                    multiplier: 1
+                };
+                
+                // Load upgrades
+                const savedUpgrades = localStorage.getItem('spaceDashUpgrades');
+                if (savedUpgrades) {
+                    this.upgrades = JSON.parse(savedUpgrades);
+                }
+                
+                this.initControls();
+                this.initStars();
+                this.gameLoop();
+            }
+
+            initControls() {
+                let isPressed = false;
+                
+                const startThrust = () => {
+                    isPressed = true;
+                    this.ship.classList.add('boosting');
+                };
+                
+                const stopThrust = () => {
+                    isPressed = false;
+                    this.ship.classList.remove('boosting');
+                };
+                
+                // Mouse controls
+                this.canvas.addEventListener('mousedown', startThrust);
+                document.addEventListener('mouseup', stopThrust);
+                
+                // Touch controls
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    startThrust();
+                });
+                document.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    stopThrust();
+                });
+                
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' || e.code === 'ArrowUp') {
+                        e.preventDefault();
+                        if (!isPressed) startThrust();
+                    }
+                });
+                document.addEventListener('keyup', (e) => {
+                    if (e.code === 'Space' || e.code === 'ArrowUp') {
+                        e.preventDefault();
+                        stopThrust();
+                    }
+                });
+                
+                this.thrustActive = () => isPressed;
+            }
+
+            initStars() {
+                for (let i = 0; i < 50; i++) {
+                    this.createStar();
+                }
+            }
+
+            createStar() {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * this.canvas.clientWidth + 'px';
+                star.style.top = Math.random() * this.canvas.clientHeight + 'px';
+                star.style.animationDuration = (0.5 + Math.random() * 1) + 's';
+                this.canvas.appendChild(star);
+                
+                this.stars.push({
+                    element: star,
+                    x: parseInt(star.style.left),
+                    speed: 1 + Math.random() * 2
+                });
+            }
+
+            createAsteroid() {
+                const asteroid = document.createElement('div');
+                const sizes = ['small', 'medium', 'large'];
+                const size = sizes[Math.floor(Math.random() * sizes.length)];
+                
+                asteroid.className = `asteroid ${size}`;
+                asteroid.style.right = '-60px';
+                asteroid.style.top = Math.random() * (this.canvas.clientHeight - 100) + 'px';
+                
+                this.canvas.appendChild(asteroid);
+                
+                this.asteroids.push({
+                    element: asteroid,
+                    x: this.canvas.clientWidth + 60,
+                    y: parseInt(asteroid.style.top),
+                    size: size,
+                    speed: this.gameSpeed + Math.random() * 2
+                });
+            }
+
+            createPowerup() {
+                const powerup = document.createElement('div');
+                const types = ['shield', 'boost', 'score'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                powerup.className = `powerup ${type}`;
+                powerup.style.right = '-30px';
+                powerup.style.top = Math.random() * (this.canvas.clientHeight - 100) + 50 + 'px';
+                
+                this.canvas.appendChild(powerup);
+                
+                this.powerups.push({
+                    element: powerup,
+                    x: this.canvas.clientWidth + 30,
+                    y: parseInt(powerup.style.top),
+                    type: type,
+                    speed: this.gameSpeed
+                });
+            }
+
+            createTrail() {
+                const trail = document.createElement('div');
+                trail.className = 'trail';
+                trail.style.left = '65px';
+                trail.style.bottom = (this.canvas.clientHeight - this.shipY + 15) + 'px';
+                
+                this.canvas.appendChild(trail);
+                
+                setTimeout(() => {
+                    if (trail.parentNode) {
+                        trail.parentNode.removeChild(trail);
+                    }
+                }, 300);
+            }
+
+            createExplosion(x, y) {
+                const explosion = document.createElement('div');
+                explosion.className = 'explosion';
+                explosion.style.left = x + 'px';
+                explosion.style.top = y + 'px';
+                
+                this.canvas.appendChild(explosion);
+                
+                setTimeout(() => {
+                    if (explosion.parentNode) {
+                        explosion.parentNode.removeChild(explosion);
+                    }
+                }, 500);
+            }
+
+            updateShip() {
+                if (this.thrustActive()) {
+                    this.shipVY += this.thrust * 0.15;
+                    
+                    // Create trail effect
+                    if (Math.random() < 0.3) {
+                        this.createTrail();
+                    }
+                }
+                
+                this.shipVY += this.gravity;
+                this.shipY += this.shipVY;
+                
+                // Boundary constraints
+                if (this.shipY < 0) {
+                    this.shipY = 0;
+                    this.shipVY = 0;
+                }
+                if (this.shipY > this.canvas.clientHeight - 30) {
+                    this.shipY = this.canvas.clientHeight - 30;
+                    this.shipVY = 0;
+                }
+                
+                this.ship.style.bottom = (this.canvas.clientHeight - this.shipY - 30) + 'px';
+            }
+
+            updateStars() {
+                this.stars.forEach(star => {
+                    star.x -= star.speed * this.gameSpeed;
+                    star.element.style.left = star.x + 'px';
+                    
+                    if (star.x < -5) {
+                        star.x = this.canvas.clientWidth + 5;
+                        star.element.style.left = star.x + 'px';
+                        star.element.style.top = Math.random() * this.canvas.clientHeight + 'px';
+                    }
+                });
+            }
+
+            updateAsteroids() {
+                this.asteroids.forEach((asteroid, index) => {
+                    asteroid.x -= asteroid.speed;
+                    asteroid.element.style.right = (this.canvas.clientWidth - asteroid.x) + 'px';
+                    
+                    // Check collision with ship
+                    const shipBounds = {
+                        x: 50,
+                        y: this.shipY,
+                        width: 40,
+                        height: 30
+                    };
+                    
+                    const asteroidSize = asteroid.size === 'large' ? 50 : asteroid.size === 'medium' ? 35 : 25;
+                    const asteroidBounds = {
+                        x: asteroid.x,
+                        y: asteroid.y,
+                        width: asteroidSize,
+                        height: asteroidSize
+                    };
+                    
+                    if (this.checkCollision(shipBounds, asteroidBounds)) {
+                        if (this.hasShield) {
+                            // Shield absorbs hit
+                            this.hasShield = false;
+                            this.shieldTime = 0;
+                            this.createExplosion(asteroid.x, asteroid.y);
+                            this.removeAsteroid(index);
+                            this.updateShieldStatus();
+                        } else {
+                            this.gameOver();
+                            return;
+                        }
+                    }
+                    
+                    // Remove off-screen asteroids
+                    if (asteroid.x < -100) {
+                        this.removeAsteroid(index);
+                        this.asteroidsCount++;
+                        this.score += 10 * this.scoreMultiplier * this.upgrades.multiplier;
+                    }
+                });
+            }
+
+            updatePowerups() {
+                this.powerups.forEach((powerup, index) => {
+                    powerup.x -= powerup.speed;
+                    powerup.element.style.right = (this.canvas.clientWidth - powerup.x) + 'px';
+                    
+                    // Check collision with ship
+                    const shipBounds = {
+                        x: 50,
+                        y: this.shipY,
+                        width: 40,
+                        height: 30
+                    };
+                    
+                    const powerupBounds = {
+                        x: powerup.x,
+                        y: powerup.y,
+                        width: 25,
+                        height: 25
+                    };
+                    
+                    if (this.checkCollision(shipBounds, powerupBounds)) {
+                        this.collectPowerup(powerup.type);
+                        this.removePowerup(index);
+                        this.powerupsCount++;
+                    }
+                    
+                    // Remove off-screen powerups
+                    if (powerup.x < -50) {
+                        this.removePowerup(index);
+                    }
+                });
+            }
+
+            checkCollision(rect1, rect2) {
+                return rect1.x < rect2.x + rect2.width &&
+                       rect1.x + rect1.width > rect2.x &&
+                       rect1.y < rect2.y + rect2.height &&
+                       rect1.y + rect1.height > rect2.y;
+            }
+
+            collectPowerup(type) {
+                switch (type) {
+                    case 'shield':
+                        this.hasShield = true;
+                        this.shieldTime = 5000 * this.upgrades.shield;
+                        this.updateShieldStatus();
+                        break;
+                    case 'boost':
+                        this.hasBoost = true;
+                        this.boostTime = 3000;
+                        this.gameSpeed *= 1.5;
+                        this.updateBoostStatus();
+                        break;
+                    case 'score':
+                        this.score += 500 * this.scoreMultiplier * this.upgrades.multiplier;
+                        break;
+                }
+            }
+
+            updateShieldStatus() {
+                const status = document.getElementById('shieldStatus');
+                if (this.hasShield) {
+                    status.style.display = 'block';
+                    status.textContent = `Shield: ${Math.ceil(this.shieldTime / 1000)}s`;
+                } else {
+                    status.style.display = 'none';
+                }
+            }
+
+            updateBoostStatus() {
+                const status = document.getElementById('boostStatus');
+                if (this.hasBoost) {
+                    status.style.display = 'block';
+                    status.textContent = `Boost: ${Math.ceil(this.boostTime / 1000)}s`;
+                } else {
+                    status.style.display = 'none';
+                }
+            }
+
+            removeAsteroid(index) {
+                const asteroid = this.asteroids[index];
+                if (asteroid && asteroid.element.parentNode) {
+                    asteroid.element.parentNode.removeChild(asteroid.element);
+                }
+                this.asteroids.splice(index, 1);
+            }
+
+            removePowerup(index) {
+                const powerup = this.powerups[index];
+                if (powerup && powerup.element.parentNode) {
+                    powerup.element.parentNode.removeChild(powerup.element);
+                }
+                this.powerups.splice(index, 1);
+            }
+
+            updateTimers() {
+                if (this.hasShield) {
+                    this.shieldTime -= 16;
+                    if (this.shieldTime <= 0) {
+                        this.hasShield = false;
+                        this.shieldTime = 0;
+                    }
+                    this.updateShieldStatus();
+                }
+                
+                if (this.hasBoost) {
+                    this.boostTime -= 16;
+                    if (this.boostTime <= 0) {
+                        this.hasBoost = false;
+                        this.boostTime = 0;
+                        this.gameSpeed /= 1.5;
+                    }
+                    this.updateBoostStatus();
+                }
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = Math.floor(this.score);
+                document.getElementById('distance').textContent = Math.floor(this.distance);
+            }
+
+            gameLoop() {
+                if (!this.gameRunning) return;
+
+                // Update game objects
+                this.updateShip();
+                this.updateStars();
+                this.updateAsteroids();
+                this.updatePowerups();
+                this.updateTimers();
+
+                // Spawn objects
+                if (Math.random() < 0.02 + this.distance / 50000) {
+                    this.createAsteroid();
+                }
+                
+                if (Math.random() < 0.005) {
+                    this.createPowerup();
+                }
+
+                // Update game state
+                this.distance += this.gameSpeed * this.upgrades.speed;
+                this.score += this.gameSpeed * 0.1 * this.scoreMultiplier * this.upgrades.multiplier;
+                this.gameSpeed += 0.001; // Gradual speed increase
+
+                this.updateDisplay();
+                
+                requestAnimationFrame(() => this.gameLoop());
+            }
+
+            gameOver() {
+                this.gameRunning = false;
+                
+                // Update final stats
+                document.getElementById('finalScore').textContent = Math.floor(this.score);
+                document.getElementById('finalDistance').textContent = Math.floor(this.distance);
+                document.getElementById('asteroidsCount').textContent = this.asteroidsCount;
+                document.getElementById('powerupsCount').textContent = this.powerupsCount;
+                
+                // Store high score
+                const highScore = localStorage.getItem('spaceDashHighScore') || 0;
+                if (this.score > highScore) {
+                    localStorage.setItem('spaceDashHighScore', Math.floor(this.score));
+                }
+                
+                this.updateUpgradeShop();
+                document.getElementById('gameOver').style.display = 'flex';
+            }
+
+            updateUpgradeShop() {
+                const upgrades = [
+                    { id: 'speed', cost: 100 * this.upgrades.speed },
+                    { id: 'shield', cost: 150 * this.upgrades.shield },
+                    { id: 'multiplier', cost: 200 * this.upgrades.multiplier }
+                ];
+                
+                upgrades.forEach(upgrade => {
+                    const btn = document.querySelector(`button[onclick="buyUpgrade('${upgrade.id}')"]`);
+                    btn.textContent = `${upgrade.cost} pts`;
+                    btn.disabled = this.score < upgrade.cost;
+                });
+            }
+        }
+
+        let game;
+
+        function startGame() {
+            game = new SpaceDash();
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameCanvas').innerHTML = '<div class="ship" id="ship"></div><div class="status-bar"><div id="shieldStatus" class="shield-indicator" style="display: none;">Shield Active</div><div id="boostStatus" class="boost-indicator" style="display: none;">Boost Active</div></div><div class="controls">Tap/Click to move up • Hold to boost</div>';
+            startGame();
+        }
+
+        function buyUpgrade(type) {
+            if (!game) return;
+            
+            const costs = {
+                speed: 100 * game.upgrades.speed,
+                shield: 150 * game.upgrades.shield,
+                multiplier: 200 * game.upgrades.multiplier
+            };
+            
+            if (game.score >= costs[type]) {
+                game.score -= costs[type];
+                game.upgrades[type] += 1;
+                
+                // Save upgrades
+                localStorage.setItem('spaceDashUpgrades', JSON.stringify(game.upgrades));
+                
+                game.updateUpgradeShop();
+                document.getElementById('finalScore').textContent = Math.floor(game.score);
+            }
+        }
+
+        function shareScore() {
+            const score = game ? Math.floor(game.score) : 0;
+            const distance = game ? Math.floor(game.distance) : 0;
+            const text = `I just scored ${score} points and traveled ${distance}m in Space Dash! Can you pilot further into the void?`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Space Dash High Score',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+                window.open(url, '_blank');
+            }
+        }
+
+        // Start the game
+        startGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Forge - Create Words Fast</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 400px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(30, 60, 114, 0.4);
+        }
+
+        .game-header {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-info {
+            display: flex;
+            gap: 20px;
+        }
+
+        .score, .time, .words {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .time {
+            color: #ff6b6b;
+        }
+
+        .words {
+            color: #4ecdc4;
+        }
+
+        .game-area {
+            height: 450px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .falling-letter {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+            animation: fall linear;
+        }
+
+        .falling-letter:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(116, 185, 255, 0.5);
+        }
+
+        .falling-letter.selected {
+            background: linear-gradient(45deg, #55efc4, #00b894);
+            box-shadow: 0 6px 20px rgba(85, 239, 196, 0.6);
+            animation-play-state: paused;
+        }
+
+        .falling-letter.bonus {
+            background: linear-gradient(45deg, #fdcb6e, #f39c12);
+            box-shadow: 0 4px 15px rgba(253, 203, 110, 0.4);
+        }
+
+        .falling-letter.rare {
+            background: linear-gradient(45deg, #a29bfe, #6c5ce7);
+            box-shadow: 0 4px 15px rgba(162, 155, 254, 0.4);
+        }
+
+        .word-input-area {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .current-word {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .submit-btn, .clear-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #55efc4, #00b894);
+            color: white;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(85, 239, 196, 0.4);
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .word-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .word-feedback.valid {
+            color: #55efc4;
+            animation: validWord 1s ease-out forwards;
+        }
+
+        .word-feedback.invalid {
+            color: #ff6b6b;
+            animation: invalidWord 1s ease-out forwards;
+        }
+
+        .word-feedback.bonus {
+            color: #fdcb6e;
+            animation: bonusWord 1.5s ease-out forwards;
+        }
+
+        .share-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 2000;
+        }
+
+        .game-over h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #74b9ff;
+        }
+
+        .final-stats {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            width: 300px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .vocabulary-showcase {
+            background: rgba(116, 185, 255, 0.1);
+            border: 1px solid rgba(116, 185, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            max-width: 350px;
+        }
+
+        .vocabulary-showcase h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #74b9ff;
+        }
+
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .word-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .word-tag.long {
+            background: rgba(85, 239, 196, 0.3);
+            border-color: rgba(85, 239, 196, 0.5);
+        }
+
+        .word-tag.rare {
+            background: rgba(162, 155, 254, 0.3);
+            border-color: rgba(162, 155, 254, 0.5);
+        }
+
+        .restart-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .restart-buttons button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(450px); }
+        }
+
+        @keyframes validWord {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) translateY(-50px); opacity: 0; }
+        }
+
+        @keyframes invalidWord {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            25% { transform: translate(-50%, -50%) scale(1.1) rotate(-5deg); }
+            75% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+            100% { transform: translate(-50%, -50%) scale(0); }
+        }
+
+        @keyframes bonusWord {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            25% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) translateY(-80px); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                width: 95vw;
+                height: 85vh;
+            }
+            
+            .game-area {
+                height: calc(85vh - 150px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <button class="share-button" onclick="shareScore()">Share</button>
+        <div class="game-header">
+            <div class="score-info">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="words">Words: <span id="wordCount">0</span></div>
+                <div class="time">Time: <span id="timer">60</span>s</div>
+            </div>
+        </div>
+        <div class="game-area" id="gameArea"></div>
+        <div class="word-input-area">
+            <div class="current-word" id="currentWord"></div>
+            <div class="action-buttons">
+                <button class="submit-btn" onclick="submitWord()">Submit Word</button>
+                <button class="clear-btn" onclick="clearWord()">Clear</button>
+            </div>
+        </div>
+        <div class="game-over" id="gameOver">
+            <h2>Word Forge Complete!</h2>
+            <div class="final-stats">
+                <div class="stat-row">
+                    <span>Final Score:</span>
+                    <span id="finalScore">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Words Created:</span>
+                    <span id="finalWords">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Longest Word:</span>
+                    <span id="longestWord">-</span>
+                </div>
+                <div class="stat-row">
+                    <span>Average Length:</span>
+                    <span id="averageLength">0</span>
+                </div>
+            </div>
+            <div class="vocabulary-showcase" id="vocabularyShowcase">
+                <h3>Words You Forged:</h3>
+                <div class="word-list" id="wordList"></div>
+            </div>
+            <div class="restart-buttons">
+                <button onclick="restartGame()">Forge Again</button>
+                <button onclick="shareScore()">Share Vocabulary</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class WordForge {
+            constructor() {
+                this.gameArea = document.getElementById('gameArea');
+                this.currentWordDisplay = document.getElementById('currentWord');
+                this.score = 0;
+                this.wordCount = 0;
+                this.timeLeft = 60;
+                this.gameRunning = true;
+                this.fallingLetters = [];
+                this.currentWord = [];
+                this.validWords = [];
+                this.usedWords = new Set();
+                
+                // Letter frequency (higher = more common)
+                this.letterWeights = {
+                    'A': 8, 'E': 12, 'I': 7, 'O': 8, 'U': 4,
+                    'B': 2, 'C': 3, 'D': 4, 'F': 2, 'G': 2, 'H': 6, 'J': 1, 'K': 1,
+                    'L': 4, 'M': 2, 'N': 7, 'P': 2, 'Q': 1, 'R': 6, 'S': 6, 'T': 9,
+                    'V': 1, 'W': 2, 'X': 1, 'Y': 2, 'Z': 1
+                };
+                
+                // Common English words for validation
+                this.dictionary = new Set([
+                    'THE', 'AND', 'FOR', 'ARE', 'BUT', 'NOT', 'YOU', 'ALL', 'CAN', 'HAD', 'HER', 'WAS', 'ONE', 'OUR', 'OUT', 'DAY', 'GET', 'HAS', 'HIM', 'HIS', 'HOW', 'ITS', 'NEW', 'NOW', 'OLD', 'SEE', 'TWO', 'WHO', 'BOY', 'DID', 'EYE', 'FAR', 'FEW', 'GOT', 'GUY', 'LET', 'MAY', 'PUT', 'SAY', 'SET', 'SHE', 'TRY', 'USE', 'WAY', 'WIN', 'YES', 'YET',
+                    'ABOUT', 'AFTER', 'AGAIN', 'ALONG', 'BEING', 'CAME', 'COULD', 'EACH', 'EVERY', 'FIRST', 'FROM', 'GREAT', 'GROUP', 'HAND', 'HAVE', 'HERE', 'HOME', 'HOUSE', 'INTO', 'JUST', 'KNOW', 'LARGE', 'LAST', 'LEFT', 'LIFE', 'LIKE', 'LIVE', 'LONG', 'LOOK', 'MADE', 'MAKE', 'MANY', 'MORE', 'MOST', 'MOVE', 'MUCH', 'NAME', 'NEED', 'NEXT', 'OVER', 'PART', 'PLAY', 'PLACE', 'RIGHT', 'SAID', 'SAME', 'SEEM', 'SHOW', 'SMALL', 'SOME', 'SUCH', 'TAKE', 'THAN', 'THAT', 'THEM', 'THEY', 'THIS', 'TIME', 'TURN', 'VERY', 'WANT', 'WATER', 'WELL', 'WERE', 'WHAT', 'WHEN', 'WHERE', 'WILL', 'WITH', 'WORD', 'WORK', 'YEAR', 'YOUR',
+                    'BACK', 'CALL', 'CAME', 'DOWN', 'EACH', 'FIND', 'GIVE', 'GOOD', 'HELP', 'HIGH', 'KEEP', 'KIND', 'LINE', 'LONG', 'LOOK', 'MAKE', 'MEAN', 'MOVE', 'MUST', 'NEAR', 'OPEN', 'OVER', 'PART', 'PLAY', 'POINT', 'RIGHT', 'ROUND', 'SAID', 'SAME', 'SCHOOL', 'SHALL', 'SHOW', 'SINCE', 'SMALL', 'SOUND', 'STILL', 'SUCH', 'TELL', 'THAN', 'THAT', 'THEIR', 'THERE', 'THESE', 'THEY', 'THINK', 'THIS', 'THOSE', 'THREE', 'THREW', 'THROUGH', 'TIME', 'TOLD', 'TOOK', 'TURN', 'UNDER', 'UNTIL', 'UPON', 'USED', 'VERY', 'WANT', 'WATER', 'WAYS', 'WELL', 'WENT', 'WERE', 'WHAT', 'WHEN', 'WHERE', 'WHICH', 'WHILE', 'WHITE', 'WHOLE', 'WHOSE', 'WILL', 'WITH', 'WORDS', 'WORK', 'WORLD', 'WOULD', 'WRITE', 'YEARS', 'YOUNG',
+                    'ABLE', 'ABOVE', 'ACROSS', 'AFTER', 'AGAIN', 'AGAINST', 'ALMOST', 'ALONG', 'AMONG', 'ANIMAL', 'ANSWER', 'AROUND', 'BECAME', 'BECOME', 'BEFORE', 'BEGIN', 'BEING', 'BELOW', 'BETWEEN', 'BLACK', 'BRING', 'BUILD', 'CARRY', 'CAUSE', 'CHANGE', 'CHILD', 'CHILDREN', 'CLOSE', 'COLOR', 'COME', 'COMPLETE', 'COUNTRY', 'COURSE', 'CREATE', 'CROSS', 'DOING', 'DURING', 'EARTH', 'EARLY', 'EVERY', 'EXAMPLE', 'FAMILY', 'FATHER', 'FIELD', 'FIGURE', 'FINAL', 'FOLLOW', 'FOUND', 'FRIEND', 'GENERAL', 'GIVEN', 'GOING', 'GOVERNMENT', 'GREAT', 'GREEN', 'HAPPY', 'HAVING', 'HEARD', 'HEART', 'HUMAN', 'INCREASE', 'INSIDE', 'ISLAND', 'LARGE', 'LATER', 'LEARN', 'LEAVE', 'LEVEL', 'LIGHT', 'LITTLE', 'LIVING', 'LOCAL', 'MACHINE', 'MONEY', 'MOTHER', 'MUSIC', 'NATION', 'NATURAL', 'NEVER', 'NIGHT', 'NORTH', 'NOTHING', 'NUMBER', 'OFTEN', 'ORDER', 'OTHER', 'PAPER', 'PEOPLE', 'PERSON', 'PICTURE', 'PIECE', 'PLACE', 'PLANT', 'POLITICAL', 'POSSIBLE', 'POWER', 'PROBLEM', 'PROGRAM', 'PUBLIC', 'QUESTION', 'QUITE', 'REALLY', 'REASON', 'RECEIVE', 'RECORD', 'RESULT', 'SECOND', 'SEVERAL', 'SIMPLE', 'SOCIAL', 'SOMETHING', 'SPACE', 'SPEAK', 'SPECIAL', 'START', 'STATE', 'STORY', 'STRONG', 'STUDENT', 'STUDY', 'SYSTEM', 'TABLE', 'TAKEN', 'TEACHER', 'THING', 'THINK', 'THIRD', 'THOUGH', 'TODAY', 'TOGETHER', 'TOWARD', 'TRAVEL', 'TRIED', 'UNDERSTAND', 'UNITED', 'UNTIL', 'USING', 'VALUE', 'VOICE', 'WATCH', 'WEIGHT', 'WHOLE', 'WITHIN', 'WITHOUT', 'WRITING', 'WRITTEN'
+                ]);
+                
+                this.initializeGame();
+                this.startTimer();
+                this.spawnLoop();
+                this.updateDisplay();
+            }
+
+            initializeGame() {
+                // Spawn initial letters
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => this.spawnLetter(), i * 500);
+                }
+            }
+
+            getWeightedRandomLetter() {
+                const letters = Object.keys(this.letterWeights);
+                const weights = Object.values(this.letterWeights);
+                const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+                
+                let random = Math.random() * totalWeight;
+                for (let i = 0; i < letters.length; i++) {
+                    random -= weights[i];
+                    if (random <= 0) {
+                        return letters[i];
+                    }
+                }
+                return letters[letters.length - 1];
+            }
+
+            spawnLetter() {
+                if (!this.gameRunning) return;
+
+                const letter = document.createElement('div');
+                const char = this.getWeightedRandomLetter();
+                
+                // Determine letter type and rarity
+                let letterClass = 'falling-letter';
+                const rarityRoll = Math.random();
+                
+                if (rarityRoll < 0.1) { // 10% rare letters (Q, X, Z)
+                    if (['Q', 'X', 'Z', 'J'].includes(char)) {
+                        letterClass += ' rare';
+                    }
+                } else if (rarityRoll < 0.2) { // 10% bonus letters
+                    letterClass += ' bonus';
+                }
+
+                letter.className = letterClass;
+                letter.textContent = char;
+                letter.style.left = Math.random() * (this.gameArea.clientWidth - 40) + 'px';
+                letter.style.top = '0px';
+                
+                const fallDuration = 8000 + Math.random() * 4000; // 8-12 seconds
+                letter.style.animationDuration = fallDuration + 'ms';
+                
+                const letterData = {
+                    element: letter,
+                    char: char,
+                    x: parseInt(letter.style.left),
+                    selected: false,
+                    type: letterClass.includes('bonus') ? 'bonus' : letterClass.includes('rare') ? 'rare' : 'normal'
+                };
+
+                letter.addEventListener('click', () => this.selectLetter(letterData));
+                
+                this.gameArea.appendChild(letter);
+                this.fallingLetters.push(letterData);
+
+                // Remove letter when animation ends
+                letter.addEventListener('animationend', () => {
+                    this.removeLetter(letterData);
+                });
+            }
+
+            selectLetter(letterData) {
+                if (!this.gameRunning || letterData.selected) return;
+
+                letterData.selected = true;
+                letterData.element.classList.add('selected');
+                
+                this.currentWord.push(letterData);
+                this.updateCurrentWordDisplay();
+            }
+
+            updateCurrentWordDisplay() {
+                const wordString = this.currentWord.map(l => l.char).join('');
+                this.currentWordDisplay.textContent = wordString || 'Click letters to form words...';
+            }
+
+            submitWord() {
+                if (this.currentWord.length < 3) {
+                    this.showFeedback('Need at least 3 letters!', 'invalid');
+                    return;
+                }
+
+                const wordString = this.currentWord.map(l => l.char).join('');
+                
+                if (this.usedWords.has(wordString)) {
+                    this.showFeedback('Already used!', 'invalid');
+                    return;
+                }
+
+                if (this.isValidWord(wordString)) {
+                    this.usedWords.add(wordString);
+                    this.validWords.push(wordString);
+                    
+                    let points = this.calculatePoints(wordString);
+                    this.score += points;
+                    this.wordCount++;
+                    
+                    // Bonus for long words
+                    if (wordString.length >= 6) {
+                        this.showFeedback(`${wordString} (+${points} bonus!)`, 'bonus');
+                    } else {
+                        this.showFeedback(`${wordString} (+${points})`, 'valid');
+                    }
+                    
+                    // Remove selected letters
+                    this.currentWord.forEach(letterData => {
+                        this.removeLetter(letterData);
+                    });
+                    
+                } else {
+                    this.showFeedback(`"${wordString}" not found`, 'invalid');
+                }
+
+                this.clearWord();
+                this.updateDisplay();
+            }
+
+            calculatePoints(word) {
+                let basePoints = word.length * 10;
+                
+                // Bonus for word length
+                if (word.length >= 6) basePoints *= 1.5;
+                if (word.length >= 8) basePoints *= 2;
+                
+                // Bonus for rare letters
+                for (let letter of word) {
+                    if (['Q', 'X', 'Z', 'J'].includes(letter)) {
+                        basePoints += 20;
+                    }
+                }
+                
+                return Math.floor(basePoints);
+            }
+
+            isValidWord(word) {
+                return this.dictionary.has(word.toUpperCase());
+            }
+
+            clearWord() {
+                this.currentWord.forEach(letterData => {
+                    letterData.selected = false;
+                    letterData.element.classList.remove('selected');
+                });
+                
+                this.currentWord = [];
+                this.updateCurrentWordDisplay();
+            }
+
+            showFeedback(text, type) {
+                const feedback = document.createElement('div');
+                feedback.className = `word-feedback ${type}`;
+                feedback.textContent = text;
+                
+                this.gameArea.appendChild(feedback);
+                
+                setTimeout(() => {
+                    if (feedback.parentNode) {
+                        feedback.parentNode.removeChild(feedback);
+                    }
+                }, type === 'bonus' ? 1500 : 1000);
+            }
+
+            removeLetter(letterData) {
+                const index = this.fallingLetters.indexOf(letterData);
+                if (index > -1) {
+                    this.fallingLetters.splice(index, 1);
+                }
+                
+                if (letterData.element.parentNode) {
+                    letterData.element.parentNode.removeChild(letterData.element);
+                }
+                
+                // Remove from current word if selected
+                const wordIndex = this.currentWord.indexOf(letterData);
+                if (wordIndex > -1) {
+                    this.currentWord.splice(wordIndex, 1);
+                    this.updateCurrentWordDisplay();
+                }
+            }
+
+            startTimer() {
+                const timer = setInterval(() => {
+                    this.timeLeft--;
+                    this.updateDisplay();
+                    
+                    if (this.timeLeft <= 0) {
+                        clearInterval(timer);
+                        this.gameOver();
+                    }
+                }, 1000);
+            }
+
+            spawnLoop() {
+                if (!this.gameRunning) return;
+
+                const spawnRate = Math.max(0.3, 1 - (60 - this.timeLeft) / 100); // Increase spawn rate over time
+                if (Math.random() < spawnRate) {
+                    this.spawnLetter();
+                }
+
+                setTimeout(() => this.spawnLoop(), 2000);
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('wordCount').textContent = this.wordCount;
+                document.getElementById('timer').textContent = this.timeLeft;
+            }
+
+            gameOver() {
+                this.gameRunning = false;
+                
+                // Calculate stats
+                const longestWord = this.validWords.reduce((longest, word) => 
+                    word.length > longest.length ? word : longest, '');
+                const averageLength = this.validWords.length > 0 ? 
+                    (this.validWords.reduce((sum, word) => sum + word.length, 0) / this.validWords.length).toFixed(1) : 0;
+
+                // Update final stats
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalWords').textContent = this.wordCount;
+                document.getElementById('longestWord').textContent = longestWord || 'None';
+                document.getElementById('averageLength').textContent = averageLength;
+
+                // Show word list
+                this.displayWordList();
+                
+                // Store high score
+                const highScore = localStorage.getItem('wordForgeHighScore') || 0;
+                if (this.score > highScore) {
+                    localStorage.setItem('wordForgeHighScore', this.score);
+                }
+                
+                document.getElementById('gameOver').style.display = 'flex';
+            }
+
+            displayWordList() {
+                const wordList = document.getElementById('wordList');
+                wordList.innerHTML = '';
+                
+                // Sort words by length (longest first)
+                const sortedWords = this.validWords.sort((a, b) => b.length - a.length);
+                
+                sortedWords.forEach(word => {
+                    const wordTag = document.createElement('span');
+                    wordTag.className = 'word-tag';
+                    wordTag.textContent = word;
+                    
+                    if (word.length >= 6) {
+                        wordTag.classList.add('long');
+                    }
+                    
+                    if (word.split('').some(letter => ['Q', 'X', 'Z', 'J'].includes(letter))) {
+                        wordTag.classList.add('rare');
+                    }
+                    
+                    wordList.appendChild(wordTag);
+                });
+            }
+        }
+
+        let game;
+
+        function startGame() {
+            game = new WordForge();
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameArea').innerHTML = '';
+            startGame();
+        }
+
+        function submitWord() {
+            if (game) game.submitWord();
+        }
+
+        function clearWord() {
+            if (game) game.clearWord();
+        }
+
+        function shareScore() {
+            const score = game ? game.score : 0;
+            const words = game ? game.wordCount : 0;
+            const longestWord = game && game.validWords.length > 0 ? 
+                game.validWords.reduce((longest, word) => word.length > longest.length ? word : longest, '') : '';
+            
+            let text = `I just scored ${score} points and forged ${words} words in Word Forge!`;
+            if (longestWord) {
+                text += ` My longest word was "${longestWord}".`;
+            }
+            text += ' Can you beat my vocabulary?';
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Word Forge High Score',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+                window.open(url, '_blank');
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                submitWord();
+            } else if (e.key === 'Escape') {
+                clearWord();
+            }
+        });
+
+        // Start the game
+        startGame();
+    </script>
+</body>
+</html>

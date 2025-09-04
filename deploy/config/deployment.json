@@ -1,0 +1,81 @@
+{
+  "deployment": {
+    "version": "2.0.0",
+    "type": "git-based",
+    "description": "Simplified git-based deployment system for gaming websites",
+    "requirements": {
+      "git": "2.0+",
+      "node": "16+",
+      "bash": "4.0+"
+    }
+  },
+  "sites": {
+    "unit4productions": {
+      "name": "Unit4 Productions Gaming Portal",
+      "repo": "unit4productions.github.io",
+      "branch": "main",
+      "domain": "unit4productions.com",
+      "template": "gaming-portal",
+      "games": ["reflex-rings", "quantum-hacker", "circuit-runners"],
+      "features": {
+        "analytics": true,
+        "monetization": true,
+        "social_sharing": true,
+        "responsive": true
+      }
+    },
+    "game-specific": {
+      "reflex-rings": {
+        "name": "Reflex Rings",
+        "repo": "reflex-rings-game",
+        "branch": "gh-pages",
+        "template": "single-game",
+        "type": "html5"
+      },
+      "quantum-hacker": {
+        "name": "Quantum Hacker",
+        "repo": "quantum-hacker-game",
+        "branch": "gh-pages", 
+        "template": "single-game",
+        "type": "html5"
+      },
+      "circuit-runners": {
+        "name": "Circuit Runners",
+        "repo": "circuit-runners-game",
+        "branch": "gh-pages",
+        "template": "unity-webgl",
+        "type": "unity"
+      }
+    }
+  },
+  "templates": {
+    "gaming-portal": {
+      "description": "Multi-game gaming portal with monetization",
+      "files": ["index.html", "games/", "assets/", "blog/", "about/"],
+      "features": ["game-library", "user-accounts", "payments", "analytics"]
+    },
+    "single-game": {
+      "description": "Single HTML5 game deployment",
+      "files": ["index.html", "game.js", "assets/"],
+      "features": ["game-engine", "leaderboards", "sharing"]
+    },
+    "unity-webgl": {
+      "description": "Unity WebGL game deployment", 
+      "files": ["index.html", "Build/", "TemplateData/"],
+      "features": ["unity-loader", "fullscreen", "mobile-support"]
+    }
+  },
+  "github": {
+    "organization": "Unit4Productions",
+    "pages": {
+      "enabled": true,
+      "source": "root",
+      "custom_domain": true
+    },
+    "settings": {
+      "visibility": "public",
+      "features": ["issues", "wiki", "pages"],
+      "merge_strategy": "squash"
+    }
+  }
+}

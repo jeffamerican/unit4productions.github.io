@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Hacker - Unit4Productions Gaming Division</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(circle at center, #001122 0%, #000000 100%);
+            color: #00ff00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            width: 1000px;
+            height: 700px;
+            background: rgba(0, 20, 30, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+        
+        .terminal-header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-bottom: 1px solid #00ff00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .terminal-title {
+            color: #00ff00;
+            font-size: 16px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        .system-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+        }
+        
+        .stat {
+            color: #00aaff;
+        }
+        
+        .game-area {
+            display: flex;
+            height: calc(100% - 60px);
+        }
+        
+        .network-display {
+            flex: 2;
+            padding: 20px;
+            background: rgba(0, 10, 20, 0.8);
+            position: relative;
+        }
+        
+        .tools-panel {
+            flex: 1;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border-left: 1px solid #00ff00;
+            overflow-y: auto;
+        }
+        
+        .network-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .node-server {
+            background: rgba(255, 100, 100, 0.2);
+            border-color: #ff6666;
+            color: #ff6666;
+        }
+        
+        .node-firewall {
+            background: rgba(255, 255, 100, 0.2);
+            border-color: #ffff66;
+            color: #ffff66;
+        }
+        
+        .node-data {
+            background: rgba(100, 255, 100, 0.2);
+            border-color: #66ff66;
+            color: #66ff66;
+        }
+        
+        .node-compromised {
+            background: rgba(0, 255, 255, 0.3);
+            border-color: #00ffff;
+            color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        .node-detected {
+            background: rgba(255, 0, 0, 0.3);
+            border-color: #ff0000;
+            color: #ff0000;
+            animation: alertPulse 1s infinite;
+        }
+        
+        @keyframes alertPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: rgba(0, 255, 0, 0.3);
+            transform-origin: left center;
+        }
+        
+        .tool-item {
+            background: rgba(0, 50, 100, 0.3);
+            border: 1px solid #0077ff;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tool-item:hover {
+            background: rgba(0, 100, 200, 0.4);
+            box-shadow: 0 0 10px rgba(0, 119, 255, 0.5);
+        }
+        
+        .tool-item.selected {
+            background: rgba(0, 255, 0, 0.3);
+            border-color: #00ff00;
+        }
+        
+        .tool-item.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .tool-name {
+            color: #00aaff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .tool-description {
+            color: #888;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        
+        .mission-panel {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #ff6600;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .mission-title {
+            color: #ff6600;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .mission-objective {
+            color: #cccccc;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #00aa00);
+            transition: width 0.5s ease;
+        }
+        
+        .log-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #666;
+            border-radius: 5px;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
+            font-size: 11px;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin-bottom: 3px;
+            opacity: 0.8;
+        }
+        
+        .log-success {
+            color: #00ff00;
+        }
+        
+        .log-warning {
+            color: #ffaa00;
+        }
+        
+        .log-error {
+            color: #ff0000;
+        }
+        
+        .menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #00ff00;
+            text-align: center;
+        }
+        
+        .game-title {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ff00;
+            letter-spacing: 2px;
+        }
+        
+        .game-subtitle {
+            font-size: 18px;
+            margin-bottom: 40px;
+            color: #00aaff;
+        }
+        
+        .menu-button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: 2px solid #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .menu-button:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+        
+        .detection-meter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #666;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .detection-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .detection-text {
+            position: absolute;
+            top: 2px;
+            left: 10px;
+            font-size: 12px;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .network-display {
+                flex: 1;
+            }
+            
+            .tools-panel {
+                flex: 0 0 200px;
+                border-left: none;
+                border-top: 1px solid #00ff00;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Terminal Header -->
+        <div class="terminal-header">
+            <div class="terminal-title">QUANTUM HACKER v2.1.7 - NEURAL INTERFACE ACTIVE</div>
+            <div class="system-stats">
+                <div class="stat">CPU: <span id="cpuUsage">45%</span></div>
+                <div class="stat">MEM: <span id="memUsage">67%</span></div>
+                <div class="stat">NET: <span id="netActivity">SCANNING</span></div>
+            </div>
+        </div>
+        
+        <!-- Detection Meter -->
+        <div class="detection-meter">
+            <div class="detection-fill" id="detectionFill"></div>
+            <div class="detection-text">DETECTION RISK: <span id="detectionText">0%</span></div>
+        </div>
+        
+        <!-- Game Area -->
+        <div class="game-area">
+            <!-- Network Display -->
+            <div class="network-display" id="networkDisplay">
+                <!-- Network nodes will be dynamically created here -->
+            </div>
+            
+            <!-- Tools Panel -->
+            <div class="tools-panel">
+                <!-- Mission Panel -->
+                <div class="mission-panel">
+                    <div class="mission-title">MISSION: CORPORATE ESPIONAGE</div>
+                    <div class="mission-objective" id="missionObjective">
+                        Infiltrate CyberCorp's network and extract classified financial data from their secure server. Avoid detection by their advanced AI security system.
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="missionProgress" style="width: 0%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Hacking Tools -->
+                <div class="tool-item" id="portScanTool" onclick="selectTool('portScan')">
+                    <div class="tool-name">Port Scanner</div>
+                    <div class="tool-description">Identify open ports and services on target nodes. Low detection risk.</div>
+                </div>
+                
+                <div class="tool-item" id="exploitTool" onclick="selectTool('exploit')">
+                    <div class="tool-name">Exploit Kit</div>
+                    <div class="tool-description">Compromise vulnerable services. Moderate detection risk.</div>
+                </div>
+                
+                <div class="tool-item" id="stealthTool" onclick="selectTool('stealth')">
+                    <div class="tool-name">Stealth Wrapper</div>
+                    <div class="tool-description">Reduce detection risk of next action. One-time use.</div>
+                </div>
+                
+                <div class="tool-item" id="dataMinerTool" onclick="selectTool('dataMiner')">
+                    <div class="tool-name">Data Miner</div>
+                    <div class="tool-description">Extract data from compromised nodes. High detection risk.</div>
+                </div>
+                
+                <div class="tool-item disabled" id="virusTool">
+                    <div class="tool-name">Logic Bomb</div>
+                    <div class="tool-description">Disable security systems. [PREMIUM REQUIRED]</div>
+                </div>
+                
+                <!-- Activity Log -->
+                <div class="log-panel" id="activityLog">
+                    <div class="log-entry">System initialized. Neural interface online.</div>
+                    <div class="log-entry log-success">Network topology mapped successfully.</div>
+                    <div class="log-entry">Scanning for entry points...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu Screen -->
+        <div class="menu-screen" id="menuScreen">
+            <div class="game-title">QUANTUM HACKER</div>
+            <div class="game-subtitle">Strategic Network Infiltration</div>
+            <button class="menu-button" onclick="startGame()">BEGIN HACK</button>
+            <button class="menu-button" onclick="showTutorial()">NEURAL TRAINING</button>
+            <button class="menu-button" onclick="showPremium()">UPGRADE TOOLS</button>
+            <div style="margin-top: 30px; font-size: 12px; color: #666;">
+                Unit4Productions Gaming Division | v1.0.0-beta
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state management
+        class QuantumHackerGame {
+            constructor() {
+                this.gameState = 'menu';
+                this.selectedTool = null;
+                this.detectionLevel = 0;
+                this.missionProgress = 0;
+                this.compromisedNodes = new Set();
+                this.networkNodes = [];
+                this.currentMission = null;
+                this.gameTime = 0;
+                this.tools = {
+                    portScan: { uses: Infinity, detectionRisk: 5 },
+                    exploit: { uses: Infinity, detectionRisk: 15 },
+                    stealth: { uses: 3, detectionRisk: 0 },
+                    dataMiner: { uses: Infinity, detectionRisk: 25 }
+                };
+                
+                // Premium features
+                this.isPremium = this.checkPremiumStatus();
+                
+                // Analytics
+                this.sessionId = this.generateSessionId();
+                this.startTime = Date.now();
+                
+                this.init();
+            }
+            
+            checkPremiumStatus() {
+                const premiumKey = localStorage.getItem('quantum_hacker_premium');
+                return premiumKey && premiumKey.startsWith('PREMIUM_');
+            }
+            
+            generateSessionId() {
+                return 'hack_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+            }
+            
+            trackEvent(eventName, eventData = {}) {
+                const event = {
+                    game: 'quantum_hacker',
+                    event: eventName,
+                    sessionId: this.sessionId,
+                    timestamp: Date.now(),
+                    isPremium: this.isPremium,
+                    ...eventData
+                };
+                
+                // Store for analytics
+                const events = JSON.parse(localStorage.getItem('quantum_events') || '[]');
+                events.push(event);
+                localStorage.setItem('quantum_events', JSON.stringify(events.slice(-100)));
+                
+                // Google Analytics integration
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', eventName, {
+                        event_category: 'Quantum_Hacker',
+                        event_label: JSON.stringify(eventData)
+                    });
+                }
+            }
+            
+            init() {
+                this.generateNetwork();
+                this.updateSystemStats();
+                setInterval(() => this.gameLoop(), 100);
+                
+                this.trackEvent('game_loaded');
+            }
+            
+            generateNetwork() {
+                const networkContainer = document.getElementById('networkDisplay');
+                networkContainer.innerHTML = '';
+                
+                // Create network topology
+                const nodes = [
+                    { id: 'entry', type: 'server', x: 100, y: 300, name: 'Web Server' },
+                    { id: 'firewall1', type: 'firewall', x: 250, y: 200, name: 'Firewall A' },
+                    { id: 'firewall2', type: 'firewall', x: 250, y: 400, name: 'Firewall B' },
+                    { id: 'database', type: 'data', x: 400, y: 150, name: 'Database' },
+                    { id: 'backup', type: 'server', x: 400, y: 450, name: 'Backup' },
+                    { id: 'admin', type: 'server', x: 550, y: 300, name: 'Admin Panel' },
+                    { id: 'target', type: 'data', x: 700, y: 300, name: 'TARGET' }
+                ];
+                
+                this.networkNodes = nodes;
+                
+                // Create visual nodes
+                nodes.forEach(node => {
+                    const nodeElement = document.createElement('div');
+                    nodeElement.className = `network-node node-${node.type}`;
+                    nodeElement.id = `node-${node.id}`;
+                    nodeElement.style.left = `${node.x}px`;
+                    nodeElement.style.top = `${node.y}px`;
+                    nodeElement.textContent = node.name;
+                    nodeElement.onclick = () => this.clickNode(node);
+                    
+                    networkContainer.appendChild(nodeElement);
+                });
+                
+                // Create connections
+                const connections = [
+                    ['entry', 'firewall1'],
+                    ['entry', 'firewall2'],
+                    ['firewall1', 'database'],
+                    ['firewall1', 'admin'],
+                    ['firewall2', 'backup'],
+                    ['firewall2', 'admin'],
+                    ['admin', 'target'],
+                    ['database', 'target']
+                ];
+                
+                connections.forEach(([from, to]) => {
+                    this.drawConnection(from, to);
+                });
+            }
+            
+            drawConnection(fromId, toId) {
+                const fromNode = this.networkNodes.find(n => n.id === fromId);
+                const toNode = this.networkNodes.find(n => n.id === toId);
+                
+                if (!fromNode || !toNode) return;
+                
+                const line = document.createElement('div');
+                line.className = 'connection-line';
+                
+                const dx = toNode.x - fromNode.x;
+                const dy = toNode.y - fromNode.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                line.style.left = `${fromNode.x + 30}px`;
+                line.style.top = `${fromNode.y + 30}px`;
+                line.style.width = `${length}px`;
+                line.style.transform = `rotate(${angle}deg)`;
+                
+                document.getElementById('networkDisplay').appendChild(line);
+            }
+            
+            start() {
+                this.gameState = 'playing';
+                document.getElementById('menuScreen').style.display = 'none';
+                
+                this.currentMission = {
+                    objective: 'Extract financial data from TARGET node',
+                    requiredNodes: ['target'],
+                    timeLimit: 180000, // 3 minutes
+                    startTime: Date.now()
+                };
+                
+                this.trackEvent('game_started', {
+                    mission: this.currentMission.objective,
+                    isPremium: this.isPremium
+                });
+                
+                this.logActivity('Mission briefing received. Beginning network infiltration.', 'success');
+            }
+            
+            selectTool(toolName) {
+                if (this.gameState !== 'playing') return;
+                
+                // Clear previous selection
+                document.querySelectorAll('.tool-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // Select new tool
+                this.selectedTool = toolName;
+                document.getElementById(`${toolName}Tool`).classList.add('selected');
+                
+                this.logActivity(`${this.getToolDisplayName(toolName)} selected and ready.`);
+                this.trackEvent('tool_selected', { tool: toolName });
+            }
+            
+            getToolDisplayName(toolName) {
+                const names = {
+                    portScan: 'Port Scanner',
+                    exploit: 'Exploit Kit',
+                    stealth: 'Stealth Wrapper',
+                    dataMiner: 'Data Miner'
+                };
+                return names[toolName] || toolName;
+            }
+            
+            clickNode(node) {
+                if (this.gameState !== 'playing' || !this.selectedTool) return;
+                
+                this.executeAction(this.selectedTool, node);
+            }
+            
+            executeAction(action, targetNode) {
+                const tool = this.tools[action];
+                if (!tool || tool.uses <= 0) return;
+                
+                let success = false;
+                let message = '';
+                let detectionIncrease = tool.detectionRisk;
+                
+                // Apply stealth modifier
+                if (action === 'stealth') {
+                    this.tools.stealth.uses--;
+                    this.logActivity('Stealth wrapper activated. Next action will have reduced detection risk.', 'success');
+                    this.trackEvent('stealth_activated');
+                    return;
+                }
+                
+                switch (action) {
+                    case 'portScan':
+                        success = true;
+                        message = `Port scan completed on ${targetNode.name}. Open ports: 22, 80, 443, 3389`;
+                        this.revealNodeInfo(targetNode);
+                        break;
+                        
+                    case 'exploit':
+                        if (this.canCompromiseNode(targetNode)) {
+                            success = true;
+                            this.compromiseNode(targetNode);
+                            message = `Successfully compromised ${targetNode.name}!`;
+                        } else {
+                            message = `Exploit failed on ${targetNode.name}. Target may be patched or access restricted.`;
+                        }
+                        break;
+                        
+                    case 'dataMiner':
+                        if (this.compromisedNodes.has(targetNode.id)) {
+                            success = true;
+                            this.extractData(targetNode);
+                            message = `Data extraction from ${targetNode.name} completed.`;
+                        } else {
+                            message = `Cannot extract data from ${targetNode.name}. Node must be compromised first.`;
+                        }
+                        break;
+                }
+                
+                // Apply detection risk
+                this.detectionLevel += detectionIncrease;
+                this.detectionLevel = Math.min(100, this.detectionLevel);
+                
+                // Log activity
+                this.logActivity(message, success ? 'success' : 'warning');
+                
+                // Track action
+                this.trackEvent('action_executed', {
+                    action: action,
+                    target: targetNode.id,
+                    success: success,
+                    detectionLevel: this.detectionLevel
+                });
+                
+                // Update UI
+                this.updateDetectionMeter();
+                this.updateMissionProgress();
+                
+                // Check for mission completion or failure
+                this.checkGameEnd();
+            }
+            
+            canCompromiseNode(node) {
+                // Entry point is always accessible
+                if (node.id === 'entry') return true;
+                
+                // Check if any connected compromised nodes provide access
+                const connections = this.getNodeConnections(node.id);
+                return connections.some(connectedId => this.compromisedNodes.has(connectedId));
+            }
+            
+            getNodeConnections(nodeId) {
+                const connections = {
+                    'entry': ['firewall1', 'firewall2'],
+                    'firewall1': ['entry', 'database', 'admin'],
+                    'firewall2': ['entry', 'backup', 'admin'],
+                    'database': ['firewall1', 'target'],
+                    'backup': ['firewall2'],
+                    'admin': ['firewall1', 'firewall2', 'target'],
+                    'target': ['database', 'admin']
+                };
+                return connections[nodeId] || [];
+            }
+            
+            compromiseNode(node) {
+                this.compromisedNodes.add(node.id);
+                const nodeElement = document.getElementById(`node-${node.id}`);
+                nodeElement.classList.add('node-compromised');
+            }
+            
+            extractData(node) {
+                if (node.id === 'target') {
+                    this.missionProgress = 100;
+                }
+            }
+            
+            revealNodeInfo(node) {
+                // Visual feedback for scanned nodes
+                const nodeElement = document.getElementById(`node-${node.id}`);
+                nodeElement.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.3)';
+            }
+            
+            updateDetectionMeter() {
+                const detectionFill = document.getElementById('detectionFill');
+                const detectionText = document.getElementById('detectionText');
+                
+                detectionFill.style.width = `${this.detectionLevel}%`;
+                detectionText.textContent = `${Math.round(this.detectionLevel)}%`;
+                
+                // Change colors based on detection level
+                if (this.detectionLevel > 80) {
+                    detectionFill.style.background = '#ff0000';
+                } else if (this.detectionLevel > 50) {
+                    detectionFill.style.background = '#ffff00';
+                } else {
+                    detectionFill.style.background = '#00ff00';
+                }
+            }
+            
+            updateMissionProgress() {
+                const progressBar = document.getElementById('missionProgress');
+                progressBar.style.width = `${this.missionProgress}%`;
+            }
+            
+            checkGameEnd() {
+                if (this.detectionLevel >= 100) {
+                    this.gameOver('DETECTED! Security systems have traced your location.');
+                } else if (this.missionProgress >= 100) {
+                    this.missionSuccess();
+                }
+            }
+            
+            gameOver(reason) {
+                this.gameState = 'gameOver';
+                this.logActivity(reason, 'error');
+                this.logActivity('Connection terminated. Initiating emergency protocols.', 'error');
+                
+                const sessionDuration = Date.now() - this.startTime;
+                this.trackEvent('game_over', {
+                    reason: 'detected',
+                    sessionDuration: sessionDuration,
+                    progress: this.missionProgress,
+                    detectionLevel: this.detectionLevel
+                });
+                
+                setTimeout(() => {
+                    if (!this.isPremium) {
+                        this.showPremiumUpgrade();
+                    } else {
+                        this.showRestartOption();
+                    }
+                }, 2000);
+            }
+            
+            missionSuccess() {
+                this.gameState = 'success';
+                this.logActivity('Mission completed successfully! Data extracted and transmitted.', 'success');
+                this.logActivity('Neural interface disconnected. Well done, operative.', 'success');
+                
+                const sessionDuration = Date.now() - this.startTime;
+                this.trackEvent('mission_completed', {
+                    sessionDuration: sessionDuration,
+                    detectionLevel: this.detectionLevel,
+                    toolsUsed: Object.keys(this.tools).filter(t => this.tools[t].uses < Infinity)
+                });
+                
+                setTimeout(() => {
+                    this.showSuccessScreen();
+                }, 2000);
+            }
+            
+            showPremiumUpgrade() {
+                const upgradeHTML = `
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; color: #00ff00; font-family: 'Courier New', monospace;">
+                        <div style="max-width: 500px; padding: 30px; background: radial-gradient(circle, #001122, #000000); border: 2px solid #00ff00; border-radius: 10px; text-align: center;">
+                            <h2 style="color: #ff6600; margin-bottom: 20px;">UPGRADE YOUR NEURAL INTERFACE</h2>
+                            <p style="margin-bottom: 20px;">Your hacking skills are impressive! Unlock advanced capabilities:</p>
+                            <ul style="text-align: left; margin: 20px 0; color: #00aaff;">
+                                <li>🔓 Logic Bomb - Disable security systems</li>
+                                <li>⚡ Advanced Exploits - Higher success rates</li>
+                                <li>🛡️ Enhanced Stealth - Lower detection risk</li>
+                                <li>📊 Mission Analytics - Track your progress</li>
+                                <li>🎯 Campaign Mode - 20+ connected missions</li>
+                            </ul>
+                            <div style="margin-top: 30px;">
+                                <button onclick="alert('Premium upgrade simulation - In production, this would process payment and unlock premium features.'); game.trackEvent('premium_purchase_attempt', {source: 'in_game_modal'}); this.parentElement.parentElement.parentElement.remove();" style="padding: 15px 30px; background: #ff6600; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; font-family: 'Courier New', monospace;">UPGRADE FOR $4.99</button>
+                                <button onclick="this.parentElement.parentElement.parentElement.remove(); game.showMenu();" style="padding: 15px 30px; background: transparent; color: #00ff00; border: 2px solid #00ff00; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; font-family: 'Courier New', monospace;">MAYBE LATER</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', upgradeHTML);
+                
+                this.trackEvent('premium_prompt_shown', {
+                    trigger: 'game_over',
+                    progress: this.missionProgress
+                });
+            }
+            
+            showRestartOption() {
+                const restartHTML = `
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; color: #00ff00; font-family: 'Courier New', monospace;">
+                        <div style="max-width: 400px; padding: 30px; background: radial-gradient(circle, #001122, #000000); border: 2px solid #ff0000; border-radius: 10px; text-align: center;">
+                            <h2 style="color: #ff0000; margin-bottom: 20px;">MISSION FAILED</h2>
+                            <p style="margin-bottom: 30px;">Your neural signature was detected. Security protocols have been activated.</p>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove(); game.start();" style="padding: 15px 30px; background: #00ff00; color: black; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; font-family: 'Courier New', monospace;">RETRY MISSION</button>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove(); game.showMenu();" style="padding: 15px 30px; background: transparent; color: #00ff00; border: 2px solid #00ff00; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; font-family: 'Courier New', monospace;">MAIN MENU</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', restartHTML);
+            }
+            
+            showSuccessScreen() {
+                const successHTML = `
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; color: #00ff00; font-family: 'Courier New', monospace;">
+                        <div style="max-width: 400px; padding: 30px; background: radial-gradient(circle, #002200, #000000); border: 2px solid #00ff00; border-radius: 10px; text-align: center;">
+                            <h2 style="color: #00ff00; margin-bottom: 20px;">MISSION SUCCESSFUL</h2>
+                            <p style="margin-bottom: 20px;">Data successfully extracted and transmitted to secure location.</p>
+                            <div style="margin: 20px 0; color: #00aaff;">
+                                <div>Final Detection Level: ${Math.round(this.detectionLevel)}%</div>
+                                <div>Mission Time: ${Math.round((Date.now() - this.startTime) / 1000)}s</div>
+                            </div>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove(); game.start();" style="padding: 15px 30px; background: #00ff00; color: black; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; font-family: 'Courier New', monospace;">NEW MISSION</button>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove(); game.showMenu();" style="padding: 15px 30px; background: transparent; color: #00ff00; border: 2px solid #00ff00; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; font-family: 'Courier New', monospace;">MAIN MENU</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', successHTML);
+            }
+            
+            logActivity(message, type = 'info') {
+                const logPanel = document.getElementById('activityLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = `> ${message}`;
+                
+                logPanel.appendChild(entry);
+                logPanel.scrollTop = logPanel.scrollHeight;
+            }
+            
+            updateSystemStats() {
+                // Simulate system resource usage
+                document.getElementById('cpuUsage').textContent = `${Math.floor(Math.random() * 30 + 40)}%`;
+                document.getElementById('memUsage').textContent = `${Math.floor(Math.random() * 20 + 60)}%`;
+                
+                const netStates = ['SCANNING', 'ROUTING', 'ENCRYPTED', 'ACTIVE'];
+                document.getElementById('netActivity').textContent = netStates[Math.floor(Math.random() * netStates.length)];
+            }
+            
+            gameLoop() {
+                if (this.gameState === 'playing') {
+                    this.updateSystemStats();
+                    
+                    // Slowly decrease detection level over time if not at maximum
+                    if (this.detectionLevel > 0 && this.detectionLevel < 100) {
+                        this.detectionLevel = Math.max(0, this.detectionLevel - 0.1);
+                        this.updateDetectionMeter();
+                    }
+                }
+            }
+            
+            showMenu() {
+                this.gameState = 'menu';
+                document.getElementById('menuScreen').style.display = 'flex';
+                
+                // Reset game state
+                this.detectionLevel = 0;
+                this.missionProgress = 0;
+                this.compromisedNodes.clear();
+                this.selectedTool = null;
+                
+                // Reset visual state
+                document.querySelectorAll('.network-node').forEach(node => {
+                    node.classList.remove('node-compromised', 'node-detected');
+                    node.style.boxShadow = '';
+                });
+                
+                this.updateDetectionMeter();
+                this.updateMissionProgress();
+                
+                // Reset tool selection
+                document.querySelectorAll('.tool-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // Clear log
+                document.getElementById('activityLog').innerHTML = `
+                    <div class="log-entry">Neural interface offline.</div>
+                    <div class="log-entry">System ready for next mission.</div>
+                `;
+            }
+        }
+        
+        // Global game instance
+        let game;
+        
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            game = new QuantumHackerGame();
+        });
+        
+        // Global functions for menu buttons
+        function startGame() {
+            game.start();
+        }
+        
+        function showTutorial() {
+            alert('Tutorial: Select tools from the right panel, then click network nodes to execute actions. Compromise nodes to gain access, extract data from the TARGET, but avoid detection!');
+        }
+        
+        function showPremium() {
+            // Track premium interest from main menu
+            game.trackEvent('premium_interest', { 
+                trigger: 'main_menu',
+                source: 'upgrade_tools_button' 
+            });
+            
+            // Use the existing premium upgrade modal
+            game.showPremiumUpgrade();
+        }
+        
+        // Tool selection function
+        function selectTool(toolName) {
+            game.selectTool(toolName);
+        }
+    </script>
+</body>
+</html>

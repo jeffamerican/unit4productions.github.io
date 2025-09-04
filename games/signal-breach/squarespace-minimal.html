@@ -1,0 +1,299 @@
+<!-- 
+Signal Breach - Squarespace Minimal Version
+Unit4Productions Gaming Division
+Optimized for Squarespace Code Block deployment
+Total size: ~15KB (well under 400KB limit)
+-->
+
+<div id="signalBreach" style="width:100%;max-width:800px;margin:0 auto;background:radial-gradient(circle,#1a0033,#000);color:#00ff88;font-family:Courier,monospace;border-radius:8px;overflow:hidden;">
+
+<!-- Game Container -->
+<div id="gameScreen" style="position:relative;height:500px;background:#0a0014;">
+
+<!-- Menu Screen -->
+<div id="menu" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.95);z-index:100;">
+    <h1 style="font-size:2.5em;color:#ff0088;text-shadow:0 0 20px #ff0088;margin:0 0 10px 0;animation:glow 2s ease-in-out infinite alternate;">SIGNAL BREACH</h1>
+    <p style="margin:0 0 20px 0;text-align:center;color:#00ffff;font-size:0.9em;">Professional cyberpunk strategy by Unit4Productions Gaming</p>
+    <button onclick="startGame()" style="background:linear-gradient(45deg,#ff0088,#00ffff);border:none;padding:12px 24px;color:white;font-family:inherit;cursor:pointer;border-radius:5px;margin:5px;font-size:1em;transition:transform 0.3s;">START MISSION</button>
+    <button onclick="showHelp()" style="background:rgba(0,255,136,0.2);border:2px solid #00ff88;padding:10px 20px;color:#00ff88;font-family:inherit;cursor:pointer;border-radius:5px;margin:5px;">INSTRUCTIONS</button>
+</div>
+
+<!-- Game UI -->
+<div id="gameUI" style="display:none;width:100%;height:100%;position:relative;">
+    <!-- Header -->
+    <div style="height:40px;background:rgba(0,0,0,0.8);border-bottom:2px solid #00ff88;display:flex;align-items:center;justify-content:space-between;padding:0 15px;font-size:0.8em;">
+        <div style="display:flex;gap:15px;">
+            <div style="text-align:center;">
+                <div style="color:#888;font-size:0.7em;">SCORE</div>
+                <div id="score" style="color:#00ff88;">0</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="color:#888;font-size:0.7em;">LEVEL</div>
+                <div id="level" style="color:#00ff88;">1</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="color:#888;font-size:0.7em;">CREDITS</div>
+                <div id="credits" style="color:#00ff88;">100</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="color:#888;font-size:0.7em;">STEALTH</div>
+                <div id="stealth" style="color:#00ff88;">100%</div>
+            </div>
+        </div>
+        <div>
+            <button onclick="pauseGame()" id="pauseBtn" style="background:rgba(0,255,136,0.2);border:1px solid #00ff88;padding:4px 8px;color:#00ff88;cursor:pointer;font-family:inherit;font-size:0.7em;">PAUSE</button>
+            <button onclick="endGame()" style="background:rgba(255,0,136,0.2);border:1px solid #ff0088;padding:4px 8px;color:#ff0088;cursor:pointer;font-family:inherit;font-size:0.7em;margin-left:5px;">END</button>
+        </div>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="canvas" style="width:100%;height:400px;background:#0a0014;cursor:crosshair;display:block;"></canvas>
+
+    <!-- Bottom Panel -->
+    <div style="height:60px;background:rgba(0,0,0,0.8);border-top:2px solid #00ff88;display:flex;align-items:center;justify-content:space-between;padding:0 15px;">
+        <div style="display:flex;gap:8px;">
+            <button onclick="selectNode('router')" id="router" class="nodeBtn" style="background:rgba(0,255,136,0.3);border:2px solid #00ff88;padding:5px 8px;color:#00ff88;cursor:pointer;font-family:inherit;font-size:0.7em;">ROUTER(10)</button>
+            <button onclick="selectNode('firewall')" id="firewall" class="nodeBtn" style="background:rgba(255,0,136,0.1);border:2px solid #ff0088;padding:5px 8px;color:#ff0088;cursor:pointer;font-family:inherit;font-size:0.7em;">FIREWALL(25)</button>
+            <button onclick="selectNode('proxy')" id="proxy" class="nodeBtn" style="background:rgba(255,255,0,0.1);border:2px solid #ffff00;padding:5px 8px;color:#ffff00;cursor:pointer;font-family:inherit;font-size:0.7em;">PROXY(20)</button>
+        </div>
+        <div style="flex:1;max-width:200px;margin:0 15px;">
+            <div style="height:15px;background:rgba(255,255,255,0.1);border:1px solid #00ff88;border-radius:8px;overflow:hidden;position:relative;">
+                <div id="progress" style="height:100%;background:linear-gradient(90deg,#00ff88,#00ffff);width:0%;transition:width 0.3s;"></div>
+            </div>
+            <div style="text-align:center;font-size:0.7em;color:#888;">BREACH PROGRESS</div>
+        </div>
+        <div style="display:flex;gap:5px;">
+            <button onclick="usePower('speed')" id="speedPwr" style="background:rgba(255,255,0,0.2);border:1px solid #ffff00;padding:4px 6px;color:#ffff00;cursor:pointer;font-family:inherit;font-size:0.6em;">SPEED</button>
+            <button onclick="usePower('stealth')" id="stealthPwr" style="background:rgba(0,255,255,0.2);border:1px solid #00ffff;padding:4px 6px;color:#00ffff;cursor:pointer;font-family:inherit;font-size:0.6em;">CLOAK</button>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- Professional Footer -->
+<div style="text-align:center;padding:10px;background:rgba(46,91,255,0.1);font-family:Arial,sans-serif;font-size:0.8em;color:#666;">
+    Developed by <a href="/about/" style="color:#2E5BFF;text-decoration:none;">Unit4Productions Gaming Division</a> | Professional browser gaming
+</div>
+
+</div>
+
+<style>
+@keyframes glow{0%{text-shadow:0 0 20px #ff0088}100%{text-shadow:0 0 30px #ff0088}}
+.nodeBtn:hover{transform:scale(1.05);box-shadow:0 0 10px rgba(0,255,136,0.3);}
+#signalBreach button:hover{opacity:0.8;}
+@media(max-width:600px){
+    #signalBreach{margin:0 -20px;border-radius:0;}
+    #canvas{height:300px;}
+    #gameScreen{height:400px;}
+}
+</style>
+
+<script>
+// Ultra-compact Signal Breach for Squarespace
+let game={
+    canvas:null,ctx:null,
+    state:{score:0,level:1,credits:100,stealth:100,playing:false,paused:false,time:60,progress:0,
+           selectedNode:'router',nodes:[],packets:[],enemies:[],powerups:{speed:0,stealth:0}},
+    
+    init(){
+        this.canvas=document.getElementById('canvas');
+        this.ctx=this.canvas.getContext('2d');
+        this.resize();
+        this.canvas.onclick=e=>this.click(e);
+        window.addEventListener('resize',()=>this.resize());
+    },
+    
+    resize(){
+        let rect=this.canvas.getBoundingClientRect();
+        this.canvas.width=rect.width;
+        this.canvas.height=rect.height;
+    },
+    
+    click(e){
+        if(!this.state.playing||this.state.paused)return;
+        let rect=this.canvas.getBoundingClientRect();
+        let x=e.clientX-rect.left,y=e.clientY-rect.top;
+        this.placeNode(Math.floor(x/30),Math.floor(y/30));
+    },
+    
+    placeNode(gx,gy){
+        let types={router:{cost:10,color:'#00ff88'},firewall:{cost:25,color:'#ff0088'},proxy:{cost:20,color:'#ffff00'}};
+        let type=types[this.state.selectedNode];
+        if(this.state.credits<type.cost)return;
+        if(this.state.nodes.find(n=>n.x===gx&&n.y===gy))return;
+        this.state.nodes.push({x:gx,y:gy,type:this.state.selectedNode,...type});
+        this.state.credits-=type.cost;
+        this.updateUI();
+    },
+    
+    start(){
+        Object.assign(this.state,{score:0,level:1,credits:100,stealth:100,playing:true,paused:false,
+                                 time:60,progress:0,nodes:[],packets:[],enemies:[]});
+        document.getElementById('menu').style.display='none';
+        document.getElementById('gameUI').style.display='block';
+        this.resize();
+        this.loop();
+    },
+    
+    loop(){
+        if(!this.state.playing)return;
+        if(!this.state.paused)this.update();
+        this.render();
+        requestAnimationFrame(()=>this.loop());
+    },
+    
+    update(){
+        this.state.time-=1/60;
+        if(Math.random()<0.03&&this.state.nodes.length>0)this.spawnPacket();
+        if(Math.random()<0.008)this.spawnEnemy();
+        
+        // Update packets
+        this.state.packets.forEach((p,i)=>{
+            p.x+=p.vx;p.y+=p.vy;
+            if(p.x<0||p.x>this.canvas.width||p.y<0||p.y>this.canvas.height){
+                this.state.packets.splice(i,1);
+                this.state.score+=10;
+                this.state.progress+=3;
+            }
+        });
+        
+        // Update enemies
+        this.state.enemies.forEach((e,i)=>{
+            e.x+=e.vx;e.y+=e.vy;
+            this.state.packets.forEach((p,j)=>{
+                if(Math.abs(e.x-p.x)<15&&Math.abs(e.y-p.y)<15){
+                    this.state.packets.splice(j,1);
+                    this.state.stealth-=15;
+                }
+            });
+            if(e.x<-20||e.x>this.canvas.width+20||e.y<-20||e.y>this.canvas.height+20)
+                this.state.enemies.splice(i,1);
+        });
+        
+        // Win/lose conditions
+        if(this.state.progress>=100)this.levelUp();
+        if(this.state.time<=0||this.state.stealth<=0)this.gameOver();
+        
+        // Update powerups
+        Object.keys(this.state.powerups).forEach(k=>{
+            if(this.state.powerups[k]>0)this.state.powerups[k]--;
+        });
+        
+        this.state.credits+=0.08;
+        this.updateUI();
+    },
+    
+    spawnPacket(){
+        let node=this.state.nodes[Math.floor(Math.random()*this.state.nodes.length)];
+        this.state.packets.push({
+            x:node.x*30+15,y:node.y*30+15,
+            vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3
+        });
+    },
+    
+    spawnEnemy(){
+        let side=Math.floor(Math.random()*4);
+        let x,y,vx,vy;
+        switch(side){
+            case 0:x=0;y=Math.random()*this.canvas.height;vx=1;vy=0;break;
+            case 1:x=this.canvas.width;y=Math.random()*this.canvas.height;vx=-1;vy=0;break;
+            case 2:x=Math.random()*this.canvas.width;y=0;vx=0;vy=1;break;
+            case 3:x=Math.random()*this.canvas.width;y=this.canvas.height;vx=0;vy=-1;break;
+        }
+        this.state.enemies.push({x,y,vx:vx*0.8,vy:vy*0.8});
+    },
+    
+    render(){
+        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+        
+        // Grid
+        this.ctx.strokeStyle='rgba(0,255,136,0.1)';
+        this.ctx.lineWidth=1;
+        for(let x=0;x<this.canvas.width;x+=30){
+            this.ctx.beginPath();this.ctx.moveTo(x,0);this.ctx.lineTo(x,this.canvas.height);this.ctx.stroke();
+        }
+        for(let y=0;y<this.canvas.height;y+=30){
+            this.ctx.beginPath();this.ctx.moveTo(0,y);this.ctx.lineTo(this.canvas.width,y);this.ctx.stroke();
+        }
+        
+        // Nodes
+        this.state.nodes.forEach(n=>{
+            this.ctx.fillStyle=n.color;
+            this.ctx.beginPath();
+            this.ctx.arc(n.x*30+15,n.y*30+15,8,0,Math.PI*2);
+            this.ctx.fill();
+        });
+        
+        // Packets
+        this.state.packets.forEach(p=>{
+            this.ctx.fillStyle='#00ffff';
+            this.ctx.beginPath();
+            this.ctx.arc(p.x,p.y,3,0,Math.PI*2);
+            this.ctx.fill();
+        });
+        
+        // Enemies
+        this.state.enemies.forEach(e=>{
+            this.ctx.fillStyle='#ff0088';
+            this.ctx.beginPath();
+            this.ctx.arc(e.x,e.y,6,0,Math.PI*2);
+            this.ctx.fill();
+        });
+    },
+    
+    levelUp(){
+        this.state.level++;
+        this.state.score+=1000;
+        this.state.credits+=50;
+        this.state.progress=0;
+        this.state.time=60;
+        this.state.stealth=Math.min(100,this.state.stealth+20);
+        this.state.enemies=[];
+    },
+    
+    gameOver(){
+        this.state.playing=false;
+        setTimeout(()=>{
+            document.getElementById('menu').style.display='flex';
+            document.getElementById('gameUI').style.display='none';
+            document.querySelector('#menu p').innerHTML=`Game Over! Score: ${Math.floor(this.state.score)} | Level: ${this.state.level}<br>Professional cyberpunk strategy by Unit4Productions Gaming`;
+        },1000);
+    },
+    
+    updateUI(){
+        document.getElementById('score').textContent=Math.floor(this.state.score);
+        document.getElementById('level').textContent=this.state.level;
+        document.getElementById('credits').textContent=Math.floor(this.state.credits);
+        document.getElementById('stealth').textContent=Math.max(0,Math.floor(this.state.stealth))+'%';
+        document.getElementById('progress').style.width=Math.min(100,this.state.progress)+'%';
+    }
+};
+
+// Global functions
+function startGame(){game.start();}
+function endGame(){game.gameOver();}
+function pauseGame(){
+    if(!game.state.playing)return;
+    game.state.paused=!game.state.paused;
+    document.getElementById('pauseBtn').textContent=game.state.paused?'RESUME':'PAUSE';
+}
+function selectNode(type){
+    game.state.selectedNode=type;
+    document.querySelectorAll('.nodeBtn').forEach(b=>b.style.opacity='0.7');
+    document.getElementById(type).style.opacity='1';
+}
+function usePower(type){
+    if(!game.state.playing||game.state.powerups[type]>0)return;
+    game.state.powerups[type]=180;
+    if(type==='speed')game.state.packets.forEach(p=>{p.vx*=2;p.vy*=2;});
+    if(type==='stealth')game.state.stealth=Math.min(100,game.state.stealth+25);
+}
+function showHelp(){
+    alert('SIGNAL BREACH - Unit4Productions Gaming\n\n• Click to place network nodes\n• Route data packets to breach system\n• Avoid red security algorithms\n• Reach 100% progress to advance\n\nNodes:\n• Router (10) - Basic routing\n• Firewall (25) - Security defense\n• Proxy (20) - Stealth routing\n\nPowerups:\n• Speed - Accelerate packets\n• Cloak - Boost stealth level');
+}
+
+// Initialize
+window.addEventListener('load',()=>game.init());
+selectNode('router');
+</script>

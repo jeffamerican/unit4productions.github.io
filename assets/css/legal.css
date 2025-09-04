@@ -1,0 +1,404 @@
+/* ============================================
+   Legal Pages Specific Styles
+   ============================================ */
+
+.legal-document {
+    padding: 6rem 0 4rem;
+    margin-top: 80px;
+    background: linear-gradient(135deg, rgba(0, 0, 51, 0.1), rgba(0, 0, 0, 0.05));
+    min-height: calc(100vh - 80px);
+}
+
+.document-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid rgba(0, 255, 136, 0.2);
+}
+
+.document-header h1 {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, #00ff88, #00ffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.last-updated,
+.effective-date {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.document-content {
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.section {
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.section::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 255, 136, 0.5), transparent);
+}
+
+.section h2 {
+    color: #00ff88;
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+    position: relative;
+}
+
+.section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, #00ff88, #00ffff);
+}
+
+.section h3 {
+    color: #00ffff;
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+}
+
+.section p {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.section ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.section li {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.section li::marker {
+    color: #00ff88;
+}
+
+.section li strong {
+    color: #00ffff;
+    font-weight: 600;
+}
+
+/* Contact Information Styling */
+.contact-info {
+    background: rgba(0, 255, 136, 0.05);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.contact-info p {
+    margin-bottom: 0.5rem;
+    font-family: 'Courier New', monospace;
+}
+
+.contact-info strong {
+    color: #00ff88;
+    display: inline-block;
+    min-width: 120px;
+}
+
+.contact-info a {
+    color: #00ffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-info a:hover {
+    color: #00ff88;
+    text-decoration: underline;
+}
+
+/* Document Footer */
+.document-footer {
+    margin-top: 4rem;
+    padding: 2rem;
+    background: rgba(0, 255, 136, 0.05);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 10px;
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.document-footer p {
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+    line-height: 1.6;
+}
+
+.document-footer a {
+    color: #00ffff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.document-footer a:hover {
+    color: #00ff88;
+    text-decoration: underline;
+}
+
+/* Links within content */
+.section a {
+    color: #00ffff;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px dotted rgba(0, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.section a:hover {
+    color: #00ff88;
+    border-bottom-color: rgba(0, 255, 136, 0.8);
+}
+
+.section a[target="_blank"]::after {
+    content: " ↗";
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+/* Enhanced Typography */
+.section p:first-child {
+    font-size: 1.05em;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* Special formatting for important notices */
+.section p:contains("By using"),
+.section p:contains("You agree"),
+.section p:contains("We reserve") {
+    background: rgba(255, 0, 136, 0.05);
+    border-left: 3px solid #ff0088;
+    padding: 1rem;
+    border-radius: 5px;
+    margin: 1.5rem 0;
+}
+
+/* Numbered sections styling */
+.section h2:first-child {
+    counter-increment: section;
+}
+
+/* Table of Contents (if needed) */
+.toc {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 10px;
+    padding: 2rem;
+    margin: 2rem 0;
+    max-width: 400px;
+}
+
+.toc h3 {
+    color: #00ff88;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.toc ol {
+    list-style: none;
+    counter-reset: toc-counter;
+}
+
+.toc li {
+    counter-increment: toc-counter;
+    margin-bottom: 0.5rem;
+}
+
+.toc li::before {
+    content: counter(toc-counter) ".";
+    color: #00ff88;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.toc a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.toc a:hover {
+    color: #00ffff;
+}
+
+/* Responsive Design for Legal Pages */
+@media (max-width: 768px) {
+    .legal-document {
+        padding: 4rem 0 2rem;
+    }
+
+    .document-content {
+        padding: 2rem;
+        margin: 0 1rem;
+    }
+
+    .section::before {
+        display: none;
+    }
+
+    .section {
+        margin-bottom: 2rem;
+    }
+
+    .section ul {
+        margin-left: 1rem;
+    }
+
+    .contact-info {
+        padding: 1rem;
+    }
+
+    .contact-info strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        min-width: auto;
+    }
+
+    .document-footer {
+        padding: 1.5rem;
+        margin: 2rem 1rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .document-content {
+        padding: 1.5rem;
+        border-radius: 10px;
+    }
+
+    .section h2 {
+        font-size: 1.3rem;
+    }
+
+    .section h3 {
+        font-size: 1.1rem;
+    }
+
+    .contact-info p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .main-nav,
+    .main-footer {
+        display: none;
+    }
+
+    .legal-document {
+        margin-top: 0;
+        padding: 1rem 0;
+    }
+
+    .document-content {
+        background: white;
+        border: none;
+        box-shadow: none;
+        color: black;
+        padding: 0;
+        margin: 0;
+    }
+
+    .section h2,
+    .section h3,
+    .contact-info strong {
+        color: black;
+    }
+
+    .section p,
+    .section li {
+        color: black;
+    }
+
+    .section::before,
+    .section h2::after {
+        display: none;
+    }
+
+    .contact-info {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+    .section::before {
+        animation: none;
+    }
+    
+    .section a {
+        transition: none;
+    }
+}
+
+@media (prefers-high-contrast: high) {
+    .section h2 {
+        color: #fff;
+        border-bottom-color: #fff;
+    }
+    
+    .section h3 {
+        color: #fff;
+    }
+    
+    .contact-info {
+        border-color: #fff;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+.section a:focus {
+    outline: 2px solid #00ff88;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Selection styling */
+::selection {
+    background: rgba(0, 255, 136, 0.3);
+    color: white;
+}
+
+::-moz-selection {
+    background: rgba(0, 255, 136, 0.3);
+    color: white;
+}

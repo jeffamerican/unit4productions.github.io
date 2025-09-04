@@ -1,0 +1,16 @@
+{
+    "name": "CircuitRunners.Bot",
+    "rootNamespace": "CircuitRunners.Bot",
+    "references": [
+        "CircuitRunners.Data"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

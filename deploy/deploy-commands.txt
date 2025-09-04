@@ -1,0 +1,10 @@
+# Copy these commands and replace YOUR_USERNAME with your GitHub username:
+
+cd /tmp/unit4-gaming-deploy
+
+git remote add origin https://github.com/jeffamerican/unit4productions.github.io.git
+
+git push -u origin main
+
+# That's it! Your website will be live in 2-3 minutes at:
+# https://YOUR_USERNAME.github.io

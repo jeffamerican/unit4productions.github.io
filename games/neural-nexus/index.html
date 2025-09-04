@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Nexus - Strategic Neural Network Puzzles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ffff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            border-right: 2px solid #00ffff;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-game {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-board {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(0, 255, 255, 0.1), transparent);
+            overflow: hidden;
+        }
+
+        .grid {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: grid;
+            grid-template-columns: repeat(12, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 5px;
+            padding: 20px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .grid-cell {
+            width: 60px;
+            height: 60px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 5px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .grid-cell:hover {
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .grid-cell.valid-drop {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .grid-cell.invalid-drop {
+            border-color: #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .node {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: 0 0 5px currentColor;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px currentColor;
+        }
+
+        .node.dragging {
+            cursor: grabbing;
+            transform: scale(1.2);
+            z-index: 1000;
+        }
+
+        .node.input {
+            background: radial-gradient(circle, #00ff00, #004400);
+            color: #00ff00;
+            border: 2px solid #00ff00;
+        }
+
+        .node.processing {
+            background: radial-gradient(circle, #ffff00, #444400);
+            color: #ffff00;
+            border: 2px solid #ffff00;
+        }
+
+        .node.output {
+            background: radial-gradient(circle, #ff0000, #440000);
+            color: #ff0000;
+            border: 2px solid #ff0000;
+        }
+
+        .node.memory {
+            background: radial-gradient(circle, #ff00ff, #440044);
+            color: #ff00ff;
+            border: 2px solid #ff00ff;
+        }
+
+        .node.amplifier {
+            background: radial-gradient(circle, #00ffff, #004444);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+        }
+
+        .node.filter {
+            background: radial-gradient(circle, #ffa500, #442200);
+            color: #ffa500;
+            border: 2px solid #ffa500;
+        }
+
+        .connection {
+            position: absolute;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .connection-line {
+            stroke: #00ffff;
+            stroke-width: 3;
+            fill: none;
+            filter: drop-shadow(0 0 5px #00ffff);
+            opacity: 0.8;
+        }
+
+        .data-flow {
+            stroke: #ffffff;
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 8;
+            animation: flow 2s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes flow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 16; }
+        }
+
+        .node-palette {
+            margin-bottom: 30px;
+        }
+
+        .node-palette h3 {
+            margin-bottom: 15px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .palette-nodes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .palette-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            font-weight: bold;
+            font-size: 10px;
+            text-shadow: 0 0 5px currentColor;
+            box-shadow: 0 0 15px currentColor;
+            transition: all 0.3s ease;
+            justify-self: center;
+        }
+
+        .palette-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px currentColor;
+        }
+
+        .palette-node.locked {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+
+        .stats-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .stats-panel h3 {
+            margin-bottom: 10px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .stat-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .efficiency-meter {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            margin: 10px 0;
+        }
+
+        .efficiency-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 5px;
+            color: #00ffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.primary {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .btn.primary:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .challenge-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .challenge-panel h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #ffd700;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            color: #00ff00;
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .notification.warning {
+            border-color: #ffff00;
+            color: #ffff00;
+        }
+
+        .leaderboard {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .leaderboard h4 {
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            margin: 2px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+
+        .leaderboard-entry.player {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px currentColor; }
+            50% { box-shadow: 0 0 25px currentColor; }
+            100% { box-shadow: 0 0 5px currentColor; }
+        }
+
+        .mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 2px solid #00ffff;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(8, 45px);
+                grid-template-rows: repeat(6, 45px);
+                gap: 3px;
+            }
+            
+            .grid-cell {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .node {
+                width: 35px;
+                height: 35px;
+                font-size: 10px;
+            }
+            
+            .mobile-controls {
+                display: flex;
+            }
+        }
+
+        .sharing-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+        }
+
+        .sharing-content {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            z-index: 25000;
+            display: none;
+            animation: achievementPop 3s ease-in-out;
+        }
+
+        @keyframes achievementPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="sidebar">
+            <div class="stats-panel">
+                <h3>Network Statistics</h3>
+                <div class="stat-item">
+                    <span>Efficiency:</span>
+                    <span class="stat-value" id="efficiency">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span>Nodes Used:</span>
+                    <span class="stat-value" id="nodes-used">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Connections:</span>
+                    <span class="stat-value" id="connections">0</span>
+                </div>
+                <div class="efficiency-meter">
+                    <div class="efficiency-bar" id="efficiency-bar"></div>
+                </div>
+                <div class="stat-item">
+                    <span>vs Global Avg:</span>
+                    <span class="stat-value" id="vs-global">--</span>
+                </div>
+            </div>
+
+            <div class="challenge-panel">
+                <h3>Daily Challenge</h3>
+                <div id="challenge-desc">Optimize data flow with max 15 nodes</div>
+                <div class="stat-item">
+                    <span>Best Today:</span>
+                    <span class="stat-value" id="daily-best">Not completed</span>
+                </div>
+            </div>
+
+            <div class="node-palette">
+                <h3>Available Nodes</h3>
+                <div class="palette-nodes">
+                    <div class="palette-node input" data-type="input" title="Input Node - Generates data">IN</div>
+                    <div class="palette-node processing" data-type="processing" title="Processing Node - Transforms data">PR</div>
+                    <div class="palette-node output" data-type="output" title="Output Node - Receives data">OUT</div>
+                    <div class="palette-node memory locked" data-type="memory" title="Memory Node - Stores data (Unlock at Level 3)">MEM</div>
+                    <div class="palette-node amplifier locked" data-type="amplifier" title="Amplifier - Boosts signal (Unlock at Level 5)">AMP</div>
+                    <div class="palette-node filter locked" data-type="filter" title="Filter - Reduces noise (Unlock at Level 7)">FLT</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn primary" onclick="runSimulation()">Simulate</button>
+                <button class="btn" onclick="clearNetwork()">Clear</button>
+                <button class="btn" onclick="shareNetwork()">Share</button>
+            </div>
+
+            <div class="leaderboard">
+                <h4>Today's Leaders</h4>
+                <div class="leaderboard-entry">
+                    <span>1. NeuroMaster</span>
+                    <span>94%</span>
+                </div>
+                <div class="leaderboard-entry">
+                    <span>2. DataFlow_Pro</span>
+                    <span>91%</span>
+                </div>
+                <div class="leaderboard-entry player">
+                    <span>3. You</span>
+                    <span id="player-best">--</span>
+                </div>
+                <div class="leaderboard-entry">
+                    <span>4. CircuitWiz</span>
+                    <span>87%</span>
+                </div>
+                <div class="leaderboard-entry">
+                    <span>5. NetworkNinja</span>
+                    <span>85%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-game">
+            <div class="header">
+                <div>
+                    <h1>Neural Nexus</h1>
+                    <small>Level <span id="player-level">1</span> | XP: <span id="player-xp">0</span>/100</small>
+                </div>
+                <div>
+                    <span>Puzzle <span id="puzzle-number">1</span> | Target: <span id="target-efficiency">75%</span></span>
+                </div>
+            </div>
+
+            <div class="game-board">
+                <div class="grid" id="game-grid">
+                    <!-- Grid cells will be generated by JavaScript -->
+                </div>
+                <svg class="connections" id="connections-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                    <!-- Connection lines will be drawn here -->
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-controls">
+        <button class="btn" onclick="runSimulation()">Simulate</button>
+        <button class="btn" onclick="clearNetwork()">Clear</button>
+        <button class="btn" onclick="shareNetwork()">Share</button>
+    </div>
+
+    <div class="notification" id="notification">
+        Network optimized successfully!
+    </div>
+
+    <div class="sharing-modal" id="sharing-modal">
+        <div class="sharing-content">
+            <h2>Share Your Network!</h2>
+            <div id="share-stats"></div>
+            <div class="controls" style="margin-top: 20px;">
+                <button class="btn primary" onclick="shareToSocial()">Share on Social</button>
+                <button class="btn" onclick="challengeFriend()">Challenge Friend</button>
+                <button class="btn" onclick="closeSharing()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="achievement-popup" id="achievement-popup">
+        🏆 Achievement Unlocked: Network Architect!
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            level: 1,
+            xp: 0,
+            unlockedNodes: ['input', 'processing', 'output'],
+            currentPuzzle: 1,
+            placedNodes: [],
+            connections: [],
+            efficiency: 0,
+            globalAverage: 68,
+            dailyBest: null,
+            playerBest: null
+        };
+
+        // Load saved game state
+        function loadGameState() {
+            const saved = localStorage.getItem('neural-nexus-save');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                gameState = { ...gameState, ...savedState };
+                updateUI();
+                updateUnlockedNodes();
+            }
+        }
+
+        // Save game state
+        function saveGameState() {
+            localStorage.setItem('neural-nexus-save', JSON.stringify(gameState));
+        }
+
+        // Initialize game
+        function initGame() {
+            createGrid();
+            loadGameState();
+            setupDragAndDrop();
+            generateDailyChallenge();
+            setInterval(updateGlobalStats, 30000); // Update every 30 seconds
+        }
+
+        // Create game grid
+        function createGrid() {
+            const grid = document.getElementById('game-grid');
+            const isMobile = window.innerWidth <= 768;
+            const cols = isMobile ? 8 : 12;
+            const rows = isMobile ? 6 : 8;
+            
+            grid.style.gridTemplateColumns = `repeat(${cols}, ${isMobile ? '45px' : '60px'})`;
+            grid.style.gridTemplateRows = `repeat(${rows}, ${isMobile ? '45px' : '60px'})`;
+            
+            grid.innerHTML = '';
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        // Setup drag and drop functionality
+        function setupDragAndDrop() {
+            // Make palette nodes draggable
+            document.querySelectorAll('.palette-node:not(.locked)').forEach(node => {
+                node.draggable = true;
+                node.addEventListener('dragstart', handleDragStart);
+            });
+
+            // Setup drop zones
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.addEventListener('dragover', handleDragOver);
+                cell.addEventListener('drop', handleDrop);
+                cell.addEventListener('dragenter', handleDragEnter);
+                cell.addEventListener('dragleave', handleDragLeave);
+            });
+
+            // Touch support for mobile
+            setupTouchSupport();
+        }
+
+        // Touch support for mobile devices
+        function setupTouchSupport() {
+            let draggedElement = null;
+            let draggedType = null;
+            
+            document.querySelectorAll('.palette-node:not(.locked)').forEach(node => {
+                node.addEventListener('touchstart', (e) => {
+                    draggedType = node.dataset.type;
+                    node.style.opacity = '0.5';
+                    showValidDropZones(true);
+                });
+                
+                node.addEventListener('touchend', (e) => {
+                    node.style.opacity = '1';
+                    showValidDropZones(false);
+                    draggedType = null;
+                });
+            });
+            
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.addEventListener('touchstart', (e) => {
+                    if (draggedType && !cell.querySelector('.node')) {
+                        placeNode(draggedType, cell);
+                        draggedType = null;
+                        showValidDropZones(false);
+                    }
+                });
+            });
+        }
+
+        // Drag and drop handlers
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.type);
+            showValidDropZones(true);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            if (!e.target.querySelector('.node')) {
+                e.target.classList.add('valid-drop');
+            } else {
+                e.target.classList.add('invalid-drop');
+            }
+        }
+
+        function handleDragLeave(e) {
+            e.target.classList.remove('valid-drop', 'invalid-drop');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const nodeType = e.dataTransfer.getData('text/plain');
+            const cell = e.target;
+            
+            cell.classList.remove('valid-drop', 'invalid-drop');
+            showValidDropZones(false);
+            
+            if (!cell.querySelector('.node')) {
+                placeNode(nodeType, cell);
+            }
+        }
+
+        // Show valid drop zones
+        function showValidDropZones(show) {
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                if (show && !cell.querySelector('.node')) {
+                    cell.style.borderColor = '#00ff00';
+                    cell.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
+                } else if (!show) {
+                    cell.style.borderColor = 'rgba(0, 255, 255, 0.2)';
+                    cell.style.backgroundColor = 'transparent';
+                }
+            });
+        }
+
+        // Place a node on the grid
+        function placeNode(type, cell) {
+            if (!gameState.unlockedNodes.includes(type)) {
+                showNotification('Node type not unlocked yet!', 'error');
+                return;
+            }
+
+            const node = document.createElement('div');
+            node.className = `node ${type}`;
+            node.dataset.type = type;
+            node.textContent = getNodeAbbreviation(type);
+            node.title = getNodeDescription(type);
+            
+            // Make placed nodes draggable within grid
+            node.draggable = true;
+            node.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', 'move-node');
+                e.dataTransfer.setData('application/json', JSON.stringify({
+                    fromRow: parseInt(cell.dataset.row),
+                    fromCol: parseInt(cell.dataset.col)
+                }));
+            });
+            
+            // Double-click to remove node
+            node.addEventListener('dblclick', () => {
+                removeNode(cell);
+            });
+            
+            cell.appendChild(node);
+            
+            // Add to game state
+            gameState.placedNodes.push({
+                type: type,
+                row: parseInt(cell.dataset.row),
+                col: parseInt(cell.dataset.col)
+            });
+            
+            updateStats();
+            autoConnect();
+            
+            // Play placement sound effect
+            playSound('place');
+        }
+
+        // Remove a node from the grid
+        function removeNode(cell) {
+            const node = cell.querySelector('.node');
+            if (node) {
+                cell.removeChild(node);
+                
+                // Remove from game state
+                gameState.placedNodes = gameState.placedNodes.filter(n => 
+                    !(n.row === parseInt(cell.dataset.row) && n.col === parseInt(cell.dataset.col))
+                );
+                
+                updateStats();
+                updateConnections();
+                playSound('remove');
+            }
+        }
+
+        // Get node abbreviation
+        function getNodeAbbreviation(type) {
+            const abbreviations = {
+                'input': 'IN',
+                'processing': 'PR',
+                'output': 'OUT',
+                'memory': 'MEM',
+                'amplifier': 'AMP',
+                'filter': 'FLT'
+            };
+            return abbreviations[type] || 'N';
+        }
+
+        // Get node description
+        function getNodeDescription(type) {
+            const descriptions = {
+                'input': 'Input Node - Generates data signals',
+                'processing': 'Processing Node - Transforms and routes data',
+                'output': 'Output Node - Receives and processes final data',
+                'memory': 'Memory Node - Stores and buffers data',
+                'amplifier': 'Amplifier - Boosts signal strength',
+                'filter': 'Filter - Reduces noise and optimizes flow'
+            };
+            return descriptions[type] || 'Unknown node type';
+        }
+
+        // Auto-connect nearby nodes
+        function autoConnect() {
+            gameState.connections = [];
+            const nodes = gameState.placedNodes;
+            
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const nodeA = nodes[i];
+                    const nodeB = nodes[j];
+                    const distance = Math.abs(nodeA.row - nodeB.row) + Math.abs(nodeA.col - nodeB.col);
+                    
+                    // Connect nodes within 2 grid units
+                    if (distance <= 2) {
+                        gameState.connections.push({
+                            from: i,
+                            to: j,
+                            strength: Math.max(0.3, 1 - distance * 0.2)
+                        });
+                    }
+                }
+            }
+            
+            updateConnections();
+        }
+
+        // Update visual connections
+        function updateConnections() {
+            const svg = document.getElementById('connections-svg');
+            svg.innerHTML = '';
+            
+            const grid = document.getElementById('game-grid');
+            const gridRect = grid.getBoundingClientRect();
+            const gameBoard = document.querySelector('.game-board');
+            const boardRect = gameBoard.getBoundingClientRect();
+            
+            gameState.connections.forEach(conn => {
+                const nodeA = gameState.placedNodes[conn.from];
+                const nodeB = gameState.placedNodes[conn.to];
+                
+                if (nodeA && nodeB) {
+                    const cellSize = window.innerWidth <= 768 ? 45 : 60;
+                    const gap = window.innerWidth <= 768 ? 3 : 5;
+                    
+                    const x1 = gridRect.left - boardRect.left + (nodeA.col * (cellSize + gap)) + cellSize / 2;
+                    const y1 = gridRect.top - boardRect.top + (nodeA.row * (cellSize + gap)) + cellSize / 2;
+                    const x2 = gridRect.left - boardRect.left + (nodeB.col * (cellSize + gap)) + cellSize / 2;
+                    const y2 = gridRect.top - boardRect.top + (nodeB.row * (cellSize + gap)) + cellSize / 2;
+                    
+                    // Connection line
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', x2);
+                    line.setAttribute('y2', y2);
+                    line.setAttribute('class', 'connection-line');
+                    line.style.strokeOpacity = conn.strength;
+                    svg.appendChild(line);
+                    
+                    // Data flow animation
+                    const flowLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    flowLine.setAttribute('x1', x1);
+                    flowLine.setAttribute('y1', y1);
+                    flowLine.setAttribute('x2', x2);
+                    flowLine.setAttribute('y2', y2);
+                    flowLine.setAttribute('class', 'data-flow');
+                    flowLine.style.animationDelay = `${Math.random() * 2}s`;
+                    svg.appendChild(flowLine);
+                }
+            });
+        }
+
+        // Calculate network efficiency
+        function calculateEfficiency() {
+            const nodes = gameState.placedNodes;
+            const connections = gameState.connections;
+            
+            if (nodes.length === 0) {
+                return 0;
+            }
+            
+            let efficiency = 0;
+            
+            // Base efficiency from node types
+            const inputNodes = nodes.filter(n => n.type === 'input').length;
+            const outputNodes = nodes.filter(n => n.type === 'output').length;
+            const processingNodes = nodes.filter(n => n.type === 'processing').length;
+            
+            // Must have at least one input and output
+            if (inputNodes === 0 || outputNodes === 0) {
+                return 0;
+            }
+            
+            // Base efficiency calculation
+            efficiency += Math.min(inputNodes, outputNodes) * 20; // Input-output balance
+            efficiency += processingNodes * 10; // Processing power
+            
+            // Connection efficiency
+            const avgConnectionStrength = connections.reduce((sum, conn) => sum + conn.strength, 0) / Math.max(connections.length, 1);
+            efficiency += avgConnectionStrength * 30;
+            
+            // Node efficiency bonus
+            nodes.forEach(node => {
+                switch (node.type) {
+                    case 'memory':
+                        efficiency += 5;
+                        break;
+                    case 'amplifier':
+                        efficiency += 8;
+                        break;
+                    case 'filter':
+                        efficiency += 6;
+                        break;
+                }
+            });
+            
+            // Penalty for too many nodes (encourage optimization)
+            const optimalNodeCount = 8 + gameState.level * 2;
+            if (nodes.length > optimalNodeCount) {
+                efficiency *= Math.max(0.5, 1 - (nodes.length - optimalNodeCount) * 0.05);
+            }
+            
+            // Random variance for replayability
+            efficiency += (Math.random() - 0.5) * 10;
+            
+            return Math.max(0, Math.min(100, Math.round(efficiency)));
+        }
+
+        // Run network simulation
+        function runSimulation() {
+            if (gameState.placedNodes.length === 0) {
+                showNotification('Place some nodes first!', 'warning');
+                return;
+            }
+            
+            // Add pulsing animation to nodes
+            document.querySelectorAll('.node').forEach(node => {
+                node.classList.add('pulse');
+                setTimeout(() => node.classList.remove('pulse'), 2000);
+            });
+            
+            // Calculate efficiency
+            gameState.efficiency = calculateEfficiency();
+            
+            // Update UI
+            updateStats();
+            
+            // Check for achievements
+            checkAchievements();
+            
+            // Add XP
+            const xpGained = Math.round(gameState.efficiency / 10);
+            gameState.xp += xpGained;
+            
+            // Level up check
+            const xpRequired = gameState.level * 100;
+            if (gameState.xp >= xpRequired) {
+                levelUp();
+            }
+            
+            // Update personal best
+            if (!gameState.playerBest || gameState.efficiency > gameState.playerBest) {
+                gameState.playerBest = gameState.efficiency;
+                showNotification(`New personal best: ${gameState.efficiency}%!`, 'success');
+            }
+            
+            // Save progress
+            saveGameState();
+            
+            // Show results
+            setTimeout(() => {
+                const comparison = gameState.efficiency - gameState.globalAverage;
+                const comparisonText = comparison > 0 ? 
+                    `+${comparison}% above average!` : 
+                    `${comparison}% below average`;
+                
+                showNotification(`Efficiency: ${gameState.efficiency}% (${comparisonText})`, 'success');
+            }, 1000);
+            
+            playSound('simulate');
+        }
+
+        // Update game statistics
+        function updateStats() {
+            document.getElementById('efficiency').textContent = `${gameState.efficiency}%`;
+            document.getElementById('nodes-used').textContent = gameState.placedNodes.length;
+            document.getElementById('connections').textContent = gameState.connections.length;
+            document.getElementById('player-level').textContent = gameState.level;
+            document.getElementById('player-xp').textContent = gameState.xp;
+            document.getElementById('player-best').textContent = gameState.playerBest ? `${gameState.playerBest}%` : '--';
+            
+            // Update efficiency bar
+            const efficiencyBar = document.getElementById('efficiency-bar');
+            efficiencyBar.style.width = `${gameState.efficiency}%`;
+            
+            // Update global comparison
+            const comparison = gameState.efficiency - gameState.globalAverage;
+            const vsGlobalElement = document.getElementById('vs-global');
+            if (comparison > 0) {
+                vsGlobalElement.textContent = `+${comparison}%`;
+                vsGlobalElement.style.color = '#00ff00';
+            } else if (comparison < 0) {
+                vsGlobalElement.textContent = `${comparison}%`;
+                vsGlobalElement.style.color = '#ff0000';
+            } else {
+                vsGlobalElement.textContent = 'Equal';
+                vsGlobalElement.style.color = '#ffff00';
+            }
+        }
+
+        // Level up
+        function levelUp() {
+            gameState.level++;
+            gameState.xp = 0;
+            
+            showAchievement(`Level ${gameState.level} Reached!`);
+            
+            // Unlock new nodes at certain levels
+            if (gameState.level === 3 && !gameState.unlockedNodes.includes('memory')) {
+                gameState.unlockedNodes.push('memory');
+                showAchievement('Memory Nodes Unlocked!');
+            }
+            if (gameState.level === 5 && !gameState.unlockedNodes.includes('amplifier')) {
+                gameState.unlockedNodes.push('amplifier');
+                showAchievement('Amplifier Nodes Unlocked!');
+            }
+            if (gameState.level === 7 && !gameState.unlockedNodes.includes('filter')) {
+                gameState.unlockedNodes.push('filter');
+                showAchievement('Filter Nodes Unlocked!');
+            }
+            
+            updateUnlockedNodes();
+            updateUI();
+            playSound('levelup');
+        }
+
+        // Update unlocked nodes in UI
+        function updateUnlockedNodes() {
+            document.querySelectorAll('.palette-node').forEach(node => {
+                const nodeType = node.dataset.type;
+                if (gameState.unlockedNodes.includes(nodeType)) {
+                    node.classList.remove('locked');
+                    node.draggable = true;
+                } else {
+                    node.classList.add('locked');
+                    node.draggable = false;
+                }
+            });
+            
+            // Re-setup drag and drop for newly unlocked nodes
+            setupDragAndDrop();
+        }
+
+        // Clear network
+        function clearNetwork() {
+            document.querySelectorAll('.node').forEach(node => {
+                node.parentElement.removeChild(node);
+            });
+            
+            gameState.placedNodes = [];
+            gameState.connections = [];
+            gameState.efficiency = 0;
+            
+            updateStats();
+            updateConnections();
+            playSound('clear');
+        }
+
+        // Share network
+        function shareNetwork() {
+            if (gameState.placedNodes.length === 0) {
+                showNotification('Build a network first!', 'warning');
+                return;
+            }
+            
+            const shareStats = document.getElementById('share-stats');
+            shareStats.innerHTML = `
+                <h3>Your Neural Network</h3>
+                <p>Efficiency: <strong>${gameState.efficiency}%</strong></p>
+                <p>Nodes Used: <strong>${gameState.placedNodes.length}</strong></p>
+                <p>Global Ranking: <strong>Top ${Math.round((1 - gameState.efficiency / 100) * 100)}%</strong></p>
+                <p>Challenge your friends to beat this!</p>
+            `;
+            
+            document.getElementById('sharing-modal').style.display = 'flex';
+        }
+
+        // Close sharing modal
+        function closeSharing() {
+            document.getElementById('sharing-modal').style.display = 'none';
+        }
+
+        // Share to social media
+        function shareToSocial() {
+            const text = `I just optimized a neural network with ${gameState.efficiency}% efficiency in Neural Nexus! Can you beat my score? 🧠⚡`;
+            const url = window.location.href;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Neural Nexus Challenge',
+                    text: text,
+                    url: url
+                });
+            } else {
+                // Fallback for browsers without native sharing
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                window.open(twitterUrl, '_blank');
+            }
+            
+            closeSharing();
+        }
+
+        // Challenge a friend
+        function challengeFriend() {
+            const challengeCode = btoa(JSON.stringify({
+                puzzle: gameState.currentPuzzle,
+                targetEfficiency: gameState.efficiency,
+                nodes: gameState.placedNodes.length
+            }));
+            
+            const challengeUrl = `${window.location.href}?challenge=${challengeCode}`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(challengeUrl).then(() => {
+                    showNotification('Challenge link copied to clipboard!', 'success');
+                });
+            } else {
+                showNotification(`Challenge URL: ${challengeUrl}`, 'success');
+            }
+            
+            closeSharing();
+        }
+
+        // Generate daily challenge
+        function generateDailyChallenge() {
+            const today = new Date().toDateString();
+            const savedChallenge = localStorage.getItem('neural-nexus-daily');
+            
+            if (!savedChallenge || JSON.parse(savedChallenge).date !== today) {
+                // Generate new daily challenge
+                const challenges = [
+                    { desc: 'Optimize data flow with max 15 nodes', maxNodes: 15, target: 75 },
+                    { desc: 'Build efficient network with only 8 nodes', maxNodes: 8, target: 80 },
+                    { desc: 'Create high-throughput network (20+ nodes)', minNodes: 20, target: 85 },
+                    { desc: 'Memory-focused optimization challenge', requiredTypes: ['memory'], target: 70 },
+                    { desc: 'Amplifier efficiency challenge', requiredTypes: ['amplifier'], target: 85 }
+                ];
+                
+                const todayChallenge = challenges[Math.floor(Math.random() * challenges.length)];
+                localStorage.setItem('neural-nexus-daily', JSON.stringify({
+                    date: today,
+                    challenge: todayChallenge
+                }));
+                
+                gameState.dailyChallenge = todayChallenge;
+            } else {
+                gameState.dailyChallenge = JSON.parse(savedChallenge).challenge;
+            }
+            
+            document.getElementById('challenge-desc').textContent = gameState.dailyChallenge.desc;
+            document.getElementById('target-efficiency').textContent = `${gameState.dailyChallenge.target}%`;
+        }
+
+        // Check achievements
+        function checkAchievements() {
+            const achievements = [];
+            
+            if (gameState.efficiency >= 90 && !gameState.achievements?.includes('perfectionist')) {
+                achievements.push('Perfectionist: 90%+ efficiency!');
+                gameState.achievements = gameState.achievements || [];
+                gameState.achievements.push('perfectionist');
+            }
+            
+            if (gameState.placedNodes.length >= 20 && !gameState.achievements?.includes('architect')) {
+                achievements.push('Network Architect: 20+ nodes!');
+                gameState.achievements = gameState.achievements || [];
+                gameState.achievements.push('architect');
+            }
+            
+            if (gameState.efficiency > gameState.globalAverage + 20 && !gameState.achievements?.includes('genius')) {
+                achievements.push('Genius: 20%+ above average!');
+                gameState.achievements = gameState.achievements || [];
+                gameState.achievements.push('genius');
+            }
+            
+            achievements.forEach(achievement => {
+                showAchievement(achievement);
+            });
+        }
+
+        // Show achievement popup
+        function showAchievement(text) {
+            const popup = document.getElementById('achievement-popup');
+            popup.textContent = `🏆 ${text}`;
+            popup.style.display = 'block';
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 3000);
+            
+            playSound('achievement');
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Update global statistics (simulated)
+        function updateGlobalStats() {
+            // Simulate changing global average
+            gameState.globalAverage = 65 + Math.random() * 10;
+            updateStats();
+        }
+
+        // Play sound effects
+        function playSound(type) {
+            // Create audio context for sound effects
+            if (!window.audioContext) {
+                window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            const ctx = window.audioContext;
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            switch (type) {
+                case 'place':
+                    oscillator.frequency.value = 800;
+                    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                    break;
+                case 'remove':
+                    oscillator.frequency.value = 400;
+                    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                    break;
+                case 'simulate':
+                    oscillator.frequency.value = 600;
+                    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    break;
+                case 'levelup':
+                    oscillator.frequency.value = 1000;
+                    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    break;
+                case 'achievement':
+                    oscillator.frequency.value = 1200;
+                    gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    break;
+                case 'clear':
+                    oscillator.frequency.value = 200;
+                    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    break;
+            }
+            
+            oscillator.start(ctx.currentTime);
+            oscillator.stop(ctx.currentTime + 0.5);
+        }
+
+        // Update UI elements
+        function updateUI() {
+            document.getElementById('player-level').textContent = gameState.level;
+            document.getElementById('player-xp').textContent = gameState.xp;
+            document.getElementById('puzzle-number').textContent = gameState.currentPuzzle;
+            
+            // Update XP requirement display
+            const xpRequired = gameState.level * 100;
+            document.querySelector('small').textContent = `Level ${gameState.level} | XP: ${gameState.xp}/${xpRequired}`;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            createGrid();
+            setTimeout(updateConnections, 100);
+        });
+
+        // Handle challenge URL parameter
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const challengeCode = urlParams.get('challenge');
+            
+            if (challengeCode) {
+                try {
+                    const challenge = JSON.parse(atob(challengeCode));
+                    showNotification(`Friend's Challenge: ${challenge.targetEfficiency}% in ${challenge.nodes} nodes!`, 'warning');
+                    gameState.currentChallenge = challenge;
+                } catch (e) {
+                    console.log('Invalid challenge code');
+                }
+            }
+        });
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+
+        // Auto-save every 30 seconds
+        setInterval(saveGameState, 30000);
+    </script>
+    
+    <!-- Viral Mechanics and Tournament Integration -->
+    <script src="/assets/js/analytics-dashboard.js"></script>
+    <script src="/assets/js/viral-mechanics.js"></script>
+    <script src="/assets/js/community-system.js"></script>
+    <script src="/assets/js/leaderboards.js"></script>
+    
+    <script>
+        // Neural Nexus Tournament System
+        class NeuralNexusTournament {
+            constructor() {
+                this.currentTournament = null;
+                this.playerStats = {
+                    gamesPlayed: 0,
+                    bestAccuracy: 0,
+                    bestEfficiency: 0,
+                    tournamentWins: 0
+                };
+                
+                this.initializeTournaments();
+                this.setupTournamentUI();
+            }
+            
+            initializeTournaments() {
+                // Generate daily tournament
+                const today = new Date().toDateString();
+                const lastTournament = localStorage.getItem('neural_nexus_last_tournament_date');
+                
+                if (lastTournament !== today) {
+                    this.generateDailyTournament();
+                    localStorage.setItem('neural_nexus_last_tournament_date', today);
+                }
+                
+                this.loadCurrentTournament();
+            }
+            
+            generateDailyTournament() {
+                const tournamentTypes = [
+                    {
+                        name: "Speed Circuit",
+                        description: "Complete networks as fast as possible",
+                        type: "speed",
+                        target: { time: 30, accuracy: 85 },
+                        reward: 150
+                    },
+                    {
+                        name: "Precision Challenge",
+                        description: "Achieve maximum accuracy",
+                        type: "accuracy",
+                        target: { accuracy: 98, efficiency: 80 },
+                        reward: 200
+                    },
+                    {
+                        name: "Efficiency Master",
+                        description: "Optimal network efficiency",
+                        type: "efficiency",
+                        target: { efficiency: 95, nodes: 15 },
+                        reward: 175
+                    }
+                ];
+                
+                const tournament = tournamentTypes[Math.floor(Math.random() * tournamentTypes.length)];
+                tournament.id = 'daily_' + Date.now();
+                tournament.date = new Date().toDateString();
+                tournament.participants = 0;
+                tournament.leaderboard = [];
+                
+                localStorage.setItem('neural_nexus_daily_tournament', JSON.stringify(tournament));
+                this.currentTournament = tournament;
+            }
+            
+            loadCurrentTournament() {
+                const stored = localStorage.getItem('neural_nexus_daily_tournament');
+                if (stored) {
+                    this.currentTournament = JSON.parse(stored);
+                }
+            }
+            
+            setupTournamentUI() {
+                // Add tournament info to sidebar
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar && this.currentTournament) {
+                    const tournamentSection = document.createElement('div');
+                    tournamentSection.className = 'tournament-section';
+                    tournamentSection.innerHTML = `
+                        <div class="section-title">🏆 Daily Tournament</div>
+                        <div class="tournament-info">
+                            <h3>${this.currentTournament.name}</h3>
+                            <p>${this.currentTournament.description}</p>
+                            <div class="tournament-target">
+                                <strong>Target:</strong><br>
+                                ${this.formatTournamentTarget(this.currentTournament.target)}
+                            </div>
+                            <div class="tournament-reward">
+                                Reward: ${this.currentTournament.reward} points
+                            </div>
+                            <button id="joinTournamentBtn" class="btn tournament-btn">
+                                Join Tournament
+                            </button>
+                        </div>
+                        <div id="tournamentProgress" class="tournament-progress" style="display: none;">
+                            <div class="progress-label">Tournament Progress</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="tournamentProgressFill"></div>
+                            </div>
+                            <div class="progress-text" id="tournamentProgressText">0%</div>
+                        </div>
+                    `;
+                    
+                    sidebar.appendChild(tournamentSection);
+                    
+                    // Add tournament styles
+                    const styles = document.createElement('style');
+                    styles.textContent = `
+                        .tournament-section {
+                            background: rgba(0, 255, 255, 0.1);
+                            border: 1px solid #00ffff;
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-top: 20px;
+                        }
+                        
+                        .tournament-info h3 {
+                            color: #ffff00;
+                            margin-bottom: 8px;
+                        }
+                        
+                        .tournament-target {
+                            background: rgba(255, 255, 0, 0.1);
+                            padding: 10px;
+                            border-radius: 4px;
+                            margin: 10px 0;
+                            font-size: 12px;
+                        }
+                        
+                        .tournament-reward {
+                            color: #00ff00;
+                            font-weight: bold;
+                            margin-bottom: 10px;
+                        }
+                        
+                        .tournament-btn {
+                            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+                            color: white;
+                            border: none;
+                            padding: 10px 15px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            width: 100%;
+                            font-weight: bold;
+                            transition: all 0.3s;
+                        }
+                        
+                        .tournament-btn:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        }
+                        
+                        .tournament-progress {
+                            margin-top: 15px;
+                        }
+                        
+                        .progress-label {
+                            font-size: 12px;
+                            margin-bottom: 5px;
+                        }
+                        
+                        .progress-bar {
+                            background: rgba(255, 255, 255, 0.2);
+                            height: 8px;
+                            border-radius: 4px;
+                            overflow: hidden;
+                        }
+                        
+                        .progress-fill {
+                            background: linear-gradient(90deg, #00ffff, #ffff00);
+                            height: 100%;
+                            width: 0%;
+                            transition: width 0.5s ease;
+                        }
+                        
+                        .progress-text {
+                            text-align: center;
+                            font-size: 12px;
+                            margin-top: 5px;
+                        }
+                    `;
+                    document.head.appendChild(styles);
+                    
+                    // Setup tournament join button
+                    document.getElementById('joinTournamentBtn').addEventListener('click', () => {
+                        this.joinTournament();
+                    });
+                }
+            }
+            
+            formatTournamentTarget(target) {
+                let text = '';
+                if (target.time) text += `Time: ${target.time}s<br>`;
+                if (target.accuracy) text += `Accuracy: ${target.accuracy}%<br>`;
+                if (target.efficiency) text += `Efficiency: ${target.efficiency}%<br>`;
+                if (target.nodes) text += `Max Nodes: ${target.nodes}`;
+                return text;
+            }
+            
+            joinTournament() {
+                if (!this.currentTournament) return;
+                
+                // Show tournament mode UI
+                document.getElementById('tournamentProgress').style.display = 'block';
+                document.getElementById('joinTournamentBtn').textContent = 'Tournament Active';
+                document.getElementById('joinTournamentBtn').disabled = true;
+                
+                // Enable tournament mode
+                window.gameState.tournamentMode = true;
+                window.gameState.tournamentData = {
+                    type: this.currentTournament.type,
+                    target: this.currentTournament.target,
+                    startTime: Date.now()
+                };
+                
+                // Reset game for tournament
+                resetLevel();
+                showNotification(`${this.currentTournament.name} tournament started!`, 'success');
+                
+                // Track tournament participation
+                if (typeof trackGameEvent !== 'undefined') {
+                    trackGameEvent('tournament_joined', {
+                        tournament: this.currentTournament.name,
+                        type: this.currentTournament.type
+                    });
+                }
+            }
+            
+            checkTournamentProgress() {
+                if (!window.gameState.tournamentMode || !this.currentTournament) return;
+                
+                const target = this.currentTournament.target;
+                const current = window.gameState;
+                let progress = 0;
+                
+                switch (this.currentTournament.type) {
+                    case 'speed':
+                        const elapsedTime = (Date.now() - window.gameState.tournamentData.startTime) / 1000;
+                        progress = Math.min(100, (current.accuracy / target.accuracy) * 50 + 
+                                          (target.time / Math.max(elapsedTime, 1)) * 50);
+                        break;
+                        
+                    case 'accuracy':
+                        progress = (current.accuracy / target.accuracy) * 70 + 
+                                  (current.efficiency / target.efficiency) * 30;
+                        break;
+                        
+                    case 'efficiency':
+                        progress = (current.efficiency / target.efficiency) * 80 + 
+                                  (target.nodes / Math.max(current.nodesPlaced, 1)) * 20;
+                        break;
+                }
+                
+                progress = Math.min(100, Math.max(0, progress));
+                
+                // Update progress UI
+                document.getElementById('tournamentProgressFill').style.width = progress + '%';
+                document.getElementById('tournamentProgressText').textContent = Math.round(progress) + '%';
+                
+                // Check for tournament completion
+                if (progress >= 100) {
+                    this.completeTournament();
+                }
+            }
+            
+            completeTournament() {
+                window.gameState.tournamentMode = false;
+                
+                // Calculate final score
+                const baseScore = this.currentTournament.reward;
+                const bonusScore = Math.round(window.gameState.score * 0.1);
+                const totalScore = baseScore + bonusScore;
+                
+                // Award points
+                if (window.viralMechanics) {
+                    window.viralMechanics.playerStats.totalPoints += totalScore;
+                    window.viralMechanics.savePlayerStats();
+                    window.viralMechanics.checkAchievement('neural_master', window.gameState.accuracy);
+                }
+                
+                // Submit to leaderboard
+                if (window.leaderboardSystem) {
+                    window.leaderboardSystem.submitScore('neural-nexus', totalScore, 'Neural Champion');
+                }
+                
+                // Show completion notification
+                showNotification(`Tournament Complete! +${totalScore} points earned!`, 'success');
+                
+                // Enable sharing
+                setTimeout(() => {
+                    if (window.viralMechanics) {
+                        window.viralMechanics.shareScore({
+                            type: 'achievement',
+                            achievementName: `${this.currentTournament.name} Winner`,
+                            score: totalScore,
+                            game: 'neural-nexus',
+                            gameName: 'Neural Nexus'
+                        });
+                    }
+                }, 2000);
+                
+                // Reset UI
+                document.getElementById('joinTournamentBtn').textContent = 'Tournament Complete';
+                document.getElementById('joinTournamentBtn').style.background = '#4CAF50';
+            }
+        }
+        
+        // Enhanced Neural Nexus with viral features
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize tournament system
+            window.neuralNexusTournament = new NeuralNexusTournament();
+            
+            // Track game engagement
+            if (typeof botincAnalytics !== 'undefined') {
+                botincAnalytics.trackEngagementEvent('game_page_visit', { game: 'neural-nexus' });
+            }
+            
+            // Enhanced game completion tracking
+            const originalResetLevel = window.resetLevel;
+            window.resetLevel = function() {
+                // Submit score before reset
+                if (window.gameState.score > 0) {
+                    // Submit to leaderboard
+                    if (window.leaderboardSystem) {
+                        window.leaderboardSystem.submitScore('neural-nexus', window.gameState.score, 'Anonymous Player');
+                    }
+                    
+                    // Check achievements
+                    if (window.viralMechanics) {
+                        if (window.gameState.accuracy >= 95) {
+                            window.viralMechanics.checkAchievement('perfectionist', window.gameState.accuracy);
+                        }
+                        if (window.gameState.efficiency >= 90) {
+                            window.viralMechanics.checkAchievement('efficiency_expert', window.gameState.efficiency);
+                        }
+                    }
+                    
+                    // Track analytics
+                    if (typeof trackGameEvent !== 'undefined') {
+                        trackGameEvent('level_completed', {
+                            score: window.gameState.score,
+                            accuracy: window.gameState.accuracy,
+                            efficiency: window.gameState.efficiency,
+                            game: 'neural-nexus'
+                        });
+                    }
+                }
+                
+                return originalResetLevel.apply(this, arguments);
+            };
+            
+            // Monitor tournament progress
+            setInterval(() => {
+                if (window.neuralNexusTournament && window.gameState.tournamentMode) {
+                    window.neuralNexusTournament.checkTournamentProgress();
+                }
+            }, 1000);
+        });
+        
+        // Track initial game load
+        if (typeof trackGameEvent !== 'undefined') {
+            trackGameEvent('game_loaded', { game: 'neural-nexus' });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+    "name": "CircuitRunners.Tests.EditMode",
+    "rootNamespace": "CircuitRunners.Tests.EditMode",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "CircuitRunners.Core",
+        "CircuitRunners.Bot",
+        "CircuitRunners.Course",
+        "CircuitRunners.Data",
+        "CircuitRunners.Monetization",
+        "CircuitRunners.Firebase"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

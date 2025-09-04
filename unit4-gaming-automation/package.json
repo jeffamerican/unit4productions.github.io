@@ -1,0 +1,71 @@
+{
+  "name": "unit4productions-gaming-automation",
+  "version": "1.0.0",
+  "description": "Complete GitHub Pages automation system for Unit4Productions gaming website deployment",
+  "main": "unit4-gaming-platform.js",
+  "scripts": {
+    "deploy": "node example-deployment.js --deploy",
+    "add-game": "node example-deployment.js --add-game",
+    "validate": "node example-deployment.js --validate",
+    "guide": "node example-deployment.js --guide",
+    "test": "node test-suite.js",
+    "start": "node example-deployment.js",
+    "setup": "npm install && node setup-wizard.js"
+  },
+  "keywords": [
+    "github-pages",
+    "gaming",
+    "automation",
+    "deployment",
+    "website",
+    "html5-games",
+    "monetization",
+    "analytics",
+    "unit4productions"
+  ],
+  "author": "Unit4Productions <contact@unit4productions.com>",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.7",
+    "puppeteer": "^19.8.5",
+    "jszip": "^3.10.1",
+    "sharp": "^0.32.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.40.0",
+    "prettier": "^2.8.8"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unit4productions/gaming-automation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/unit4productions/gaming-automation/issues"
+  },
+  "homepage": "https://unit4productions.com",
+  "config": {
+    "platform": {
+      "siteName": "Unit4Productions",
+      "siteUrl": "https://unit4productions.com",
+      "primaryColor": "#FF6B35",
+      "secondaryColor": "#1A1A2E"
+    }
+  },
+  "files": [
+    "unit4-gaming-platform.js",
+    "github-api-manager.js",
+    "website-template-system.js",
+    "game-deployment-pipeline.js",
+    "domain-configuration-system.js",
+    "monetization-analytics-system.js",
+    "testing-validation-system.js",
+    "setup-guide.js",
+    "example-deployment.js",
+    "README.md",
+    "docs/"
+  ]
+}

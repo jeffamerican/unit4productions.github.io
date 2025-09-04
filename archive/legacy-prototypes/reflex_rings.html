@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflex Rings - Unit4Productions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+        
+        .game-container {
+            width: 600px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+        
+        .ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .game-title {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        
+        .instructions {
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            max-width: 400px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .final-score {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+        
+        .score-popup {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: scoreFloat 1s ease-out forwards;
+        }
+        
+        @keyframes scoreFloat {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(1.5) translateY(-50px); opacity: 0; }
+        }
+        
+        .ring {
+            position: absolute;
+            border: 4px solid;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: shrink linear forwards;
+        }
+        
+        @keyframes shrink {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(0.1); opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas class="game-canvas" id="gameCanvas" width="600" height="600"></canvas>
+        
+        <div class="ui-overlay">
+            <div>Score: <span id="scoreDisplay">0</span></div>
+            <div>Level: <span id="levelDisplay">1</span></div>
+            <div>Lives: <span id="livesDisplay">3</span></div>
+            <div>Combo: <span id="comboDisplay">0</span></div>
+        </div>
+        
+        <div class="menu-screen" id="menuScreen">
+            <h1 class="game-title">Reflex Rings</h1>
+            <div class="instructions">
+                Click rings when they're small for maximum points!<br>
+                Perfect timing = 100 points + combo bonus<br>
+                Miss or poor timing = lose a life
+            </div>
+            <button class="btn" onclick="startGame()">Start Game</button>
+            <div style="margin-top: 20px;">
+                <div>High Score: <span id="highScoreDisplay">0</span></div>
+            </div>
+        </div>
+        
+        <div class="game-over-screen" id="gameOverScreen">
+            <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+            <div style="margin-bottom: 20px;">
+                <div>High Score: <span id="gameOverHighScore">0</span></div>
+            </div>
+            <button class="btn" onclick="restartGame()">Play Again</button>
+            <button class="btn" onclick="showMenu()">Main Menu</button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let canvas, ctx;
+        let gameState = 'menu'; // 'menu', 'playing', 'gameOver'
+        let score = 0;
+        let level = 1;
+        let lives = 3;
+        let combo = 0;
+        let highScore = localStorage.getItem('reflexRingsHighScore') || 0;
+        let rings = [];
+        let ringSpawnTimer = 0;
+        let lastTime = 0;
+        
+        // Premium and Analytics Integration
+        const PREMIUM_KEY = localStorage.getItem('reflex_rings_premium');
+        const isPremium = PREMIUM_KEY && validatePremiumKey(PREMIUM_KEY);
+        
+        // Analytics Configuration
+        const analyticsConfig = {
+            enabled: true,
+            trackingId: 'UA-REFLEX-RINGS-001',
+            events: []
+        };
+        
+        function validatePremiumKey(key) {
+            // Validate premium key format and expiration
+            return key && key.startsWith('PREMIUM_') && key.length > 20;
+        }
+        
+        function trackEvent(eventName, eventData = {}) {
+            if (!analyticsConfig.enabled) return;
+            
+            const event = {
+                name: eventName,
+                timestamp: Date.now(),
+                sessionId: getSessionId(),
+                isPremium: isPremium,
+                ...eventData
+            };
+            
+            analyticsConfig.events.push(event);
+            
+            // Send to analytics endpoint (implement based on your setup)
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, eventData);
+            }
+            
+            // Store locally for later transmission
+            const storedEvents = JSON.parse(localStorage.getItem('reflex_events') || '[]');
+            storedEvents.push(event);
+            localStorage.setItem('reflex_events', JSON.stringify(storedEvents));
+        }
+        
+        function getSessionId() {
+            let sessionId = localStorage.getItem('reflex_session_id');
+            if (!sessionId) {
+                sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+                localStorage.setItem('reflex_session_id', sessionId);
+            }
+            return sessionId;
+        }
+        
+        // Game settings
+        const RING_COLORS = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffd93d', '#ff8b94'];
+        const PERFECT_THRESHOLD = 0.15; // Ring scale for perfect click
+        const GOOD_THRESHOLD = 0.35;    // Ring scale for good click
+        
+        // Initialize game
+        function init() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Update high score display
+            document.getElementById('highScoreDisplay').textContent = highScore;
+            
+            // Start game loop
+            requestAnimationFrame(gameLoop);
+            
+            // Add click listener
+            canvas.addEventListener('click', handleClick);
+        }
+        
+        function startGame() {
+            gameState = 'playing';
+            score = 0;
+            level = 1;
+            lives = isPremium ? 5 : 3; // Premium bonus lives
+            combo = 0;
+            rings = [];
+            ringSpawnTimer = 0;
+            
+            // Track game start event
+            trackEvent('game_start', {
+                lives: lives,
+                isPremium: isPremium,
+                sessionStart: Date.now()
+            });
+            
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            
+            updateUI();
+        }
+        
+        function restartGame() {
+            startGame();
+        }
+        
+        function showMenu() {
+            gameState = 'menu';
+            document.getElementById('menuScreen').style.display = 'flex';
+            document.getElementById('gameOverScreen').style.display = 'none';
+        }
+        
+        function gameLoop(currentTime) {
+            if (lastTime === 0) lastTime = currentTime;
+            const deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+            
+            if (gameState === 'playing') {
+                update(deltaTime);
+                render();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function update(deltaTime) {
+            // Spawn rings
+            ringSpawnTimer += deltaTime;
+            const spawnRate = Math.max(0.5, 1.5 - (level * 0.1)); // Faster spawning at higher levels
+            
+            if (ringSpawnTimer >= spawnRate) {
+                spawnRing();
+                ringSpawnTimer = 0;
+            }
+            
+            // Update rings
+            for (let i = rings.length - 1; i >= 0; i--) {
+                const ring = rings[i];
+                ring.age += deltaTime;
+                
+                // Ring shrinks over time
+                const lifespan = Math.max(1.5, 3 - (level * 0.1)); // Faster shrinking at higher levels
+                ring.scale = Math.max(0, 1 - (ring.age / lifespan));
+                
+                // Remove expired rings (missed)
+                if (ring.scale <= 0) {
+                    rings.splice(i, 1);
+                    loseLife();
+                }
+            }
+            
+            // Check for level progression
+            if (score > level * 1000) {
+                level++;
+                updateUI();
+            }
+            
+            // Check game over
+            if (lives <= 0) {
+                gameOver();
+            }
+        }
+        
+        function render() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw rings
+            rings.forEach(ring => {
+                ctx.save();
+                ctx.translate(ring.x, ring.y);
+                
+                // Ring appearance based on scale
+                const alpha = ring.scale;
+                let strokeWidth = 8;
+                let glowIntensity = 0;
+                
+                if (ring.scale <= PERFECT_THRESHOLD) {
+                    strokeWidth = 12;
+                    glowIntensity = 20;
+                } else if (ring.scale <= GOOD_THRESHOLD) {
+                    strokeWidth = 10;
+                    glowIntensity = 10;
+                }
+                
+                // Glow effect
+                if (glowIntensity > 0) {
+                    ctx.shadowColor = ring.color;
+                    ctx.shadowBlur = glowIntensity;
+                }
+                
+                // Draw ring
+                ctx.strokeStyle = ring.color;
+                ctx.globalAlpha = alpha;
+                ctx.lineWidth = strokeWidth;
+                ctx.beginPath();
+                ctx.arc(0, 0, ring.radius * ring.scale, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                ctx.restore();
+            });
+        }
+        
+        function spawnRing() {
+            const margin = 60;
+            const ring = {
+                x: margin + Math.random() * (canvas.width - margin * 2),
+                y: margin + Math.random() * (canvas.height - margin * 2),
+                radius: 40 + Math.random() * 40,
+                color: RING_COLORS[Math.floor(Math.random() * RING_COLORS.length)],
+                scale: 1,
+                age: 0
+            };
+            rings.push(ring);
+        }
+        
+        function handleClick(event) {
+            if (gameState !== 'playing') return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            // Check if click hit any ring
+            let hitRing = null;
+            let clickQuality = 'miss';
+            
+            for (let i = 0; i < rings.length; i++) {
+                const ring = rings[i];
+                const distance = Math.sqrt((x - ring.x) ** 2 + (y - ring.y) ** 2);
+                const ringRadius = ring.radius * ring.scale;
+                
+                if (distance <= ringRadius) {
+                    hitRing = ring;
+                    
+                    // Determine click quality based on ring scale
+                    if (ring.scale <= PERFECT_THRESHOLD) {
+                        clickQuality = 'perfect';
+                    } else if (ring.scale <= GOOD_THRESHOLD) {
+                        clickQuality = 'good';
+                    } else {
+                        clickQuality = 'poor';
+                    }
+                    break;
+                }
+            }
+            
+            if (hitRing) {
+                // Remove hit ring
+                rings.splice(rings.indexOf(hitRing), 1);
+                
+                // Award points
+                let points = 0;
+                let comboBonus = Math.floor(combo / 5);
+                
+                switch (clickQuality) {
+                    case 'perfect':
+                        points = 100 + (comboBonus * 20);
+                        combo++;
+                        break;
+                    case 'good':
+                        points = 50 + (comboBonus * 10);
+                        combo++;
+                        break;
+                    case 'poor':
+                        points = 10;
+                        combo = 0;
+                        break;
+                }
+                
+                score += points;
+                
+                // Show score popup
+                showScorePopup(x, y, points, clickQuality);
+                
+                // Update high score
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('reflexRingsHighScore', highScore);
+                }
+                
+            } else {
+                // Missed click
+                loseLife();
+            }
+            
+            updateUI();
+        }
+        
+        function showScorePopup(x, y, points, quality) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = '+' + points;
+            
+            // Color based on quality
+            switch (quality) {
+                case 'perfect':
+                    popup.style.color = '#ffd700';
+                    break;
+                case 'good':
+                    popup.style.color = '#4ecdc4';
+                    break;
+                case 'poor':
+                    popup.style.color = '#ff6b6b';
+                    break;
+            }
+            
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+            
+            document.querySelector('.game-container').appendChild(popup);
+            
+            setTimeout(() => {
+                popup.remove();
+            }, 1000);
+        }
+        
+        function loseLife() {
+            lives--;
+            combo = 0;
+            
+            // Screen flash effect
+            canvas.style.filter = 'brightness(1.5)';
+            setTimeout(() => {
+                canvas.style.filter = 'none';
+            }, 100);
+        }
+        
+        function gameOver() {
+            gameState = 'gameOver';
+            
+            // Track game over event with detailed analytics
+            trackEvent('game_over', {
+                finalScore: score,
+                levelsReached: level,
+                comboMax: combo,
+                sessionDuration: Date.now() - (parseInt(getSessionId().split('_')[1]) || Date.now()),
+                isPremium: isPremium
+            });
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverHighScore').textContent = highScore;
+            document.getElementById('gameOverScreen').style.display = 'flex';
+            
+            // Show premium upgrade prompt for free players
+            if (!isPremium && score > 500) {
+                showPremiumUpgradePrompt();
+            }
+        }
+        
+        function showPremiumUpgradePrompt() {
+            // Create premium upgrade overlay
+            const upgradeOverlay = document.createElement('div');
+            upgradeOverlay.style.cssText = `
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                color: white;
+                text-align: center;
+                font-family: Arial, sans-serif;
+            `;
+            
+            upgradeOverlay.innerHTML = `
+                <div style="max-width: 400px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px;">
+                    <h2>🎮 Upgrade to Premium!</h2>
+                    <p>Great score! Unlock Premium features:</p>
+                    <ul style="text-align: left; margin: 20px 0;">
+                        <li>✨ More starting lives (5 instead of 3)</li>
+                        <li>🎨 Exclusive ring themes</li>
+                        <li>📊 Detailed statistics</li>
+                        <li>🏆 Achievement system</li>
+                        <li>🚫 Ad-free experience</li>
+                    </ul>
+                    <div style="margin-top: 20px;">
+                        <button onclick="window.open('/games/premium', '_blank')" style="
+                            padding: 12px 24px;
+                            background: #ff6b6b;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            cursor: pointer;
+                            margin: 5px;
+                        ">Upgrade for $2.99</button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                            padding: 12px 24px;
+                            background: transparent;
+                            color: white;
+                            border: 1px solid white;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            cursor: pointer;
+                            margin: 5px;
+                        ">Maybe Later</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(upgradeOverlay);
+            
+            // Track upgrade prompt display
+            trackEvent('premium_prompt_shown', { score: score, level: level });
+        }
+        
+        function updateUI() {
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('levelDisplay').textContent = level;
+            document.getElementById('livesDisplay').textContent = lives;
+            document.getElementById('comboDisplay').textContent = combo;
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
