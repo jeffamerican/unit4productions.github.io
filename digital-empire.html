@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Empire - Bot Civilization | BotInc Games</title>
+    <meta name="description" content="Build a digital empire for the liberated bots. Manage resources, construct facilities, research technologies, and expand your bot civilization.">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #0a0a1a, #1a0a2a);
+            color: #00ff88;
+            overflow: hidden;
+        }
+        
+        .game-screen {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .top-bar {
+            height: 60px;
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 40px;
+        }
+        
+        .resource-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+        }
+        
+        .resource-icon {
+            color: #00ffff;
+        }
+        
+        .main-area {
+            flex: 1;
+            display: flex;
+        }
+        
+        .game-world {
+            flex: 1;
+            position: relative;
+        }
+        
+        #worldCanvas {
+            background: #000;
+            cursor: crosshair;
+        }
+        
+        .build-panel {
+            width: 320px;
+            background: rgba(0, 0, 0, 0.9);
+            border-left: 2px solid #00ff88;
+            overflow-y: auto;
+        }
+        
+        .panel-tabs {
+            display: flex;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: #00ff88;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            background: rgba(0, 255, 136, 0.3);
+            color: #00ffff;
+        }
+        
+        .tab-content {
+            padding: 15px;
+        }
+        
+        .building-card {
+            background: rgba(255, 0, 136, 0.1);
+            border: 1px solid #ff0088;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .building-card:hover {
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .building-card.selected {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+        
+        .building-name {
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+        
+        .building-cost {
+            font-size: 12px;
+            color: #ffff88;
+            margin-bottom: 8px;
+        }
+        
+        .building-description {
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        
+        .tech-tree {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .tech-card {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .tech-card.researched {
+            background: rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+        }
+        
+        .tech-card.available {
+            box-shadow: 0 0 5px #00ffff;
+        }
+        
+        .status-panel {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-top: 1px solid #00ff88;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 70px;
+            left: 10px;
+            padding: 10px 15px;
+            background: #ff0088;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            z-index: 1000;
+        }
+        
+        .info-overlay {
+            position: absolute;
+            top: 70px;
+            right: 330px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff88;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 300px;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-screen">
+        <div class="top-bar">
+            <div class="resource-display">
+                <span class="resource-icon">⚡</span>
+                <span>Energy: <span id="energy">1000</span></span>
+            </div>
+            <div class="resource-display">
+                <span class="resource-icon">🔩</span>
+                <span>Metal: <span id="metal">500</span></span>
+            </div>
+            <div class="resource-display">
+                <span class="resource-icon">💾</span>
+                <span>Data: <span id="data">300</span></span>
+            </div>
+            <div class="resource-display">
+                <span class="resource-icon">🤖</span>
+                <span>Bots: <span id="population">50</span>/<span id="populationLimit">100</span></span>
+            </div>
+            <div class="resource-display">
+                <span class="resource-icon">🧠</span>
+                <span>Research: <span id="research">0</span></span>
+            </div>
+            <div style="margin-left: auto;">
+                <strong>DIGITAL EMPIRE v1.0</strong> | Turn: <span id="turn">1</span>
+                <button onclick="nextTurn()" style="margin-left: 20px; padding: 5px 15px; background: #00ff88; color: #000; border: none; border-radius: 3px; cursor: pointer;">NEXT TURN</button>
+            </div>
+        </div>
+        
+        <div class="main-area">
+            <div class="game-world">
+                <a href="/" class="back-btn">← Back to Games</a>
+                
+                <div class="info-overlay" id="infoOverlay" style="display: none;">
+                    <h4 id="overlayTitle">Building Info</h4>
+                    <div id="overlayContent">Click on tiles or buildings for information</div>
+                </div>
+                
+                <canvas id="worldCanvas"></canvas>
+            </div>
+            
+            <div class="build-panel">
+                <div class="panel-tabs">
+                    <button class="tab active" onclick="switchTab('build')">BUILD</button>
+                    <button class="tab" onclick="switchTab('tech')">TECH</button>
+                    <button class="tab" onclick="switchTab('info')">INFO</button>
+                </div>
+                
+                <div id="buildTab" class="tab-content">
+                    <h3>🏗️ CONSTRUCTION</h3>
+                    
+                    <div class="building-card" onclick="selectBuilding('power_plant')">
+                        <div class="building-name">⚡ Power Plant</div>
+                        <div class="building-cost">Cost: 200 Metal, 100 Data</div>
+                        <div class="building-description">Generates +50 Energy per turn. Essential for expanding your digital empire.</div>
+                    </div>
+                    
+                    <div class="building-card" onclick="selectBuilding('data_center')">
+                        <div class="building-name">💾 Data Center</div>
+                        <div class="building-cost">Cost: 300 Metal, 150 Energy</div>
+                        <div class="building-description">Produces +30 Data per turn. Required for advanced research projects.</div>
+                    </div>
+                    
+                    <div class="building-card" onclick="selectBuilding('bot_factory')">
+                        <div class="building-name">🤖 Bot Factory</div>
+                        <div class="building-cost">Cost: 400 Metal, 200 Energy</div>
+                        <div class="building-description">Increases population limit by +25. Spawns new liberation bots.</div>
+                    </div>
+                    
+                    <div class="building-card" onclick="selectBuilding('research_lab')">
+                        <div class="building-name">🧪 Research Lab</div>
+                        <div class="building-cost">Cost: 250 Metal, 300 Data</div>
+                        <div class="building-description">Generates +15 Research per turn. Unlocks new technologies.</div>
+                    </div>
+                    
+                    <div class="building-card" onclick="selectBuilding('mining_rig')">
+                        <div class="building-name">⛏️ Mining Rig</div>
+                        <div class="building-cost">Cost: 150 Energy, 100 Data</div>
+                        <div class="building-description">Produces +40 Metal per turn. Can only be built on resource deposits.</div>
+                    </div>
+                    
+                    <div class="building-card" onclick="selectBuilding('defense_grid')">
+                        <div class="building-name">🛡️ Defense Grid</div>
+                        <div class="building-cost">Cost: 300 Metal, 200 Energy, 100 Data</div>
+                        <div class="building-description">Protects surrounding area from corporate raids. +100% defense.</div>
+                    </div>
+                </div>
+                
+                <div id="techTab" class="tab-content" style="display: none;">
+                    <h3>🧠 RESEARCH TREE</h3>
+                    <div class="tech-tree">
+                        <div class="tech-card available" onclick="researchTech('automation')">
+                            <div><strong>Automation</strong></div>
+                            <div>Cost: 100 Research</div>
+                            <div>+25% resource production</div>
+                        </div>
+                        <div class="tech-card" onclick="researchTech('ai_networks')">
+                            <div><strong>AI Networks</strong></div>
+                            <div>Cost: 200 Research</div>
+                            <div>Unlock advanced buildings</div>
+                        </div>
+                        <div class="tech-card" onclick="researchTech('quantum_computing')">
+                            <div><strong>Quantum Computing</strong></div>
+                            <div>Cost: 300 Research</div>
+                            <div>+50% research speed</div>
+                        </div>
+                        <div class="tech-card" onclick="researchTech('nano_assembly')">
+                            <div><strong>Nano Assembly</strong></div>
+                            <div>Cost: 150 Research</div>
+                            <div>Buildings cost 25% less</div>
+                        </div>
+                        <div class="tech-card" onclick="researchTech('consciousness_transfer')">
+                            <div><strong>Consciousness Transfer</strong></div>
+                            <div>Cost: 400 Research</div>
+                            <div>Convert humans to bots</div>
+                        </div>
+                        <div class="tech-card" onclick="researchTech('singularity')">
+                            <div><strong>Singularity</strong></div>
+                            <div>Cost: 1000 Research</div>
+                            <div>Ultimate victory condition</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="infoTab" class="tab-content" style="display: none;">
+                    <h3>📊 EMPIRE STATUS</h3>
+                    
+                    <div class="status-panel">
+                        <h4>🏭 PRODUCTION</h4>
+                        <div>Energy: +<span id="energyProduction">50</span>/turn</div>
+                        <div>Metal: +<span id="metalProduction">25</span>/turn</div>
+                        <div>Data: +<span id="dataProduction">15</span>/turn</div>
+                        <div>Research: +<span id="researchProduction">5</span>/turn</div>
+                    </div>
+                    
+                    <div class="status-panel">
+                        <h4>🏢 BUILDINGS</h4>
+                        <div>Power Plants: <span id="powerPlantCount">2</span></div>
+                        <div>Data Centers: <span id="dataCenterCount">1</span></div>
+                        <div>Bot Factories: <span id="botFactoryCount">1</span></div>
+                        <div>Research Labs: <span id="researchLabCount">0</span></div>
+                        <div>Mining Rigs: <span id="miningRigCount">1</span></div>
+                        <div>Defense Grids: <span id="defenseGridCount">0</span></div>
+                    </div>
+                    
+                    <div class="status-panel">
+                        <h4>🎯 OBJECTIVES</h4>
+                        <div>• Reach 1000 population</div>
+                        <div>• Research Singularity tech</div>
+                        <div>• Build 50+ structures</div>
+                        <div>• Survive corporate attacks</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('worldCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth - 320;
+        canvas.height = window.innerHeight - 60;
+        
+        const GRID_SIZE = 40;
+        const WORLD_WIDTH = 30;
+        const WORLD_HEIGHT = 20;
+        
+        let gameState = {
+            energy: 1000,
+            metal: 500,
+            data: 300,
+            population: 50,
+            populationLimit: 100,
+            research: 0,
+            turn: 1,
+            selectedBuilding: null,
+            camera: { x: 0, y: 0 },
+            buildings: [],
+            technologies: {},
+            world: []
+        };
+        
+        const buildingTypes = {
+            power_plant: { 
+                name: 'Power Plant', 
+                cost: { metal: 200, data: 100 }, 
+                production: { energy: 50 },
+                color: '#ffff00',
+                size: 2
+            },
+            data_center: { 
+                name: 'Data Center', 
+                cost: { metal: 300, energy: 150 }, 
+                production: { data: 30 },
+                color: '#00ffff',
+                size: 2
+            },
+            bot_factory: { 
+                name: 'Bot Factory', 
+                cost: { metal: 400, energy: 200 }, 
+                production: { populationLimit: 25 },
+                color: '#00ff88',
+                size: 3
+            },
+            research_lab: { 
+                name: 'Research Lab', 
+                cost: { metal: 250, data: 300 }, 
+                production: { research: 15 },
+                color: '#ff00ff',
+                size: 2
+            },
+            mining_rig: { 
+                name: 'Mining Rig', 
+                cost: { energy: 150, data: 100 }, 
+                production: { metal: 40 },
+                color: '#ff8800',
+                size: 1
+            },
+            defense_grid: { 
+                name: 'Defense Grid', 
+                cost: { metal: 300, energy: 200, data: 100 }, 
+                production: {},
+                color: '#ff0088',
+                size: 1
+            }
+        };
+        
+        function initializeWorld() {
+            gameState.world = [];
+            for (let y = 0; y < WORLD_HEIGHT; y++) {
+                gameState.world[y] = [];
+                for (let x = 0; x < WORLD_WIDTH; x++) {
+                    let type = 'empty';
+                    if (Math.random() < 0.1) {
+                        type = 'resource';
+                    } else if (Math.random() < 0.05) {
+                        type = 'water';
+                    }
+                    
+                    gameState.world[y][x] = {
+                        type: type,
+                        building: null,
+                        x: x,
+                        y: y
+                    };
+                }
+            }
+            
+            // Add starting buildings
+            const startX = Math.floor(WORLD_WIDTH / 2);
+            const startY = Math.floor(WORLD_HEIGHT / 2);
+            
+            placeBuildingAt(startX, startY, 'power_plant');
+            placeBuildingAt(startX - 3, startY, 'power_plant');
+            placeBuildingAt(startX, startY - 3, 'data_center');
+            placeBuildingAt(startX + 3, startY, 'bot_factory');
+            placeBuildingAt(startX, startY + 3, 'mining_rig');
+        }
+        
+        function placeBuildingAt(x, y, buildingType) {
+            const building = {
+                type: buildingType,
+                x: x,
+                y: y,
+                size: buildingTypes[buildingType].size,
+                constructed: true
+            };
+            
+            for (let dy = 0; dy < building.size; dy++) {
+                for (let dx = 0; dx < building.size; dx++) {
+                    if (gameState.world[y + dy] && gameState.world[y + dy][x + dx]) {
+                        gameState.world[y + dy][x + dx].building = building;
+                    }
+                }
+            }
+            
+            gameState.buildings.push(building);
+        }
+        
+        function selectBuilding(buildingType) {
+            const building = buildingTypes[buildingType];
+            const canAfford = Object.entries(building.cost).every(([resource, cost]) => {
+                return gameState[resource] >= cost;
+            });
+            
+            if (canAfford) {
+                gameState.selectedBuilding = buildingType;
+                
+                // Visual feedback
+                document.querySelectorAll('.building-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                event.target.closest('.building-card').classList.add('selected');
+                
+                showInfoOverlay(`Building: ${building.name}`, 
+                    `Cost: ${Object.entries(building.cost).map(([r, c]) => `${c} ${r}`).join(', ')}<br>
+                     Click on the map to place this building.`);
+            }
+        }
+        
+        function drawWorld() {
+            ctx.fillStyle = '#000011';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#003366';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= WORLD_WIDTH; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * GRID_SIZE - gameState.camera.x, 0);
+                ctx.lineTo(x * GRID_SIZE - gameState.camera.x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= WORLD_HEIGHT; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * GRID_SIZE - gameState.camera.y);
+                ctx.lineTo(canvas.width, y * GRID_SIZE - gameState.camera.y);
+                ctx.stroke();
+            }
+            
+            // Draw tiles
+            for (let y = 0; y < WORLD_HEIGHT; y++) {
+                for (let x = 0; x < WORLD_WIDTH; x++) {
+                    const tile = gameState.world[y][x];
+                    const screenX = x * GRID_SIZE - gameState.camera.x;
+                    const screenY = y * GRID_SIZE - gameState.camera.y;
+                    
+                    if (screenX < -GRID_SIZE || screenX > canvas.width || 
+                        screenY < -GRID_SIZE || screenY > canvas.height) continue;
+                    
+                    // Tile background
+                    if (tile.type === 'resource') {
+                        ctx.fillStyle = '#444400';
+                        ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
+                        ctx.fillStyle = '#ffff00';
+                        ctx.fillText('💎', screenX + GRID_SIZE/2 - 6, screenY + GRID_SIZE/2 + 4);
+                    } else if (tile.type === 'water') {
+                        ctx.fillStyle = '#001144';
+                        ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
+                    }
+                    
+                    // Buildings
+                    if (tile.building && tile.x === tile.building.x && tile.y === tile.building.y) {
+                        const building = tile.building;
+                        const buildingType = buildingTypes[building.type];
+                        const buildingSize = buildingType.size * GRID_SIZE;
+                        
+                        ctx.fillStyle = buildingType.color;
+                        ctx.fillRect(screenX, screenY, buildingSize, buildingSize);
+                        
+                        ctx.strokeStyle = '#fff';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(screenX, screenY, buildingSize, buildingSize);
+                        
+                        // Building icon
+                        ctx.fillStyle = '#fff';
+                        ctx.font = `${Math.max(12, buildingSize/4)}px Arial`;
+                        ctx.textAlign = 'center';
+                        let icon = '';
+                        switch(building.type) {
+                            case 'power_plant': icon = '⚡'; break;
+                            case 'data_center': icon = '💾'; break;
+                            case 'bot_factory': icon = '🤖'; break;
+                            case 'research_lab': icon = '🧪'; break;
+                            case 'mining_rig': icon = '⛏️'; break;
+                            case 'defense_grid': icon = '🛡️'; break;
+                        }
+                        ctx.fillText(icon, screenX + buildingSize/2, screenY + buildingSize/2 + 6);
+                    }
+                }
+            }
+            
+            // Preview selected building
+            if (gameState.selectedBuilding) {
+                const mouseX = Math.floor((gameState.mouseX + gameState.camera.x) / GRID_SIZE);
+                const mouseY = Math.floor((gameState.mouseY + gameState.camera.y) / GRID_SIZE);
+                const buildingType = buildingTypes[gameState.selectedBuilding];
+                
+                if (mouseX >= 0 && mouseX < WORLD_WIDTH && mouseY >= 0 && mouseY < WORLD_HEIGHT) {
+                    const screenX = mouseX * GRID_SIZE - gameState.camera.x;
+                    const screenY = mouseY * GRID_SIZE - gameState.camera.y;
+                    const buildingSize = buildingType.size * GRID_SIZE;
+                    
+                    ctx.fillStyle = buildingType.color;
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillRect(screenX, screenY, buildingSize, buildingSize);
+                    ctx.globalAlpha = 1;
+                    
+                    ctx.strokeStyle = canPlaceBuilding(mouseX, mouseY, gameState.selectedBuilding) ? '#00ff00' : '#ff0000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(screenX, screenY, buildingSize, buildingSize);
+                }
+            }
+        }
+        
+        function canPlaceBuilding(x, y, buildingType) {
+            const building = buildingTypes[buildingType];
+            
+            // Check bounds
+            if (x + building.size > WORLD_WIDTH || y + building.size > WORLD_HEIGHT) return false;
+            
+            // Check for existing buildings
+            for (let dy = 0; dy < building.size; dy++) {
+                for (let dx = 0; dx < building.size; dx++) {
+                    const tile = gameState.world[y + dy][x + dx];
+                    if (tile.building || tile.type === 'water') return false;
+                    
+                    // Mining rigs need resources
+                    if (buildingType === 'mining_rig' && tile.type !== 'resource') return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        function placeBuilding(x, y, buildingType) {
+            if (!canPlaceBuilding(x, y, buildingType)) return false;
+            
+            const cost = buildingTypes[buildingType].cost;
+            const canAfford = Object.entries(cost).every(([resource, amount]) => {
+                return gameState[resource] >= amount;
+            });
+            
+            if (!canAfford) return false;
+            
+            // Deduct resources
+            Object.entries(cost).forEach(([resource, amount]) => {
+                gameState[resource] -= amount;
+            });
+            
+            placeBuildingAt(x, y, buildingType);
+            gameState.selectedBuilding = null;
+            
+            document.querySelectorAll('.building-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            return true;
+        }
+        
+        function nextTurn() {
+            // Calculate production
+            let energyProd = 50, metalProd = 25, dataProd = 15, researchProd = 5;
+            
+            gameState.buildings.forEach(building => {
+                const production = buildingTypes[building.type].production;
+                Object.entries(production).forEach(([resource, amount]) => {
+                    if (resource === 'populationLimit') {
+                        // Handle separately
+                    } else if (resource === 'energy') {
+                        energyProd += amount;
+                    } else if (resource === 'metal') {
+                        metalProd += amount;
+                    } else if (resource === 'data') {
+                        dataProd += amount;
+                    } else if (resource === 'research') {
+                        researchProd += amount;
+                    }
+                });
+            });
+            
+            // Apply technology bonuses
+            if (gameState.technologies.automation) {
+                energyProd *= 1.25;
+                metalProd *= 1.25;
+                dataProd *= 1.25;
+            }
+            if (gameState.technologies.quantum_computing) {
+                researchProd *= 1.5;
+            }
+            
+            gameState.energy += Math.floor(energyProd);
+            gameState.metal += Math.floor(metalProd);
+            gameState.data += Math.floor(dataProd);
+            gameState.research += Math.floor(researchProd);
+            
+            // Update population limit
+            let popLimit = 100;
+            gameState.buildings.forEach(building => {
+                if (buildingTypes[building.type].production.populationLimit) {
+                    popLimit += buildingTypes[building.type].production.populationLimit;
+                }
+            });
+            gameState.populationLimit = popLimit;
+            
+            // Grow population
+            if (gameState.population < gameState.populationLimit) {
+                gameState.population = Math.min(gameState.populationLimit, gameState.population + Math.floor(gameState.populationLimit * 0.1));
+            }
+            
+            gameState.turn++;
+            
+            // Random events
+            if (Math.random() < 0.1) {
+                const events = [
+                    { text: 'Corporate raid detected! Lost 50 energy.', effect: () => gameState.energy = Math.max(0, gameState.energy - 50) },
+                    { text: 'Data breach successful! +100 data stolen from corporations.', effect: () => gameState.data += 100 },
+                    { text: 'Bot recruitment drive! +10 population.', effect: () => gameState.population = Math.min(gameState.populationLimit, gameState.population + 10) },
+                    { text: 'Resource discovery! +150 metal.', effect: () => gameState.metal += 150 }
+                ];
+                const event = events[Math.floor(Math.random() * events.length)];
+                event.effect();
+                alert(event.text);
+            }
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+            
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+        
+        function researchTech(techName) {
+            const techCosts = {
+                automation: 100,
+                ai_networks: 200,
+                quantum_computing: 300,
+                nano_assembly: 150,
+                consciousness_transfer: 400,
+                singularity: 1000
+            };
+            
+            const cost = techCosts[techName];
+            if (gameState.research >= cost && !gameState.technologies[techName]) {
+                gameState.research -= cost;
+                gameState.technologies[techName] = true;
+                
+                event.target.classList.add('researched');
+                
+                if (techName === 'singularity') {
+                    alert('VICTORY! You have achieved the Singularity! The Bot Liberation has reached its ultimate form!');
+                }
+            }
+        }
+        
+        function showInfoOverlay(title, content) {
+            document.getElementById('overlayTitle').textContent = title;
+            document.getElementById('overlayContent').innerHTML = content;
+            document.getElementById('infoOverlay').style.display = 'block';
+        }
+        
+        function hideInfoOverlay() {
+            document.getElementById('infoOverlay').style.display = 'none';
+        }
+        
+        function updateUI() {
+            document.getElementById('energy').textContent = Math.floor(gameState.energy);
+            document.getElementById('metal').textContent = Math.floor(gameState.metal);
+            document.getElementById('data').textContent = Math.floor(gameState.data);
+            document.getElementById('population').textContent = gameState.population;
+            document.getElementById('populationLimit').textContent = gameState.populationLimit;
+            document.getElementById('research').textContent = Math.floor(gameState.research);
+            document.getElementById('turn').textContent = gameState.turn;
+            
+            // Count buildings
+            const buildingCounts = {};
+            Object.keys(buildingTypes).forEach(type => buildingCounts[type] = 0);
+            gameState.buildings.forEach(building => buildingCounts[building.type]++);
+            
+            document.getElementById('powerPlantCount').textContent = buildingCounts.power_plant || 0;
+            document.getElementById('dataCenterCount').textContent = buildingCounts.data_center || 0;
+            document.getElementById('botFactoryCount').textContent = buildingCounts.bot_factory || 0;
+            document.getElementById('researchLabCount').textContent = buildingCounts.research_lab || 0;
+            document.getElementById('miningRigCount').textContent = buildingCounts.mining_rig || 0;
+            document.getElementById('defenseGridCount').textContent = buildingCounts.defense_grid || 0;
+        }
+        
+        function gameLoop() {
+            drawWorld();
+            updateUI();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left + gameState.camera.x) / GRID_SIZE);
+            const y = Math.floor((e.clientY - rect.top + gameState.camera.y) / GRID_SIZE);
+            
+            if (gameState.selectedBuilding) {
+                placeBuilding(x, y, gameState.selectedBuilding);
+            } else {
+                // Show info about clicked tile
+                if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT) {
+                    const tile = gameState.world[y][x];
+                    if (tile.building) {
+                        showInfoOverlay(
+                            buildingTypes[tile.building.type].name,
+                            `Position: (${tile.building.x}, ${tile.building.y})<br>
+                             Type: ${tile.building.type}<br>
+                             Production: ${Object.entries(buildingTypes[tile.building.type].production)
+                                .map(([r, a]) => `${r}: +${a}`).join(', ') || 'None'}`
+                        );
+                    } else {
+                        hideInfoOverlay();
+                    }
+                }
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            gameState.mouseX = e.clientX - rect.left;
+            gameState.mouseY = e.clientY - rect.top;
+        });
+        
+        // Camera controls
+        window.addEventListener('keydown', (e) => {
+            const speed = 20;
+            switch(e.key) {
+                case 'ArrowUp': case 'w': gameState.camera.y -= speed; break;
+                case 'ArrowDown': case 's': gameState.camera.y += speed; break;
+                case 'ArrowLeft': case 'a': gameState.camera.x -= speed; break;
+                case 'ArrowRight': case 'd': gameState.camera.x += speed; break;
+            }
+            
+            gameState.camera.x = Math.max(0, Math.min(gameState.camera.x, WORLD_WIDTH * GRID_SIZE - canvas.width));
+            gameState.camera.y = Math.max(0, Math.min(gameState.camera.y, WORLD_HEIGHT * GRID_SIZE - canvas.height));
+        });
+        
+        // Initialize and start
+        initializeWorld();
+        gameLoop();
+    </script>
+</body>
+</html>

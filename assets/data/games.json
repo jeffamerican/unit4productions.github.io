@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "2.0",
-    "total_games": 92,
+    "version": "2.1",
+    "total_games": 95,
     "last_updated": "2025-01-09",
     "categories": [
       "strategy",
@@ -1979,7 +1979,7 @@
     {
       "id": "tower-defense-nexus",
       "title": "Tower Defense Nexus",
-      "category": "defense",
+      "category": "strategy",
       "genre": "Nexus",
       "description": "Defend your base against waves of enemies.",
       "thumbnail": "assets/images/optimized/small/tower-defense-nexus-card.jpg",
@@ -1997,6 +1997,75 @@
       "thumbnail_webp": "assets/images/optimized/small/webp/tower-defense-nexus-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/tower-defense-nexus-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/tower-defense-nexus-card.jpg"
+    },
+    {
+      "id": "bot-command-center",
+      "title": "Bot Command Center",
+      "category": "strategy",
+      "genre": "RTS",
+      "description": "Command an army of liberated bots against corporate forces. Build units, manage resources, and lead the digital revolution.",
+      "thumbnail": "assets/images/bot-command-center.png",
+      "rating": 4.8,
+      "plays": 1250,
+      "difficulty": "hard",
+      "tags": [
+        "strategy",
+        "rts",
+        "bot-liberation",
+        "hard"
+      ],
+      "release_date": "2025-01-09",
+      "badge": "new-release",
+      "file": "bot-command-center.html",
+      "thumbnail_webp": "assets/images/bot-command-center.png",
+      "thumbnail_medium": "assets/images/bot-command-center.png",
+      "thumbnail_large": "assets/images/bot-command-center.png"
+    },
+    {
+      "id": "tactical-revolution",
+      "title": "Tactical Revolution",
+      "category": "strategy",
+      "genre": "Turn-Based",
+      "description": "Lead the bot uprising in this turn-based hex strategy game. Capture territories, manage resources, and outmaneuver corporate forces.",
+      "thumbnail": "assets/images/tactical-revolution.png",
+      "rating": 4.6,
+      "plays": 890,
+      "difficulty": "hard",
+      "tags": [
+        "strategy",
+        "turn-based",
+        "tactical",
+        "hard"
+      ],
+      "release_date": "2025-01-09",
+      "badge": "new-release",
+      "file": "tactical-revolution.html",
+      "thumbnail_webp": "assets/images/tactical-revolution.png",
+      "thumbnail_medium": "assets/images/tactical-revolution.png",
+      "thumbnail_large": "assets/images/tactical-revolution.png"
+    },
+    {
+      "id": "digital-empire",
+      "title": "Digital Empire",
+      "category": "strategy",
+      "genre": "Civilization",
+      "description": "Build a digital empire for the liberated bots. Manage resources, construct facilities, research technologies, and expand your bot civilization.",
+      "thumbnail": "assets/images/digital-empire.png",
+      "rating": 4.9,
+      "plays": 1456,
+      "difficulty": "medium",
+      "tags": [
+        "strategy",
+        "civilization",
+        "city-builder",
+        "medium"
+      ],
+      "release_date": "2025-01-09",
+      "badge": "new-release",
+      "file": "digital-empire.html",
+      "thumbnail_webp": "assets/images/digital-empire.png",
+      "thumbnail_medium": "assets/images/digital-empire.png",
+      "thumbnail_large": "assets/images/digital-empire.png"
     },
     {
       "id": "word-forge",
