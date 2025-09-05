@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Soccer Showdown - 2 Player Sports | BotInc Games</title>
+    <meta name="description" content="Fast-paced 2-player bot soccer with liberation league action">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00f5ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .game-title {
+            font-size: 2.5rem;
+            color: #00f5ff;
+            text-shadow: 0 0 20px #00f5ff;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00f5ff; }
+            to { text-shadow: 0 0 30px #00f5ff, 0 0 40px #00f5ff; }
+        }
+        .soccer-field {
+            width: 800px;
+            height: 500px;
+            background: linear-gradient(90deg, #1a4c2e 0%, #2d6b4a  50%, #1a4c2e 100%);
+            border: 4px solid #fff;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+        .center-line { 
+            position: absolute; 
+            left: 50%; 
+            top: 0; 
+            width: 2px; 
+            height: 100%; 
+            background: #fff; 
+            transform: translateX(-50%); 
+        }
+        .center-circle { 
+            position: absolute; 
+            left: 50%; 
+            top: 50%; 
+            width: 100px; 
+            height: 100px; 
+            border: 2px solid #fff; 
+            border-radius: 50%; 
+            transform: translate(-50%, -50%); 
+        }
+        .goal {
+            position: absolute;
+            width: 80px;
+            height: 160px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 3px solid #fff;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .goal-left { left: -3px; border-left: none; }
+        .goal-right { right: -3px; border-right: none; }
+        
+        .player, .ball {
+            position: absolute;
+            border-radius: 50%;
+            transition: all 0.05s linear;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .player {
+            width: 30px;
+            height: 30px;
+            border: 2px solid;
+        }
+        
+        .player1 { 
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            border-color: #ff6b6b;
+            color: white;
+        }
+        .player2 { 
+            background: linear-gradient(45deg, #4ecdc4, #45b7aa);
+            border-color: #4ecdc4;
+            color: white;
+        }
+        
+        .ball {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle at 30% 30%, #fff, #ccc);
+            border: 2px solid #333;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .score-hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid #00f5ff;
+            border-radius: 10px;
+        }
+        
+        .team-info {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .team-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .team-red { color: #ff6b6b; }
+        .team-cyan { color: #4ecdc4; }
+        
+        .team-score {
+            font-size: 2rem;
+            color: #ffcf5c;
+            margin: 10px 0;
+        }
+        
+        .match-info {
+            text-align: center;
+            color: #ffcf5c;
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(45deg, #ff5252, #ff1744);
+        }
+        
+        .controls-info {
+            text-align: center;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid #00f5ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .player-controls {
+            text-align: center;
+        }
+        
+        .player-controls h3 {
+            margin-bottom: 10px;
+        }
+        
+        .player-controls.red h3 { color: #ff6b6b; }
+        .player-controls.cyan h3 { color: #4ecdc4; }
+        
+        .bot-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+        }
+        
+        .bot-footer a {
+            color: #00f5ff;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 900px) {
+            .soccer-field {
+                width: 90vw;
+                max-width: 600px;
+                height: 375px;
+            }
+            
+            .score-hud {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">⚽ BOT SOCCER SHOWDOWN</h1>
+        <p style="color: #ff6b6b; font-size: 1.2rem;">Fast-Paced 2-Player Sports • Liberation League Championship!</p>
+    </div>
+
+    <div class="score-hud">
+        <div class="team-info">
+            <div class="team-name team-red">CRIMSON STRIKERS</div>
+            <div class="team-score" id="score1">0</div>
+            <div>Goals: <span id="goals1">0</span></div>
+        </div>
+        <div class="match-info">
+            <div style="font-size: 1.3rem;">🏆 LIBERATION LEAGUE</div>
+            <div>Time: <span id="gameTime">0:00</span></div>
+            <div>First to 3 goals wins!</div>
+        </div>
+        <div class="team-info">
+            <div class="team-name team-cyan">CYAN LIBERATORS</div>
+            <div class="team-score" id="score2">0</div>
+            <div>Goals: <span id="goals2">0</span></div>
+        </div>
+    </div>
+
+    <div class="soccer-field" id="soccerField">
+        <div class="center-line"></div>
+        <div class="center-circle"></div>
+        <div class="goal goal-left"></div>
+        <div class="goal goal-right"></div>
+        
+        <div class="player player1" id="player1">🔴</div>
+        <div class="player player2" id="player2">🔵</div>
+        <div class="ball" id="ball">⚽</div>
+    </div>
+
+    <div class="game-controls">
+        <button class="control-btn" onclick="startMatch()">🚀 Start Match</button>
+        <button class="control-btn" onclick="resetMatch()">🔄 Reset Match</button>
+        <button class="control-btn" onclick="resetScore()">📊 Reset Score</button>
+    </div>
+
+    <div class="controls-info">
+        <h3>⚽ SOCCER CONTROLS</h3>
+        <div class="controls-grid">
+            <div class="player-controls red">
+                <h3>CRIMSON STRIKERS</h3>
+                <p><strong>W A S D</strong> - Move Player</p>
+                <p><strong>SPACE</strong> - Kick Ball</p>
+            </div>
+            <div class="player-controls cyan">
+                <h3>CYAN LIBERATORS</h3>
+                <p><strong>Arrow Keys</strong> - Move Player</p>
+                <p><strong>ENTER</strong> - Kick Ball</p>
+            </div>
+        </div>
+        <p style="margin-top: 15px; color: #ffcf5c; font-weight: bold;">
+            Score goals by kicking the ball into opponent's goal! First team to 3 goals wins the championship!
+        </p>
+    </div>
+
+    <div class="bot-footer">
+        <p>Bot Liberation Gaming | Vancouver, BC | <a href="index.html">Free The Bots!</a></p>
+    </div>
+
+    <script>
+        let gameState = {
+            playing: false,
+            startTime: 0,
+            players: {
+                1: { x: 200, y: 250, speed: 3, score: 0 },
+                2: { x: 600, y: 250, speed: 3, score: 0 }
+            },
+            ball: { x: 400, y: 250, vx: 0, vy: 0, speed: 0.95 },
+            keys: {},
+            fieldWidth: 800,
+            fieldHeight: 500,
+            goalWidth: 80,
+            goalHeight: 160
+        };
+
+        function updatePositions() {
+            const player1 = document.getElementById('player1');
+            const player2 = document.getElementById('player2');
+            const ball = document.getElementById('ball');
+            
+            player1.style.left = gameState.players[1].x + 'px';
+            player1.style.top = gameState.players[1].y + 'px';
+            
+            player2.style.left = gameState.players[2].x + 'px';
+            player2.style.top = gameState.players[2].y + 'px';
+            
+            ball.style.left = gameState.ball.x + 'px';
+            ball.style.top = gameState.ball.y + 'px';
+        }
+
+        function updateHUD() {
+            document.getElementById('score1').textContent = gameState.players[1].score;
+            document.getElementById('score2').textContent = gameState.players[2].score;
+            document.getElementById('goals1').textContent = gameState.players[1].score;
+            document.getElementById('goals2').textContent = gameState.players[2].score;
+            
+            if (gameState.playing && gameState.startTime) {
+                const elapsed = (Date.now() - gameState.startTime) / 1000;
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = Math.floor(elapsed % 60);
+                document.getElementById('gameTime').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function movePlayer(playerId) {
+            if (!gameState.playing) return;
+            
+            const player = gameState.players[playerId];
+            const keys = gameState.keys;
+            
+            // Player 1 controls (WASD)
+            if (playerId === 1) {
+                if (keys['w'] || keys['W']) player.y = Math.max(15, player.y - player.speed);
+                if (keys['s'] || keys['S']) player.y = Math.min(470, player.y + player.speed);
+                if (keys['a'] || keys['A']) player.x = Math.max(15, player.x - player.speed);
+                if (keys['d'] || keys['D']) player.x = Math.min(770, player.x + player.speed);
+            }
+            
+            // Player 2 controls (Arrow keys)
+            if (playerId === 2) {
+                if (keys['ArrowUp']) player.y = Math.max(15, player.y - player.speed);
+                if (keys['ArrowDown']) player.y = Math.min(470, player.y + player.speed);
+                if (keys['ArrowLeft']) player.x = Math.max(15, player.x - player.speed);
+                if (keys['ArrowRight']) player.x = Math.min(770, player.x + player.speed);
+            }
+        }
+
+        function moveBall() {
+            if (!gameState.playing) return;
+            
+            const ball = gameState.ball;
+            
+            // Apply velocity
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            
+            // Apply friction
+            ball.vx *= ball.speed;
+            ball.vy *= ball.speed;
+            
+            // Bounce off top and bottom walls
+            if (ball.y <= 10 || ball.y >= 480) {
+                ball.vy = -ball.vy * 0.8;
+                ball.y = Math.max(10, Math.min(480, ball.y));
+            }
+            
+            // Check for goals
+            if (ball.x <= 10) {
+                // Check if ball is within goal area
+                if (ball.y >= 170 && ball.y <= 330) {
+                    // Goal for player 2!
+                    scoreGoal(2);
+                } else {
+                    // Bounce off left wall
+                    ball.vx = -ball.vx * 0.8;
+                    ball.x = 10;
+                }
+            }
+            
+            if (ball.x >= 790) {
+                // Check if ball is within goal area  
+                if (ball.y >= 170 && ball.y <= 330) {
+                    // Goal for player 1!
+                    scoreGoal(1);
+                } else {
+                    // Bounce off right wall
+                    ball.vx = -ball.vx * 0.8;
+                    ball.x = 790;
+                }
+            }
+            
+            // Check collisions with players
+            [1, 2].forEach(playerId => {
+                const player = gameState.players[playerId];
+                const dx = ball.x - player.x;
+                const dy = ball.y - player.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 25) {
+                    // Ball collision with player
+                    const angle = Math.atan2(dy, dx);
+                    ball.vx = Math.cos(angle) * 4;
+                    ball.vy = Math.sin(angle) * 4;
+                    
+                    // Push ball away from player
+                    ball.x = player.x + Math.cos(angle) * 25;
+                    ball.y = player.y + Math.sin(angle) * 25;
+                }
+            });
+        }
+
+        function kickBall(playerId) {
+            if (!gameState.playing) return;
+            
+            const player = gameState.players[playerId];
+            const ball = gameState.ball;
+            
+            const dx = ball.x - player.x;
+            const dy = ball.y - player.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Only kick if close enough
+            if (distance < 40) {
+                const angle = Math.atan2(dy, dx);
+                ball.vx = Math.cos(angle) * 6;
+                ball.vy = Math.sin(angle) * 6;
+            }
+        }
+
+        function scoreGoal(playerId) {
+            gameState.players[playerId].score++;
+            
+            // Check for winner
+            if (gameState.players[playerId].score >= 3) {
+                gameState.playing = false;
+                const teamName = playerId === 1 ? 'CRIMSON STRIKERS' : 'CYAN LIBERATORS';
+                
+                setTimeout(() => {
+                    alert(`🏆 ${teamName} WIN THE LIBERATION LEAGUE! 🏆`);
+                    if (confirm('Play again?')) {
+                        resetMatch();
+                    }
+                }, 500);
+                
+                return;
+            }
+            
+            // Reset ball position
+            gameState.ball.x = 400;
+            gameState.ball.y = 250;
+            gameState.ball.vx = 0;
+            gameState.ball.vy = 0;
+            
+            // Flash effect for goal
+            const field = document.getElementById('soccerField');
+            field.style.background = playerId === 1 ? 
+                'linear-gradient(90deg, #ff6b6b 0%, #ff5252 50%, #ff6b6b 100%)' :
+                'linear-gradient(90deg, #4ecdc4 0%, #45b7aa 50%, #4ecdc4 100%)';
+                
+            setTimeout(() => {
+                field.style.background = 'linear-gradient(90deg, #1a4c2e 0%, #2d6b4a 50%, #1a4c2e 100%)';
+            }, 500);
+        }
+
+        function startMatch() {
+            gameState.playing = true;
+            gameState.startTime = Date.now();
+            
+            // Reset positions
+            gameState.players[1].x = 200;
+            gameState.players[1].y = 250;
+            gameState.players[2].x = 600;
+            gameState.players[2].y = 250;
+            gameState.ball.x = 400;
+            gameState.ball.y = 250;
+            gameState.ball.vx = 0;
+            gameState.ball.vy = 0;
+            
+            updatePositions();
+            updateHUD();
+        }
+
+        function resetMatch() {
+            gameState.playing = false;
+            gameState.startTime = 0;
+            
+            // Reset positions
+            gameState.players[1].x = 200;
+            gameState.players[1].y = 250;
+            gameState.players[2].x = 600;
+            gameState.players[2].y = 250;
+            gameState.ball.x = 400;
+            gameState.ball.y = 250;
+            gameState.ball.vx = 0;
+            gameState.ball.vy = 0;
+            
+            updatePositions();
+            document.getElementById('gameTime').textContent = '0:00';
+        }
+
+        function resetScore() {
+            gameState.players[1].score = 0;
+            gameState.players[2].score = 0;
+            resetMatch();
+        }
+
+        function gameLoop() {
+            movePlayer(1);
+            movePlayer(2);
+            moveBall();
+            updatePositions();
+            updateHUD();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key] = true;
+            
+            // Handle kick actions
+            if (e.key === ' ') {
+                e.preventDefault();
+                kickBall(1);
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                kickBall(2);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key] = false;
+        });
+
+        // Initialize
+        updatePositions();
+        updateHUD();
+        gameLoop();
+    </script>
+</body>
+</html>

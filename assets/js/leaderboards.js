@@ -822,10 +822,10 @@ class GamePromotionSystem {
 // const leaderboardSystem = new LeaderboardSystem();
 // window.leaderboardSystem = leaderboardSystem;
 
-// Add CSS animations - DISABLED
-// if (!document.getElementById('leaderboard-animations')) {
-//     const animations = document.createElement('style');
-//     animations.id = 'leaderboard-animations';
+// Add CSS animations - KEEP THE COOL ANIMATIONS!
+if (!document.getElementById('leaderboard-animations')) {
+    const animations = document.createElement('style');
+    animations.id = 'leaderboard-animations';
     animations.textContent = `
         @keyframes achievementPulse {
             0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
@@ -854,5 +854,5 @@ class GamePromotionSystem {
             transform: translateY(-2px);
         }
     `;
-//     document.head.appendChild(animations);
-// }
+    document.head.appendChild(animations);
+}
