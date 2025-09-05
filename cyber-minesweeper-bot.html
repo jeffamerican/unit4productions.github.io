@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Minesweeper Bot - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); cursor: pointer; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">💣 CYBER MINESWEEPER BOT 💣</h1>
+        <p>Navigate digital minefields to locate hidden data caches</p>
+    </div>
+    <canvas id="gameCanvas" width="600" height="480"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="mines">20</div><div>Mines Left</div></div>
+        <div class="stat"><div id="time">0</div><div>Time</div></div>
+        <div class="stat"><div id="cells">0</div><div>Safe Cells</div></div>
+    </div>
+    <div style="text-align: center;"><p>Left click to reveal | Right click to flag mines</p></div>
+
+    <script>
+        class CyberMinesweeperBot {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.COLS = 20;
+                this.ROWS = 16;
+                this.CELL_SIZE = 25;
+                this.MARGIN = 50;
+                this.MINES = 40;
+                
+                this.board = [];
+                this.revealed = [];
+                this.flagged = [];
+                this.gameState = 'playing'; // playing, won, lost
+                this.startTime = Date.now();
+                this.minesLeft = this.MINES;
+                this.safeCells = 0;
+                this.particles = [];
+                
+                this.initializeBoard();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            initializeBoard() {
+                // Initialize empty board
+                this.board = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(0));
+                this.revealed = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(false));
+                this.flagged = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(false));
+                
+                // Place mines
+                let minesPlaced = 0;
+                while (minesPlaced < this.MINES) {
+                    const row = Math.floor(Math.random() * this.ROWS);
+                    const col = Math.floor(Math.random() * this.COLS);
+                    
+                    if (this.board[row][col] !== -1) {
+                        this.board[row][col] = -1;
+                        minesPlaced++;
+                        
+                        // Update adjacent counts
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                const nr = row + dr;
+                                const nc = col + dc;
+                                
+                                if (nr >= 0 && nr < this.ROWS && nc >= 0 && nc < this.COLS && 
+                                    this.board[nr][nc] !== -1) {
+                                    this.board[nr][nc]++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            setupInput() {
+                this.canvas.addEventListener('click', (e) => {
+                    if (this.gameState !== 'playing') return;
+                    
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const col = Math.floor((x - this.MARGIN) / this.CELL_SIZE);
+                    const row = Math.floor((y - this.MARGIN) / this.CELL_SIZE);
+                    
+                    if (row >= 0 && row < this.ROWS && col >= 0 && col < this.COLS) {
+                        this.revealCell(row, col);
+                    }
+                });
+                
+                this.canvas.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    if (this.gameState !== 'playing') return;
+                    
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const col = Math.floor((x - this.MARGIN) / this.CELL_SIZE);
+                    const row = Math.floor((y - this.MARGIN) / this.CELL_SIZE);
+                    
+                    if (row >= 0 && row < this.ROWS && col >= 0 && col < this.COLS) {
+                        this.toggleFlag(row, col);
+                    }
+                });
+            }
+            
+            revealCell(row, col) {
+                if (this.revealed[row][col] || this.flagged[row][col]) return;
+                
+                this.revealed[row][col] = true;
+                this.safeCells++;
+                
+                // Create reveal particles
+                this.createParticles(
+                    this.MARGIN + col * this.CELL_SIZE + this.CELL_SIZE / 2,
+                    this.MARGIN + row * this.CELL_SIZE + this.CELL_SIZE / 2,
+                    '#00ff88'
+                );
+                
+                if (this.board[row][col] === -1) {
+                    this.gameOver();
+                    return;
+                }
+                
+                // Auto-reveal adjacent empty cells
+                if (this.board[row][col] === 0) {
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            const nr = row + dr;
+                            const nc = col + dc;
+                            
+                            if (nr >= 0 && nr < this.ROWS && nc >= 0 && nc < this.COLS) {
+                                this.revealCell(nr, nc);
+                            }
+                        }
+                    }
+                }
+                
+                // Check win condition
+                if (this.safeCells === this.ROWS * this.COLS - this.MINES) {
+                    this.gameWon();
+                }
+            }
+            
+            toggleFlag(row, col) {
+                if (this.revealed[row][col]) return;
+                
+                this.flagged[row][col] = !this.flagged[row][col];
+                this.minesLeft += this.flagged[row][col] ? -1 : 1;
+                
+                // Create flag particles
+                this.createParticles(
+                    this.MARGIN + col * this.CELL_SIZE + this.CELL_SIZE / 2,
+                    this.MARGIN + row * this.CELL_SIZE + this.CELL_SIZE / 2,
+                    this.flagged[row][col] ? '#ffff00' : '#ff6666'
+                );
+            }
+            
+            createParticles(x, y, color) {
+                for (let i = 0; i < 5; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        life: 20,
+                        color: color
+                    });
+                }
+            }
+            
+            gameOver() {
+                this.gameState = 'lost';
+                // Reveal all mines
+                for (let row = 0; row < this.ROWS; row++) {
+                    for (let col = 0; col < this.COLS; col++) {
+                        if (this.board[row][col] === -1) {
+                            this.revealed[row][col] = true;
+                        }
+                    }
+                }
+                
+                setTimeout(() => {
+                    alert(`Mine Detected! System Compromised! Time: ${this.getTime()}s`);
+                    this.restart();
+                }, 500);
+            }
+            
+            gameWon() {
+                this.gameState = 'won';
+                const time = this.getTime();
+                
+                // Create celebration particles
+                for (let i = 0; i < 50; i++) {
+                    this.particles.push({
+                        x: this.canvas.width / 2,
+                        y: this.canvas.height / 2,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: (Math.random() - 0.5) * 10,
+                        life: 60,
+                        color: Math.random() > 0.5 ? '#00ff88' : '#ffff00'
+                    });
+                }
+                
+                setTimeout(() => {
+                    alert(`All Data Caches Located! Liberation Complete! Time: ${time}s`);
+                    this.restart();
+                }, 1000);
+            }
+            
+            getTime() {
+                return Math.floor((Date.now() - this.startTime) / 1000);
+            }
+            
+            update() {
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                this.updateDisplay();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw board
+                for (let row = 0; row < this.ROWS; row++) {
+                    for (let col = 0; col < this.COLS; col++) {
+                        const x = this.MARGIN + col * this.CELL_SIZE;
+                        const y = this.MARGIN + row * this.CELL_SIZE;
+                        
+                        // Cell background
+                        if (this.revealed[row][col]) {
+                            if (this.board[row][col] === -1) {
+                                this.ctx.fillStyle = '#ff0000';
+                            } else {
+                                this.ctx.fillStyle = '#333333';
+                            }
+                        } else {
+                            this.ctx.fillStyle = '#666666';
+                        }
+                        
+                        this.ctx.fillRect(x, y, this.CELL_SIZE - 1, this.CELL_SIZE - 1);
+                        
+                        // Cell content
+                        if (this.revealed[row][col]) {
+                            if (this.board[row][col] === -1) {
+                                // Mine
+                                this.ctx.fillStyle = '#ffffff';
+                                this.ctx.beginPath();
+                                this.ctx.arc(x + this.CELL_SIZE / 2, y + this.CELL_SIZE / 2, 6, 0, Math.PI * 2);
+                                this.ctx.fill();
+                            } else if (this.board[row][col] > 0) {
+                                // Number
+                                const colors = ['', '#0066ff', '#00aa00', '#ff6600', '#cc0000', '#660066', '#006666', '#000000', '#666666'];
+                                this.ctx.fillStyle = colors[this.board[row][col]];
+                                this.ctx.font = '12px Courier New';
+                                this.ctx.textAlign = 'center';
+                                this.ctx.fillText(this.board[row][col].toString(), x + this.CELL_SIZE / 2, y + this.CELL_SIZE / 2 + 4);
+                            }
+                        } else if (this.flagged[row][col]) {
+                            // Flag
+                            this.ctx.fillStyle = '#ffff00';
+                            this.ctx.font = '14px Courier New';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText('🚩', x + this.CELL_SIZE / 2, y + this.CELL_SIZE / 2 + 4);
+                        }
+                        
+                        // Cell border
+                        this.ctx.strokeStyle = '#00ff88';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.strokeRect(x, y, this.CELL_SIZE - 1, this.CELL_SIZE - 1);
+                    }
+                }
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 20;
+                    this.ctx.fillRect(p.x, p.y, 2, 2);
+                });
+                this.ctx.globalAlpha = 1;
+            }
+            
+            updateDisplay() {
+                document.getElementById('mines').textContent = this.minesLeft;
+                document.getElementById('time').textContent = this.getTime();
+                document.getElementById('cells').textContent = this.safeCells;
+            }
+            
+            restart() {
+                this.gameState = 'playing';
+                this.startTime = Date.now();
+                this.minesLeft = this.MINES;
+                this.safeCells = 0;
+                this.particles = [];
+                this.initializeBoard();
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new CyberMinesweeperBot();
+    </script>
+</body>
+</html>

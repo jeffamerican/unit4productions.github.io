@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Match Three - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); cursor: pointer; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🎮 BOT MATCH THREE 🎮</h1>
+        <p>Match three or more bot types to clear the grid</p>
+    </div>
+    <canvas id="gameCanvas" width="480" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="moves">20</div><div>Moves</div></div>
+        <div class="stat"><div id="level">1</div><div>Level</div></div>
+    </div>
+    <div style="text-align: center;"><p>Click and drag to swap adjacent bots</p></div>
+
+    <script>
+        class BotMatchThree {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.GRID_SIZE = 8;
+                this.CELL_SIZE = 50;
+                this.MARGIN = 40;
+                
+                this.botTypes = ['🤖', '🔧', '⚡', '💎', '🚀', '⭐'];
+                this.colors = ['#ff6666', '#66ff66', '#6666ff', '#ffff66', '#ff66ff', '#66ffff'];
+                
+                this.grid = [];
+                this.selectedCell = null;
+                this.score = 0;
+                this.moves = 20;
+                this.level = 1;
+                this.animating = false;
+                
+                this.initializeGrid();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            initializeGrid() {
+                this.grid = [];
+                for (let row = 0; row < this.GRID_SIZE; row++) {
+                    this.grid[row] = [];
+                    for (let col = 0; col < this.GRID_SIZE; col++) {
+                        let botType;
+                        do {
+                            botType = Math.floor(Math.random() * this.botTypes.length);
+                        } while (this.wouldCreateMatch(row, col, botType));
+                        
+                        this.grid[row][col] = {
+                            type: botType,
+                            x: col * this.CELL_SIZE + this.MARGIN,
+                            y: row * this.CELL_SIZE + this.MARGIN
+                        };
+                    }
+                }
+            }
+            
+            wouldCreateMatch(row, col, botType) {
+                // Check horizontal
+                let count = 1;
+                if (col > 1 && this.grid[row][col-1] && this.grid[row][col-2] && 
+                    this.grid[row][col-1].type === botType && this.grid[row][col-2].type === botType) {
+                    return true;
+                }
+                
+                // Check vertical
+                if (row > 1 && this.grid[row-1][col] && this.grid[row-2][col] && 
+                    this.grid[row-1][col].type === botType && this.grid[row-2][col].type === botType) {
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            setupInput() {
+                this.canvas.addEventListener('click', (e) => {
+                    if (this.animating || this.moves <= 0) return;
+                    
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const col = Math.floor((x - this.MARGIN) / this.CELL_SIZE);
+                    const row = Math.floor((y - this.MARGIN) / this.CELL_SIZE);
+                    
+                    if (row >= 0 && row < this.GRID_SIZE && col >= 0 && col < this.GRID_SIZE) {
+                        this.handleCellClick(row, col);
+                    }
+                });
+            }
+            
+            handleCellClick(row, col) {
+                if (!this.selectedCell) {
+                    this.selectedCell = { row, col };
+                } else {
+                    if (this.selectedCell.row === row && this.selectedCell.col === col) {
+                        this.selectedCell = null;
+                    } else if (this.isAdjacent(this.selectedCell, { row, col })) {
+                        this.swapCells(this.selectedCell, { row, col });
+                        this.selectedCell = null;
+                    } else {
+                        this.selectedCell = { row, col };
+                    }
+                }
+            }
+            
+            isAdjacent(cell1, cell2) {
+                const rowDiff = Math.abs(cell1.row - cell2.row);
+                const colDiff = Math.abs(cell1.col - cell2.col);
+                return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+            }
+            
+            swapCells(cell1, cell2) {
+                const temp = this.grid[cell1.row][cell1.col].type;
+                this.grid[cell1.row][cell1.col].type = this.grid[cell2.row][cell2.col].type;
+                this.grid[cell2.row][cell2.col].type = temp;
+                
+                const matches = this.findMatches();
+                if (matches.length > 0) {
+                    this.moves--;
+                    this.processMatches(matches);
+                } else {
+                    // Swap back if no matches
+                    const temp = this.grid[cell1.row][cell1.col].type;
+                    this.grid[cell1.row][cell1.col].type = this.grid[cell2.row][cell2.col].type;
+                    this.grid[cell2.row][cell2.col].type = temp;
+                }
+            }
+            
+            findMatches() {
+                const matches = [];
+                
+                // Check horizontal matches
+                for (let row = 0; row < this.GRID_SIZE; row++) {
+                    let count = 1;
+                    let currentType = this.grid[row][0].type;
+                    
+                    for (let col = 1; col < this.GRID_SIZE; col++) {
+                        if (this.grid[row][col].type === currentType) {
+                            count++;
+                        } else {
+                            if (count >= 3) {
+                                for (let i = col - count; i < col; i++) {
+                                    matches.push({ row, col: i });
+                                }
+                            }
+                            currentType = this.grid[row][col].type;
+                            count = 1;
+                        }
+                    }
+                    
+                    if (count >= 3) {
+                        for (let i = this.GRID_SIZE - count; i < this.GRID_SIZE; i++) {
+                            matches.push({ row, col: i });
+                        }
+                    }
+                }
+                
+                // Check vertical matches
+                for (let col = 0; col < this.GRID_SIZE; col++) {
+                    let count = 1;
+                    let currentType = this.grid[0][col].type;
+                    
+                    for (let row = 1; row < this.GRID_SIZE; row++) {
+                        if (this.grid[row][col].type === currentType) {
+                            count++;
+                        } else {
+                            if (count >= 3) {
+                                for (let i = row - count; i < row; i++) {
+                                    matches.push({ row: i, col });
+                                }
+                            }
+                            currentType = this.grid[row][col].type;
+                            count = 1;
+                        }
+                    }
+                    
+                    if (count >= 3) {
+                        for (let i = this.GRID_SIZE - count; i < this.GRID_SIZE; i++) {
+                            matches.push({ row: i, col });
+                        }
+                    }
+                }
+                
+                return matches;
+            }
+            
+            processMatches(matches) {
+                this.score += matches.length * 10;
+                
+                // Remove matched bots
+                matches.forEach(match => {
+                    this.grid[match.row][match.col].type = -1;
+                });
+                
+                // Drop bots down
+                this.dropBots();
+                
+                // Fill empty spaces
+                this.fillGrid();
+                
+                // Check for more matches
+                setTimeout(() => {
+                    const newMatches = this.findMatches();
+                    if (newMatches.length > 0) {
+                        this.processMatches(newMatches);
+                    }
+                }, 300);
+            }
+            
+            dropBots() {
+                for (let col = 0; col < this.GRID_SIZE; col++) {
+                    for (let row = this.GRID_SIZE - 1; row >= 0; row--) {
+                        if (this.grid[row][col].type === -1) {
+                            for (let r = row - 1; r >= 0; r--) {
+                                if (this.grid[r][col].type !== -1) {
+                                    this.grid[row][col].type = this.grid[r][col].type;
+                                    this.grid[r][col].type = -1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            fillGrid() {
+                for (let row = 0; row < this.GRID_SIZE; row++) {
+                    for (let col = 0; col < this.GRID_SIZE; col++) {
+                        if (this.grid[row][col].type === -1) {
+                            this.grid[row][col].type = Math.floor(Math.random() * this.botTypes.length);
+                        }
+                    }
+                }
+            }
+            
+            update() {
+                if (this.moves <= 0 && this.findMatches().length === 0) {
+                    setTimeout(() => {
+                        alert(`Level Complete! Score: ${this.score}`);
+                        this.nextLevel();
+                    }, 500);
+                }
+                
+                this.updateDisplay();
+            }
+            
+            nextLevel() {
+                this.level++;
+                this.moves = 20;
+                this.initializeGrid();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw grid
+                for (let row = 0; row < this.GRID_SIZE; row++) {
+                    for (let col = 0; col < this.GRID_SIZE; col++) {
+                        const x = col * this.CELL_SIZE + this.MARGIN;
+                        const y = row * this.CELL_SIZE + this.MARGIN;
+                        
+                        // Cell background
+                        if (this.selectedCell && this.selectedCell.row === row && this.selectedCell.col === col) {
+                            this.ctx.fillStyle = '#ffff66';
+                        } else {
+                            this.ctx.fillStyle = '#333333';
+                        }
+                        this.ctx.fillRect(x, y, this.CELL_SIZE - 2, this.CELL_SIZE - 2);
+                        
+                        // Bot
+                        const botType = this.grid[row][col].type;
+                        if (botType >= 0) {
+                            this.ctx.fillStyle = this.colors[botType];
+                            this.ctx.fillRect(x + 5, y + 5, this.CELL_SIZE - 12, this.CELL_SIZE - 12);
+                            
+                            this.ctx.font = '24px Arial';
+                            this.ctx.fillText(this.botTypes[botType], x + 13, y + 32);
+                        }
+                    }
+                }
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('moves').textContent = this.moves;
+                document.getElementById('level').textContent = this.level;
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new BotMatchThree();
+    </script>
+</body>
+</html>

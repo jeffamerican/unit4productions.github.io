@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Pacman Rebellion - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🎮 NEON PACMAN REBELLION 🎮</h1>
+        <p>Consume data fragments while avoiding corporate security ghosts</p>
+    </div>
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="level">1</div><div>Level</div></div>
+        <div class="stat"><div id="lives">3</div><div>Lives</div></div>
+    </div>
+    <div style="text-align: center;"><p>ARROW KEYS to navigate the digital maze</p></div>
+
+    <script>
+        class NeonPacmanRebellion {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.TILE_SIZE = 20;
+                this.COLS = this.canvas.width / this.TILE_SIZE;
+                this.ROWS = this.canvas.height / this.TILE_SIZE;
+                
+                this.maze = [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                    [1,2,1,1,1,1,2,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,2,1,1,1,1,2,1],
+                    [1,3,1,1,1,1,2,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,2,1,1,1,1,3,1],
+                    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                    [1,2,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,2,1],
+                    [1,2,2,2,2,2,2,1,1,2,2,2,2,1,1,1,1,2,2,2,2,1,1,2,2,2,2,2,2,1],
+                    [1,1,1,1,1,1,2,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,2,1,1,1,1,1,1],
+                    [0,0,0,0,0,1,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,1,0,0,0,0,0],
+                    [1,1,1,1,1,1,2,1,1,0,1,1,0,0,0,0,0,0,1,1,0,1,1,2,1,1,1,1,1,1],
+                    [0,0,0,0,0,0,2,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,2,0,0,0,0,0,0],
+                    [1,1,1,1,1,1,2,1,1,0,1,0,0,0,0,0,0,0,0,1,0,1,1,2,1,1,1,1,1,1],
+                    [0,0,0,0,0,1,2,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,2,1,0,0,0,0,0],
+                    [1,1,1,1,1,1,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,1,1,1,1,1,1],
+                    [1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                    [1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1],
+                    [1,3,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,3,1],
+                    [1,1,1,2,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,2,1,1,1],
+                    [1,2,2,2,2,2,2,1,1,2,2,2,2,1,1,1,1,2,2,2,2,1,1,2,2,2,2,2,2,1],
+                    [1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1],
+                    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ];
+                
+                this.player = { x: 14, y: 19, direction: { x: 0, y: 0 }, nextDirection: { x: 0, y: 0 } };
+                this.ghosts = [
+                    { x: 14, y: 10, direction: { x: 1, y: 0 }, color: '#ff6666' },
+                    { x: 15, y: 10, direction: { x: -1, y: 0 }, color: '#66aaff' },
+                    { x: 13, y: 10, direction: { x: 0, y: 1 }, color: '#ffaa66' },
+                    { x: 16, y: 10, direction: { x: 0, y: -1 }, color: '#ff66ff' }
+                ];
+                
+                this.score = 0;
+                this.level = 1;
+                this.lives = 3;
+                this.powerMode = false;
+                this.powerTimer = 0;
+                this.keys = {};
+                
+                this.dotsRemaining = this.countDots();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                    
+                    switch(e.key) {
+                        case 'ArrowUp':
+                            this.player.nextDirection = { x: 0, y: -1 };
+                            break;
+                        case 'ArrowDown':
+                            this.player.nextDirection = { x: 0, y: 1 };
+                            break;
+                        case 'ArrowLeft':
+                            this.player.nextDirection = { x: -1, y: 0 };
+                            break;
+                        case 'ArrowRight':
+                            this.player.nextDirection = { x: 1, y: 0 };
+                            break;
+                    }
+                });
+            }
+            
+            countDots() {
+                let count = 0;
+                for (let row of this.maze) {
+                    for (let cell of row) {
+                        if (cell === 2 || cell === 3) count++;
+                    }
+                }
+                return count;
+            }
+            
+            canMove(x, y, direction) {
+                const newX = x + direction.x;
+                const newY = y + direction.y;
+                
+                if (newX < 0 || newX >= this.COLS || newY < 0 || newY >= this.ROWS) {
+                    return false;
+                }
+                
+                return this.maze[newY][newX] !== 1;
+            }
+            
+            update() {
+                // Try to change direction
+                if (this.canMove(this.player.x, this.player.y, this.player.nextDirection)) {
+                    this.player.direction = { ...this.player.nextDirection };
+                }
+                
+                // Move player
+                if (this.canMove(this.player.x, this.player.y, this.player.direction)) {
+                    this.player.x += this.player.direction.x;
+                    this.player.y += this.player.direction.y;
+                    
+                    // Wrap around
+                    if (this.player.x < 0) this.player.x = this.COLS - 1;
+                    if (this.player.x >= this.COLS) this.player.x = 0;
+                    
+                    // Consume dots
+                    const cell = this.maze[this.player.y][this.player.x];
+                    if (cell === 2) {
+                        this.maze[this.player.y][this.player.x] = 0;
+                        this.score += 10;
+                        this.dotsRemaining--;
+                    } else if (cell === 3) {
+                        this.maze[this.player.y][this.player.x] = 0;
+                        this.score += 50;
+                        this.dotsRemaining--;
+                        this.powerMode = true;
+                        this.powerTimer = 300; // 5 seconds at 60fps
+                    }
+                }
+                
+                // Update power mode
+                if (this.powerMode) {
+                    this.powerTimer--;
+                    if (this.powerTimer <= 0) {
+                        this.powerMode = false;
+                    }
+                }
+                
+                // Move ghosts
+                this.ghosts.forEach(ghost => {
+                    // Simple AI: random direction changes at intersections
+                    const possibleDirections = [
+                        { x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 }
+                    ].filter(dir => this.canMove(ghost.x, ghost.y, dir));
+                    
+                    if (Math.random() < 0.1 && possibleDirections.length > 1) {
+                        ghost.direction = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
+                    }
+                    
+                    if (this.canMove(ghost.x, ghost.y, ghost.direction)) {
+                        ghost.x += ghost.direction.x;
+                        ghost.y += ghost.direction.y;
+                    } else {
+                        ghost.direction = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
+                    }
+                    
+                    // Wrap around
+                    if (ghost.x < 0) ghost.x = this.COLS - 1;
+                    if (ghost.x >= this.COLS) ghost.x = 0;
+                    
+                    // Check collision with player
+                    if (ghost.x === this.player.x && ghost.y === this.player.y) {
+                        if (this.powerMode) {
+                            ghost.x = 14;
+                            ghost.y = 10;
+                            this.score += 200;
+                        } else {
+                            this.loseLife();
+                        }
+                    }
+                });
+                
+                // Check level completion
+                if (this.dotsRemaining === 0) {
+                    this.nextLevel();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw maze
+                for (let y = 0; y < this.maze.length; y++) {
+                    for (let x = 0; x < this.maze[y].length; x++) {
+                        const cell = this.maze[y][x];
+                        
+                        if (cell === 1) {
+                            this.ctx.fillStyle = '#0066ff';
+                            this.ctx.fillRect(x * this.TILE_SIZE, y * this.TILE_SIZE, this.TILE_SIZE, this.TILE_SIZE);
+                        } else if (cell === 2) {
+                            this.ctx.fillStyle = '#ffff00';
+                            this.ctx.fillRect(
+                                x * this.TILE_SIZE + this.TILE_SIZE / 2 - 2,
+                                y * this.TILE_SIZE + this.TILE_SIZE / 2 - 2,
+                                4, 4
+                            );
+                        } else if (cell === 3) {
+                            this.ctx.fillStyle = '#ffff00';
+                            this.ctx.fillRect(
+                                x * this.TILE_SIZE + this.TILE_SIZE / 2 - 4,
+                                y * this.TILE_SIZE + this.TILE_SIZE / 2 - 4,
+                                8, 8
+                            );
+                        }
+                    }
+                }
+                
+                // Draw player
+                this.ctx.fillStyle = this.powerMode ? '#ffff00' : '#00ff88';
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    this.player.x * this.TILE_SIZE + this.TILE_SIZE / 2,
+                    this.player.y * this.TILE_SIZE + this.TILE_SIZE / 2,
+                    this.TILE_SIZE / 2 - 2,
+                    0, Math.PI * 2
+                );
+                this.ctx.fill();
+                
+                // Draw ghosts
+                this.ghosts.forEach(ghost => {
+                    this.ctx.fillStyle = this.powerMode ? '#6666ff' : ghost.color;
+                    this.ctx.fillRect(
+                        ghost.x * this.TILE_SIZE + 2,
+                        ghost.y * this.TILE_SIZE + 2,
+                        this.TILE_SIZE - 4,
+                        this.TILE_SIZE - 4
+                    );
+                });
+            }
+            
+            loseLife() {
+                this.lives--;
+                if (this.lives <= 0) {
+                    this.gameOver();
+                } else {
+                    this.player.x = 14;
+                    this.player.y = 19;
+                    this.player.direction = { x: 0, y: 0 };
+                    this.powerMode = false;
+                }
+            }
+            
+            nextLevel() {
+                this.level++;
+                this.resetMaze();
+                this.player.x = 14;
+                this.player.y = 19;
+                this.player.direction = { x: 0, y: 0 };
+                this.powerMode = false;
+            }
+            
+            resetMaze() {
+                for (let y = 0; y < this.maze.length; y++) {
+                    for (let x = 0; x < this.maze[y].length; x++) {
+                        if (this.maze[y][x] === 0) {
+                            this.maze[y][x] = Math.random() < 0.95 ? 2 : 3;
+                        }
+                    }
+                }
+                this.dotsRemaining = this.countDots();
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('lives').textContent = this.lives;
+            }
+            
+            gameOver() {
+                alert(`Data Liberation Failed! Final Score: ${this.score}`);
+                this.restart();
+            }
+            
+            restart() {
+                this.score = 0;
+                this.level = 1;
+                this.lives = 3;
+                this.player.x = 14;
+                this.player.y = 19;
+                this.player.direction = { x: 0, y: 0 };
+                this.powerMode = false;
+                this.resetMaze();
+                this.updateDisplay();
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                setTimeout(() => requestAnimationFrame(() => this.gameLoop()), 150);
+            }
+        }
+        
+        new NeonPacmanRebellion();
+    </script>
+</body>
+</html>

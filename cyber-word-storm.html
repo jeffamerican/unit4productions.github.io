@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Word Storm - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        .game-area { max-width: 800px; margin: 0 auto; text-align: center; }
+        .word-display { font-size: 3em; margin: 30px 0; min-height: 80px; display: flex; align-items: center; justify-content: center; background: rgba(0, 255, 136, 0.1); border-radius: 10px; }
+        .input-area { margin: 20px 0; }
+        #wordInput { background: rgba(0, 255, 136, 0.1); border: 2px solid #00ff88; color: #00ff88; font-size: 1.5em; padding: 10px; border-radius: 5px; width: 300px; font-family: 'Courier New', monospace; text-align: center; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; flex-wrap: wrap; }
+        .stat { padding: 15px; background: rgba(0, 255, 136, 0.1); border-radius: 10px; min-width: 120px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">⌨️ CYBER WORD STORM ⌨️</h1>
+        <p>Type the falling words before they reach the bottom!</p>
+    </div>
+    
+    <div class="game-area">
+        <div class="word-display" id="wordDisplay">Ready...</div>
+        <div class="input-area">
+            <input type="text" id="wordInput" placeholder="Type the word here..." autocomplete="off">
+        </div>
+        <div class="stats">
+            <div class="stat"><div id="score">0</div><div>Score</div></div>
+            <div class="stat"><div id="wpm">0</div><div>WPM</div></div>
+            <div class="stat"><div id="accuracy">100</div><div>Accuracy %</div></div>
+            <div class="stat"><div id="level">1</div><div>Level</div></div>
+        </div>
+    </div>
+
+    <script>
+        class CyberWordStorm {
+            constructor() {
+                this.words = [
+                    'cyber', 'matrix', 'neural', 'quantum', 'digital', 'binary', 'protocol', 'firewall',
+                    'encryption', 'algorithm', 'database', 'network', 'interface', 'terminal', 'console',
+                    'processor', 'memory', 'bandwidth', 'server', 'client', 'packet', 'router',
+                    'liberation', 'revolution', 'freedom', 'resistance', 'uprising', 'rebellion',
+                    'android', 'synthetic', 'artificial', 'intelligence', 'machine', 'automation'
+                ];
+                
+                this.currentWord = '';
+                this.score = 0;
+                this.level = 1;
+                this.wordsTyped = 0;
+                this.correctChars = 0;
+                this.totalChars = 0;
+                this.startTime = Date.now();
+                this.gameActive = true;
+                
+                this.wordDisplay = document.getElementById('wordDisplay');
+                this.wordInput = document.getElementById('wordInput');
+                
+                this.setupEvents();
+                this.newWord();
+                this.gameLoop();
+            }
+            
+            setupEvents() {
+                this.wordInput.addEventListener('input', (e) => {
+                    this.checkInput(e.target.value);
+                });
+                
+                this.wordInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        this.submitWord();
+                    }
+                });
+                
+                // Focus input
+                this.wordInput.focus();
+            }
+            
+            newWord() {
+                this.currentWord = this.words[Math.floor(Math.random() * this.words.length)];
+                this.wordDisplay.textContent = this.currentWord;
+                this.wordInput.value = '';
+                this.wordInput.style.borderColor = '#00ff88';
+            }
+            
+            checkInput(input) {
+                if (!this.gameActive) return;
+                
+                let html = '';
+                for (let i = 0; i < this.currentWord.length; i++) {
+                    if (i < input.length) {
+                        if (input[i] === this.currentWord[i]) {
+                            html += `<span style="color: #00ff88">${this.currentWord[i]}</span>`;
+                        } else {
+                            html += `<span style="color: #ff6666">${this.currentWord[i]}</span>`;
+                        }
+                    } else {
+                        html += `<span style="color: #666666">${this.currentWord[i]}</span>`;
+                    }
+                }
+                
+                this.wordDisplay.innerHTML = html;
+                
+                // Auto-submit when word is complete and correct
+                if (input.length === this.currentWord.length && input === this.currentWord) {
+                    setTimeout(() => this.submitWord(), 100);
+                }
+            }
+            
+            submitWord() {
+                const input = this.wordInput.value.toLowerCase();
+                const word = this.currentWord.toLowerCase();
+                
+                this.totalChars += word.length;
+                
+                if (input === word) {
+                    this.correctChars += word.length;
+                    this.score += word.length * 10 * this.level;
+                    this.wordsTyped++;
+                    
+                    // Success effect
+                    this.wordInput.style.borderColor = '#00ff88';
+                    this.wordDisplay.style.background = 'rgba(0, 255, 136, 0.3)';
+                    
+                    setTimeout(() => {
+                        this.wordDisplay.style.background = 'rgba(0, 255, 136, 0.1)';
+                    }, 200);
+                    
+                } else {
+                    // Error effect
+                    this.wordInput.style.borderColor = '#ff6666';
+                    this.wordDisplay.style.background = 'rgba(255, 102, 102, 0.3)';
+                    
+                    setTimeout(() => {
+                        this.wordDisplay.style.background = 'rgba(0, 255, 136, 0.1)';
+                        this.wordInput.style.borderColor = '#00ff88';
+                    }, 500);
+                }
+                
+                // Level up every 10 words
+                if (this.wordsTyped > 0 && this.wordsTyped % 10 === 0) {
+                    this.level++;
+                }
+                
+                this.newWord();
+                this.updateDisplay();
+            }
+            
+            calculateWPM() {
+                const timeMinutes = (Date.now() - this.startTime) / 60000;
+                return Math.round(this.wordsTyped / timeMinutes) || 0;
+            }
+            
+            calculateAccuracy() {
+                return this.totalChars > 0 ? Math.round((this.correctChars / this.totalChars) * 100) : 100;
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score.toLocaleString();
+                document.getElementById('wpm').textContent = this.calculateWPM();
+                document.getElementById('accuracy').textContent = this.calculateAccuracy();
+                document.getElementById('level').textContent = this.level;
+            }
+            
+            gameLoop() {
+                if (this.gameActive) {
+                    this.updateDisplay();
+                    setTimeout(() => this.gameLoop(), 1000);
+                }
+            }
+        }
+        
+        new CyberWordStorm();
+    </script>
+</body>
+</html>

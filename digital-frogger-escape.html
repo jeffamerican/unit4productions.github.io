@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Frogger Escape - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🐸 DIGITAL FROGGER ESCAPE 🐸</h1>
+        <p>Navigate through data streams to reach the liberation zone</p>
+    </div>
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="lives">3</div><div>Lives</div></div>
+        <div class="stat"><div id="level">1</div><div>Level</div></div>
+    </div>
+    <div style="text-align: center;"><p>ARROW KEYS to hop through the digital maze</p></div>
+
+    <script>
+        class DigitalFroggerEscape {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.TILE_SIZE = 40;
+                this.ROWS = this.canvas.height / this.TILE_SIZE;
+                this.COLS = this.canvas.width / this.TILE_SIZE;
+                
+                this.player = { x: 7, y: 14, moving: false };
+                this.vehicles = [];
+                this.logs = [];
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                this.keys = {};
+                
+                this.initializeLevel();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                document.addEventListener('keydown', (e) => {
+                    if (this.player.moving) return;
+                    
+                    switch(e.key) {
+                        case 'ArrowUp':
+                            this.movePlayer(0, -1);
+                            break;
+                        case 'ArrowDown':
+                            this.movePlayer(0, 1);
+                            break;
+                        case 'ArrowLeft':
+                            this.movePlayer(-1, 0);
+                            break;
+                        case 'ArrowRight':
+                            this.movePlayer(1, 0);
+                            break;
+                    }
+                });
+            }
+            
+            initializeLevel() {
+                this.vehicles = [];
+                this.logs = [];
+                
+                // Create vehicle lanes (rows 8-12)
+                for (let row = 8; row <= 12; row++) {
+                    const speed = (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random() * 2);
+                    for (let i = 0; i < 3; i++) {
+                        this.vehicles.push({
+                            x: i * 6,
+                            y: row,
+                            width: 2,
+                            speed: speed
+                        });
+                    }
+                }
+                
+                // Create log lanes (rows 2-6)
+                for (let row = 2; row <= 6; row++) {
+                    const speed = (Math.random() > 0.5 ? 1 : -1) * (0.5 + Math.random());
+                    for (let i = 0; i < 2; i++) {
+                        this.logs.push({
+                            x: i * 8,
+                            y: row,
+                            width: 4,
+                            speed: speed
+                        });
+                    }
+                }
+            }
+            
+            movePlayer(dx, dy) {
+                const newX = Math.max(0, Math.min(this.COLS - 1, this.player.x + dx));
+                const newY = Math.max(0, Math.min(this.ROWS - 1, this.player.y + dy));
+                
+                this.player.x = newX;
+                this.player.y = newY;
+                this.player.moving = true;
+                
+                if (dy < 0) this.score += 10; // Forward movement bonus
+                
+                setTimeout(() => this.player.moving = false, 150);
+            }
+            
+            update() {
+                // Update vehicles
+                this.vehicles.forEach(vehicle => {
+                    vehicle.x += vehicle.speed * 0.1;
+                    if (vehicle.x > this.COLS + 2) vehicle.x = -vehicle.width - 2;
+                    if (vehicle.x < -vehicle.width - 2) vehicle.x = this.COLS + 2;
+                });
+                
+                // Update logs
+                this.logs.forEach(log => {
+                    log.x += log.speed * 0.05;
+                    if (log.x > this.COLS + 2) log.x = -log.width - 2;
+                    if (log.x < -log.width - 2) log.x = this.COLS + 2;
+                });
+                
+                // Check collisions
+                this.checkCollisions();
+                
+                // Check win condition
+                if (this.player.y === 0) {
+                    this.score += 100;
+                    this.level++;
+                    this.resetPlayer();
+                    this.initializeLevel();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            checkCollisions() {
+                const playerRow = this.player.y;
+                
+                // Vehicle collision (rows 8-12)
+                if (playerRow >= 8 && playerRow <= 12) {
+                    for (let vehicle of this.vehicles) {
+                        if (vehicle.y === playerRow &&
+                            this.player.x >= vehicle.x &&
+                            this.player.x < vehicle.x + vehicle.width) {
+                            this.loseLife();
+                            return;
+                        }
+                    }
+                }
+                
+                // Water collision (rows 2-6) - must be on log
+                if (playerRow >= 2 && playerRow <= 6) {
+                    let onLog = false;
+                    for (let log of this.logs) {
+                        if (log.y === playerRow &&
+                            this.player.x >= log.x &&
+                            this.player.x < log.x + log.width) {
+                            onLog = true;
+                            // Move player with log
+                            this.player.x += log.speed * 0.05;
+                            this.player.x = Math.max(0, Math.min(this.COLS - 1, this.player.x));
+                            break;
+                        }
+                    }
+                    if (!onLog) {
+                        this.loseLife();
+                    }
+                }
+                
+                // Boundary check
+                if (this.player.x < 0 || this.player.x >= this.COLS) {
+                    this.loseLife();
+                }
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw zones
+                // Goal zone
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.TILE_SIZE);
+                
+                // Water zone
+                this.ctx.fillStyle = '#0066aa';
+                this.ctx.fillRect(0, this.TILE_SIZE, this.canvas.width, this.TILE_SIZE * 6);
+                
+                // Road zone
+                this.ctx.fillStyle = '#333333';
+                this.ctx.fillRect(0, this.TILE_SIZE * 8, this.canvas.width, this.TILE_SIZE * 5);
+                
+                // Draw vehicles
+                this.ctx.fillStyle = '#ff6666';
+                this.vehicles.forEach(vehicle => {
+                    this.ctx.fillRect(
+                        vehicle.x * this.TILE_SIZE,
+                        vehicle.y * this.TILE_SIZE + 5,
+                        vehicle.width * this.TILE_SIZE,
+                        this.TILE_SIZE - 10
+                    );
+                });
+                
+                // Draw logs
+                this.ctx.fillStyle = '#8b4513';
+                this.logs.forEach(log => {
+                    this.ctx.fillRect(
+                        log.x * this.TILE_SIZE,
+                        log.y * this.TILE_SIZE + 10,
+                        log.width * this.TILE_SIZE,
+                        this.TILE_SIZE - 20
+                    );
+                });
+                
+                // Draw player
+                this.ctx.fillStyle = '#00ff00';
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    this.player.x * this.TILE_SIZE + this.TILE_SIZE / 2,
+                    this.player.y * this.TILE_SIZE + this.TILE_SIZE / 2,
+                    15,
+                    0, Math.PI * 2
+                );
+                this.ctx.fill();
+            }
+            
+            loseLife() {
+                this.lives--;
+                if (this.lives <= 0) {
+                    this.gameOver();
+                } else {
+                    this.resetPlayer();
+                }
+            }
+            
+            resetPlayer() {
+                this.player.x = 7;
+                this.player.y = 14;
+                this.player.moving = false;
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('lives').textContent = this.lives;
+                document.getElementById('level').textContent = this.level;
+            }
+            
+            gameOver() {
+                alert(`Escape Failed! Final Score: ${this.score}`);
+                this.restart();
+            }
+            
+            restart() {
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                this.resetPlayer();
+                this.initializeLevel();
+                this.updateDisplay();
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new DigitalFroggerEscape();
+    </script>
+</body>
+</html>

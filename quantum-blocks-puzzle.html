@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Blocks Puzzle - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🧩 QUANTUM BLOCKS PUZZLE 🧩</h1>
+        <p>Arrange quantum blocks to form stable data patterns</p>
+    </div>
+    <canvas id="gameCanvas" width="500" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="lines">0</div><div>Patterns</div></div>
+        <div class="stat"><div id="level">1</div><div>Level</div></div>
+    </div>
+    <div style="text-align: center;"><p>Click blocks to rotate them | Complete rows to score</p></div>
+
+    <script>
+        class QuantumBlocksPuzzle {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.COLS = 10;
+                this.ROWS = 15;
+                this.BLOCK_SIZE = 30;
+                this.MARGIN = 100;
+                
+                this.grid = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(null));
+                this.fallingBlocks = [];
+                this.score = 0;
+                this.lines = 0;
+                this.level = 1;
+                this.dropTimer = 0;
+                this.dropInterval = 2000;
+                this.gameActive = true;
+                
+                this.blockTypes = [
+                    { color: '#ff6666', pattern: [[1, 1], [1, 1]] },
+                    { color: '#66ff66', pattern: [[1], [1], [1], [1]] },
+                    { color: '#6666ff', pattern: [[1, 1, 1], [1, 0, 0]] },
+                    { color: '#ffff66', pattern: [[1, 1, 1], [0, 0, 1]] },
+                    { color: '#ff66ff', pattern: [[1, 1, 1], [0, 1, 0]] }
+                ];
+                
+                this.spawnNewBlocks();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                this.canvas.addEventListener('click', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const gridX = Math.floor((x - this.MARGIN) / this.BLOCK_SIZE);
+                    const gridY = Math.floor((y - this.MARGIN) / this.BLOCK_SIZE);
+                    
+                    this.rotateBlockAt(gridX, gridY);
+                });
+            }
+            
+            spawnNewBlocks() {
+                if (Math.random() < 0.3 && this.fallingBlocks.length < 3) {
+                    const blockType = this.blockTypes[Math.floor(Math.random() * this.blockTypes.length)];
+                    const x = Math.floor(Math.random() * (this.COLS - blockType.pattern[0].length + 1));
+                    
+                    this.fallingBlocks.push({
+                        x: x,
+                        y: -blockType.pattern.length,
+                        pattern: blockType.pattern,
+                        color: blockType.color,
+                        rotation: 0,
+                        fallSpeed: 0.02 + this.level * 0.005,
+                        id: Date.now() + Math.random()
+                    });
+                }
+            }
+            
+            rotateBlockAt(gridX, gridY) {
+                this.fallingBlocks.forEach(block => {
+                    if (gridX >= block.x && gridX < block.x + block.pattern[0].length &&
+                        gridY >= block.y && gridY < block.y + block.pattern.length) {
+                        this.rotateBlock(block);
+                    }
+                });
+            }
+            
+            rotateBlock(block) {
+                const oldPattern = block.pattern;
+                const newPattern = [];
+                const rows = oldPattern.length;
+                const cols = oldPattern[0].length;
+                
+                for (let i = 0; i < cols; i++) {
+                    newPattern[i] = [];
+                    for (let j = 0; j < rows; j++) {
+                        newPattern[i][j] = oldPattern[rows - 1 - j][i];
+                    }
+                }
+                
+                // Check if rotation is valid
+                if (this.canPlace(block.x, Math.floor(block.y), newPattern)) {
+                    block.pattern = newPattern;
+                    block.rotation = (block.rotation + 90) % 360;
+                }
+            }
+            
+            canPlace(x, y, pattern) {
+                for (let row = 0; row < pattern.length; row++) {
+                    for (let col = 0; col < pattern[row].length; col++) {
+                        if (pattern[row][col] === 1) {
+                            const newX = x + col;
+                            const newY = y + row;
+                            
+                            if (newX < 0 || newX >= this.COLS || newY >= this.ROWS) {
+                                return false;
+                            }
+                            
+                            if (newY >= 0 && this.grid[newY][newX] !== null) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            
+            update(deltaTime) {
+                if (!this.gameActive) return;
+                
+                this.dropTimer += deltaTime;
+                if (this.dropTimer >= this.dropInterval) {
+                    this.spawnNewBlocks();
+                    this.dropTimer = 0;
+                }
+                
+                // Update falling blocks
+                this.fallingBlocks.forEach((block, blockIndex) => {
+                    block.y += block.fallSpeed;
+                    
+                    // Check if block should land
+                    if (!this.canPlace(block.x, Math.floor(block.y + 1), block.pattern) || 
+                        Math.floor(block.y) + block.pattern.length >= this.ROWS) {
+                        
+                        // Place block in grid
+                        for (let row = 0; row < block.pattern.length; row++) {
+                            for (let col = 0; col < block.pattern[row].length; col++) {
+                                if (block.pattern[row][col] === 1) {
+                                    const gridY = Math.floor(block.y) + row;
+                                    const gridX = block.x + col;
+                                    
+                                    if (gridY >= 0 && gridY < this.ROWS && 
+                                        gridX >= 0 && gridX < this.COLS) {
+                                        this.grid[gridY][gridX] = {
+                                            color: block.color,
+                                            fixed: true
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                        
+                        this.fallingBlocks.splice(blockIndex, 1);
+                        this.checkForCompletedRows();
+                    }
+                });
+                
+                // Check game over
+                for (let col = 0; col < this.COLS; col++) {
+                    if (this.grid[0][col] !== null) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+                
+                this.updateDisplay();
+            }
+            
+            checkForCompletedRows() {
+                const completedRows = [];
+                
+                for (let row = this.ROWS - 1; row >= 0; row--) {
+                    if (this.grid[row].every(cell => cell !== null)) {
+                        completedRows.push(row);
+                    }
+                }
+                
+                if (completedRows.length > 0) {
+                    // Remove completed rows
+                    completedRows.forEach(row => {
+                        this.grid.splice(row, 1);
+                        this.grid.unshift(Array(this.COLS).fill(null));
+                    });
+                    
+                    this.lines += completedRows.length;
+                    this.score += completedRows.length * 100 * this.level;
+                    this.level = Math.floor(this.lines / 10) + 1;
+                    
+                    // Create particles for completed rows
+                    completedRows.forEach(row => {
+                        for (let col = 0; col < this.COLS; col++) {
+                            for (let i = 0; i < 3; i++) {
+                                this.createParticle(
+                                    this.MARGIN + col * this.BLOCK_SIZE + this.BLOCK_SIZE / 2,
+                                    this.MARGIN + row * this.BLOCK_SIZE + this.BLOCK_SIZE / 2
+                                );
+                            }
+                        }
+                    });
+                }
+            }
+            
+            createParticle(x, y) {
+                // Particle effects would go here
+                // For simplicity, we'll skip the particle system in this version
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw grid
+                this.ctx.strokeStyle = '#333333';
+                this.ctx.lineWidth = 1;
+                for (let row = 0; row <= this.ROWS; row++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.MARGIN, this.MARGIN + row * this.BLOCK_SIZE);
+                    this.ctx.lineTo(this.MARGIN + this.COLS * this.BLOCK_SIZE, this.MARGIN + row * this.BLOCK_SIZE);
+                    this.ctx.stroke();
+                }
+                for (let col = 0; col <= this.COLS; col++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.MARGIN + col * this.BLOCK_SIZE, this.MARGIN);
+                    this.ctx.lineTo(this.MARGIN + col * this.BLOCK_SIZE, this.MARGIN + this.ROWS * this.BLOCK_SIZE);
+                    this.ctx.stroke();
+                }
+                
+                // Draw placed blocks
+                for (let row = 0; row < this.ROWS; row++) {
+                    for (let col = 0; col < this.COLS; col++) {
+                        if (this.grid[row][col] !== null) {
+                            this.ctx.fillStyle = this.grid[row][col].color;
+                            this.ctx.fillRect(
+                                this.MARGIN + col * this.BLOCK_SIZE + 1,
+                                this.MARGIN + row * this.BLOCK_SIZE + 1,
+                                this.BLOCK_SIZE - 2,
+                                this.BLOCK_SIZE - 2
+                            );
+                        }
+                    }
+                }
+                
+                // Draw falling blocks
+                this.fallingBlocks.forEach(block => {
+                    this.ctx.fillStyle = block.color;
+                    this.ctx.globalAlpha = 0.8;
+                    
+                    for (let row = 0; row < block.pattern.length; row++) {
+                        for (let col = 0; col < block.pattern[row].length; col++) {
+                            if (block.pattern[row][col] === 1) {
+                                const x = this.MARGIN + (block.x + col) * this.BLOCK_SIZE;
+                                const y = this.MARGIN + (block.y + row) * this.BLOCK_SIZE;
+                                
+                                this.ctx.fillRect(x + 1, y + 1, this.BLOCK_SIZE - 2, this.BLOCK_SIZE - 2);
+                            }
+                        }
+                    }
+                    this.ctx.globalAlpha = 1;
+                });
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('lines').textContent = this.lines;
+                document.getElementById('level').textContent = this.level;
+            }
+            
+            gameOver() {
+                this.gameActive = false;
+                alert(`Quantum Stability Lost! Final Score: ${this.score}`);
+                this.restart();
+            }
+            
+            restart() {
+                this.grid = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(null));
+                this.fallingBlocks = [];
+                this.score = 0;
+                this.lines = 0;
+                this.level = 1;
+                this.dropTimer = 0;
+                this.gameActive = true;
+                this.updateDisplay();
+            }
+            
+            gameLoop() {
+                let lastTime = 0;
+                
+                const loop = (currentTime) => {
+                    const deltaTime = currentTime - lastTime;
+                    lastTime = currentTime;
+                    
+                    this.update(deltaTime);
+                    this.render();
+                    
+                    requestAnimationFrame(loop);
+                };
+                
+                requestAnimationFrame(loop);
+            }
+        }
+        
+        new QuantumBlocksPuzzle();
+    </script>
+</body>
+</html>

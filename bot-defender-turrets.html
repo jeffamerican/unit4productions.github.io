@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Defender Turrets - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🏰 BOT DEFENDER TURRETS 🏰</h1>
+        <p>Build defensive turrets to protect the bot sanctuary</p>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="wave">1</div><div>Wave</div></div>
+        <div class="stat"><div id="credits">100</div><div>Credits</div></div>
+    </div>
+    <div style="text-align: center;"><p>Click to build turrets (Cost: 50) | SPACE for next wave</p></div>
+
+    <script>
+        class BotDefenderTurrets {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.path = [
+                    {x: 0, y: 300}, {x: 200, y: 300}, {x: 200, y: 150}, 
+                    {x: 400, y: 150}, {x: 400, y: 450}, {x: 600, y: 450}, 
+                    {x: 600, y: 200}, {x: 800, y: 200}
+                ];
+                
+                this.turrets = [];
+                this.enemies = [];
+                this.projectiles = [];
+                this.particles = [];
+                
+                this.score = 0;
+                this.wave = 1;
+                this.credits = 100;
+                this.waveActive = false;
+                this.enemiesSpawned = 0;
+                this.enemiesPerWave = 10;
+                
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                this.canvas.addEventListener('click', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    this.buildTurret(x, y);
+                });
+                
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === ' ' && !this.waveActive) {
+                        this.startWave();
+                    }
+                });
+            }
+            
+            buildTurret(x, y) {
+                if (this.credits < 50) return;
+                
+                // Check if too close to path
+                for (let i = 0; i < this.path.length - 1; i++) {
+                    const p1 = this.path[i];
+                    const p2 = this.path[i + 1];
+                    const dist = this.distanceToLine(x, y, p1.x, p1.y, p2.x, p2.y);
+                    if (dist < 40) return;
+                }
+                
+                // Check if too close to other turrets
+                for (let turret of this.turrets) {
+                    const dist = Math.sqrt((x - turret.x) ** 2 + (y - turret.y) ** 2);
+                    if (dist < 50) return;
+                }
+                
+                this.turrets.push({
+                    x: x,
+                    y: y,
+                    range: 100,
+                    damage: 25,
+                    cooldown: 0,
+                    maxCooldown: 30,
+                    target: null
+                });
+                
+                this.credits -= 50;
+            }
+            
+            distanceToLine(px, py, x1, y1, x2, y2) {
+                const A = px - x1;
+                const B = py - y1;
+                const C = x2 - x1;
+                const D = y2 - y1;
+                
+                const dot = A * C + B * D;
+                const lenSq = C * C + D * D;
+                let param = -1;
+                if (lenSq !== 0) param = dot / lenSq;
+                
+                let xx, yy;
+                if (param < 0) {
+                    xx = x1;
+                    yy = y1;
+                } else if (param > 1) {
+                    xx = x2;
+                    yy = y2;
+                } else {
+                    xx = x1 + param * C;
+                    yy = y1 + param * D;
+                }
+                
+                const dx = px - xx;
+                const dy = py - yy;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            
+            startWave() {
+                this.waveActive = true;
+                this.enemiesSpawned = 0;
+                this.enemiesPerWave = 10 + this.wave * 2;
+            }
+            
+            spawnEnemy() {
+                if (this.enemiesSpawned < this.enemiesPerWave) {
+                    this.enemies.push({
+                        x: this.path[0].x,
+                        y: this.path[0].y,
+                        pathIndex: 0,
+                        progress: 0,
+                        health: 50 + this.wave * 10,
+                        maxHealth: 50 + this.wave * 10,
+                        speed: 1 + this.wave * 0.1,
+                        value: 10 + this.wave * 2
+                    });
+                    this.enemiesSpawned++;
+                }
+            }
+            
+            update() {
+                if (this.waveActive && Math.random() < 0.05) {
+                    this.spawnEnemy();
+                }
+                
+                // Update enemies
+                this.enemies.forEach((enemy, index) => {
+                    if (enemy.pathIndex < this.path.length - 1) {
+                        const current = this.path[enemy.pathIndex];
+                        const next = this.path[enemy.pathIndex + 1];
+                        
+                        const dx = next.x - current.x;
+                        const dy = next.y - current.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        enemy.progress += enemy.speed / distance;
+                        
+                        if (enemy.progress >= 1) {
+                            enemy.pathIndex++;
+                            enemy.progress = 0;
+                        }
+                        
+                        enemy.x = current.x + (next.x - current.x) * enemy.progress;
+                        enemy.y = current.y + (next.y - current.y) * enemy.progress;
+                    } else {
+                        // Enemy reached end
+                        this.enemies.splice(index, 1);
+                        this.credits -= 10;
+                    }
+                });
+                
+                // Update turrets
+                this.turrets.forEach(turret => {
+                    turret.cooldown = Math.max(0, turret.cooldown - 1);
+                    
+                    // Find target
+                    turret.target = null;
+                    let closestDistance = turret.range;
+                    
+                    this.enemies.forEach(enemy => {
+                        const dist = Math.sqrt((turret.x - enemy.x) ** 2 + (turret.y - enemy.y) ** 2);
+                        if (dist < closestDistance) {
+                            turret.target = enemy;
+                            closestDistance = dist;
+                        }
+                    });
+                    
+                    // Shoot at target
+                    if (turret.target && turret.cooldown === 0) {
+                        this.projectiles.push({
+                            x: turret.x,
+                            y: turret.y,
+                            targetX: turret.target.x,
+                            targetY: turret.target.y,
+                            speed: 5,
+                            damage: turret.damage,
+                            target: turret.target
+                        });
+                        turret.cooldown = turret.maxCooldown;
+                    }
+                });
+                
+                // Update projectiles
+                this.projectiles.forEach((projectile, index) => {
+                    if (projectile.target && this.enemies.includes(projectile.target)) {
+                        projectile.targetX = projectile.target.x;
+                        projectile.targetY = projectile.target.y;
+                    }
+                    
+                    const dx = projectile.targetX - projectile.x;
+                    const dy = projectile.targetY - projectile.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < projectile.speed) {
+                        // Hit target
+                        if (projectile.target && this.enemies.includes(projectile.target)) {
+                            projectile.target.health -= projectile.damage;
+                            
+                            // Create hit particles
+                            for (let i = 0; i < 5; i++) {
+                                this.particles.push({
+                                    x: projectile.target.x,
+                                    y: projectile.target.y,
+                                    vx: (Math.random() - 0.5) * 4,
+                                    vy: (Math.random() - 0.5) * 4,
+                                    life: 20,
+                                    color: '#ffaa00'
+                                });
+                            }
+                            
+                            if (projectile.target.health <= 0) {
+                                this.score += projectile.target.value;
+                                this.credits += projectile.target.value;
+                                
+                                const enemyIndex = this.enemies.indexOf(projectile.target);
+                                if (enemyIndex !== -1) {
+                                    this.enemies.splice(enemyIndex, 1);
+                                }
+                            }
+                        }
+                        this.projectiles.splice(index, 1);
+                    } else {
+                        projectile.x += (dx / dist) * projectile.speed;
+                        projectile.y += (dy / dist) * projectile.speed;
+                    }
+                });
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                // Check wave completion
+                if (this.waveActive && this.enemies.length === 0 && this.enemiesSpawned >= this.enemiesPerWave) {
+                    this.waveActive = false;
+                    this.wave++;
+                    this.credits += 50;
+                }
+                
+                this.updateDisplay();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw path
+                this.ctx.strokeStyle = '#666666';
+                this.ctx.lineWidth = 30;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.path[0].x, this.path[0].y);
+                for (let i = 1; i < this.path.length; i++) {
+                    this.ctx.lineTo(this.path[i].x, this.path[i].y);
+                }
+                this.ctx.stroke();
+                
+                // Draw turrets
+                this.turrets.forEach(turret => {
+                    // Range circle
+                    this.ctx.strokeStyle = '#00ff88';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.globalAlpha = 0.2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(turret.x, turret.y, turret.range, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    this.ctx.globalAlpha = 1;
+                    
+                    // Turret body
+                    this.ctx.fillStyle = '#00ff88';
+                    this.ctx.fillRect(turret.x - 15, turret.y - 15, 30, 30);
+                    
+                    // Turret barrel
+                    if (turret.target) {
+                        const angle = Math.atan2(turret.target.y - turret.y, turret.target.x - turret.x);
+                        this.ctx.save();
+                        this.ctx.translate(turret.x, turret.y);
+                        this.ctx.rotate(angle);
+                        this.ctx.fillStyle = '#ffffff';
+                        this.ctx.fillRect(0, -3, 20, 6);
+                        this.ctx.restore();
+                    }
+                });
+                
+                // Draw enemies
+                this.enemies.forEach(enemy => {
+                    this.ctx.fillStyle = '#ff6666';
+                    this.ctx.fillRect(enemy.x - 10, enemy.y - 10, 20, 20);
+                    
+                    // Health bar
+                    const healthPercent = enemy.health / enemy.maxHealth;
+                    this.ctx.fillStyle = '#ff0000';
+                    this.ctx.fillRect(enemy.x - 12, enemy.y - 18, 24, 4);
+                    this.ctx.fillStyle = '#00ff00';
+                    this.ctx.fillRect(enemy.x - 12, enemy.y - 18, 24 * healthPercent, 4);
+                });
+                
+                // Draw projectiles
+                this.ctx.fillStyle = '#ffff00';
+                this.projectiles.forEach(projectile => {
+                    this.ctx.fillRect(projectile.x - 2, projectile.y - 2, 4, 4);
+                });
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 20;
+                    this.ctx.fillRect(p.x, p.y, 3, 3);
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw wave status
+                if (!this.waveActive) {
+                    this.ctx.font = '24px Courier New';
+                    this.ctx.fillStyle = '#00ff88';
+                    this.ctx.fillText('Press SPACE for next wave', 250, 50);
+                }
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('wave').textContent = this.wave;
+                document.getElementById('credits').textContent = this.credits;
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new BotDefenderTurrets();
+    </script>
+</body>
+</html>

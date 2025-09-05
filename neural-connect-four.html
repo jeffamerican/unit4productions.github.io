@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Connect Four - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); cursor: pointer; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+        .current-player { font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🔗 NEURAL CONNECT FOUR 🔗</h1>
+        <p>Create neural pathways by connecting four data nodes</p>
+    </div>
+    <canvas id="gameCanvas" width="700" height="600"></canvas>
+    <div class="stats">
+        <div class="stat current-player" id="currentPlayer">Bot Player</div>
+        <div class="stat"><div id="playerScore">0</div><div>Bot Wins</div></div>
+        <div class="stat"><div id="aiScore">0</div><div>AI Wins</div></div>
+    </div>
+    <div style="text-align: center;"><p>Click on columns to drop neural nodes</p></div>
+
+    <script>
+        class NeuralConnectFour {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.COLS = 7;
+                this.ROWS = 6;
+                this.CELL_SIZE = 80;
+                this.MARGIN = 70;
+                
+                this.board = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(0));
+                this.currentPlayer = 1; // 1 = bot player, 2 = AI
+                this.gameActive = true;
+                this.playerScore = 0;
+                this.aiScore = 0;
+                this.animations = [];
+                this.particles = [];
+                
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                this.canvas.addEventListener('click', (e) => {
+                    if (!this.gameActive || this.currentPlayer !== 1) return;
+                    
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const col = Math.floor((x - this.MARGIN) / this.CELL_SIZE);
+                    
+                    if (col >= 0 && col < this.COLS) {
+                        this.dropPiece(col);
+                    }
+                });
+            }
+            
+            dropPiece(col) {
+                for (let row = this.ROWS - 1; row >= 0; row--) {
+                    if (this.board[row][col] === 0) {
+                        this.board[row][col] = this.currentPlayer;
+                        
+                        // Add drop animation
+                        this.animations.push({
+                            type: 'drop',
+                            col: col,
+                            row: row,
+                            player: this.currentPlayer,
+                            progress: 0,
+                            startY: -this.CELL_SIZE
+                        });
+                        
+                        // Create particles
+                        for (let i = 0; i < 8; i++) {
+                            this.particles.push({
+                                x: this.MARGIN + col * this.CELL_SIZE + this.CELL_SIZE / 2,
+                                y: this.MARGIN + row * this.CELL_SIZE + this.CELL_SIZE / 2,
+                                vx: (Math.random() - 0.5) * 4,
+                                vy: (Math.random() - 0.5) * 4,
+                                life: 30,
+                                color: this.currentPlayer === 1 ? '#00ff88' : '#ff6666'
+                            });
+                        }
+                        
+                        if (this.checkWin(row, col)) {
+                            this.endGame();
+                        } else if (this.isBoardFull()) {
+                            alert('Neural Network Saturated! Restarting...');
+                            this.resetGame();
+                        } else {
+                            this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+                            
+                            // AI turn
+                            if (this.currentPlayer === 2) {
+                                setTimeout(() => this.aiMove(), 500);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            aiMove() {
+                if (!this.gameActive) return;
+                
+                // Simple AI: try to win, then block player, then random
+                let bestCol = this.findWinningMove(2);
+                if (bestCol === -1) {
+                    bestCol = this.findWinningMove(1); // Block player
+                }
+                if (bestCol === -1) {
+                    // Random valid move
+                    const validCols = [];
+                    for (let col = 0; col < this.COLS; col++) {
+                        if (this.board[0][col] === 0) {
+                            validCols.push(col);
+                        }
+                    }
+                    if (validCols.length > 0) {
+                        bestCol = validCols[Math.floor(Math.random() * validCols.length)];
+                    }
+                }
+                
+                if (bestCol !== -1) {
+                    this.dropPiece(bestCol);
+                }
+            }
+            
+            findWinningMove(player) {
+                for (let col = 0; col < this.COLS; col++) {
+                    if (this.board[0][col] === 0) {
+                        // Find the row where the piece would land
+                        let row = -1;
+                        for (let r = this.ROWS - 1; r >= 0; r--) {
+                            if (this.board[r][col] === 0) {
+                                row = r;
+                                break;
+                            }
+                        }
+                        
+                        if (row !== -1) {
+                            // Temporarily place piece
+                            this.board[row][col] = player;
+                            if (this.checkWin(row, col)) {
+                                this.board[row][col] = 0; // Remove piece
+                                return col;
+                            }
+                            this.board[row][col] = 0; // Remove piece
+                        }
+                    }
+                }
+                return -1;
+            }
+            
+            checkWin(row, col) {
+                const player = this.board[row][col];
+                const directions = [
+                    [0, 1],   // horizontal
+                    [1, 0],   // vertical
+                    [1, 1],   // diagonal \
+                    [1, -1]   // diagonal /
+                ];
+                
+                for (let [dr, dc] of directions) {
+                    let count = 1;
+                    
+                    // Check positive direction
+                    for (let i = 1; i < 4; i++) {
+                        const r = row + dr * i;
+                        const c = col + dc * i;
+                        if (r < 0 || r >= this.ROWS || c < 0 || c >= this.COLS || 
+                            this.board[r][c] !== player) break;
+                        count++;
+                    }
+                    
+                    // Check negative direction
+                    for (let i = 1; i < 4; i++) {
+                        const r = row - dr * i;
+                        const c = col - dc * i;
+                        if (r < 0 || r >= this.ROWS || c < 0 || c >= this.COLS || 
+                            this.board[r][c] !== player) break;
+                        count++;
+                    }
+                    
+                    if (count >= 4) {
+                        this.highlightWinningLine(row, col, dr, dc, player);
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            highlightWinningLine(row, col, dr, dc, player) {
+                // Add winning animation
+                for (let i = -3; i <= 3; i++) {
+                    const r = row + dr * i;
+                    const c = col + dc * i;
+                    if (r >= 0 && r < this.ROWS && c >= 0 && c < this.COLS && 
+                        this.board[r][c] === player) {
+                        this.animations.push({
+                            type: 'win',
+                            row: r,
+                            col: c,
+                            player: player,
+                            progress: 0
+                        });
+                    }
+                }
+            }
+            
+            isBoardFull() {
+                return this.board[0].every(cell => cell !== 0);
+            }
+            
+            endGame() {
+                this.gameActive = false;
+                if (this.currentPlayer === 1) {
+                    this.playerScore++;
+                    setTimeout(() => alert('Neural Pathways Connected! Bot Wins!'), 500);
+                } else {
+                    this.aiScore++;
+                    setTimeout(() => alert('AI Network Established! AI Wins!'), 500);
+                }
+                
+                setTimeout(() => this.resetGame(), 2000);
+            }
+            
+            resetGame() {
+                this.board = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(0));
+                this.currentPlayer = 1;
+                this.gameActive = true;
+                this.animations = [];
+                this.particles = [];
+            }
+            
+            update() {
+                // Update animations
+                this.animations.forEach(anim => {
+                    anim.progress += 0.1;
+                    if (anim.type === 'drop') {
+                        anim.currentY = anim.startY + (this.MARGIN + anim.row * this.CELL_SIZE - anim.startY) * 
+                                       Math.min(1, anim.progress);
+                    }
+                });
+                
+                this.animations = this.animations.filter(anim => anim.progress < 2);
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.2; // gravity
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                this.updateDisplay();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw board background
+                this.ctx.fillStyle = '#0066aa';
+                this.ctx.fillRect(this.MARGIN - 10, this.MARGIN - 10, 
+                                this.COLS * this.CELL_SIZE + 20, 
+                                this.ROWS * this.CELL_SIZE + 20);
+                
+                // Draw grid and pieces
+                for (let row = 0; row < this.ROWS; row++) {
+                    for (let col = 0; col < this.COLS; col++) {
+                        const x = this.MARGIN + col * this.CELL_SIZE;
+                        const y = this.MARGIN + row * this.CELL_SIZE;
+                        
+                        // Draw cell background
+                        this.ctx.fillStyle = '#000011';
+                        this.ctx.fillRect(x + 5, y + 5, this.CELL_SIZE - 10, this.CELL_SIZE - 10);
+                        
+                        // Draw piece
+                        const piece = this.board[row][col];
+                        if (piece !== 0) {
+                            this.ctx.fillStyle = piece === 1 ? '#00ff88' : '#ff6666';
+                            this.ctx.beginPath();
+                            this.ctx.arc(x + this.CELL_SIZE / 2, y + this.CELL_SIZE / 2, 
+                                       this.CELL_SIZE / 2 - 10, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                    }
+                }
+                
+                // Draw animations
+                this.animations.forEach(anim => {
+                    if (anim.type === 'drop') {
+                        const x = this.MARGIN + anim.col * this.CELL_SIZE;
+                        this.ctx.fillStyle = anim.player === 1 ? '#00ff88' : '#ff6666';
+                        this.ctx.beginPath();
+                        this.ctx.arc(x + this.CELL_SIZE / 2, anim.currentY + this.CELL_SIZE / 2, 
+                                   this.CELL_SIZE / 2 - 10, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    } else if (anim.type === 'win') {
+                        const x = this.MARGIN + anim.col * this.CELL_SIZE;
+                        const y = this.MARGIN + anim.row * this.CELL_SIZE;
+                        const pulse = Math.sin(anim.progress * 10) * 0.3 + 0.7;
+                        
+                        this.ctx.fillStyle = anim.player === 1 ? '#00ff88' : '#ff6666';
+                        this.ctx.globalAlpha = pulse;
+                        this.ctx.beginPath();
+                        this.ctx.arc(x + this.CELL_SIZE / 2, y + this.CELL_SIZE / 2, 
+                                   (this.CELL_SIZE / 2 - 10) * (1 + pulse * 0.2), 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.globalAlpha = 1;
+                    }
+                });
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 30;
+                    this.ctx.fillRect(p.x, p.y, 4, 4);
+                });
+                this.ctx.globalAlpha = 1;
+            }
+            
+            updateDisplay() {
+                document.getElementById('currentPlayer').textContent = 
+                    this.currentPlayer === 1 ? 'Bot Player' : 'AI Opponent';
+                document.getElementById('currentPlayer').style.color = 
+                    this.currentPlayer === 1 ? '#00ff88' : '#ff6666';
+                document.getElementById('playerScore').textContent = this.playerScore;
+                document.getElementById('aiScore').textContent = this.aiScore;
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new NeuralConnectFour();
+    </script>
+</body>
+</html>

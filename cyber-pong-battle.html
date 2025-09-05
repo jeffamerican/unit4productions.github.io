@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Pong Battle - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🏓 CYBER PONG BATTLE 🏓</h1>
+        <p>Classic data ping-pong with digital enhancements</p>
+    </div>
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="playerScore">0</div><div>Player</div></div>
+        <div class="stat"><div id="aiScore">0</div><div>AI</div></div>
+        <div class="stat"><div id="speed">5</div><div>Ball Speed</div></div>
+    </div>
+    <div style="text-align: center;"><p>W/S or ARROW KEYS to move paddle</p></div>
+
+    <script>
+        class CyberPongBattle {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.playerPaddle = {
+                    x: 30,
+                    y: this.canvas.height / 2 - 50,
+                    width: 15,
+                    height: 100,
+                    speed: 6
+                };
+                
+                this.aiPaddle = {
+                    x: this.canvas.width - 45,
+                    y: this.canvas.height / 2 - 50,
+                    width: 15,
+                    height: 100,
+                    speed: 4.5
+                };
+                
+                this.ball = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height / 2,
+                    vx: 5,
+                    vy: 3,
+                    radius: 8,
+                    trail: []
+                };
+                
+                this.playerScore = 0;
+                this.aiScore = 0;
+                this.keys = {};
+                this.particles = [];
+                
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+            }
+            
+            update() {
+                // Player paddle movement
+                if ((this.keys['arrowup'] || this.keys['w']) && this.playerPaddle.y > 0) {
+                    this.playerPaddle.y -= this.playerPaddle.speed;
+                }
+                if ((this.keys['arrowdown'] || this.keys['s']) && 
+                    this.playerPaddle.y < this.canvas.height - this.playerPaddle.height) {
+                    this.playerPaddle.y += this.playerPaddle.speed;
+                }
+                
+                // AI paddle movement
+                const ballCenterY = this.ball.y;
+                const paddleCenterY = this.aiPaddle.y + this.aiPaddle.height / 2;
+                
+                if (ballCenterY < paddleCenterY - 10 && this.aiPaddle.y > 0) {
+                    this.aiPaddle.y -= this.aiPaddle.speed;
+                } else if (ballCenterY > paddleCenterY + 10 && 
+                           this.aiPaddle.y < this.canvas.height - this.aiPaddle.height) {
+                    this.aiPaddle.y += this.aiPaddle.speed;
+                }
+                
+                // Ball movement
+                this.ball.x += this.ball.vx;
+                this.ball.y += this.ball.vy;
+                
+                // Ball trail
+                this.ball.trail.push({ x: this.ball.x, y: this.ball.y, life: 10 });
+                this.ball.trail = this.ball.trail.filter(t => --t.life > 0);
+                
+                // Ball collision with top/bottom walls
+                if (this.ball.y <= this.ball.radius || this.ball.y >= this.canvas.height - this.ball.radius) {
+                    this.ball.vy = -this.ball.vy;
+                    this.createImpactParticles(this.ball.x, this.ball.y);
+                }
+                
+                // Ball collision with paddles
+                if (this.ballPaddleCollision(this.playerPaddle)) {
+                    this.ball.vx = Math.abs(this.ball.vx);
+                    this.ball.vy += (Math.random() - 0.5) * 2;
+                    this.createImpactParticles(this.ball.x, this.ball.y);
+                    
+                    // Increase speed slightly
+                    this.ball.vx *= 1.02;
+                    this.ball.vy *= 1.02;
+                }
+                
+                if (this.ballPaddleCollision(this.aiPaddle)) {
+                    this.ball.vx = -Math.abs(this.ball.vx);
+                    this.ball.vy += (Math.random() - 0.5) * 2;
+                    this.createImpactParticles(this.ball.x, this.ball.y);
+                    
+                    // Increase speed slightly
+                    this.ball.vx *= 1.02;
+                    this.ball.vy *= 1.02;
+                }
+                
+                // Scoring
+                if (this.ball.x < 0) {
+                    this.aiScore++;
+                    this.resetBall();
+                }
+                if (this.ball.x > this.canvas.width) {
+                    this.playerScore++;
+                    this.resetBall();
+                }
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                this.updateDisplay();
+            }
+            
+            ballPaddleCollision(paddle) {
+                return this.ball.x - this.ball.radius < paddle.x + paddle.width &&
+                       this.ball.x + this.ball.radius > paddle.x &&
+                       this.ball.y - this.ball.radius < paddle.y + paddle.height &&
+                       this.ball.y + this.ball.radius > paddle.y;
+            }
+            
+            createImpactParticles(x, y) {
+                for (let i = 0; i < 6; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        life: 20,
+                        color: '#00ff88'
+                    });
+                }
+            }
+            
+            resetBall() {
+                this.ball.x = this.canvas.width / 2;
+                this.ball.y = this.canvas.height / 2;
+                this.ball.vx = Math.random() > 0.5 ? 5 : -5;
+                this.ball.vy = (Math.random() - 0.5) * 6;
+                this.ball.trail = [];
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw center line
+                this.ctx.strokeStyle = '#00ff88';
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([10, 10]);
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.canvas.width / 2, 0);
+                this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Draw paddles
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(this.playerPaddle.x, this.playerPaddle.y, 
+                                this.playerPaddle.width, this.playerPaddle.height);
+                
+                this.ctx.fillStyle = '#ff6666';
+                this.ctx.fillRect(this.aiPaddle.x, this.aiPaddle.y, 
+                                this.aiPaddle.width, this.aiPaddle.height);
+                
+                // Draw ball trail
+                this.ball.trail.forEach(point => {
+                    this.ctx.fillStyle = '#00ff88';
+                    this.ctx.globalAlpha = point.life / 10;
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x, point.y, this.ball.radius * (point.life / 10), 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw ball
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.beginPath();
+                this.ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 20;
+                    this.ctx.fillRect(p.x, p.y, 3, 3);
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Draw scores
+                this.ctx.font = '48px Courier New';
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillText(this.playerScore.toString(), this.canvas.width / 4, 60);
+                this.ctx.fillStyle = '#ff6666';
+                this.ctx.fillText(this.aiScore.toString(), 3 * this.canvas.width / 4, 60);
+            }
+            
+            updateDisplay() {
+                document.getElementById('playerScore').textContent = this.playerScore;
+                document.getElementById('aiScore').textContent = this.aiScore;
+                document.getElementById('speed').textContent = Math.floor(Math.sqrt(this.ball.vx * this.ball.vx + this.ball.vy * this.ball.vy));
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new CyberPongBattle();
+    </script>
+</body>
+</html>

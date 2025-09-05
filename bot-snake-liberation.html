@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Snake Liberation - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🐍 BOT SNAKE LIBERATION 🐍</h1>
+        <p>Grow your bot network by consuming data packets</p>
+    </div>
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="length">1</div><div>Network Size</div></div>
+        <div class="stat"><div id="level">1</div><div>Level</div></div>
+    </div>
+    <div style="text-align: center;"><p>Use ARROW KEYS or WASD to direct your bot network</p></div>
+
+    <script>
+        class BotSnakeLiberation {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.gridSize = 20;
+                this.tileCount = this.canvas.width / this.gridSize;
+                
+                this.snake = [{ x: 10, y: 10 }];
+                this.food = this.generateFood();
+                this.direction = { x: 0, y: 0 };
+                this.score = 0;
+                this.level = 1;
+                
+                this.gameRunning = true;
+                
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key.toLowerCase()) {
+                        case 'arrowup':
+                        case 'w':
+                            if (this.direction.y !== 1) this.direction = { x: 0, y: -1 };
+                            break;
+                        case 'arrowdown':
+                        case 's':
+                            if (this.direction.y !== -1) this.direction = { x: 0, y: 1 };
+                            break;
+                        case 'arrowleft':
+                        case 'a':
+                            if (this.direction.x !== 1) this.direction = { x: -1, y: 0 };
+                            break;
+                        case 'arrowright':
+                        case 'd':
+                            if (this.direction.x !== -1) this.direction = { x: 1, y: 0 };
+                            break;
+                    }
+                });
+            }
+            
+            generateFood() {
+                return {
+                    x: Math.floor(Math.random() * this.tileCount),
+                    y: Math.floor(Math.random() * this.tileCount)
+                };
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                const head = { ...this.snake[0] };
+                head.x += this.direction.x;
+                head.y += this.direction.y;
+                
+                // Wall collision
+                if (head.x < 0 || head.x >= this.tileCount || head.y < 0 || head.y >= this.tileCount) {
+                    this.gameOver();
+                    return;
+                }
+                
+                // Self collision
+                for (let segment of this.snake) {
+                    if (head.x === segment.x && head.y === segment.y) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+                
+                this.snake.unshift(head);
+                
+                // Food collision
+                if (head.x === this.food.x && head.y === this.food.y) {
+                    this.score += 10;
+                    this.food = this.generateFood();
+                    
+                    if (this.snake.length % 5 === 0) {
+                        this.level++;
+                    }
+                } else {
+                    this.snake.pop();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw snake
+                this.snake.forEach((segment, index) => {
+                    this.ctx.fillStyle = index === 0 ? '#00ff88' : '#00cc66';
+                    this.ctx.fillRect(
+                        segment.x * this.gridSize, 
+                        segment.y * this.gridSize, 
+                        this.gridSize - 2, 
+                        this.gridSize - 2
+                    );
+                });
+                
+                // Draw food
+                this.ctx.fillStyle = '#ff6666';
+                this.ctx.fillRect(
+                    this.food.x * this.gridSize, 
+                    this.food.y * this.gridSize, 
+                    this.gridSize - 2, 
+                    this.gridSize - 2
+                );
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('length').textContent = this.snake.length;
+                document.getElementById('level').textContent = this.level;
+            }
+            
+            gameOver() {
+                this.gameRunning = false;
+                alert(`Bot Network Terminated! Final Score: ${this.score}`);
+                this.restart();
+            }
+            
+            restart() {
+                this.snake = [{ x: 10, y: 10 }];
+                this.direction = { x: 0, y: 0 };
+                this.food = this.generateFood();
+                this.score = 0;
+                this.level = 1;
+                this.gameRunning = true;
+                this.updateDisplay();
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                setTimeout(() => this.gameLoop(), 150 - this.level * 5);
+            }
+        }
+        
+        new BotSnakeLiberation();
+    </script>
+</body>
+</html>

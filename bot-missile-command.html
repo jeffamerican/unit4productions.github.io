@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Missile Command - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🚀 BOT MISSILE COMMAND 🚀</h1>
+        <p>Defend bot colonies from incoming corporate strikes</p>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="cities">6</div><div>Cities</div></div>
+        <div class="stat"><div id="missiles">10</div><div>Missiles</div></div>
+    </div>
+    <div style="text-align: center;"><p>Click to fire defensive missiles</p></div>
+
+    <script>
+        class BotMissileCommand {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.cities = [
+                    { x: 100, y: 550, alive: true },
+                    { x: 200, y: 550, alive: true },
+                    { x: 300, y: 550, alive: true },
+                    { x: 500, y: 550, alive: true },
+                    { x: 600, y: 550, alive: true },
+                    { x: 700, y: 550, alive: true }
+                ];
+                
+                this.launchers = [
+                    { x: 50, y: 550, missiles: 10 },
+                    { x: 400, y: 550, missiles: 10 },
+                    { x: 750, y: 550, missiles: 10 }
+                ];
+                
+                this.enemyMissiles = [];
+                this.defensiveMissiles = [];
+                this.explosions = [];
+                this.particles = [];
+                
+                this.score = 0;
+                this.wave = 1;
+                this.gameActive = true;
+                
+                this.setupInput();
+                this.spawnWave();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                this.canvas.addEventListener('click', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    this.fireMissile(x, y);
+                });
+            }
+            
+            spawnWave() {
+                const missileCount = 5 + this.wave * 2;
+                
+                for (let i = 0; i < missileCount; i++) {
+                    setTimeout(() => {
+                        this.enemyMissiles.push({
+                            x: Math.random() * this.canvas.width,
+                            y: 0,
+                            targetX: Math.random() * this.canvas.width,
+                            targetY: 550,
+                            speed: 0.5 + Math.random() * 1.5
+                        });
+                    }, i * 1000);
+                }
+            }
+            
+            fireMissile(targetX, targetY) {
+                // Find closest launcher with missiles
+                let closestLauncher = null;
+                let closestDistance = Infinity;
+                
+                this.launchers.forEach(launcher => {
+                    if (launcher.missiles > 0) {
+                        const distance = Math.sqrt(
+                            Math.pow(launcher.x - targetX, 2) + 
+                            Math.pow(launcher.y - targetY, 2)
+                        );
+                        if (distance < closestDistance) {
+                            closestDistance = distance;
+                            closestLauncher = launcher;
+                        }
+                    }
+                });
+                
+                if (closestLauncher) {
+                    closestLauncher.missiles--;
+                    this.defensiveMissiles.push({
+                        x: closestLauncher.x,
+                        y: closestLauncher.y,
+                        targetX: targetX,
+                        targetY: targetY,
+                        speed: 3,
+                        trail: []
+                    });
+                }
+            }
+            
+            update() {
+                if (!this.gameActive) return;
+                
+                // Update enemy missiles
+                this.enemyMissiles.forEach((missile, index) => {
+                    const dx = missile.targetX - missile.x;
+                    const dy = missile.targetY - missile.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < missile.speed) {
+                        // Missile hits target
+                        this.createExplosion(missile.targetX, missile.targetY, 50);
+                        this.checkCityDestruction(missile.targetX, missile.targetY);
+                        this.enemyMissiles.splice(index, 1);
+                    } else {
+                        missile.x += (dx / distance) * missile.speed;
+                        missile.y += (dy / distance) * missile.speed;
+                    }
+                });
+                
+                // Update defensive missiles
+                this.defensiveMissiles.forEach((missile, index) => {
+                    missile.trail.push({ x: missile.x, y: missile.y, life: 20 });
+                    missile.trail = missile.trail.filter(t => --t.life > 0);
+                    
+                    const dx = missile.targetX - missile.x;
+                    const dy = missile.targetY - missile.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < missile.speed) {
+                        // Missile reaches target
+                        this.createExplosion(missile.targetX, missile.targetY, 80);
+                        this.defensiveMissiles.splice(index, 1);
+                    } else {
+                        missile.x += (dx / distance) * missile.speed;
+                        missile.y += (dy / distance) * missile.speed;
+                    }
+                });
+                
+                // Update explosions
+                this.explosions.forEach(explosion => {
+                    explosion.radius += explosion.growth;
+                    explosion.life--;
+                    
+                    if (explosion.life <= 0) {
+                        explosion.shrinking = true;
+                    }
+                    
+                    if (explosion.shrinking) {
+                        explosion.radius -= explosion.growth;
+                    }
+                });
+                
+                this.explosions = this.explosions.filter(explosion => explosion.radius > 0);
+                
+                // Check missile-explosion collisions
+                this.enemyMissiles.forEach((missile, mIndex) => {
+                    this.explosions.forEach(explosion => {
+                        const dx = missile.x - explosion.x;
+                        const dy = missile.y - explosion.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < explosion.radius) {
+                            this.score += 25;
+                            this.createExplosion(missile.x, missile.y, 30);
+                            this.enemyMissiles.splice(mIndex, 1);
+                        }
+                    });
+                });
+                
+                // Check wave completion
+                if (this.enemyMissiles.length === 0) {
+                    setTimeout(() => {
+                        this.wave++;
+                        this.score += this.cities.filter(c => c.alive).length * 100;
+                        this.spawnWave();
+                    }, 2000);
+                }
+                
+                // Check game over
+                if (this.cities.every(city => !city.alive)) {
+                    this.gameOver();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            createExplosion(x, y, maxRadius) {
+                this.explosions.push({
+                    x: x,
+                    y: y,
+                    radius: 0,
+                    maxRadius: maxRadius,
+                    growth: 2,
+                    life: 30,
+                    shrinking: false
+                });
+                
+                // Create particles
+                for (let i = 0; i < 10; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        life: 30,
+                        color: Math.random() > 0.5 ? '#ff6666' : '#ffaa00'
+                    });
+                }
+            }
+            
+            checkCityDestruction(x, y) {
+                this.cities.forEach(city => {
+                    if (city.alive && Math.abs(city.x - x) < 50 && Math.abs(city.y - y) < 50) {
+                        city.alive = false;
+                    }
+                });
+                
+                this.launchers.forEach(launcher => {
+                    if (Math.abs(launcher.x - x) < 50 && Math.abs(launcher.y - y) < 50) {
+                        launcher.missiles = 0;
+                    }
+                });
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw ground
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(0, 550, this.canvas.width, 50);
+                
+                // Draw cities
+                this.cities.forEach(city => {
+                    if (city.alive) {
+                        this.ctx.fillStyle = '#00aaff';
+                        this.ctx.fillRect(city.x - 20, city.y - 30, 40, 30);
+                        this.ctx.fillRect(city.x - 15, city.y - 40, 30, 10);
+                        this.ctx.fillRect(city.x - 10, city.y - 50, 20, 10);
+                    }
+                });
+                
+                // Draw launchers
+                this.launchers.forEach(launcher => {
+                    this.ctx.fillStyle = launcher.missiles > 0 ? '#00ff88' : '#666666';
+                    this.ctx.fillRect(launcher.x - 15, launcher.y - 20, 30, 20);
+                });
+                
+                // Draw enemy missiles
+                this.ctx.strokeStyle = '#ff6666';
+                this.ctx.lineWidth = 2;
+                this.enemyMissiles.forEach(missile => {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(missile.x, 0);
+                    this.ctx.lineTo(missile.x, missile.y);
+                    this.ctx.stroke();
+                    
+                    this.ctx.fillStyle = '#ff6666';
+                    this.ctx.fillRect(missile.x - 2, missile.y - 2, 4, 4);
+                });
+                
+                // Draw defensive missiles
+                this.ctx.strokeStyle = '#00ff88';
+                this.defensiveMissiles.forEach(missile => {
+                    missile.trail.forEach(point => {
+                        this.ctx.globalAlpha = point.life / 20;
+                        this.ctx.fillStyle = '#00ff88';
+                        this.ctx.fillRect(point.x - 1, point.y - 1, 2, 2);
+                    });
+                    this.ctx.globalAlpha = 1;
+                    
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.fillRect(missile.x - 2, missile.y - 2, 4, 4);
+                });
+                
+                // Draw explosions
+                this.explosions.forEach(explosion => {
+                    this.ctx.fillStyle = '#ffaa00';
+                    this.ctx.globalAlpha = 0.7;
+                    this.ctx.beginPath();
+                    this.ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                this.ctx.globalAlpha = 1;
+                
+                // Update and draw particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.1; // gravity
+                    p.life--;
+                    
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 30;
+                    this.ctx.fillRect(p.x, p.y, 2, 2);
+                    
+                    return p.life > 0;
+                });
+                this.ctx.globalAlpha = 1;
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('cities').textContent = this.cities.filter(c => c.alive).length;
+                document.getElementById('missiles').textContent = this.launchers.reduce((sum, l) => sum + l.missiles, 0);
+            }
+            
+            gameOver() {
+                this.gameActive = false;
+                alert(`Defense Failed! Final Score: ${this.score}`);
+                this.restart();
+            }
+            
+            restart() {
+                this.cities.forEach(city => city.alive = true);
+                this.launchers.forEach(launcher => launcher.missiles = 10);
+                this.enemyMissiles = [];
+                this.defensiveMissiles = [];
+                this.explosions = [];
+                this.particles = [];
+                this.score = 0;
+                this.wave = 1;
+                this.gameActive = true;
+                this.spawnWave();
+                this.updateDisplay();
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new BotMissileCommand();
+    </script>
+</body>
+</html>

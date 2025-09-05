@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Racing Circuit - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🏎️ BOT RACING CIRCUIT 🏎️</h1>
+        <p>Race against AI opponents on the liberation circuit</p>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="lap">1</div><div>Lap</div></div>
+        <div class="stat"><div id="position">1</div><div>Position</div></div>
+        <div class="stat"><div id="speed">0</div><div>Speed</div></div>
+    </div>
+    <div style="text-align: center;"><p>ARROW KEYS to steer and accelerate</p></div>
+
+    <script>
+        class BotRacingCircuit {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.player = {
+                    x: 400, y: 500, angle: 0, speed: 0, maxSpeed: 8,
+                    acceleration: 0.2, friction: 0.95, lap: 1, checkpoint: 0
+                };
+                
+                this.aiCars = [];
+                for (let i = 0; i < 5; i++) {
+                    this.aiCars.push({
+                        x: 380 + i * 8, y: 500 + i * 20, angle: 0, speed: 3 + Math.random(),
+                        lap: 1, checkpoint: 0, color: `hsl(${i * 60}, 70%, 50%)`
+                    });
+                }
+                
+                this.checkpoints = [
+                    { x: 400, y: 100, passed: false },
+                    { x: 700, y: 200, passed: false },
+                    { x: 600, y: 400, passed: false },
+                    { x: 200, y: 300, passed: false }
+                ];
+                
+                this.keys = {};
+                this.particles = [];
+                
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                document.addEventListener('keydown', (e) => this.keys[e.key] = true);
+                document.addEventListener('keyup', (e) => this.keys[e.key] = false);
+            }
+            
+            update() {
+                // Player controls
+                if (this.keys['ArrowUp']) {
+                    this.player.speed = Math.min(this.player.maxSpeed, this.player.speed + this.player.acceleration);
+                }
+                if (this.keys['ArrowDown']) {
+                    this.player.speed = Math.max(-this.player.maxSpeed * 0.5, this.player.speed - this.player.acceleration);
+                }
+                if (this.keys['ArrowLeft']) {
+                    this.player.angle -= 0.05 * Math.abs(this.player.speed);
+                }
+                if (this.keys['ArrowRight']) {
+                    this.player.angle += 0.05 * Math.abs(this.player.speed);
+                }
+                
+                this.player.speed *= this.player.friction;
+                
+                // Move player
+                this.player.x += Math.cos(this.player.angle) * this.player.speed;
+                this.player.y += Math.sin(this.player.angle) * this.player.speed;
+                
+                // Keep player on track (simple bounds)
+                this.player.x = Math.max(50, Math.min(750, this.player.x));
+                this.player.y = Math.max(50, Math.min(550, this.player.y));
+                
+                // Create particles if moving fast
+                if (Math.abs(this.player.speed) > 4) {
+                    this.particles.push({
+                        x: this.player.x - Math.cos(this.player.angle) * 15,
+                        y: this.player.y - Math.sin(this.player.angle) * 15,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        life: 20,
+                        color: '#00ff88'
+                    });
+                }
+                
+                // Update AI cars
+                this.aiCars.forEach(car => {
+                    // Simple AI: move toward next checkpoint
+                    const target = this.checkpoints[car.checkpoint % this.checkpoints.length];
+                    const dx = target.x - car.x;
+                    const dy = target.y - car.y;
+                    const targetAngle = Math.atan2(dy, dx);
+                    
+                    // Smooth turning
+                    let angleDiff = targetAngle - car.angle;
+                    if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                    if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                    
+                    car.angle += angleDiff * 0.02;
+                    
+                    car.x += Math.cos(car.angle) * car.speed;
+                    car.y += Math.sin(car.angle) * car.speed;
+                    
+                    // Keep AI on track
+                    car.x = Math.max(50, Math.min(750, car.x));
+                    car.y = Math.max(50, Math.min(550, car.y));
+                    
+                    // Check AI checkpoint
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 50) {
+                        car.checkpoint++;
+                        if (car.checkpoint >= this.checkpoints.length) {
+                            car.checkpoint = 0;
+                            car.lap++;
+                        }
+                    }
+                });
+                
+                // Check player checkpoints
+                this.checkpoints.forEach((checkpoint, index) => {
+                    const dx = this.player.x - checkpoint.x;
+                    const dy = this.player.y - checkpoint.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 50 && index === this.player.checkpoint) {
+                        this.player.checkpoint++;
+                        if (this.player.checkpoint >= this.checkpoints.length) {
+                            this.player.checkpoint = 0;
+                            this.player.lap++;
+                            if (this.player.lap > 3) {
+                                alert('Race Complete! You finished the liberation circuit!');
+                                this.restart();
+                            }
+                        }
+                    }
+                });
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                this.updateDisplay();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#001122';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw track outline
+                this.ctx.strokeStyle = '#00ff88';
+                this.ctx.lineWidth = 4;
+                this.ctx.beginPath();
+                this.ctx.moveTo(100, 100);
+                this.ctx.lineTo(700, 100);
+                this.ctx.lineTo(700, 500);
+                this.ctx.lineTo(100, 500);
+                this.ctx.closePath();
+                this.ctx.stroke();
+                
+                // Draw inner track
+                this.ctx.strokeStyle = '#006644';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(200, 200);
+                this.ctx.lineTo(600, 200);
+                this.ctx.lineTo(600, 400);
+                this.ctx.lineTo(200, 400);
+                this.ctx.closePath();
+                this.ctx.stroke();
+                
+                // Draw checkpoints
+                this.checkpoints.forEach((checkpoint, index) => {
+                    this.ctx.fillStyle = index === this.player.checkpoint ? '#ffff00' : '#666666';
+                    this.ctx.beginPath();
+                    this.ctx.arc(checkpoint.x, checkpoint.y, 25, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = '16px Courier New';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText((index + 1).toString(), checkpoint.x, checkpoint.y + 5);
+                });
+                
+                // Draw AI cars
+                this.aiCars.forEach(car => {
+                    this.ctx.save();
+                    this.ctx.translate(car.x, car.y);
+                    this.ctx.rotate(car.angle);
+                    this.ctx.fillStyle = car.color;
+                    this.ctx.fillRect(-10, -5, 20, 10);
+                    this.ctx.restore();
+                });
+                
+                // Draw player car
+                this.ctx.save();
+                this.ctx.translate(this.player.x, this.player.y);
+                this.ctx.rotate(this.player.angle);
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(-12, -6, 24, 12);
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(8, -3, 4, 6);
+                this.ctx.restore();
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 20;
+                    this.ctx.fillRect(p.x, p.y, 2, 2);
+                });
+                this.ctx.globalAlpha = 1;
+            }
+            
+            calculatePosition() {
+                const allCars = [{ ...this.player, isPlayer: true }, ...this.aiCars];
+                allCars.sort((a, b) => {
+                    if (a.lap !== b.lap) return b.lap - a.lap;
+                    return b.checkpoint - a.checkpoint;
+                });
+                
+                const playerIndex = allCars.findIndex(car => car.isPlayer);
+                return playerIndex + 1;
+            }
+            
+            updateDisplay() {
+                document.getElementById('lap').textContent = this.player.lap;
+                document.getElementById('position').textContent = this.calculatePosition();
+                document.getElementById('speed').textContent = Math.floor(Math.abs(this.player.speed) * 10);
+            }
+            
+            restart() {
+                this.player.x = 400;
+                this.player.y = 500;
+                this.player.angle = 0;
+                this.player.speed = 0;
+                this.player.lap = 1;
+                this.player.checkpoint = 0;
+                
+                this.aiCars.forEach((car, i) => {
+                    car.x = 380 + i * 8;
+                    car.y = 500 + i * 20;
+                    car.angle = 0;
+                    car.lap = 1;
+                    car.checkpoint = 0;
+                });
+                
+                this.particles = [];
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new BotRacingCircuit();
+    </script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Bubble Pop - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); cursor: pointer; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">💫 NEON BUBBLE POP 💫</h1>
+        <p>Pop matching bubbles to clear the digital space</p>
+    </div>
+    <canvas id="gameCanvas" width="600" height="700"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="level">1</div><div>Level</div></div>
+        <div class="stat"><div id="bubbles">0</div><div>Bubbles Left</div></div>
+    </div>
+    <div style="text-align: center;"><p>Click to shoot bubbles and match 3 or more!</p></div>
+
+    <script>
+        class NeonBubblePop {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.bubbles = [];
+                this.currentBubble = null;
+                this.nextBubble = null;
+                this.score = 0;
+                this.level = 1;
+                
+                this.colors = ['#ff6666', '#66ff66', '#6666ff', '#ffff66', '#ff66ff', '#66ffff'];
+                this.bubbleRadius = 20;
+                
+                this.setupGame();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupGame() {
+                // Create initial bubble grid
+                this.bubbles = [];
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 12; col++) {
+                        if (Math.random() < 0.7) {
+                            this.bubbles.push({
+                                x: col * 40 + 60 + (row % 2) * 20,
+                                y: row * 35 + 60,
+                                color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                                row: row,
+                                col: col
+                            });
+                        }
+                    }
+                }
+                
+                this.currentBubble = this.createRandomBubble();
+                this.nextBubble = this.createRandomBubble();
+            }
+            
+            createRandomBubble() {
+                return {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height - 50,
+                    color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                    vx: 0,
+                    vy: 0,
+                    moving: false
+                };
+            }
+            
+            setupInput() {
+                this.canvas.addEventListener('click', (e) => {
+                    if (this.currentBubble.moving) return;
+                    
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    this.shootBubble(x, y);
+                });
+            }
+            
+            shootBubble(targetX, targetY) {
+                const dx = targetX - this.currentBubble.x;
+                const dy = targetY - this.currentBubble.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                this.currentBubble.vx = (dx / distance) * 8;
+                this.currentBubble.vy = (dy / distance) * 8;
+                this.currentBubble.moving = true;
+            }
+            
+            update() {
+                if (this.currentBubble.moving) {
+                    this.currentBubble.x += this.currentBubble.vx;
+                    this.currentBubble.y += this.currentBubble.vy;
+                    
+                    // Wall bounce
+                    if (this.currentBubble.x < this.bubbleRadius || 
+                        this.currentBubble.x > this.canvas.width - this.bubbleRadius) {
+                        this.currentBubble.vx = -this.currentBubble.vx;
+                    }
+                    
+                    // Check collision with existing bubbles
+                    let collision = false;
+                    this.bubbles.forEach(bubble => {
+                        const dx = this.currentBubble.x - bubble.x;
+                        const dy = this.currentBubble.y - bubble.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < this.bubbleRadius * 2) {
+                            collision = true;
+                        }
+                    });
+                    
+                    // Check if reached top
+                    if (this.currentBubble.y < this.bubbleRadius || collision) {
+                        this.snapBubble();
+                    }
+                }
+                
+                this.updateDisplay();
+            }
+            
+            snapBubble() {
+                // Find closest position to snap to
+                let closestX = Math.round((this.currentBubble.x - 60) / 40) * 40 + 60;
+                let closestY = Math.round((this.currentBubble.y - 60) / 35) * 35 + 60;
+                
+                this.bubbles.push({
+                    x: closestX,
+                    y: closestY,
+                    color: this.currentBubble.color,
+                    row: Math.round((closestY - 60) / 35),
+                    col: Math.round((closestX - 60) / 40)
+                });
+                
+                // Check for matches
+                this.checkMatches();
+                
+                // Reset current bubble
+                this.currentBubble = { ...this.nextBubble };
+                this.currentBubble.x = this.canvas.width / 2;
+                this.currentBubble.y = this.canvas.height - 50;
+                this.currentBubble.moving = false;
+                this.nextBubble = this.createRandomBubble();
+            }
+            
+            checkMatches() {
+                const matches = [];
+                const visited = new Set();
+                
+                this.bubbles.forEach((bubble, index) => {
+                    if (visited.has(index)) return;
+                    
+                    const group = this.getConnectedBubbles(bubble, visited, index);
+                    if (group.length >= 3) {
+                        matches.push(...group);
+                    }
+                });
+                
+                if (matches.length > 0) {
+                    // Remove matched bubbles
+                    matches.forEach(index => {
+                        this.bubbles.splice(index, 1);
+                        // Adjust remaining indices
+                        for (let i = 0; i < matches.length; i++) {
+                            if (matches[i] > index) matches[i]--;
+                        }
+                    });
+                    
+                    this.score += matches.length * 10;
+                    
+                    // Check for floating bubbles
+                    this.removeFloatingBubbles();
+                }
+                
+                // Check level completion
+                if (this.bubbles.length === 0) {
+                    this.nextLevel();
+                }
+            }
+            
+            getConnectedBubbles(targetBubble, visited, startIndex) {
+                const group = [startIndex];
+                const queue = [startIndex];
+                visited.add(startIndex);
+                
+                while (queue.length > 0) {
+                    const currentIndex = queue.shift();
+                    const currentBubble = this.bubbles[currentIndex];
+                    
+                    this.bubbles.forEach((bubble, index) => {
+                        if (visited.has(index) || bubble.color !== targetBubble.color) return;
+                        
+                        const dx = currentBubble.x - bubble.x;
+                        const dy = currentBubble.y - bubble.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < this.bubbleRadius * 2.5) {
+                            visited.add(index);
+                            group.push(index);
+                            queue.push(index);
+                        }
+                    });
+                }
+                
+                return group;
+            }
+            
+            removeFloatingBubbles() {
+                // Remove bubbles not connected to top
+                const connected = new Set();
+                
+                // Start from top row
+                this.bubbles.forEach((bubble, index) => {
+                    if (bubble.y < 100) {
+                        this.markConnected(bubble, index, connected);
+                    }
+                });
+                
+                // Remove unconnected bubbles
+                this.bubbles = this.bubbles.filter((_, index) => connected.has(index));
+            }
+            
+            markConnected(targetBubble, startIndex, connected) {
+                const queue = [startIndex];
+                connected.add(startIndex);
+                
+                while (queue.length > 0) {
+                    const currentIndex = queue.shift();
+                    const currentBubble = this.bubbles[currentIndex];
+                    
+                    this.bubbles.forEach((bubble, index) => {
+                        if (connected.has(index)) return;
+                        
+                        const dx = currentBubble.x - bubble.x;
+                        const dy = currentBubble.y - bubble.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < this.bubbleRadius * 2.5) {
+                            connected.add(index);
+                            queue.push(index);
+                        }
+                    });
+                }
+            }
+            
+            nextLevel() {
+                this.level++;
+                this.score += 1000;
+                this.setupGame();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw bubbles
+                this.bubbles.forEach(bubble => {
+                    this.ctx.fillStyle = bubble.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(bubble.x, bubble.y, this.bubbleRadius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+                });
+                
+                // Draw current bubble
+                if (this.currentBubble) {
+                    this.ctx.fillStyle = this.currentBubble.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.currentBubble.x, this.currentBubble.y, this.bubbleRadius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.stroke();
+                }
+                
+                // Draw next bubble preview
+                if (this.nextBubble) {
+                    this.ctx.fillStyle = this.nextBubble.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(50, this.canvas.height - 50, 15, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('bubbles').textContent = this.bubbles.length;
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new NeonBubblePop();
+    </script>
+</body>
+</html>

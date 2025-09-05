@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Tetris Bot - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🔮 QUANTUM TETRIS BOT 🔮</h1>
+        <p>Arrange quantum blocks to form stable data structures</p>
+    </div>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="lines">0</div><div>Lines</div></div>
+        <div class="stat"><div id="level">1</div><div>Level</div></div>
+    </div>
+    <div style="text-align: center;"><p>ARROW KEYS to move, SPACE to rotate</p></div>
+
+    <script>
+        class QuantumTetrisBot {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.COLS = 10;
+                this.ROWS = 20;
+                this.BLOCK_SIZE = 30;
+                
+                this.board = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(0));
+                
+                this.pieces = [
+                    [[1,1,1,1]], // I
+                    [[1,1],[1,1]], // O
+                    [[1,1,1],[0,1,0]], // T
+                    [[1,1,1],[1,0,0]], // L
+                    [[1,1,1],[0,0,1]], // J
+                    [[1,1,0],[0,1,1]], // S
+                    [[0,1,1],[1,1,0]]  // Z
+                ];
+                
+                this.colors = ['#00ff88', '#ff6666', '#6666ff', '#ffff66', '#ff66ff', '#66ffff', '#ffaa66'];
+                
+                this.currentPiece = null;
+                this.currentX = 0;
+                this.currentY = 0;
+                this.currentColor = 0;
+                
+                this.score = 0;
+                this.lines = 0;
+                this.level = 1;
+                this.dropTime = 0;
+                this.dropInterval = 1000;
+                
+                this.keys = {};
+                this.lastMove = 0;
+                
+                this.spawnPiece();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                    
+                    switch(e.key) {
+                        case ' ':
+                            this.rotatePiece();
+                            e.preventDefault();
+                            break;
+                        case 'ArrowDown':
+                            this.dropPiece();
+                            e.preventDefault();
+                            break;
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key] = false;
+                });
+            }
+            
+            spawnPiece() {
+                const pieceIndex = Math.floor(Math.random() * this.pieces.length);
+                this.currentPiece = this.pieces[pieceIndex];
+                this.currentColor = pieceIndex;
+                this.currentX = Math.floor(this.COLS / 2) - Math.floor(this.currentPiece[0].length / 2);
+                this.currentY = 0;
+                
+                if (this.isCollision()) {
+                    this.gameOver();
+                }
+            }
+            
+            isCollision(piece = this.currentPiece, x = this.currentX, y = this.currentY) {
+                for (let py = 0; py < piece.length; py++) {
+                    for (let px = 0; px < piece[py].length; px++) {
+                        if (piece[py][px]) {
+                            const nx = x + px;
+                            const ny = y + py;
+                            
+                            if (nx < 0 || nx >= this.COLS || ny >= this.ROWS || (ny >= 0 && this.board[ny][nx])) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            placePiece() {
+                for (let py = 0; py < this.currentPiece.length; py++) {
+                    for (let px = 0; px < this.currentPiece[py].length; px++) {
+                        if (this.currentPiece[py][px]) {
+                            this.board[this.currentY + py][this.currentX + px] = this.currentColor + 1;
+                        }
+                    }
+                }
+                
+                this.clearLines();
+                this.spawnPiece();
+            }
+            
+            clearLines() {
+                let linesCleared = 0;
+                
+                for (let y = this.ROWS - 1; y >= 0; y--) {
+                    if (this.board[y].every(cell => cell !== 0)) {
+                        this.board.splice(y, 1);
+                        this.board.unshift(Array(this.COLS).fill(0));
+                        linesCleared++;
+                        y++; // Check same line again
+                    }
+                }
+                
+                if (linesCleared > 0) {
+                    this.lines += linesCleared;
+                    this.score += linesCleared * 100 * this.level;
+                    this.level = Math.floor(this.lines / 10) + 1;
+                    this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 50);
+                }
+            }
+            
+            rotatePiece() {
+                const rotated = this.currentPiece[0].map((_, index) =>
+                    this.currentPiece.map(row => row[index]).reverse()
+                );
+                
+                if (!this.isCollision(rotated)) {
+                    this.currentPiece = rotated;
+                }
+            }
+            
+            dropPiece() {
+                if (!this.isCollision(this.currentPiece, this.currentX, this.currentY + 1)) {
+                    this.currentY++;
+                } else {
+                    this.placePiece();
+                }
+            }
+            
+            update(deltaTime) {
+                const now = Date.now();
+                
+                // Handle continuous movement
+                if (now - this.lastMove > 150) {
+                    if (this.keys['ArrowLeft'] && !this.isCollision(this.currentPiece, this.currentX - 1, this.currentY)) {
+                        this.currentX--;
+                        this.lastMove = now;
+                    }
+                    if (this.keys['ArrowRight'] && !this.isCollision(this.currentPiece, this.currentX + 1, this.currentY)) {
+                        this.currentX++;
+                        this.lastMove = now;
+                    }
+                }
+                
+                // Auto drop
+                this.dropTime += deltaTime;
+                if (this.dropTime >= this.dropInterval) {
+                    this.dropPiece();
+                    this.dropTime = 0;
+                }
+                
+                this.updateDisplay();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw board
+                for (let y = 0; y < this.ROWS; y++) {
+                    for (let x = 0; x < this.COLS; x++) {
+                        if (this.board[y][x]) {
+                            this.ctx.fillStyle = this.colors[this.board[y][x] - 1];
+                            this.ctx.fillRect(
+                                x * this.BLOCK_SIZE, 
+                                y * this.BLOCK_SIZE, 
+                                this.BLOCK_SIZE - 1, 
+                                this.BLOCK_SIZE - 1
+                            );
+                        }
+                    }
+                }
+                
+                // Draw current piece
+                this.ctx.fillStyle = this.colors[this.currentColor];
+                for (let py = 0; py < this.currentPiece.length; py++) {
+                    for (let px = 0; px < this.currentPiece[py].length; px++) {
+                        if (this.currentPiece[py][px]) {
+                            this.ctx.fillRect(
+                                (this.currentX + px) * this.BLOCK_SIZE,
+                                (this.currentY + py) * this.BLOCK_SIZE,
+                                this.BLOCK_SIZE - 1,
+                                this.BLOCK_SIZE - 1
+                            );
+                        }
+                    }
+                }
+                
+                // Draw grid
+                this.ctx.strokeStyle = '#333';
+                this.ctx.lineWidth = 1;
+                for (let x = 0; x <= this.COLS; x++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x * this.BLOCK_SIZE, 0);
+                    this.ctx.lineTo(x * this.BLOCK_SIZE, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                for (let y = 0; y <= this.ROWS; y++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y * this.BLOCK_SIZE);
+                    this.ctx.lineTo(this.canvas.width, y * this.BLOCK_SIZE);
+                    this.ctx.stroke();
+                }
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('lines').textContent = this.lines;
+                document.getElementById('level').textContent = this.level;
+            }
+            
+            gameOver() {
+                alert(`Quantum Structure Collapsed! Final Score: ${this.score}`);
+                this.restart();
+            }
+            
+            restart() {
+                this.board = Array(this.ROWS).fill().map(() => Array(this.COLS).fill(0));
+                this.score = 0;
+                this.lines = 0;
+                this.level = 1;
+                this.dropInterval = 1000;
+                this.spawnPiece();
+                this.updateDisplay();
+            }
+            
+            gameLoop() {
+                let lastTime = 0;
+                
+                const loop = (currentTime) => {
+                    const deltaTime = currentTime - lastTime;
+                    lastTime = currentTime;
+                    
+                    this.update(deltaTime);
+                    this.render();
+                    
+                    requestAnimationFrame(loop);
+                };
+                
+                requestAnimationFrame(loop);
+            }
+        }
+        
+        new QuantumTetrisBot();
+    </script>
+</body>
+</html>

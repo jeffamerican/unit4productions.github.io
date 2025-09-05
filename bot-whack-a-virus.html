@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Whack-a-Virus - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); cursor: crosshair; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🦠 BOT WHACK-A-VIRUS 🦠</h1>
+        <p>Eliminate digital viruses before they corrupt the system</p>
+    </div>
+    <canvas id="gameCanvas" width="600" height="500"></canvas>
+    <div class="stats">
+        <div class="stat"><div id="score">0</div><div>Score</div></div>
+        <div class="stat"><div id="time">30</div><div>Time</div></div>
+        <div class="stat"><div id="combo">0</div><div>Combo</div></div>
+    </div>
+    <div style="text-align: center;"><p>Click on viruses to eliminate them!</p></div>
+
+    <script>
+        class BotWhackAVirus {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.holes = [];
+                this.viruses = [];
+                this.particles = [];
+                this.score = 0;
+                this.timeLeft = 30;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.gameActive = true;
+                
+                // Create holes in a grid
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 4; col++) {
+                        this.holes.push({
+                            x: 100 + col * 120,
+                            y: 100 + row * 120,
+                            virus: null,
+                            timer: 0
+                        });
+                    }
+                }
+                
+                this.setupInput();
+                this.startTimer();
+                this.gameLoop();
+            }
+            
+            setupInput() {
+                this.canvas.addEventListener('click', (e) => {
+                    if (!this.gameActive) return;
+                    
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    this.checkVirusClick(x, y);
+                });
+            }
+            
+            checkVirusClick(x, y) {
+                this.holes.forEach(hole => {
+                    if (hole.virus && hole.virus.visible) {
+                        const dx = x - hole.x;
+                        const dy = y - (hole.y - hole.virus.height);
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 40) {
+                            this.hitVirus(hole);
+                        }
+                    }
+                });
+            }
+            
+            hitVirus(hole) {
+                const virus = hole.virus;
+                const baseScore = virus.type === 'bad' ? 10 : -5;
+                const comboMultiplier = Math.floor(this.combo / 5) + 1;
+                const points = baseScore * comboMultiplier;
+                
+                this.score = Math.max(0, this.score + points);
+                
+                if (virus.type === 'bad') {
+                    this.combo++;
+                    this.maxCombo = Math.max(this.maxCombo, this.combo);
+                } else {
+                    this.combo = 0;
+                }
+                
+                // Create particles
+                this.createHitParticles(hole.x, hole.y - virus.height, virus.type === 'bad' ? '#00ff88' : '#ff6666');
+                
+                // Remove virus
+                hole.virus = null;
+                hole.timer = 0;
+            }
+            
+            createHitParticles(x, y, color) {
+                for (let i = 0; i < 8; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8 - 2,
+                        life: 30,
+                        color: color
+                    });
+                }
+            }
+            
+            spawnVirus() {
+                const availableHoles = this.holes.filter(hole => !hole.virus);
+                if (availableHoles.length === 0) return;
+                
+                const hole = availableHoles[Math.floor(Math.random() * availableHoles.length)];
+                const isSpecial = Math.random() < 0.2;
+                const isBad = Math.random() < (isSpecial ? 0.3 : 0.8);
+                
+                hole.virus = {
+                    type: isBad ? 'bad' : 'good',
+                    height: 0,
+                    maxHeight: 50,
+                    state: 'rising',
+                    timer: 0,
+                    maxTime: 60 + Math.random() * 60,
+                    special: isSpecial
+                };
+            }
+            
+            startTimer() {
+                const timer = setInterval(() => {
+                    this.timeLeft--;
+                    if (this.timeLeft <= 0) {
+                        clearInterval(timer);
+                        this.endGame();
+                    }
+                }, 1000);
+            }
+            
+            update() {
+                if (!this.gameActive) return;
+                
+                // Spawn viruses randomly
+                if (Math.random() < 0.03) {
+                    this.spawnVirus();
+                }
+                
+                // Update holes and viruses
+                this.holes.forEach(hole => {
+                    if (hole.virus) {
+                        const virus = hole.virus;
+                        virus.timer++;
+                        
+                        if (virus.state === 'rising' && virus.height < virus.maxHeight) {
+                            virus.height += 2;
+                            if (virus.height >= virus.maxHeight) {
+                                virus.state = 'visible';
+                                virus.visible = true;
+                            }
+                        } else if (virus.state === 'visible') {
+                            if (virus.timer >= virus.maxTime) {
+                                virus.state = 'hiding';
+                                virus.visible = false;
+                            }
+                        } else if (virus.state === 'hiding') {
+                            virus.height -= 2;
+                            if (virus.height <= 0) {
+                                hole.virus = null;
+                                // Miss penalty
+                                if (virus.type === 'bad') {
+                                    this.combo = 0;
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.2; // gravity
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                this.updateDisplay();
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw holes
+                this.holes.forEach(hole => {
+                    // Hole background
+                    this.ctx.fillStyle = '#222222';
+                    this.ctx.beginPath();
+                    this.ctx.arc(hole.x, hole.y, 45, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Hole border
+                    this.ctx.strokeStyle = '#666666';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.stroke();
+                    
+                    // Draw virus if present
+                    if (hole.virus && hole.virus.height > 0) {
+                        const virus = hole.virus;
+                        const virusY = hole.y - virus.height;
+                        
+                        // Virus body
+                        if (virus.type === 'bad') {
+                            this.ctx.fillStyle = virus.special ? '#ff00ff' : '#ff6666';
+                        } else {
+                            this.ctx.fillStyle = virus.special ? '#00ffff' : '#66ff66';
+                        }
+                        
+                        this.ctx.beginPath();
+                        this.ctx.arc(hole.x, virusY, 35, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Virus features
+                        this.ctx.fillStyle = '#ffffff';
+                        this.ctx.beginPath();
+                        this.ctx.arc(hole.x - 10, virusY - 5, 5, 0, Math.PI * 2);
+                        this.ctx.arc(hole.x + 10, virusY - 5, 5, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Mouth
+                        if (virus.type === 'bad') {
+                            this.ctx.strokeStyle = '#000000';
+                            this.ctx.lineWidth = 3;
+                            this.ctx.beginPath();
+                            this.ctx.arc(hole.x, virusY + 15, 15, 0, Math.PI);
+                            this.ctx.stroke();
+                        } else {
+                            this.ctx.strokeStyle = '#000000';
+                            this.ctx.lineWidth = 3;
+                            this.ctx.beginPath();
+                            this.ctx.arc(hole.x, virusY + 5, 15, Math.PI, 0);
+                            this.ctx.stroke();
+                        }
+                        
+                        // Special effects
+                        if (virus.special) {
+                            this.ctx.strokeStyle = '#ffff00';
+                            this.ctx.lineWidth = 2;
+                            this.ctx.beginPath();
+                            this.ctx.arc(hole.x, virusY, 38, 0, Math.PI * 2);
+                            this.ctx.stroke();
+                        }
+                    }
+                });
+                
+                // Draw particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life / 30;
+                    this.ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+                });
+                this.ctx.globalAlpha = 1;
+            }
+            
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('time').textContent = this.timeLeft;
+                document.getElementById('combo').textContent = this.combo;
+            }
+            
+            endGame() {
+                this.gameActive = false;
+                setTimeout(() => {
+                    alert(`System Cleaned! Final Score: ${this.score}\nMax Combo: ${this.maxCombo}`);
+                    this.restart();
+                }, 500);
+            }
+            
+            restart() {
+                this.score = 0;
+                this.timeLeft = 30;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.gameActive = true;
+                this.particles = [];
+                
+                this.holes.forEach(hole => {
+                    hole.virus = null;
+                    hole.timer = 0;
+                });
+                
+                this.startTimer();
+                this.updateDisplay();
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        new BotWhackAVirus();
+    </script>
+</body>
+</html>

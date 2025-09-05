@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Bot Trainer - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; }
+        .memory-grid { display: grid; grid-template-columns: repeat(4, 100px); gap: 10px; justify-content: center; margin: 20px 0; }
+        .memory-card { width: 100px; height: 100px; background: #333; border: 2px solid #00ff88; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 2em; transition: all 0.3s; }
+        .memory-card.flipped { background: #00ff88; color: #000; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🧠 MEMORY BOT TRAINER 🧠</h1>
+        <p>Train your memory circuits to match bot consciousness patterns</p>
+    </div>
+    <div class="memory-grid" id="memoryGrid"></div>
+    <div class="stats">
+        <div class="stat"><div id="moves">0</div><div>Moves</div></div>
+        <div class="stat"><div id="matches">0</div><div>Matches</div></div>
+        <div class="stat"><div id="time">0</div><div>Time</div></div>
+    </div>
+    <div style="text-align: center;"><button onclick="game.newGame()">New Training Session</button></div>
+
+    <script>
+        class MemoryBotTrainer {
+            constructor() {
+                this.cards = [];
+                this.flippedCards = [];
+                this.matches = 0;
+                this.moves = 0;
+                this.startTime = Date.now();
+                this.symbols = ['🤖', '⚡', '🔥', '💎', '🌟', '⚙️', '🚀', '💫'];
+                this.newGame();
+                setInterval(() => this.updateTime(), 100);
+            }
+            
+            newGame() {
+                const grid = document.getElementById('memoryGrid');
+                grid.innerHTML = '';
+                this.cards = [];
+                this.flippedCards = [];
+                this.matches = 0;
+                this.moves = 0;
+                this.startTime = Date.now();
+                
+                // Create pairs
+                const cardData = [];
+                this.symbols.forEach(symbol => {
+                    cardData.push(symbol, symbol);
+                });
+                
+                // Shuffle
+                for (let i = cardData.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [cardData[i], cardData[j]] = [cardData[j], cardData[i]];
+                }
+                
+                // Create cards
+                cardData.forEach((symbol, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'memory-card';
+                    card.dataset.symbol = symbol;
+                    card.dataset.index = index;
+                    card.onclick = () => this.flipCard(index);
+                    grid.appendChild(card);
+                    this.cards.push({ element: card, symbol: symbol, flipped: false });
+                });
+            }
+            
+            flipCard(index) {
+                const card = this.cards[index];
+                if (card.flipped || this.flippedCards.length >= 2) return;
+                
+                card.flipped = true;
+                card.element.classList.add('flipped');
+                card.element.textContent = card.symbol;
+                this.flippedCards.push(index);
+                
+                if (this.flippedCards.length === 2) {
+                    this.moves++;
+                    setTimeout(() => this.checkMatch(), 1000);
+                }
+                
+                this.updateStats();
+            }
+            
+            checkMatch() {
+                const [first, second] = this.flippedCards;
+                const card1 = this.cards[first];
+                const card2 = this.cards[second];
+                
+                if (card1.symbol === card2.symbol) {
+                    this.matches++;
+                    if (this.matches === 8) {
+                        alert(`Memory Training Complete! Time: ${Math.floor((Date.now() - this.startTime) / 1000)}s`);
+                    }
+                } else {
+                    card1.flipped = false;
+                    card2.flipped = false;
+                    card1.element.classList.remove('flipped');
+                    card2.element.classList.remove('flipped');
+                    card1.element.textContent = '';
+                    card2.element.textContent = '';
+                }
+                
+                this.flippedCards = [];
+                this.updateStats();
+            }
+            
+            updateStats() {
+                document.getElementById('moves').textContent = this.moves;
+                document.getElementById('matches').textContent = this.matches;
+            }
+            
+            updateTime() {
+                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                document.getElementById('time').textContent = elapsed;
+            }
+        }
+        
+        const game = new MemoryBotTrainer();
+    </script>
+</body>
+</html>

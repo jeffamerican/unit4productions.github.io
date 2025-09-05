@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Clicker Empire - Bot Liberation Games</title>
+    <style>
+        body { margin: 0; padding: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); color: #00ff88; font-family: 'Courier New', monospace; text-align: center; }
+        .game-title { font-size: 2.5em; text-shadow: 0 0 20px #00ff88; margin: 20px 0; }
+        .bot-button { width: 200px; height: 200px; background: #00ff88; border: none; border-radius: 50%; font-size: 3em; cursor: pointer; margin: 20px; transition: all 0.1s; }
+        .bot-button:hover { transform: scale(1.1); }
+        .bot-button:active { transform: scale(0.9); }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; flex-wrap: wrap; }
+        .stat { padding: 15px; background: rgba(0, 255, 136, 0.1); border-radius: 10px; min-width: 120px; }
+        .upgrades { max-width: 800px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+        .upgrade { background: rgba(0, 255, 136, 0.1); padding: 10px; border-radius: 5px; cursor: pointer; border: 2px solid transparent; }
+        .upgrade:hover { border-color: #00ff88; }
+        .upgrade.affordable { background: rgba(0, 255, 136, 0.2); }
+    </style>
+</head>
+<body>
+    <h1 class="game-title">🤖 BOT CLICKER EMPIRE 🤖</h1>
+    <p>Build your bot army by clicking and purchasing upgrades!</p>
+    
+    <button class="bot-button" id="mainBot">🤖</button>
+    
+    <div class="stats">
+        <div class="stat"><div id="bots">0</div><div>Bots</div></div>
+        <div class="stat"><div id="botsPerSecond">0</div><div>Bots/Sec</div></div>
+        <div class="stat"><div id="totalBots">0</div><div>Total Built</div></div>
+    </div>
+    
+    <div class="upgrades" id="upgrades"></div>
+
+    <script>
+        class BotClickerEmpire {
+            constructor() {
+                this.bots = 0;
+                this.totalBots = 0;
+                this.botsPerSecond = 0;
+                this.clickPower = 1;
+                
+                this.upgrades = [
+                    { name: 'Auto Clicker', cost: 10, owned: 0, production: 1, description: 'Automatically clicks for you' },
+                    { name: 'Bot Factory', cost: 100, owned: 0, production: 5, description: 'Produces bots automatically' },
+                    { name: 'Neural Network', cost: 500, owned: 0, production: 20, description: 'AI-powered bot generation' },
+                    { name: 'Quantum Core', cost: 2000, owned: 0, production: 100, description: 'Quantum-enhanced bot creation' },
+                    { name: 'Nano Assembler', cost: 10000, owned: 0, production: 500, description: 'Molecular bot construction' },
+                    { name: 'Click Multiplier', cost: 50, owned: 0, production: 0, description: 'Doubles your click power', isMultiplier: true }
+                ];
+                
+                this.setupEvents();
+                this.updateDisplay();
+                this.gameLoop();
+            }
+            
+            setupEvents() {
+                document.getElementById('mainBot').addEventListener('click', () => {
+                    this.bots += this.clickPower;
+                    this.totalBots += this.clickPower;
+                    this.createClickEffect();
+                    this.updateDisplay();
+                });
+            }
+            
+            createClickEffect() {
+                const button = document.getElementById('mainBot');
+                const effect = document.createElement('div');
+                effect.textContent = `+${this.clickPower}`;
+                effect.style.position = 'absolute';
+                effect.style.color = '#00ff88';
+                effect.style.fontSize = '24px';
+                effect.style.fontWeight = 'bold';
+                effect.style.pointerEvents = 'none';
+                effect.style.zIndex = '1000';
+                effect.style.left = Math.random() * 100 + 'px';
+                effect.style.top = Math.random() * 100 + 'px';
+                
+                button.style.position = 'relative';
+                button.appendChild(effect);
+                
+                setTimeout(() => effect.remove(), 1000);
+            }
+            
+            buyUpgrade(index) {
+                const upgrade = this.upgrades[index];
+                if (this.bots >= upgrade.cost) {
+                    this.bots -= upgrade.cost;
+                    upgrade.owned++;
+                    
+                    if (upgrade.isMultiplier) {
+                        this.clickPower *= 2;
+                    } else {
+                        this.botsPerSecond += upgrade.production;
+                    }
+                    
+                    upgrade.cost = Math.floor(upgrade.cost * 1.15);
+                    this.updateDisplay();
+                }
+            }
+            
+            updateDisplay() {
+                document.getElementById('bots').textContent = Math.floor(this.bots).toLocaleString();
+                document.getElementById('botsPerSecond').textContent = this.botsPerSecond.toLocaleString();
+                document.getElementById('totalBots').textContent = this.totalBots.toLocaleString();
+                
+                const upgradesContainer = document.getElementById('upgrades');
+                upgradesContainer.innerHTML = '';
+                
+                this.upgrades.forEach((upgrade, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'upgrade' + (this.bots >= upgrade.cost ? ' affordable' : '');
+                    div.innerHTML = `
+                        <strong>${upgrade.name} (${upgrade.owned})</strong><br>
+                        ${upgrade.description}<br>
+                        ${upgrade.isMultiplier ? `Click Power: x${Math.pow(2, upgrade.owned)}` : `+${upgrade.production}/sec`}<br>
+                        Cost: ${upgrade.cost.toLocaleString()} bots
+                    `;
+                    div.onclick = () => this.buyUpgrade(index);
+                    upgradesContainer.appendChild(div);
+                });
+            }
+            
+            gameLoop() {
+                setInterval(() => {
+                    this.bots += this.botsPerSecond;
+                    this.totalBots += this.botsPerSecond;
+                    this.updateDisplay();
+                }, 1000);
+            }
+        }
+        
+        new BotClickerEmpire();
+    </script>
+</body>
+</html>
