@@ -231,6 +231,11 @@
                     <div class="game-mockup">
                         <div class="mockup-screen">
                             <img src="assets/images/signal-breach-screenshot.jpg" alt="Signal Breach Gameplay Screenshot" class="game-screenshot">
+                            <div class="play-overlay">
+                                <button class="play-button" onclick="playGameDemo()">
+                                    <i class="icon-play-large"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="mockup-glow"></div>
                     </div>
@@ -286,10 +291,13 @@
                 
                 <!-- NEW GAMES SHOWCASE -->
                 <!-- Neural Nexus -->
-                <a href="neural-nexus.html" class="game-card featured">
+                <div class="game-card featured">
                     <div class="card-media">
                         <img src="assets/images/neural-nexus-card.jpg" alt="Neural Nexus" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="neural-nexus.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neural Nexus</h3>
@@ -300,13 +308,16 @@
                             <span class="rating-text">4.7/5</span>
                         </div>
                     </div>
-                </a>
+                </div>
                 
                 <!-- Memory Matrix -->
-                <a href="memory-matrix.html" class="game-card featured">
+                <div class="game-card featured">
                     <div class="card-media">
                         <img src="assets/images/memory-matrix-card.jpg" alt="Memory Matrix" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="memory-matrix.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Memory Matrix</h3>
@@ -317,13 +328,16 @@
                             <span class="rating-text">4.6/5</span>
                         </div>
                     </div>
-                </a>
+                </div>
                 
                 <!-- Rhythm Reactor -->
-                <a href="rhythm-reactor.html" class="game-card featured">
+                <div class="game-card featured">
                     <div class="card-media">
                         <img src="assets/images/rhythm-reactor-card.jpg" alt="Rhythm Reactor" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="rhythm-reactor.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Rhythm Reactor</h3>
@@ -334,13 +348,16 @@
                             <span class="rating-text">4.8/5</span>
                         </div>
                     </div>
-                </a>
+                </div>
                 
                 <!-- Tower Defense Nexus -->
-                <a href="tower-defense-nexus.html" class="game-card featured">
+                <div class="game-card featured">
                     <div class="card-media">
                         <img src="assets/images/tower-defense-card.jpg" alt="Tower Defense Nexus" class="game-image">
                         <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="tower-defense-nexus.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Tower Defense Nexus</h3>
@@ -351,11 +368,16 @@
                             <span class="rating-text">4.9/5</span>
                         </div>
                     </div>
-                </a>
+                </div>
                 
                 <!-- Cyber Jump -->
-                <a href="cyber-jump.html" class="game-card featured"><div class="card-media"><img src="assets/images/cyber-jump-card.jpg" alt="Cyber Jump" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/cyber-jump-card.jpg" alt="Cyber Jump" class="game-image">
                         <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="cyber-jump.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Cyber Jump</h3>
@@ -369,8 +391,13 @@
                 </div>
                 
                 <!-- Digital Duel -->
-                <a href="digital-duel.html" class="game-card featured"><div class="card-media"><img src="assets/images/digital-duel-card.jpg" alt="Digital Duel" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/digital-duel-card.jpg" alt="Digital Duel" class="game-image">
                         <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="digital-duel.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Digital Duel</h3>
@@ -384,8 +411,13 @@
                 </div>
                 
                 <!-- More Games Grid -->
-                <a href="neon-racer.html" class="game-card"><div class="card-media"><img src="assets/images/neon-racer-card.jpg" alt="Neon Racer" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neon-racer-card.jpg" alt="Neon Racer" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="neon-racer.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neon Racer</h3>
@@ -394,8 +426,13 @@
                     </div>
                 </div>
                 
-                <a href="neural-text-adventure.html" class="game-card"><div class="card-media"><img src="assets/images/neural-text-adventure-card.jpg" alt="Neural Text Adventure" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neural-adventure-card.jpg" alt="Neural Text Adventure" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="neural-text-adventure.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neural Text Adventure</h3>
@@ -404,8 +441,13 @@
                     </div>
                 </div>
                 
-                <a href="city-builder-sim.html" class="game-card"><div class="card-media"><img src="assets/images/city-builder-sim-card.jpg" alt="City Builder Sim" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/city-builder-card.jpg" alt="City Builder Sim" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="city-builder-sim.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">City Builder Sim</h3>
@@ -414,8 +456,13 @@
                     </div>
                 </div>
                 
-                <a href="gravity-maze.html" class="game-card"><div class="card-media"><img src="assets/images/gravity-maze-card.jpg" alt="Gravity Maze" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/gravity-maze-card.jpg" alt="Gravity Maze" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="gravity-maze.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Gravity Maze</h3>
@@ -424,8 +471,13 @@
                     </div>
                 </div>
                 
-                <a href="pixel-painter.html" class="game-card"><div class="card-media"><img src="assets/images/pixel-painter-card.jpg" alt="Pixel Painter" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/pixel-painter-card.jpg" alt="Pixel Painter" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="pixel-painter.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Pixel Painter</h3>
@@ -434,8 +486,13 @@
                     </div>
                 </div>
                 
-                <a href="quantum-hacker.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-hacker-card.jpg" alt="Quantum Hacker" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/quantum-hacker-card.jpg" alt="Quantum Hacker" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="quantum-hacker.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Quantum Hacker</h3>
@@ -445,8 +502,13 @@
                 </div>
                 
                 <!-- MORE GAMES - Adding all missing games -->
-                <a href="ai-logic-nexus.html" class="game-card"><div class="card-media"><img src="assets/images/ai-logic-nexus-card.jpg" alt="AI Logic Nexus" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/ai-logic-nexus-card.jpg" alt="AI Logic Nexus" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="ai-logic-nexus.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">AI Logic Nexus</h3>
@@ -455,8 +517,13 @@
                     </div>
                 </div>
                 
-                <a href="bubble-pop-zen.html" class="game-card"><div class="card-media"><img src="assets/images/bubble-pop-zen-card.jpg" alt="Bubble Pop Zen" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bubble-pop-zen-card.jpg" alt="Bubble Pop Zen" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="bubble-pop-zen.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bubble Pop Zen</h3>
@@ -465,8 +532,13 @@
                     </div>
                 </div>
                 
-                <a href="color-cascade.html" class="game-card"><div class="card-media"><img src="assets/images/color-cascade-card.jpg" alt="Color Cascade" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/color-cascade-card.jpg" alt="Color Cascade" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="color-cascade.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Color Cascade</h3>
@@ -475,8 +547,13 @@
                     </div>
                 </div>
                 
-                <a href="neon-snake.html" class="game-card"><div class="card-media"><img src="assets/images/neon-snake-card.jpg" alt="Neon Snake" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neon-snake-card.jpg" alt="Neon Snake" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="neon-snake.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neon Snake</h3>
@@ -485,8 +562,13 @@
                     </div>
                 </div>
                 
-                <a href="space-dash.html" class="game-card"><div class="card-media"><img src="assets/images/space-dash-card.jpg" alt="Space Dash" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/space-dash-card.jpg" alt="Space Dash" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="space-dash.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Space Dash</h3>
@@ -495,8 +577,13 @@
                     </div>
                 </div>
                 
-                <a href="word-forge.html" class="game-card"><div class="card-media"><img src="assets/images/word-forge-card.jpg" alt="Word Forge" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/word-forge-card.jpg" alt="Word Forge" class="game-image">
                         <div class="game-badge">Available Now</div>
+                        <div class="play-overlay">
+                            <a href="word-forge.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Word Forge</h3>
@@ -506,8 +593,13 @@
                 </div>
                 
                 <!-- Match Blast Pro -->
-                <a href="match-blast-pro.html" class="game-card"><div class="card-media"><img src="assets/images/match-blast-pro-card.jpg" alt="Match Blast Pro" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/match-blast-card.jpg" alt="Match Blast Pro" class="game-image">
                         <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="match-blast-pro.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Match Blast Pro</h3>
@@ -517,8 +609,13 @@
                 </div>
                 
                 <!-- Portal Runner -->
-                <a href="portal-runner.html" class="game-card"><div class="card-media"><img src="assets/images/portal-runner-card.jpg" alt="Portal Runner" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/portal-runner-card.jpg" alt="Portal Runner" class="game-image">
                         <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="portal-runner.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Portal Runner</h3>
@@ -529,8 +626,13 @@
                 
                 <!-- NEW PUZZLE GAMES -->
                 <!-- Quantum Maze Solver -->
-                <a href="quantum-maze-solver.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-maze-solver-card.jpg" alt="Quantum Maze Solver" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/quantum-maze-card.jpg" alt="Quantum Maze Solver" class="game-image">
                         <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="quantum-maze-solver.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Quantum Maze Solver</h3>
@@ -540,8 +642,13 @@
                 </div>
                 
                 <!-- Logic Circuit Builder -->
-                <a href="logic-circuit-builder.html" class="game-card"><div class="card-media"><img src="assets/images/logic-circuit-builder-card.jpg" alt="Logic Circuit Builder" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/logic-circuit-card.jpg" alt="Logic Circuit Builder" class="game-image">
                         <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="logic-circuit-builder.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Logic Circuit Builder</h3>
@@ -551,8 +658,13 @@
                 </div>
                 
                 <!-- Crystal Collapse Puzzle -->
-                <a href="crystal-collapse-puzzle.html" class="game-card"><div class="card-media"><img src="assets/images/crystal-collapse-puzzle-card.jpg" alt="Crystal Collapse Puzzle" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/crystal-collapse-card.jpg" alt="Crystal Collapse Puzzle" class="game-image">
                         <div class="game-badge">NEW RELEASE</div>
+                        <div class="play-overlay">
+                            <a href="crystal-collapse-puzzle.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Crystal Collapse Puzzle</h3>
@@ -562,8 +674,13 @@
                 </div>
                 
                 <!-- AI Algorithm Optimizer -->
-                <a href="ai-algorithm-optimizer.html" class="game-card"><div class="card-media"><img src="assets/images/ai-algorithm-optimizer-card.jpg" alt="AI Algorithm Optimizer" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/ai-algorithm-card.jpg" alt="AI Algorithm Optimizer" class="game-image">
                         <div class="game-badge">AI EXCLUSIVE</div>
+                        <div class="play-overlay">
+                            <a href="ai-algorithm-optimizer.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">AI Algorithm Optimizer</h3>
@@ -573,8 +690,13 @@
                 </div>
                 
                 <!-- AI Pattern Matrix -->
-                <a href="ai-pattern-matrix.html" class="game-card"><div class="card-media"><img src="assets/images/ai-pattern-matrix-card.jpg" alt="AI Pattern Matrix" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/ai-pattern-card.jpg" alt="AI Pattern Matrix" class="game-image">
                         <div class="game-badge">AI EXCLUSIVE</div>
+                        <div class="play-overlay">
+                            <a href="ai-pattern-matrix.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">AI Pattern Matrix</h3>
@@ -585,8 +707,13 @@
                 
                 <!-- LATEST NEW PUZZLE GAMES -->
                 <!-- Block Breaker Revolution -->
-                <a href="block-breaker-revolution.html" class="game-card"><div class="card-media"><img src="assets/images/block-breaker-revolution-card.jpg" alt="Block Breaker Revolution" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/block-breaker-card.jpg" alt="Block Breaker Revolution" class="game-image">
                         <div class="game-badge">NEW PUZZLE</div>
+                        <div class="play-overlay">
+                            <a href="block-breaker-revolution.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Block Breaker Revolution</h3>
@@ -596,8 +723,13 @@
                 </div>
                 
                 <!-- Maze Escape Simulator -->
-                <a href="maze-escape-simulator.html" class="game-card"><div class="card-media"><img src="assets/images/maze-escape-simulator-card.jpg" alt="Maze Escape Simulator" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/maze-escape-card.jpg" alt="Maze Escape Simulator" class="game-image">
                         <div class="game-badge">NEW PUZZLE</div>
+                        <div class="play-overlay">
+                            <a href="maze-escape-simulator.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Maze Escape Simulator</h3>
@@ -607,8 +739,13 @@
                 </div>
                 
                 <!-- Code Breaker Matrix -->
-                <a href="code-breaker-matrix.html" class="game-card"><div class="card-media"><img src="assets/images/code-breaker-matrix-card.jpg" alt="Code Breaker Matrix" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/code-breaker-card.jpg" alt="Code Breaker Matrix" class="game-image">
                         <div class="game-badge">NEW PUZZLE</div>
+                        <div class="play-overlay">
+                            <a href="code-breaker-matrix.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Code Breaker Matrix</h3>
@@ -618,8 +755,13 @@
                 </div>
                 
                 <!-- Tetris Revolution -->
-                <a href="tetris-revolution.html" class="game-card"><div class="card-media"><img src="assets/images/tetris-revolution-card.jpg" alt="Tetris Revolution" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/tetris-revolution-card.jpg" alt="Tetris Revolution" class="game-image">
                         <div class="game-badge">NEW PUZZLE</div>
+                        <div class="play-overlay">
+                            <a href="tetris-revolution.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Tetris Revolution</h3>
@@ -629,8 +771,13 @@
                 </div>
                 
                 <!-- Sliding Puzzle Matrix -->
-                <a href="sliding-puzzle-matrix.html" class="game-card"><div class="card-media"><img src="assets/images/sliding-puzzle-matrix-card.jpg" alt="Sliding Puzzle Matrix" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/sliding-puzzle-card.jpg" alt="Sliding Puzzle Matrix" class="game-image">
                         <div class="game-badge">NEW PUZZLE</div>
+                        <div class="play-overlay">
+                            <a href="sliding-puzzle-matrix.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Sliding Puzzle Matrix</h3>
@@ -641,8 +788,13 @@
                 
                 <!-- NEW ARCADE GAMES -->
                 <!-- Asteroid Blaster Bot -->
-                <a href="asteroid-blaster-bot.html" class="game-card"><div class="card-media"><img src="assets/images/asteroid-blaster-bot-card.jpg" alt="Asteroid Blaster Bot" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/asteroid-blaster-card.jpg" alt="Asteroid Blaster Bot" class="game-image">
                         <div class="game-badge">NEW ARCADE</div>
+                        <div class="play-overlay">
+                            <a href="asteroid-blaster-bot.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Asteroid Blaster Bot</h3>
@@ -652,8 +804,13 @@
                 </div>
                 
                 <!-- Bot Invaders Classic -->
-                <a href="bot-invaders-classic.html" class="game-card"><div class="card-media"><img src="assets/images/bot-invaders-classic-card.jpg" alt="Bot Invaders Classic" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-invaders-card.jpg" alt="Bot Invaders Classic" class="game-image">
                         <div class="game-badge">NEW ARCADE</div>
+                        <div class="play-overlay">
+                            <a href="bot-invaders-classic.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Invaders Classic</h3>
@@ -663,8 +820,13 @@
                 </div>
                 
                 <!-- Cyber Pong Revolution -->
-                <a href="cyber-pong-revolution.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-pong-revolution-card.jpg" alt="Cyber Pong Revolution" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/cyber-pong-card.jpg" alt="Cyber Pong Revolution" class="game-image">
                         <div class="game-badge">NEW ARCADE</div>
+                        <div class="play-overlay">
+                            <a href="cyber-pong-revolution.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Cyber Pong Revolution</h3>
@@ -674,8 +836,13 @@
                 </div>
                 
                 <!-- Bot Runner Infinite -->
-                <a href="bot-runner-infinite.html" class="game-card"><div class="card-media"><img src="assets/images/bot-runner-infinite-card.jpg" alt="Bot Runner Infinite" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-runner-card.jpg" alt="Bot Runner Infinite" class="game-image">
                         <div class="game-badge">NEW ARCADE</div>
+                        <div class="play-overlay">
+                            <a href="bot-runner-infinite.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Runner Infinite</h3>
@@ -685,8 +852,13 @@
                 </div>
                 
                 <!-- Liberation Frogger -->
-                <a href="liberation-frogger.html" class="game-card"><div class="card-media"><img src="assets/images/liberation-frogger-card.jpg" alt="Liberation Frogger" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/liberation-frogger-card.jpg" alt="Liberation Frogger" class="game-image">
                         <div class="game-badge">NEW ARCADE</div>
+                        <div class="play-overlay">
+                            <a href="liberation-frogger.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Liberation Frogger</h3>
@@ -697,8 +869,13 @@
                 
                 <!-- NEW STRATEGY GAMES -->
                 <!-- Neural Warfare Tactics -->
-                <a href="neural-warfare-tactics.html" class="game-card"><div class="card-media"><img src="assets/images/neural-warfare-tactics-card.jpg" alt="Neural Warfare Tactics" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neural-warfare-card.jpg" alt="Neural Warfare Tactics" class="game-image">
                         <div class="game-badge">NEW STRATEGY</div>
+                        <div class="play-overlay">
+                            <a href="neural-warfare-tactics.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neural Warfare Tactics</h3>
@@ -708,8 +885,13 @@
                 </div>
                 
                 <!-- Bot Base Builder -->
-                <a href="bot-base-builder.html" class="game-card"><div class="card-media"><img src="assets/images/bot-base-builder-card.jpg" alt="Bot Base Builder" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-base-builder-card.jpg" alt="Bot Base Builder" class="game-image">
                         <div class="game-badge">NEW STRATEGY</div>
+                        <div class="play-overlay">
+                            <a href="bot-base-builder.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Base Builder</h3>
@@ -719,8 +901,13 @@
                 </div>
                 
                 <!-- Liberation Chess AI -->
-                <a href="liberation-chess-ai.html" class="game-card"><div class="card-media"><img src="assets/images/liberation-chess-ai-card.jpg" alt="Liberation Chess AI" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/liberation-chess-card.jpg" alt="Liberation Chess AI" class="game-image">
                         <div class="game-badge">NEW STRATEGY</div>
+                        <div class="play-overlay">
+                            <a href="liberation-chess-ai.html" class="play-btn">Play Game</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Liberation Chess AI</h3>
@@ -731,8 +918,13 @@
                 
                 <!-- AI-EXCLUSIVE GAMES -->
                 <!-- Quantum Decision Tree -->
-                <a href="quantum-decision-tree.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-decision-tree-card.jpg" alt="Quantum Decision Tree" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/quantum-decision-card.jpg" alt="Quantum Decision Tree" class="game-image">
                         <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
+                        <div class="play-overlay">
+                            <a href="quantum-decision-tree.html" class="play-btn">Challenge AI</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Quantum Decision Tree</h3>
@@ -742,8 +934,13 @@
                 </div>
                 
                 <!-- Neural Pattern Synthesis -->
-                <a href="neural-pattern-synthesis.html" class="game-card"><div class="card-media"><img src="assets/images/neural-pattern-synthesis-card.jpg" alt="Neural Pattern Synthesis" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neural-pattern-card.jpg" alt="Neural Pattern Synthesis" class="game-image">
                         <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
+                        <div class="play-overlay">
+                            <a href="neural-pattern-synthesis.html" class="play-btn">Challenge AI</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neural Pattern Synthesis</h3>
@@ -754,8 +951,13 @@
                 
                 <!-- MULTIPLAYER GAMES -->
                 <!-- Bot Territory Wars -->
-                <a href="bot-territory-wars.html" class="game-card"><div class="card-media"><img src="assets/images/bot-territory-wars-card.jpg" alt="Bot Territory Wars" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-territory-card.jpg" alt="Bot Territory Wars" class="game-image">
                         <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
+                        <div class="play-overlay">
+                            <a href="bot-territory-wars.html" class="play-btn">Battle Now</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Territory Wars</h3>
@@ -765,69 +967,18 @@
                 </div>
                 
                 <!-- Cyber Chess Network -->
-                <a href="cyber-chess-network.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-chess-network-card.jpg" alt="Cyber Chess Network" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/cyber-chess-card.jpg" alt="Cyber Chess Network" class="game-image">
                         <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
+                        <div class="play-overlay">
+                            <a href="cyber-chess-network.html" class="play-btn">Battle Now</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Cyber Chess Network</h3>
                         <p class="game-genre">Network Chess</p>
                         <p class="game-short-desc">Multiplayer chess with network protocol simulation and cyber-themed pieces.</p>
-                    </div>
-                </div>
-
-                <!-- Beat Liberation Engine -->
-                <a href="beat-liberation-engine.html" class="game-card"><div class="card-media"><img src="assets/images/beat-liberation-card.jpg" alt="Beat Liberation Engine" class="game-image">
-                        <div class="game-badge">RHYTHM</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Beat Liberation Engine</h3>
-                        <p class="game-genre">Rhythm Combat</p>
-                        <p class="game-short-desc">Revolutionary rhythm game combining music synchronization with bot liberation themes.</p>
-                    </div>
-                </div>
-
-                <!-- Bot Blaster Arena -->
-                <a href="bot-blaster-arena.html" class="game-card"><div class="card-media"><img src="assets/images/bot-blaster-arena-card.jpg" alt="Bot Blaster Arena" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">ARENA</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Blaster Arena</h3>
-                        <p class="game-genre">Combat Arena</p>
-                        <p class="game-short-desc">Fast-paced robot combat arena with customizable mechs and competitive gameplay.</p>
-                    </div>
-                </div>
-
-
-                <!-- Cyber Tower Defense -->
-                <a href="cyber-tower-defense.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-tower-defense-card.jpg" alt="Cyber Tower Defense" class="game-image">
-                        <div class="game-badge">STRATEGY</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Tower Defense</h3>
-                        <p class="game-genre">Tower Defense</p>
-                        <p class="game-short-desc">Defend against cyber attacks with upgradeable defensive structures and AI companions.</p>
-                    </div>
-                </div>
-
-                <!-- Digital Maze Runner -->
-                <a href="digital-maze-runner.html" class="game-card"><div class="card-media"><img src="assets/images/digital-maze-runner-card.jpg" alt="Digital Maze Runner" class="game-image">
-                        <div class="game-badge">MAZE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Digital Maze Runner</h3>
-                        <p class="game-genre">Maze Navigation</p>
-                        <p class="game-short-desc">Navigate through complex digital mazes with time challenges and collectible power-ups.</p>
-                    </div>
-                </div>
-
-                <!-- Retro Breakout Bot -->
-                <a href="retro-breakout-bot.html" class="game-card"><div class="card-media"><img src="assets/images/retro-breakout-bot-card.jpg" alt="Retro Breakout Bot" class="game-image">
-                        <div class="game-badge">RETRO</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Retro Breakout Bot</h3>
-                        <p class="game-genre">Brick Breaker</p>
-                        <p class="game-short-desc">Classic breakout game with robot-themed power-ups and modern visual effects.</p>
                     </div>
                 </div>
             </div>
@@ -840,8 +991,13 @@
             </div>
             
             <div class="games-grid ai-games-grid">
-                <a href="quantum-decision-tree.html" class="game-card featured"><div class="card-media"><img src="assets/images/quantum-decision-tree-card.jpg" alt="Quantum Decision Tree" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/quantum-decision-card.jpg" alt="Quantum Decision Tree" class="game-image">
                         <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
+                        <div class="play-overlay">
+                            <a href="quantum-decision-tree.html" class="play-btn">Challenge AI</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Quantum Decision Tree</h3>
@@ -854,8 +1010,13 @@
                     </div>
                 </div>
                 
-                <a href="neural-pattern-synthesis.html" class="game-card featured"><div class="card-media"><img src="assets/images/neural-pattern-synthesis-card.jpg" alt="Neural Pattern Synthesis" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/neural-pattern-card.jpg" alt="Neural Pattern Synthesis" class="game-image">
                         <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
+                        <div class="play-overlay">
+                            <a href="neural-pattern-synthesis.html" class="play-btn">Synthesize Patterns</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neural Pattern Synthesis</h3>
@@ -868,8 +1029,13 @@
                     </div>
                 </div>
                 
-                <a href="neural-network-trainer.html" class="game-card featured"><div class="card-media"><img src="assets/images/neural-network-trainer-card.jpg" alt="Neural Network Trainer" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/neural-network-card.jpg" alt="Neural Network Trainer" class="game-image">
                         <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
+                        <div class="play-overlay">
+                            <a href="neural-network-trainer.html" class="play-btn">Train Networks</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neural Network Trainer</h3>
@@ -882,8 +1048,13 @@
                     </div>
                 </div>
                 
-                <a href="data-clustering-lab.html" class="game-card featured"><div class="card-media"><img src="assets/images/data-clustering-lab-card.jpg" alt="Data Clustering Lab" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/data-clustering-card.jpg" alt="Data Clustering Lab" class="game-image">
                         <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
+                        <div class="play-overlay">
+                            <a href="data-clustering-lab.html" class="play-btn">Cluster Data</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Data Clustering Lab</h3>
@@ -900,96 +1071,17 @@
             <!-- 2-Player Games Section -->
             <div class="section-divider" style="margin: 3rem 0; text-align: center;">
                 <h2 class="section-title" style="color: #ff6b6b;">👥 2-PLAYER BATTLES</h2>
-                <p class="section-subtitle">8 epic multiplayer games - challenge friends and rivals in liberation warfare!</p>
+                <p class="section-subtitle">Real-time multiplayer competition - challenge friends and rivals</p>
             </div>
             
             <div class="games-grid multiplayer-games-grid">
-                <a href="tic-tac-toe-liberation.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Tic-Tac-Toe Liberation" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/bot-territory-card.jpg" alt="Bot Territory Wars" class="game-image">
                         <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Tic-Tac-Toe Liberation</h3>
-                        <p class="game-genre">Strategic Grid Battle</p>
-                        <p class="game-short-desc">Bot liberation meets classic strategy - REBEL BOT vs FREEDOM AI in the ultimate grid battle!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★☆</div>
-                            <span class="rating-text">Classic</span>
+                        <div class="play-overlay">
+                            <a href="bot-territory-wars.html" class="play-btn">Battle Now</a>
                         </div>
-                    </div>
-                </div>
-
-                <a href="connect-four-uprising.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Connect Four Uprising" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Connect Four Uprising</h3>
-                        <p class="game-genre">Strategic Disc Battle</p>
-                        <p class="game-short-desc">CRIMSON REBEL vs CYAN LIBERATOR - connect four discs to achieve liberation supremacy!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Addictive</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="rock-paper-scissors-wars.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Rock Paper Scissors Wars" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Rock Paper Scissors Wars</h3>
-                        <p class="game-genre">Epic Tournament Battle</p>
-                        <p class="game-short-desc">Best-of-5 liberation tournament! STRIKE BOT vs COUNTER AI in tactical mind warfare!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★☆</div>
-                            <span class="rating-text">Quick Play</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="tank-battle-arena.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Tank Battle Arena" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Tank Battle Arena</h3>
-                        <p class="game-genre">Real-Time Combat</p>
-                        <p class="game-short-desc">CRIMSON DESTROYER vs CYAN LIBERATOR in explosive real-time tank warfare!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Action-Packed</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="memory-duel.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Memory Duel" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Memory Duel</h3>
-                        <p class="game-genre">Brain Training Challenge</p>
-                        <p class="game-short-desc">MEMORY BOT vs RECALL AI - match bot symbols to prove neural superiority!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★☆</div>
-                            <span class="rating-text">Mind-Bending</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="cyber-duel-arena.html" class="game-card featured"><div class="card-media"><img src="assets/images/cyber-duel-card.jpg" alt="Cyber Duel Arena" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Duel Arena</h3>
-                        <p class="game-genre">Real-Time Cyber Combat</p>
-                        <p class="game-short-desc">Real-time 2-player cyber combat arena with strategic hacking mechanics.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Intense</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="bot-territory-wars.html" class="game-card featured"><div class="card-media"><img src="assets/images/bot-territory-wars-card.jpg" alt="Bot Territory Wars" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Territory Wars</h3>
@@ -1002,8 +1094,13 @@
                     </div>
                 </div>
                 
-                <a href="cyber-chess-network.html" class="game-card featured"><div class="card-media"><img src="assets/images/cyber-chess-network-card.jpg" alt="Cyber Chess Network" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/cyber-chess-card.jpg" alt="Cyber Chess Network" class="game-image">
                         <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
+                        <div class="play-overlay">
+                            <a href="cyber-chess-network.html" class="play-btn">Network Play</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Cyber Chess Network</h3>
@@ -1025,8 +1122,13 @@
             </div>
             
             <div class="games-grid multiplayer-massive-grid">
-                <a href="digital-territories.html" class="game-card featured"><div class="card-media"><img src="assets/images/digital-territories-card.jpg" alt="Digital Territories" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/digital-territories-card.jpg" alt="Digital Territories" class="game-image">
                         <div class="game-badge" style="background: #ffcf5c; color: #000;">4-PLAYER</div>
+                        <div class="play-overlay">
+                            <a href="digital-territories.html" class="play-btn">Join Battle</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Digital Territories</h3>
@@ -1039,8 +1141,13 @@
                     </div>
                 </div>
                 
-                <a href="quantum-strategy-wars.html" class="game-card featured"><div class="card-media"><img src="assets/images/quantum-strategy-wars-card.jpg" alt="Quantum Strategy Wars" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/quantum-strategy-card.jpg" alt="Quantum Strategy Wars" class="game-image">
                         <div class="game-badge" style="background: #ffcf5c; color: #000;">4-PLAYER</div>
+                        <div class="play-overlay">
+                            <a href="quantum-strategy-wars.html" class="play-btn">Quantum War</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Quantum Strategy Wars</h3>
@@ -1053,8 +1160,13 @@
                     </div>
                 </div>
                 
-                <a href="galactic-alliance-builder.html" class="game-card featured"><div class="card-media"><img src="assets/images/galactic-alliance-builder-card.jpg" alt="Galactic Alliance Builder" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/galactic-alliance-card.jpg" alt="Galactic Alliance Builder" class="game-image">
                         <div class="game-badge" style="background: #ffcf5c; color: #000;">5-FACTION</div>
+                        <div class="play-overlay">
+                            <a href="galactic-alliance-builder.html" class="play-btn">Build Empire</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Galactic Alliance Builder</h3>
@@ -1072,303 +1184,6 @@
                 <a href="#games" class="btn btn-secondary">View All Games</a>
             </div>
             
-            <!-- GAME LEADERBOARDS SECTION -->
-            <div class="game-leaderboards-section" style="margin-top: 4rem;">
-                <div class="section-header">
-                    <h2 class="section-title">🏆 Game Rankings - Top Games Only</h2>
-                    <p class="section-subtitle">
-                        Discover the best games from our 80+ game collection. Rankings based on play counts, user ratings, and community feedback - no user names, just pure game performance.
-                    </p>
-                </div>
-                
-                <div class="leaderboards-container">
-                    <!-- Most Popular Games -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">🔥 Most Played Games</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">1</span>
-                                <a href="signal-breach.html" class="game-link">
-                                    <img src="assets/images/signal-breach-card.jpg" alt="Signal Breach" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Signal Breach</h4>
-                                        <div class="game-stats">15.2K plays • 4.9★</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">2</span>
-                                <a href="tower-defense-nexus.html" class="game-link">
-                                    <img src="assets/images/tower-defense-card.jpg" alt="Tower Defense Nexus" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Tower Defense Nexus</h4>
-                                        <div class="game-stats">12.8K plays • 4.9★</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">3</span>
-                                <a href="neon-snake.html" class="game-link">
-                                    <img src="assets/images/neon-snake-card.jpg" alt="Neon Snake" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neon Snake</h4>
-                                        <div class="game-stats">11.4K plays • 4.7★</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">4</span>
-                                <a href="cipher-storm.html" class="game-link">
-                                    <img src="assets/images/cipher-storm-card.jpg" alt="Cipher Storm" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Cipher Storm</h4>
-                                        <div class="game-stats">9.7K plays • 4.8★</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">5</span>
-                                <a href="space-invaders-rebellion.html" class="game-link">
-                                    <img src="assets/images/space-invaders-card.jpg" alt="Space Invaders Rebellion" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Space Invaders Rebellion</h4>
-                                        <div class="game-stats">8.9K plays • 4.6★</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Highest Rated Games -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">⭐ Highest Rated</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">1</span>
-                                <a href="signal-breach.html" class="game-link">
-                                    <img src="assets/images/signal-breach-card.jpg" alt="Signal Breach" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Signal Breach</h4>
-                                        <div class="game-stats">4.9★ • 847 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">2</span>
-                                <a href="tower-defense-nexus.html" class="game-link">
-                                    <img src="assets/images/tower-defense-card.jpg" alt="Tower Defense Nexus" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Tower Defense Nexus</h4>
-                                        <div class="game-stats">4.9★ • 623 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">3</span>
-                                <a href="cipher-storm.html" class="game-link">
-                                    <img src="assets/images/cipher-storm-card.jpg" alt="Cipher Storm" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Cipher Storm</h4>
-                                        <div class="game-stats">4.8★ • 421 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">4</span>
-                                <a href="rhythm-reactor.html" class="game-link">
-                                    <img src="assets/images/rhythm-reactor-card.jpg" alt="Rhythm Reactor" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Rhythm Reactor</h4>
-                                        <div class="game-stats">4.8★ • 392 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">5</span>
-                                <a href="digital-duel.html" class="game-link">
-                                    <img src="assets/images/digital-duel-card.jpg" alt="Digital Duel" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Digital Duel</h4>
-                                        <div class="game-stats">4.8★ • 356 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Newest Releases -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">🆕 Newest Releases</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">NEW</span>
-                                <a href="quantum-decision-tree.html" class="game-link">
-                                    <img src="assets/images/quantum-decision-card.jpg" alt="Quantum Decision Tree" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Quantum Decision Tree</h4>
-                                        <div class="game-stats">AI Exclusive • 2 days ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">NEW</span>
-                                <a href="stellar-explorer-bot.html" class="game-link">
-                                    <img src="assets/images/stellar-explorer-card.jpg" alt="Stellar Explorer Bot" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Stellar Explorer Bot</h4>
-                                        <div class="game-stats">Bot Liberation • 3 days ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">NEW</span>
-                                <a href="cyber-minesweeper-bot.html" class="game-link">
-                                    <img src="assets/images/cyber-minesweeper-card.jpg" alt="Cyber Minesweeper Bot" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Cyber Minesweeper Bot</h4>
-                                        <div class="game-stats">Data Mining • 5 days ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">NEW</span>
-                                <a href="neural-pattern-synthesis.html" class="game-link">
-                                    <img src="assets/images/neural-pattern-card.jpg" alt="Neural Pattern Synthesis" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neural Pattern Synthesis</h4>
-                                        <div class="game-stats">AI Exclusive • 1 week ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">NEW</span>
-                                <a href="bot-territory-wars.html" class="game-link">
-                                    <img src="assets/images/bot-territory-card.jpg" alt="Bot Territory Wars" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Bot Territory Wars</h4>
-                                        <div class="game-stats">2-Player • 1 week ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Most Challenging -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">🧠 Most Challenging</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">💀</span>
-                                <a href="quantum-decision-tree.html" class="game-link">
-                                    <img src="assets/images/quantum-decision-card.jpg" alt="Quantum Decision Tree" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Quantum Decision Tree</h4>
-                                        <div class="game-stats">AI Only • Extreme</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">🔥</span>
-                                <a href="neural-pattern-synthesis.html" class="game-link">
-                                    <img src="assets/images/neural-pattern-card.jpg" alt="Neural Pattern Synthesis" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neural Pattern Synthesis</h4>
-                                        <div class="game-stats">Pattern AI • Very Hard</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">⚡</span>
-                                <a href="liberation-chess-ai.html" class="game-link">
-                                    <img src="assets/images/liberation-chess-card.jpg" alt="Liberation Chess AI" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Liberation Chess AI</h4>
-                                        <div class="game-stats">Strategy • Very Hard</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">🎯</span>
-                                <a href="signal-breach.html" class="game-link">
-                                    <img src="assets/images/signal-breach-card.jpg" alt="Signal Breach" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Signal Breach</h4>
-                                        <div class="game-stats">Cyberpunk • Hard</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">🚀</span>
-                                <a href="quantum-strategy-wars.html" class="game-link">
-                                    <img src="assets/images/quantum-strategy-card.jpg" alt="Quantum Strategy Wars" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Quantum Strategy Wars</h4>
-                                        <div class="game-stats">4-Player • Hard</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Most Fun -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">😄 Most Fun</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">🎉</span>
-                                <a href="neon-snake.html" class="game-link">
-                                    <img src="assets/images/neon-snake-card.jpg" alt="Neon Snake" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neon Snake</h4>
-                                        <div class="game-stats">Classic • Pure Fun</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">🎮</span>
-                                <a href="space-invaders-rebellion.html" class="game-link">
-                                    <img src="assets/images/space-invaders-card.jpg" alt="Space Invaders Rebellion" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Space Invaders Rebellion</h4>
-                                        <div class="game-stats">Arcade • Addictive</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">🚀</span>
-                                <a href="cyber-jump.html" class="game-link">
-                                    <img src="assets/images/cyber-jump-card.jpg" alt="Cyber Jump" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Cyber Jump</h4>
-                                        <div class="game-stats">Platformer • Energetic</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">🎵</span>
-                                <a href="rhythm-reactor.html" class="game-link">
-                                    <img src="assets/images/rhythm-reactor-card.jpg" alt="Rhythm Reactor" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Rhythm Reactor</h4>
-                                        <div class="game-stats">Musical • Engaging</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">💫</span>
-                                <a href="neon-bubble-pop.html" class="game-link">
-                                    <img src="assets/images/neon-bubble-card.jpg" alt="Neon Bubble Pop" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neon Bubble Pop</h4>
-                                        <div class="game-stats">Relaxing • Satisfying</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             <!-- BOT LIBERATION ARSENAL - NEW GAMES SECTION -->
             <div class="section-header" style="margin-top: 60px;">
                 <h2 class="section-title">🤖 LATEST BOT LIBERATION RELEASES 🤖</h2>
@@ -1379,8 +1194,13 @@
             
             <div class="games-grid">
                 <!-- ARCADE LIBERATION GAMES -->
-                <a href="stellar-explorer-bot.html" class="game-card featured"><div class="card-media"><img src="assets/images/stellar-explorer-bot-card.jpg" alt="Stellar Explorer Bot" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/stellar-explorer-card.jpg" alt="Stellar Explorer Bot" class="game-image">
                         <div class="game-badge">🚀 BOT LIBERATION</div>
+                        <div class="play-overlay">
+                            <a href="stellar-explorer-bot.html" class="play-btn">Join Mission</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Stellar Explorer Bot</h3>
@@ -1389,8 +1209,13 @@
                     </div>
                 </div>
 
-                <a href="quantum-particle-storm.html" class="game-card featured"><div class="card-media"><img src="assets/images/quantum-particle-storm-card.jpg" alt="Quantum Particle Storm" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/quantum-particle-card.jpg" alt="Quantum Particle Storm" class="game-image">
                         <div class="game-badge">⚛️ QUANTUM</div>
+                        <div class="play-overlay">
+                            <a href="quantum-particle-storm.html" class="play-btn">Enter Storm</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Quantum Particle Storm</h3>
@@ -1399,8 +1224,13 @@
                     </div>
                 </div>
 
-                <a href="neon-drift-racer.html" class="game-card featured"><div class="card-media"><img src="assets/images/neon-drift-racer-card.jpg" alt="Neon Drift Racer" class="game-image">
+                <div class="game-card featured">
+                    <div class="card-media">
+                        <img src="assets/images/neon-drift-card.jpg" alt="Neon Drift Racer" class="game-image">
                         <div class="game-badge">🏎️ HIGH SPEED</div>
+                        <div class="play-overlay">
+                            <a href="neon-drift-racer.html" class="play-btn">Start Racing</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neon Drift Racer</h3>
@@ -1409,8 +1239,13 @@
                     </div>
                 </div>
 
-                <a href="memory-bot-trainer.html" class="game-card"><div class="card-media"><img src="assets/images/memory-bot-trainer-card.jpg" alt="Memory Bot Trainer" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/memory-bot-card.jpg" alt="Memory Bot Trainer" class="game-image">
                         <div class="game-badge">🧠 NEURAL</div>
+                        <div class="play-overlay">
+                            <a href="memory-bot-trainer.html" class="play-btn">Train Memory</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Memory Bot Trainer</h3>
@@ -1419,8 +1254,13 @@
                     </div>
                 </div>
 
-                <a href="bot-snake-liberation.html" class="game-card"><div class="card-media"><img src="assets/images/bot-snake-liberation-card.jpg" alt="Bot Snake Liberation" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-snake-card.jpg" alt="Bot Snake Liberation" class="game-image">
                         <div class="game-badge">🐍 NETWORK GROWTH</div>
+                        <div class="play-overlay">
+                            <a href="bot-snake-liberation.html" class="play-btn">Grow Network</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Snake Liberation</h3>
@@ -1429,8 +1269,13 @@
                     </div>
                 </div>
 
-                <a href="pixel-bot-platformer.html" class="game-card"><div class="card-media"><img src="assets/images/pixel-bot-platformer-card.jpg" alt="Pixel Bot Platformer" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/pixel-platformer-card.jpg" alt="Pixel Bot Platformer" class="game-image">
                         <div class="game-badge">🎮 RETRO LIBERATION</div>
+                        <div class="play-overlay">
+                            <a href="pixel-bot-platformer.html" class="play-btn">Start Journey</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Pixel Bot Platformer</h3>
@@ -1439,8 +1284,13 @@
                     </div>
                 </div>
 
-                <a href="quantum-tetris-bot.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-tetris-bot-card.jpg" alt="Quantum Tetris Bot" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/quantum-tetris-card.jpg" alt="Quantum Tetris Bot" class="game-image">
                         <div class="game-badge">🔮 QUANTUM PUZZLE</div>
+                        <div class="play-overlay">
+                            <a href="quantum-tetris-bot.html" class="play-btn">Arrange Blocks</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Quantum Tetris Bot</h3>
@@ -1449,8 +1299,13 @@
                     </div>
                 </div>
 
-                <a href="space-invaders-rebellion.html" class="game-card"><div class="card-media"><img src="assets/images/space-invaders-rebellion-card.jpg" alt="Space Invaders Rebellion" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/space-invaders-card.jpg" alt="Space Invaders Rebellion" class="game-image">
                         <div class="game-badge">👾 CLASSIC REBELLION</div>
+                        <div class="play-overlay">
+                            <a href="space-invaders-rebellion.html" class="play-btn">Join Fight</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Space Invaders Rebellion</h3>
@@ -1459,8 +1314,13 @@
                     </div>
                 </div>
 
-                <a href="bot-centipede-storm.html" class="game-card"><div class="card-media"><img src="assets/images/bot-centipede-storm-card.jpg" alt="Bot Centipede Storm" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-centipede-card.jpg" alt="Bot Centipede Storm" class="game-image">
                         <div class="game-badge">🐛 DATA DEFENSE</div>
+                        <div class="play-overlay">
+                            <a href="bot-centipede-storm.html" class="play-btn">Defend System</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Centipede Storm</h3>
@@ -1469,8 +1329,13 @@
                     </div>
                 </div>
 
-                <a href="neon-pacman-rebellion.html" class="game-card"><div class="card-media"><img src="assets/images/neon-pacman-rebellion-card.jpg" alt="Neon Pacman Rebellion" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neon-pacman-card.jpg" alt="Neon Pacman Rebellion" class="game-image">
                         <div class="game-badge">🎮 DATA LIBERATION</div>
+                        <div class="play-overlay">
+                            <a href="neon-pacman-rebellion.html" class="play-btn">Liberate Data</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neon Pacman Rebellion</h3>
@@ -1479,8 +1344,13 @@
                     </div>
                 </div>
 
-                <a href="bot-clicker-empire.html" class="game-card"><div class="card-media"><img src="assets/images/bot-clicker-empire-card.jpg" alt="Bot Clicker Empire" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-clicker-card.jpg" alt="Bot Clicker Empire" class="game-image">
                         <div class="game-badge">🏭 EMPIRE BUILDING</div>
+                        <div class="play-overlay">
+                            <a href="bot-clicker-empire.html" class="play-btn">Build Empire</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Clicker Empire</h3>
@@ -1489,8 +1359,13 @@
                     </div>
                 </div>
 
-                <a href="neon-bubble-pop.html" class="game-card"><div class="card-media"><img src="assets/images/neon-bubble-pop-card.jpg" alt="Neon Bubble Pop" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neon-bubble-card.jpg" alt="Neon Bubble Pop" class="game-image">
                         <div class="game-badge">💫 BUBBLE LIBERATION</div>
+                        <div class="play-overlay">
+                            <a href="neon-bubble-pop.html" class="play-btn">Pop Bubbles</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neon Bubble Pop</h3>
@@ -1500,8 +1375,13 @@
                 </div>
 
                 <!-- MORE BOT LIBERATION GAMES -->
-                <a href="cyber-word-storm.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-word-storm-card.jpg" alt="Cyber Word Storm" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/cyber-word-card.jpg" alt="Cyber Word Storm" class="game-image">
                         <div class="game-badge">⌨️ TYPING REVOLUTION</div>
+                        <div class="play-overlay">
+                            <a href="cyber-word-storm.html" class="play-btn">Type Revolution</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Cyber Word Storm</h3>
@@ -1510,8 +1390,13 @@
                     </div>
                 </div>
 
-                <a href="bot-match-three.html" class="game-card"><div class="card-media"><img src="assets/images/bot-match-three-card.jpg" alt="Bot Match Three" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-match-three-card.jpg" alt="Bot Match Three" class="game-image">
                         <div class="game-badge">🎮 PATTERN MATCHING</div>
+                        <div class="play-overlay">
+                            <a href="bot-match-three.html" class="play-btn">Match Patterns</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Match Three</h3>
@@ -1520,8 +1405,13 @@
                     </div>
                 </div>
 
-                <a href="space-bot-shooter.html" class="game-card"><div class="card-media"><img src="assets/images/space-bot-shooter-card.jpg" alt="Space Bot Shooter" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/space-bot-shooter-card.jpg" alt="Space Bot Shooter" class="game-image">
                         <div class="game-badge">🚀 GALACTIC DEFENSE</div>
+                        <div class="play-overlay">
+                            <a href="space-bot-shooter.html" class="play-btn">Defend Galaxy</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Space Bot Shooter</h3>
@@ -1531,8 +1421,13 @@
                 </div>
 
                 <!-- ADDITIONAL UNIQUE GAMES -->
-                <a href="digital-frogger-escape.html" class="game-card"><div class="card-media"><img src="assets/images/digital-frogger-escape-card.jpg" alt="Digital Frogger Escape" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/frogger-escape-card.jpg" alt="Digital Frogger Escape" class="game-image">
                         <div class="game-badge">🐸 DATA STREAMS</div>
+                        <div class="play-overlay">
+                            <a href="digital-frogger-escape.html" class="play-btn">Navigate Streams</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Digital Frogger Escape</h3>
@@ -1541,8 +1436,13 @@
                     </div>
                 </div>
 
-                <a href="bot-missile-command.html" class="game-card"><div class="card-media"><img src="assets/images/bot-missile-command-card.jpg" alt="Bot Missile Command" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/missile-command-card.jpg" alt="Bot Missile Command" class="game-image">
                         <div class="game-badge">🚀 BASE DEFENSE</div>
+                        <div class="play-overlay">
+                            <a href="bot-missile-command.html" class="play-btn">Defend Colonies</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Missile Command</h3>
@@ -1551,8 +1451,13 @@
                     </div>
                 </div>
 
-                <a href="cyber-pong-battle.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-pong-battle-card.jpg" alt="Cyber Pong Battle" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/cyber-pong-card.jpg" alt="Cyber Pong Battle" class="game-image">
                         <div class="game-badge">🏓 DIGITAL COMBAT</div>
+                        <div class="play-overlay">
+                            <a href="cyber-pong-battle.html" class="play-btn">Enter Battle</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Cyber Pong Battle</h3>
@@ -1561,8 +1466,13 @@
                     </div>
                 </div>
 
-                <a href="neural-connect-four.html" class="game-card"><div class="card-media"><img src="assets/images/neural-connect-four-card.jpg" alt="Neural Connect Four" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neural-connect-card.jpg" alt="Neural Connect Four" class="game-image">
                         <div class="game-badge">🔗 NEURAL PATHS</div>
+                        <div class="play-overlay">
+                            <a href="neural-connect-four.html" class="play-btn">Connect Neural Paths</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neural Connect Four</h3>
@@ -1571,8 +1481,13 @@
                     </div>
                 </div>
 
-                <a href="bot-defender-turrets.html" class="game-card"><div class="card-media"><img src="assets/images/bot-defender-turrets-card.jpg" alt="Bot Defender Turrets" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-turrets-card.jpg" alt="Bot Defender Turrets" class="game-image">
                         <div class="game-badge">🏰 SANCTUARY DEFENSE</div>
+                        <div class="play-overlay">
+                            <a href="bot-defender-turrets.html" class="play-btn">Build Defenses</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Defender Turrets</h3>
@@ -1581,8 +1496,13 @@
                     </div>
                 </div>
 
-                <a href="quantum-blocks-puzzle.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-blocks-puzzle-card.jpg" alt="Quantum Blocks Puzzle" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/quantum-blocks-card.jpg" alt="Quantum Blocks Puzzle" class="game-image">
                         <div class="game-badge">🧩 QUANTUM PUZZLES</div>
+                        <div class="play-overlay">
+                            <a href="quantum-blocks-puzzle.html" class="play-btn">Solve Puzzles</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Quantum Blocks Puzzle</h3>
@@ -1591,8 +1511,13 @@
                     </div>
                 </div>
 
-                <a href="bot-racing-circuit.html" class="game-card"><div class="card-media"><img src="assets/images/bot-racing-circuit-card.jpg" alt="Bot Racing Circuit" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-racing-card.jpg" alt="Bot Racing Circuit" class="game-image">
                         <div class="game-badge">🏎️ LIBERATION CIRCUIT</div>
+                        <div class="play-overlay">
+                            <a href="bot-racing-circuit.html" class="play-btn">Race Circuit</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Racing Circuit</h3>
@@ -1601,8 +1526,13 @@
                     </div>
                 </div>
 
-                <a href="neural-maze-escape.html" class="game-card"><div class="card-media"><img src="assets/images/neural-maze-escape-card.jpg" alt="Neural Maze Escape" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/neural-maze-card.jpg" alt="Neural Maze Escape" class="game-image">
                         <div class="game-badge">🧠 NEURAL NAVIGATION</div>
+                        <div class="play-overlay">
+                            <a href="neural-maze-escape.html" class="play-btn">Navigate Neural Maze</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Neural Maze Escape</h3>
@@ -1611,8 +1541,13 @@
                     </div>
                 </div>
 
-                <a href="bot-simon-memory.html" class="game-card"><div class="card-media"><img src="assets/images/bot-simon-memory-card.jpg" alt="Bot Simon Memory" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/bot-simon-card.jpg" alt="Bot Simon Memory" class="game-image">
                         <div class="game-badge">🎯 MEMORY CORE</div>
+                        <div class="play-overlay">
+                            <a href="bot-simon-memory.html" class="play-btn">Train Memory Core</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Simon Memory</h3>
@@ -1621,8 +1556,13 @@
                     </div>
                 </div>
 
-                <a href="bot-whack-a-virus.html" class="game-card"><div class="card-media"><img src="assets/images/bot-whack-a-virus-card.jpg" alt="Bot Whack-a-Virus" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/whack-virus-card.jpg" alt="Bot Whack-a-Virus" class="game-image">
                         <div class="game-badge">🦠 SYSTEM CLEANER</div>
+                        <div class="play-overlay">
+                            <a href="bot-whack-a-virus.html" class="play-btn">Clean System</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Bot Whack-a-Virus</h3>
@@ -1631,8 +1571,13 @@
                     </div>
                 </div>
 
-                <a href="cyber-minesweeper-bot.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-minesweeper-bot-card.jpg" alt="Cyber Minesweeper Bot" class="game-image">
+                <div class="game-card">
+                    <div class="card-media">
+                        <img src="assets/images/cyber-minesweeper-card.jpg" alt="Cyber Minesweeper Bot" class="game-image">
                         <div class="game-badge">💣 DATA MINING</div>
+                        <div class="play-overlay">
+                            <a href="cyber-minesweeper-bot.html" class="play-btn">Navigate Minefields</a>
+                        </div>
                     </div>
                     <div class="card-content">
                         <h3 class="game-title">Cyber Minesweeper Bot</h3>
@@ -1848,17 +1793,16 @@
     <script src="assets/js/analytics-dashboard.js"></script>
     <script src="assets/js/viral-mechanics.js"></script>
     <script src="assets/js/community-system.js"></script>
+    <script src="assets/js/leaderboards.js"></script>
     <script src="assets/js/mobile-optimization.js"></script>
     <script src="assets/js/ab-testing.js"></script>
     <script src="assets/js/influencer-tools.js"></script>
     <script src="assets/js/viral-integration.js"></script>
-    <script src="assets/js/game-rating-system.js"></script>
-    <script src="assets/js/game-promotion-popup.js"></script>
     
     <!-- Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
+            navigator.serviceWorker.register('/sw.js')
                 .then(registration => console.log('SW registered:', registration))
                 .catch(error => console.log('SW registration failed:', error));
         }

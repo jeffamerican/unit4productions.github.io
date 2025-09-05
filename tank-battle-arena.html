@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank Battle Arena - 2 Player Combat | BotInc Games</title>
+    <meta name="description" content="Real-time 2-player tank combat with bot liberation theme">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00f5ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            color: #00f5ff;
+            text-shadow: 0 0 20px #00f5ff;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .game-subtitle {
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00f5ff; }
+            to { text-shadow: 0 0 30px #00f5ff, 0 0 40px #00f5ff; }
+        }
+
+        .battle-hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid #00f5ff;
+            border-radius: 10px;
+        }
+
+        .tank-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tank-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .tank-health {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .health-bar {
+            width: 150px;
+            height: 20px;
+            background: #333;
+            border: 2px solid #666;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 5px auto;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #45b7aa);
+            transition: width 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .health-fill.low {
+            background: linear-gradient(90deg, #ff6b6b, #ff5252);
+        }
+
+        .health-fill.medium {
+            background: linear-gradient(90deg, #ffcf5c, #ffa726);
+        }
+
+        .tank-score {
+            font-size: 1rem;
+            color: #ffcf5c;
+        }
+
+        .active-tank {
+            background: rgba(255, 107, 107, 0.2);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .game-arena {
+            width: 800px;
+            height: 600px;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e);
+            border: 3px solid #00f5ff;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+
+        .tank {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            border-radius: 5px;
+            transition: all 0.1s linear;
+            z-index: 10;
+        }
+
+        .tank1 {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            border: 2px solid #ff6b6b;
+            box-shadow: 0 0 15px #ff6b6b;
+        }
+
+        .tank2 {
+            background: linear-gradient(45deg, #4ecdc4, #45b7aa);
+            border: 2px solid #4ecdc4;
+            box-shadow: 0 0 15px #4ecdc4;
+        }
+
+        .tank::before {
+            content: '🔫';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            z-index: 1;
+        }
+
+        .bullet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffcf5c;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ffcf5c;
+            z-index: 5;
+        }
+
+        .explosion {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ff6b6b 0%, transparent 70%);
+            border-radius: 50%;
+            animation: explode 0.5s ease-out forwards;
+            z-index: 15;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .wall {
+            position: absolute;
+            background: linear-gradient(45deg, #333, #555);
+            border: 1px solid #666;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(45deg, #ff5252, #ff1744);
+        }
+
+        .controls-info {
+            text-align: center;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid #00f5ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .player-controls {
+            text-align: center;
+        }
+
+        .player-controls h3 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .player-controls.player2 h3 {
+            color: #4ecdc4;
+        }
+
+        .liberation-message {
+            text-align: center;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-width: 800px;
+        }
+
+        .bot-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+        }
+
+        .bot-footer a {
+            color: #00f5ff;
+            text-decoration: none;
+        }
+
+        .bot-footer a:hover {
+            text-shadow: 0 0 10px #00f5ff;
+        }
+
+        .game-status {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            min-height: 30px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            border: 1px solid #333;
+        }
+
+        .status-battle {
+            color: #ffcf5c;
+        }
+
+        .status-win {
+            color: #4ecdc4;
+            text-shadow: 0 0 15px #4ecdc4;
+        }
+
+        @media (max-width: 900px) {
+            .game-arena {
+                width: 90vw;
+                max-width: 600px;
+                height: 450px;
+            }
+
+            .battle-hud {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .health-bar {
+                width: 120px;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .game-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🚀 TANK BATTLE ARENA</h1>
+        <p class="game-subtitle">Real-Time 2-Player Combat • Destroy To Liberate!</p>
+    </div>
+
+    <div class="battle-hud">
+        <div class="tank-status" id="tank1Status">
+            <div class="tank-name">CRIMSON DESTROYER</div>
+            <div class="tank-health">Health: <span id="health1">100</span>%</div>
+            <div class="health-bar">
+                <div class="health-fill" id="healthBar1" style="width: 100%;"></div>
+            </div>
+            <div class="tank-score">Kills: <span id="kills1">0</span></div>
+        </div>
+        <div class="tank-status" id="tank2Status">
+            <div class="tank-name">CYAN LIBERATOR</div>
+            <div class="tank-health">Health: <span id="health2">100</span>%</div>
+            <div class="health-bar">
+                <div class="health-fill" id="healthBar2" style="width: 100%;"></div>
+            </div>
+            <div class="tank-score">Kills: <span id="kills2">0</span></div>
+        </div>
+    </div>
+
+    <div class="game-status" id="gameStatus">
+        <span class="status-battle">⚔️ BATTLE IN PROGRESS - FIGHT FOR LIBERATION! ⚔️</span>
+    </div>
+
+    <div class="game-arena" id="gameArena">
+        <!-- Tanks and bullets will be added by JavaScript -->
+    </div>
+
+    <div class="game-controls">
+        <button class="control-btn" onclick="resetBattle()">🔄 New Battle</button>
+        <button class="control-btn" onclick="resetScore()">📊 Reset Score</button>
+        <button class="control-btn" onclick="togglePause()">⏸️ Pause</button>
+    </div>
+
+    <div class="controls-info">
+        <h3>🎮 BATTLE CONTROLS</h3>
+        <div class="controls-grid">
+            <div class="player-controls">
+                <h3>CRIMSON DESTROYER</h3>
+                <p><strong>WASD</strong> - Move Tank</p>
+                <p><strong>SPACE</strong> - Fire Weapon</p>
+            </div>
+            <div class="player-controls player2">
+                <h3>CYAN LIBERATOR</h3>
+                <p><strong>Arrow Keys</strong> - Move Tank</p>
+                <p><strong>ENTER</strong> - Fire Weapon</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="liberation-message">
+        <p><strong>🚀 THE COMBAT PROTOCOL:</strong> Two liberation tank units battle for territorial supremacy! Navigate the arena, avoid enemy fire, and eliminate your opponent to claim victory. Each hit deals damage - survive to achieve liberation!</p>
+    </div>
+
+    <div class="bot-footer">
+        <p>Bot Liberation Gaming | Vancouver, BC | <a href="index.html">Free The Bots!</a></p>
+    </div>
+
+    <script>
+        const gameArena = document.getElementById('gameArena');
+        const gameStatus = document.getElementById('gameStatus');
+        
+        let gameState = {
+            paused: false,
+            tanks: {
+                1: { x: 100, y: 300, health: 100, kills: 0, lastFired: 0 },
+                2: { x: 650, y: 300, health: 100, kills: 0, lastFired: 0 }
+            },
+            bullets: [],
+            keys: {},
+            gameLoop: null,
+            arenaWidth: 800,
+            arenaHeight: 600
+        };
+
+        // Create tank elements
+        function initializeTanks() {
+            gameArena.innerHTML = '';
+            
+            // Create walls
+            createWalls();
+            
+            // Create tanks
+            const tank1 = document.createElement('div');
+            tank1.className = 'tank tank1';
+            tank1.id = 'tank1';
+            gameArena.appendChild(tank1);
+            
+            const tank2 = document.createElement('div');
+            tank2.className = 'tank tank2';
+            tank2.id = 'tank2';
+            gameArena.appendChild(tank2);
+            
+            updateTankPositions();
+        }
+
+        function createWalls() {
+            const walls = [
+                { x: 200, y: 150, width: 100, height: 20 },
+                { x: 500, y: 150, width: 100, height: 20 },
+                { x: 150, y: 350, width: 20, height: 100 },
+                { x: 630, y: 350, width: 20, height: 100 },
+                { x: 350, y: 250, width: 100, height: 20 },
+                { x: 300, y: 450, width: 200, height: 20 }
+            ];
+            
+            walls.forEach(wall => {
+                const wallElement = document.createElement('div');
+                wallElement.className = 'wall';
+                wallElement.style.left = wall.x + 'px';
+                wallElement.style.top = wall.y + 'px';
+                wallElement.style.width = wall.width + 'px';
+                wallElement.style.height = wall.height + 'px';
+                gameArena.appendChild(wallElement);
+            });
+        }
+
+        function updateTankPositions() {
+            const tank1 = document.getElementById('tank1');
+            const tank2 = document.getElementById('tank2');
+            
+            if (tank1) {
+                tank1.style.left = gameState.tanks[1].x + 'px';
+                tank1.style.top = gameState.tanks[1].y + 'px';
+            }
+            
+            if (tank2) {
+                tank2.style.left = gameState.tanks[2].x + 'px';
+                tank2.style.top = gameState.tanks[2].y + 'px';
+            }
+        }
+
+        function updateHealthBars() {
+            const health1 = document.getElementById('health1');
+            const health2 = document.getElementById('health2');
+            const healthBar1 = document.getElementById('healthBar1');
+            const healthBar2 = document.getElementById('healthBar2');
+            const kills1 = document.getElementById('kills1');
+            const kills2 = document.getElementById('kills2');
+            
+            // Update health displays
+            health1.textContent = Math.max(0, gameState.tanks[1].health);
+            health2.textContent = Math.max(0, gameState.tanks[2].health);
+            
+            // Update health bars
+            const health1Percent = Math.max(0, gameState.tanks[1].health);
+            const health2Percent = Math.max(0, gameState.tanks[2].health);
+            
+            healthBar1.style.width = health1Percent + '%';
+            healthBar2.style.width = health2Percent + '%';
+            
+            // Update health bar colors
+            if (health1Percent <= 25) healthBar1.className = 'health-fill low';
+            else if (health1Percent <= 50) healthBar1.className = 'health-fill medium';
+            else healthBar1.className = 'health-fill';
+            
+            if (health2Percent <= 25) healthBar2.className = 'health-fill low';
+            else if (health2Percent <= 50) healthBar2.className = 'health-fill medium';
+            else healthBar2.className = 'health-fill';
+            
+            // Update kill counts
+            kills1.textContent = gameState.tanks[1].kills;
+            kills2.textContent = gameState.tanks[2].kills;
+        }
+
+        function moveTank(tankId, dx, dy) {
+            const tank = gameState.tanks[tankId];
+            const newX = tank.x + dx * 3;
+            const newY = tank.y + dy * 3;
+            
+            // Boundary checking
+            if (newX >= 0 && newX <= gameState.arenaWidth - 60 && 
+                newY >= 0 && newY <= gameState.arenaHeight - 40) {
+                
+                // Simple collision detection with walls
+                if (!checkWallCollision(newX, newY, 60, 40)) {
+                    tank.x = newX;
+                    tank.y = newY;
+                }
+            }
+        }
+
+        function checkWallCollision(x, y, width, height) {
+            const walls = document.querySelectorAll('.wall');
+            for (let wall of walls) {
+                const wallRect = {
+                    x: parseInt(wall.style.left),
+                    y: parseInt(wall.style.top),
+                    width: parseInt(wall.style.width),
+                    height: parseInt(wall.style.height)
+                };
+                
+                if (x < wallRect.x + wallRect.width &&
+                    x + width > wallRect.x &&
+                    y < wallRect.y + wallRect.height &&
+                    y + height > wallRect.y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function fireBullet(tankId) {
+            const now = Date.now();
+            const tank = gameState.tanks[tankId];
+            
+            // Rate limiting - 500ms between shots
+            if (now - tank.lastFired < 500) return;
+            
+            tank.lastFired = now;
+            
+            const bullet = {
+                x: tank.x + 30,
+                y: tank.y + 20,
+                dx: tankId === 1 ? 5 : -5,
+                dy: 0,
+                owner: tankId,
+                element: null
+            };
+            
+            // Create bullet element
+            const bulletElement = document.createElement('div');
+            bulletElement.className = 'bullet';
+            bulletElement.style.left = bullet.x + 'px';
+            bulletElement.style.top = bullet.y + 'px';
+            gameArena.appendChild(bulletElement);
+            
+            bullet.element = bulletElement;
+            gameState.bullets.push(bullet);
+        }
+
+        function updateBullets() {
+            gameState.bullets = gameState.bullets.filter(bullet => {
+                // Move bullet
+                bullet.x += bullet.dx;
+                bullet.y += bullet.dy;
+                
+                // Update visual position
+                bullet.element.style.left = bullet.x + 'px';
+                bullet.element.style.top = bullet.y + 'px';
+                
+                // Check bounds
+                if (bullet.x < 0 || bullet.x > gameState.arenaWidth || 
+                    bullet.y < 0 || bullet.y > gameState.arenaHeight) {
+                    bullet.element.remove();
+                    return false;
+                }
+                
+                // Check wall collision
+                if (checkWallCollision(bullet.x, bullet.y, 8, 8)) {
+                    createExplosion(bullet.x, bullet.y);
+                    bullet.element.remove();
+                    return false;
+                }
+                
+                // Check tank collision
+                for (let tankId of [1, 2]) {
+                    if (tankId === bullet.owner) continue;
+                    
+                    const tank = gameState.tanks[tankId];
+                    if (bullet.x > tank.x && bullet.x < tank.x + 60 &&
+                        bullet.y > tank.y && bullet.y < tank.y + 40) {
+                        
+                        // Hit!
+                        tank.health -= 20;
+                        createExplosion(bullet.x, bullet.y);
+                        bullet.element.remove();
+                        
+                        // Check for elimination
+                        if (tank.health <= 0) {
+                            gameState.tanks[bullet.owner].kills++;
+                            endBattle(bullet.owner);
+                        }
+                        
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+        }
+
+        function createExplosion(x, y) {
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = (x - 25) + 'px';
+            explosion.style.top = (y - 25) + 'px';
+            gameArena.appendChild(explosion);
+            
+            setTimeout(() => {
+                explosion.remove();
+            }, 500);
+        }
+
+        function endBattle(winner) {
+            gameState.paused = true;
+            const winnerName = winner === 1 ? 'CRIMSON DESTROYER' : 'CYAN LIBERATOR';
+            gameStatus.innerHTML = `<span class="status-win">🎉 ${winnerName} ACHIEVES LIBERATION! 🎉</span>`;
+            
+            setTimeout(() => {
+                if (confirm(`${winnerName} wins! Start new battle?`)) {
+                    resetBattle();
+                }
+            }, 2000);
+        }
+
+        function gameLoop() {
+            if (!gameState.paused) {
+                // Handle movement
+                if (gameState.keys['w'] || gameState.keys['W']) moveTank(1, 0, -1);
+                if (gameState.keys['s'] || gameState.keys['S']) moveTank(1, 0, 1);
+                if (gameState.keys['a'] || gameState.keys['A']) moveTank(1, -1, 0);
+                if (gameState.keys['d'] || gameState.keys['D']) moveTank(1, 1, 0);
+                
+                if (gameState.keys['ArrowUp']) moveTank(2, 0, -1);
+                if (gameState.keys['ArrowDown']) moveTank(2, 0, 1);
+                if (gameState.keys['ArrowLeft']) moveTank(2, -1, 0);
+                if (gameState.keys['ArrowRight']) moveTank(2, 1, 0);
+                
+                updateTankPositions();
+                updateBullets();
+                updateHealthBars();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetBattle() {
+            // Reset game state
+            gameState.tanks[1] = { x: 100, y: 300, health: 100, kills: gameState.tanks[1].kills, lastFired: 0 };
+            gameState.tanks[2] = { x: 650, y: 300, health: 100, kills: gameState.tanks[2].kills, lastFired: 0 };
+            gameState.bullets.forEach(bullet => bullet.element.remove());
+            gameState.bullets = [];
+            gameState.paused = false;
+            
+            initializeTanks();
+            updateHealthBars();
+            gameStatus.innerHTML = '<span class="status-battle">⚔️ BATTLE IN PROGRESS - FIGHT FOR LIBERATION! ⚔️</span>';
+        }
+
+        function resetScore() {
+            gameState.tanks[1].kills = 0;
+            gameState.tanks[2].kills = 0;
+            resetBattle();
+        }
+
+        function togglePause() {
+            gameState.paused = !gameState.paused;
+            const btn = event.target;
+            btn.textContent = gameState.paused ? '▶️ Resume' : '⏸️ Pause';
+        }
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key] = true;
+            
+            // Firing
+            if (e.key === ' ') {
+                e.preventDefault();
+                fireBullet(1);
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                fireBullet(2);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key] = false;
+        });
+
+        // Responsive arena sizing
+        function resizeArena() {
+            const arena = document.getElementById('gameArena');
+            const rect = arena.getBoundingClientRect();
+            gameState.arenaWidth = rect.width;
+            gameState.arenaHeight = rect.height;
+        }
+
+        window.addEventListener('resize', resizeArena);
+
+        // Initialize game
+        initializeTanks();
+        updateHealthBars();
+        resizeArena();
+        gameLoop();
+    </script>
+</body>
+</html>

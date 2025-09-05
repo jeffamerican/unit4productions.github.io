@@ -1369,7 +1369,6 @@
     <script src="/assets/js/analytics-dashboard.js"></script>
     <script src="/assets/js/viral-mechanics.js"></script>
     <script src="/assets/js/community-system.js"></script>
-    <script src="/assets/js/leaderboards.js"></script>
     
     <script>
         // Neural Nexus Tournament System
@@ -1650,10 +1649,7 @@
                     window.viralMechanics.checkAchievement('neural_master', window.gameState.accuracy);
                 }
                 
-                // Submit to leaderboard
-                if (window.leaderboardSystem) {
-                    window.leaderboardSystem.submitScore('neural-nexus', totalScore, 'Neural Champion');
-                }
+                // Leaderboard system removed
                 
                 // Show completion notification
                 showNotification(`Tournament Complete! +${totalScore} points earned!`, 'success');
@@ -1692,10 +1688,7 @@
             window.resetLevel = function() {
                 // Submit score before reset
                 if (window.gameState.score > 0) {
-                    // Submit to leaderboard
-                    if (window.leaderboardSystem) {
-                        window.leaderboardSystem.submitScore('neural-nexus', window.gameState.score, 'Anonymous Player');
-                    }
+                    // Leaderboard system removed
                     
                     // Check achievements
                     if (window.viralMechanics) {

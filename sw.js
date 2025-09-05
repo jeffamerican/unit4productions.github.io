@@ -16,7 +16,6 @@ const STATIC_FILES = [
     '/assets/js/viral-integration.js',
     '/assets/js/influencer-tools.js',
     '/assets/js/community-system.js',
-    '/assets/js/leaderboards.js',
     '/assets/js/viral-mechanics.js',
     '/assets/js/mobile-optimization.js',
     '/assets/js/ab-testing.js',

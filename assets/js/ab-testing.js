@@ -280,37 +280,8 @@ class ABTesting {
     }
     
     applyLeaderboardVariant(config) {
-        const widget = document.getElementById('leaderboard-widget');
-        if (!widget) return;
-        
-        switch (config.position) {
-            case 'right_expanded':
-                widget.classList.remove('collapsed');
-                break;
-                
-            case 'bottom_sticky':
-                widget.style.position = 'fixed';
-                widget.style.bottom = '0';
-                widget.style.right = '0';
-                widget.style.left = '0';
-                widget.style.top = 'auto';
-                break;
-        }
-        
-        if (config.prominence === 'highlighted') {
-            widget.style.border = '2px solid #ffff00';
-            widget.style.boxShadow = '0 0 20px rgba(255, 255, 0, 0.3)';
-        }
-        
-        if (config.prominence === 'pulsing') {
-            widget.style.animation = 'pulse 3s infinite';
-        }
-        
-        if (config.autoShow) {
-            setTimeout(() => {
-                widget.classList.remove('collapsed');
-            }, 3000);
-        }
+        // Leaderboard system removed - no longer applicable
+        return;
     }
     
     trackGoal(goalId, data = {}) {

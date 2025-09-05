@@ -549,32 +549,15 @@ class InfluencerTools {
                 }
             }
             
-            // Update leaderboard
-            const leaderboardElement = document.getElementById('overlayLeaderboard');
-            if (leaderboardElement && window.leaderboardSystem) {
-                this.updateOverlayLeaderboard();
-            }
+            // Leaderboard system removed
         };
         
         setInterval(updateOverlay, 1000);
     }
     
     updateOverlayLeaderboard() {
-        const leaderboardList = document.querySelector('.overlay-leaderboard-list');
-        if (!leaderboardList) return;
-        
-        // Get current game leaderboard
-        const currentGame = this.getCurrentGame();
-        const leaderboard = window.leaderboardSystem.leaderboards[currentGame] || [];
-        
-        const topPlayers = leaderboard.slice(0, 5);
-        leaderboardList.innerHTML = topPlayers.map((entry, index) => `
-            <div class="overlay-leaderboard-entry">
-                <span class="entry-rank">#${index + 1}</span>
-                <span class="entry-name">${entry.playerName}</span>
-                <span class="entry-score">${entry.score.toLocaleString()}</span>
-            </div>
-        `).join('');
+        // Leaderboard system removed
+        return;
     }
     
     setupContentCreationTools() {

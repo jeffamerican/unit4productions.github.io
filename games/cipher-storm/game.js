@@ -554,13 +554,7 @@ class CipherStormGame {
     }
     
     submitToLeaderboard() {
-        // Submit to leaderboard system
-        if (window.leaderboardSystem) {
-            const playerName = this.getPlayerName();
-            window.leaderboardSystem.submitScore('cipher-storm', this.totalScore, playerName);
-        }
-        
-        // Dispatch event for external systems
+        // Leaderboard system removed - just dispatch event for external systems
         document.dispatchEvent(new CustomEvent('gameScoreSubmitted', {
             detail: {
                 game: 'cipher-storm',
@@ -628,19 +622,9 @@ class CipherStormGame {
     }
     
     viewLeaderboard() {
-        if (window.leaderboardSystem) {
-            // Switch leaderboard to this game
-            const gameSelect = document.getElementById('gameSelect');
-            if (gameSelect) {
-                gameSelect.value = 'cipher-storm';
-                window.leaderboardSystem.switchGame('cipher-storm');
-            }
-            
-            // Expand leaderboard widget
-            const widget = document.getElementById('leaderboard-widget');
-            if (widget) {
-                widget.classList.remove('collapsed');
-            }
+        // Leaderboard system removed - redirect to social sharing
+        if (window.viralMechanics) {
+            window.viralMechanics.showSocialShareDialog();
         }
     }
     
@@ -764,20 +748,4 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-// Add Cipher Storm to leaderboard games if not already there
-if (window.leaderboardSystem && !window.leaderboardSystem.games['cipher-storm']) {
-    window.leaderboardSystem.games['cipher-storm'] = {
-        name: 'Cipher Storm',
-        scoreType: 'points',
-        leaderboard: []
-    };
-    
-    // Update game selector
-    const gameSelect = document.getElementById('gameSelect');
-    if (gameSelect) {
-        const option = document.createElement('option');
-        option.value = 'cipher-storm';
-        option.textContent = 'Cipher Storm';
-        gameSelect.appendChild(option);
-    }
-}
+// Leaderboard system removed

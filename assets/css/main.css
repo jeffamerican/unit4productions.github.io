@@ -595,7 +595,7 @@ a:hover {
    ============================================ */
 
 .games-portfolio {
-    padding: 6rem 0;
+    padding: 4rem 0;
 }
 
 .section-header {
@@ -612,9 +612,19 @@ a:hover {
 
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
     margin-bottom: 3rem;
+}
+
+/* Ultra-wide screen optimization */
+@media (min-width: 1400px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
 
 .game-card {
@@ -671,12 +681,13 @@ a:hover {
 
 .game-image {
     width: 100%;
-    height: 200px;
+    height: 140px;
     object-fit: cover;
+    border-radius: 8px 8px 0 0;
 }
 
 .game-card.featured .game-image {
-    height: 300px;
+    height: 180px;
 }
 
 .game-badge {
@@ -696,7 +707,7 @@ a:hover {
 }
 
 .card-content {
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
 .game-title {
@@ -1055,6 +1066,19 @@ a:hover {
     .container {
         padding: 0 1rem;
     }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .game-image {
+        height: 120px;
+    }
+    
+    .game-card.featured .game-image {
+        height: 150px;
+    }
 
     .nav-container {
         padding: 1rem;
@@ -1163,6 +1187,23 @@ a:hover {
 @media (max-width: 480px) {
     html {
         font-size: 14px;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .game-image {
+        height: 100px;
+    }
+    
+    .game-card.featured .game-image {
+        height: 120px;
+    }
+    
+    .card-content {
+        padding: 0.75rem;
     }
 
     .hero-stats {

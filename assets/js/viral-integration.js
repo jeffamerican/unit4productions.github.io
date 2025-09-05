@@ -42,7 +42,7 @@ class ViralIntegration {
             this.systems.analytics = window.botincAnalytics || null;
             this.systems.viral = window.viralMechanics || null;
             this.systems.community = window.communitySystem || null;
-            this.systems.leaderboards = window.leaderboardSystem || null;
+            // this.systems.leaderboards = window.leaderboardSystem || null; // Removed
             this.systems.mobile = window.mobileOptimization || null;
             this.systems.abTesting = window.abTesting || null;
             this.systems.influencer = window.influencerTools || null;
@@ -498,13 +498,7 @@ class ViralIntegration {
             this.systems.community.captureAggressiveness = (this.systems.community.captureAggressiveness || 1) * 1.1;
         }
         
-        if (this.systems.leaderboards) {
-            // More prominent leaderboard placement
-            const widget = document.getElementById('leaderboard-widget');
-            if (widget && widget.classList.contains('collapsed')) {
-                widget.classList.remove('collapsed');
-            }
-        }
+        // Leaderboard system removed
     }
     
     reduceViralPressure() {

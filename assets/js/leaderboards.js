@@ -1,17 +1,22 @@
 /**
- * BotInc Global Leaderboards & Daily Challenges
- * Competitive features to drive engagement and virality
+ * BotInc Game Promotion & Discovery System
+ * Showcases top games and provides advertising opportunities - no user competition
+ * 
+ * DISABLED: Leaderboard system has been removed per user request
  */
 
-class LeaderboardSystem {
+// DISABLED - Leaderboard system removed
+return;
+
+class GamePromotionSystem {
     constructor() {
-        this.leaderboards = this.loadLeaderboards();
-        this.dailyChallenge = this.loadDailyChallenge();
-        this.playerScores = this.loadPlayerScores();
+        this.gameStats = this.loadGameStats();
+        this.promotedGames = this.loadPromotedGames();
+        this.gameCategories = this.loadGameCategories();
         
-        this.initializeLeaderboards();
-        this.initializeDailyChallenges();
-        this.setupCompetitiveFeatures();
+        this.initializeGameShowcase();
+        this.initializePromotions();
+        this.setupGameDiscovery();
     }
     
     initializeLeaderboards() {

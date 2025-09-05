@@ -146,10 +146,9 @@ class MobileOptimization {
     }
     
     handleSwipeUp() {
-        // Quick access to leaderboards or social sharing
-        const leaderboardWidget = document.getElementById('leaderboard-widget');
-        if (leaderboardWidget) {
-            leaderboardWidget.classList.toggle('collapsed');
+        // Quick access to social sharing
+        if (window.viralMechanics) {
+            window.viralMechanics.showSocialShareDialog();
         }
     }
     
@@ -441,9 +440,9 @@ class MobileOptimization {
         
         if (leaderboardBtn) {
             leaderboardBtn.addEventListener('click', () => {
-                const widget = document.getElementById('leaderboard-widget');
-                if (widget) {
-                    widget.classList.remove('collapsed');
+                // Redirect to social sharing instead
+                if (window.viralMechanics) {
+                    window.viralMechanics.showSocialShareDialog();
                 }
             });
         }
@@ -566,12 +565,7 @@ class MobileOptimization {
             window.botincAnalytics.updateDashboardDisplay();
         }
         
-        if (window.leaderboardSystem) {
-            const gameSelect = document.getElementById('gameSelect');
-            if (gameSelect) {
-                window.leaderboardSystem.switchGame(gameSelect.value);
-            }
-        }
+        // Leaderboard system removed
         
         this.showNotification('Content refreshed!', 'success');
     }
@@ -655,15 +649,7 @@ class MobileOptimization {
             window.game.handleResize();
         }
         
-        // Update leaderboard widget position
-        const widget = document.getElementById('leaderboard-widget');
-        if (widget && this.isMobile) {
-            widget.style.position = 'fixed';
-            widget.style.bottom = '0';
-            widget.style.right = '0';
-            widget.style.left = '0';
-            widget.style.borderRadius = '15px 15px 0 0';
-        }
+        // Leaderboard widget removed
     }
     
     showNavigationHint(message) {

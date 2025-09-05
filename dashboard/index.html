@@ -666,7 +666,6 @@
     <script src="/assets/js/analytics-dashboard.js"></script>
     <script src="/assets/js/viral-mechanics.js"></script>
     <script src="/assets/js/community-system.js"></script>
-    <script src="/assets/js/leaderboards.js"></script>
 
     <script>
         class AnalyticsDashboard {
@@ -687,7 +686,7 @@
                 const analytics = window.botincAnalytics;
                 const viral = window.viralMechanics;
                 const community = window.communitySystem;
-                const leaderboard = window.leaderboardSystem;
+                // const leaderboard = window.leaderboardSystem; // Removed
 
                 if (analytics) {
                     document.getElementById('totalSessions').textContent = analytics.metrics.sessions.toLocaleString();
@@ -729,14 +728,13 @@
             }
 
             updateGameMetrics() {
-                // Load game-specific data from leaderboards and analytics
-                if (window.leaderboardSystem) {
-                    const signalData = window.leaderboardSystem.gameMetrics['signal-breach'] || { sessions: 0, shares: 0, avgScore: 0 };
-                    const neuralData = window.leaderboardSystem.gameMetrics['neural-nexus'] || { sessions: 0, shares: 0 };
-                    const cipherData = window.leaderboardSystem.gameMetrics['cipher-storm'] || { sessions: 0, shares: 0 };
+                // Load game-specific data from analytics only (leaderboard system removed)
+                const signalData = { sessions: 0, shares: 0, avgScore: 0 };
+                const neuralData = { sessions: 0, shares: 0 };
+                const cipherData = { sessions: 0, shares: 0 };
 
-                    document.getElementById('signalSessions').textContent = signalData.sessions.toLocaleString();
-                    document.getElementById('signalShares').textContent = signalData.shares.toLocaleString();
+                document.getElementById('signalSessions').textContent = signalData.sessions.toLocaleString();
+                document.getElementById('signalShares').textContent = signalData.shares.toLocaleString();
                     document.getElementById('signalAvgScore').textContent = signalData.avgScore.toLocaleString();
 
                     document.getElementById('neuralSessions').textContent = neuralData.sessions.toLocaleString();

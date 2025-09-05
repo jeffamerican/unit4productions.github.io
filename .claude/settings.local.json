@@ -33,7 +33,13 @@
       "mcp__browsermcp__browser_go_back",
       "mcp__browsermcp__browser_type",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "mcp__fal__generate-image"
+      "mcp__fal__generate-image",
+      "Bash(git branch:*)",
+      "WebFetch(domain:jeffamerical.github.io)",
+      "Read(//c/Users/jscot/Downloads/**)",
+      "Bash(node:*)",
+      "Bash(comm:*)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []

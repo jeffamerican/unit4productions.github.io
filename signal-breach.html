@@ -2954,7 +2954,6 @@
     <script src="/assets/js/analytics-dashboard.js"></script>
     <script src="/assets/js/viral-mechanics.js"></script>
     <script src="/assets/js/community-system.js"></script>
-    <script src="/assets/js/leaderboards.js"></script>
     
     <script>
         // Enhanced Signal Breach with Viral Features
@@ -2976,10 +2975,7 @@
                         const currentScore = game ? game.gameState.score : 0;
                         const currentLevel = game ? game.gameState.level : 1;
                         
-                        // Submit to leaderboard
-                        if (window.leaderboardSystem) {
-                            window.leaderboardSystem.submitScore('signal-breach', currentScore, 'Anonymous Hacker');
-                        }
+                        // Leaderboard system removed
                         
                         // Dispatch score event
                         document.dispatchEvent(new CustomEvent('gameScoreSubmitted', {
