@@ -383,9 +383,10 @@ a:hover {
 }
 
 .nav-logo {
-    height: 32px;
+    height: 40px;
     width: auto;
     margin-right: 0.5rem;
+    filter: drop-shadow(0 0 2px rgba(0, 255, 136, 0.3));
 }
 
 .logo-img {
