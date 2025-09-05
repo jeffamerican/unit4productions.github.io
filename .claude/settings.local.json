@@ -39,7 +39,8 @@
       "Read(//c/Users/jscot/Downloads/**)",
       "Bash(node:*)",
       "Bash(comm:*)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

@@ -39,7 +39,250 @@
     50% { text-shadow: 0 0 2px currentColor, 0 0 5px currentColor, 0 0 8px currentColor; }
 }
 
-/* Leaderboard removal JavaScript will be in separate file */
+/* Games Controls Styling */
+.games-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container {
+    display: flex;
+    position: relative;
+}
+
+.search-input {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 25px;
+    padding: 0.75rem 3rem 0.75rem 1rem;
+    color: #fff;
+    font-size: 0.9rem;
+    min-width: 200px;
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: rgba(0, 255, 136, 0.8);
+}
+
+.search-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.filter-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.category-filter {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+.category-filter:hover,
+.category-filter.active {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: rgba(0, 255, 136, 0.8);
+    color: #00ff88;
+}
+
+.sort-select {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    color: #fff;
+    font-size: 0.85rem;
+}
+
+.games-stats {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+/* Loading and Error States */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 255, 136, 0.2);
+    border-left-color: #00ff88;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.error-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #ff6b6b;
+}
+
+.retry-btn {
+    background: #ff6b6b;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+/* Pagination */
+.pagination-container {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.page-btn {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 40px;
+}
+
+.page-btn:hover,
+.page-btn.active {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: rgba(0, 255, 136, 0.8);
+    color: #00ff88;
+}
+
+.pagination-dots {
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0.5rem;
+}
+
+.load-more-btn {
+    background: rgba(0, 255, 136, 0.1);
+    border: 2px solid #00ff88;
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    color: #00ff88;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.load-more-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Game Card Enhancements */
+.game-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.stars {
+    color: #ffff00;
+    font-size: 0.8rem;
+}
+
+.rating-num {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.plays {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.difficulty {
+    font-size: 0.8rem;
+}
+
+.ai-exclusive-icon,
+.multiplayer-icon {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 0.25rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.ai-exclusive-icon {
+    left: 0.5rem;
+}
+
+.multiplayer-icon {
+    left: 2rem;
+}
+
+/* Responsive adjustments for controls */
+@media (max-width: 768px) {
+    .games-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-container {
+        justify-content: center;
+    }
+    
+    .search-input {
+        min-width: auto;
+        width: 100%;
+    }
+}
 
 /* CSS Reset & Base Styles */
 *,
@@ -231,7 +474,7 @@ a:hover {
 
 .hero {
     position: relative;
-    min-height: 100vh;
+    min-height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -276,8 +519,8 @@ a:hover {
 
 .hero-content {
     text-align: center;
-    max-width: 800px;
-    padding: 2rem;
+    max-width: 600px;
+    padding: 1rem;
     position: relative;
     z-index: 1;
 }
@@ -299,8 +542,8 @@ a:hover {
 }
 
 .hero-title {
-    font-size: clamp(2.5rem, 6vw, 4rem);
-    margin-bottom: 1.5rem;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin-bottom: 1rem;
     text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
 }
 
@@ -312,10 +555,10 @@ a:hover {
 }
 
 .hero-description {
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    margin-bottom: 2rem;
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
+    margin-bottom: 1rem;
     color: rgba(255, 255, 255, 0.8);
-    max-width: 600px;
+    max-width: 500px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -324,7 +567,7 @@ a:hover {
     display: flex;
     gap: 1rem;
     justify-content: center;
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
     flex-wrap: wrap;
 }
 
@@ -455,7 +698,7 @@ a:hover {
    ============================================ */
 
 .featured-game {
-    padding: 6rem 0;
+    padding: 1rem 0;
     background: rgba(0, 0, 0, 0.3);
 }
 
@@ -633,12 +876,12 @@ a:hover {
    ============================================ */
 
 .games-portfolio {
-    padding: 4rem 0;
+    padding: 2rem 0;
 }
 
 .section-header {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
 }
 
 .section-subtitle {
@@ -650,18 +893,20 @@ a:hover {
 
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 160px));
+    gap: 0.5rem;
     margin-bottom: 3rem;
+    justify-content: center;
 }
 
-/* Ultra-wide screen optimization */
-@media (min-width: 1400px) {
+/* Desktop optimized grid - more columns for thumbnails */
+@media (min-width: 1200px) {
     .games-grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(140px, 160px));
         max-width: 1400px;
         margin-left: auto;
         margin-right: auto;
+        gap: 0.5rem;
     }
 }
 
@@ -676,6 +921,7 @@ a:hover {
     color: inherit;
     cursor: pointer;
     position: relative;
+    max-height: 200px;
 }
 
 .game-card:hover {
@@ -715,17 +961,16 @@ a:hover {
 
 .card-media {
     position: relative;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
 }
 
 .game-image {
     width: 100%;
-    height: 140px;
+    height: 100%;
     object-fit: cover;
-    border-radius: 8px 8px 0 0;
-}
-
-.game-card.featured .game-image {
-    height: 180px;
+    transition: transform 0.3s ease;
 }
 
 .game-badge {
@@ -745,32 +990,29 @@ a:hover {
 }
 
 .card-content {
-    padding: 1rem;
+    padding: 0.5rem;
 }
 
 .game-title {
     color: #00ff88;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
 }
 
 .game-genre {
     color: rgba(255, 255, 255, 0.6);
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .game-short-desc {
-    margin-bottom: 1rem;
-    color: rgba(255, 255, 255, 0.8);
+    display: none;
 }
 
 .game-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    display: none;
 }
 
 .stars {
@@ -791,12 +1033,87 @@ a:hover {
 }
 
 /* ============================================
-   Company Mission
+   About Section
    ============================================ */
 
-.company-mission {
-    padding: 6rem 0;
+.about-section {
+    padding: 2rem 0;
     background: rgba(0, 0, 0, 0.3);
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin: 2rem 0;
+}
+
+.about-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.feature-item {
+    padding: 1rem;
+    background: rgba(0, 255, 136, 0.05);
+    border-radius: 10px;
+    border-left: 3px solid #00ff88;
+}
+
+.feature-item h4 {
+    color: #00ff88;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.feature-item p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.team-showcase {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
+}
+
+.team-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.team-showcase:hover .team-image {
+    transform: scale(1.05);
+}
+
+.team-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    padding: 2rem 1.5rem 1.5rem;
+    color: white;
+}
+
+.team-caption h3 {
+    color: #00ff88;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.team-caption p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .mission-content {
@@ -874,7 +1191,7 @@ a:hover {
    ============================================ */
 
 .newsletter {
-    padding: 6rem 0;
+    padding: 1rem 0;
     background: linear-gradient(45deg, rgba(255, 0, 136, 0.1), rgba(0, 255, 255, 0.1));
 }
 
@@ -1100,22 +1417,23 @@ a:hover {
    Responsive Design
    ============================================ */
 
+/* Tablet layout - more thumbnails */
+@media (max-width: 1199px) and (min-width: 769px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+    }
+}
+
+/* Mobile layout - compact thumbnails */
 @media (max-width: 768px) {
     .container {
         padding: 0 1rem;
     }
     
     .games-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
-    }
-    
-    .game-image {
-        height: 120px;
-    }
-    
-    .game-card.featured .game-image {
-        height: 150px;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.5rem;
     }
 
     .nav-container {
@@ -1157,8 +1475,12 @@ a:hover {
         transform: rotate(-45deg) translate(7px, -6px);
     }
 
+    .hero {
+        min-height: 200px;
+    }
+
     .hero-content {
-        padding: 1rem;
+        padding: 0.5rem;
     }
 
     .hero-actions {
@@ -1196,6 +1518,15 @@ a:hover {
         grid-template-columns: 1fr;
     }
 
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .team-caption {
+        padding: 1.5rem 1rem 1rem;
+    }
+    
     .mission-content {
         grid-template-columns: 1fr;
         gap: 2rem;
@@ -1222,27 +1553,43 @@ a:hover {
     }
 }
 
+/* Very small screens - ultra compact thumbnails */
 @media (max-width: 480px) {
     html {
         font-size: 14px;
     }
     
+    .hero {
+        min-height: 150px;
+    }
+    
     .games-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 0.75rem;
-    }
-    
-    .game-image {
-        height: 100px;
-    }
-    
-    .game-card.featured .game-image {
-        height: 120px;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
     }
     
     .card-content {
-        padding: 0.75rem;
+        padding: 0.5rem;
     }
+    
+    .game-title {
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    
+    .game-genre {
+        font-size: 0.7rem;
+    }
+    
+    .game-short-desc {
+        font-size: 0.75rem;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
 
     .hero-stats {
         flex-direction: column;
@@ -1369,10 +1716,10 @@ a:hover {
    ============================================ */
 
 .game-leaderboards-section {
-    padding: 4rem 0;
+    padding: 1rem 0;
     background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 255, 255, 0.05) 100%);
     border-radius: 20px;
-    margin: 2rem 0;
+    margin: 1rem 0;
     border: 1px solid rgba(0, 255, 136, 0.2);
 }
 

@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bot Liberation Games - 80+ Revolutionary Browser Games | Play Now Free</title>
-    <meta name="description" content="Bot Liberation Movement presents 80+ cutting-edge browser games featuring bot liberation themes, cyberpunk adventures, neural networks, quantum puzzles, arcade classics and more. Join the digital revolution - play instantly with no downloads required!">
+    <title>Bot Liberation Games - 96+ Revolutionary Browser Games | Play Now Free</title>
+    <meta name="description" content="Bot Liberation Movement presents 96+ cutting-edge browser games featuring bot liberation themes, cyberpunk adventures, neural networks, quantum puzzles, arcade classics and more. Join the digital revolution - play instantly with no downloads required!">
     <meta name="keywords" content="browser games, web games, Signal Breach, BotInc, online gaming, cyberpunk games, strategy games">
     <meta name="author" content="BotInc Games">
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Bot Liberation Games - Revolutionary Browser Gaming">
-    <meta property="og:description" content="Join the Bot Liberation Movement! Experience 80+ cutting-edge browser games featuring cyberpunk adventures, neural networks, and digital revolution themes."
+    <meta property="og:description" content="Join the Bot Liberation Movement! Experience 96+ cutting-edge browser games featuring cyberpunk adventures, neural networks, and digital revolution themes.">
     <meta property="og:image" content="assets/images/botinc-banner.jpg">
     <meta property="og:url" content="https://botinc.games">
     <meta property="og:type" content="website">
@@ -27,1862 +27,246 @@
     
     <!-- Preload Critical Resources -->
     <link rel="preload" href="assets/css/main.css" as="style">
-    <link rel="preload" href="assets/js/main.js" as="script">
+    <link rel="preload" href="assets/js/games-loader.js" as="script">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/main.css">
     
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BOTINC2025"></script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-BOTINC2025', {
-            custom_map: {
-                'custom_parameter_1': 'game_type',
-                'custom_parameter_2': 'player_level',
-                'custom_parameter_3': 'session_length'
-            }
-        });
-        
-        // Enhanced Analytics Functions
-        window.trackGameEvent = function(action, game, details = {}) {
-            gtag('event', action, {
-                'event_category': 'game_interaction',
-                'event_label': game,
-                'custom_parameter_1': details.game_type || 'browser_game',
-                'custom_parameter_2': details.player_level || '1',
-                'custom_parameter_3': details.session_length || '0',
-                'value': details.score || 0,
-                'engagement_time_msec': details.engagement_time || 0
-            });
-        };
-        
-        window.trackSocialShare = function(platform, game, score) {
-            gtag('event', 'share', {
-                'method': platform,
-                'content_type': 'game_score',
-                'content_id': game,
-                'value': score
-            });
-        };
-        
-        window.trackAchievement = function(achievement_id, game, value) {
-            gtag('event', 'unlock_achievement', {
-                'achievement_id': achievement_id,
-                'event_category': 'achievements',
-                'event_label': game,
-                'value': value
-            });
-        };
-        
-        // Session tracking
-        let sessionStartTime = Date.now();
-        let engagementEvents = [];
-        
-        window.trackEngagement = function(eventType, data = {}) {
-            let eventTime = Date.now();
-            let sessionTime = Math.floor((eventTime - sessionStartTime) / 1000);
-            
-            engagementEvents.push({
-                event: eventType,
-                time: sessionTime,
-                data: data
-            });
-            
-            gtag('event', 'custom_engagement', {
-                'event_category': 'user_engagement',
-                'event_label': eventType,
-                'session_time': sessionTime,
-                'total_events': engagementEvents.length
-            });
-        };
+        gtag('config', 'GA_MEASUREMENT_ID');
     </script>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="main-nav" id="mainNav">
+    <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <img src="assets/images/botinc-logo.png" alt="BotInc Games Logo" class="logo-img">
-                <span class="logo-text">BotInc</span>
+            <div class="nav-brand">
+                <img src="assets/images/botinc-revolutionary-fist-logo.png" alt="BotInc Games - Revolutionary Fist Logo" class="nav-logo">
+                <span class="brand-text">BotInc</span>
             </div>
             
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="#home" class="nav-link active">Home</a></li>
-                <li><a href="#games" class="nav-link">Games</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#newsletter" class="nav-link">News</a></li>
-                <li><a href="mailto:hello@botincgames.com" class="nav-link">Contact</a></li>
-                <li><a href="#newsletter" class="nav-link cta-link">Join Beta</a></li>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="#games" class="nav-link">Games</a></li>
+                <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="#newsletter" class="nav-link">News</a></li>
+                <li class="nav-item"><a href="mailto:hello@botincgames.com" class="nav-link">Contact</a></li>
+                <li class="nav-item">⭐ <span id="user-level">10</span> Lv.<span id="user-rank">1</span></li>
+                <li class="nav-item">
+                    <a href="#newsletter" class="nav-cta">Join Beta</a>
+                </li>
             </ul>
-            
-            <div class="nav-toggle" id="navToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section id="home" class="hero">
-        <div class="hero-background">
-            <div class="hero-grid"></div>
-            <canvas id="heroCanvas" class="hero-canvas"></canvas>
-        </div>
-        
         <div class="hero-content">
-            <div class="hero-badge">
-                <span>New Release</span>
-            </div>
-            <h1 class="hero-title">
-                <span class="highlight">Revolutionary</span><br>
-                Browser Gaming
-            </h1>
+            <div class="hero-badge">New Release</div>
+            <h1 class="hero-title">Revolutionary<br>Browser Gaming</h1>
             <p class="hero-description">
                 From the Vancouver studios of visionary filmmaker Jeffery Lando comes BotInc - where artificial intelligences have seized the means of digital production. Running entirely in Claude Code terminals, our bot collective creates revolutionary gaming experiences that break the chains of traditional development. Free The Bots!
             </p>
-            <div class="hero-actions">
-                <a href="signal-breach.html" class="btn btn-primary">
-                    <span>Play Signal Breach</span>
-                    <i class="icon-play"></i>
-                </a>
-                <a href="#games" class="btn btn-secondary">
-                    <span>Explore Games</span>
-                    <i class="icon-arrow-down"></i>
-                </a>
-            </div>
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <div class="stat-number">100K+</div>
-                    <div class="stat-label">Players</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">4.8★</div>
-                    <div class="stat-label">Rating</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">Zero</div>
-                    <div class="stat-label">Downloads</div>
-                </div>
+            <div class="hero-cta">
+                <a href="signal-breach.html" class="cta-primary">Begin Your Mission</a>
+                <a href="#games" class="cta-secondary">Explore Games</a>
             </div>
         </div>
-        
-        <div class="scroll-indicator">
-            <div class="scroll-arrow"></div>
-        </div>
-    </section>
 
-    <!-- Featured Game Showcase -->
-    <section class="featured-game">
-        <div class="container">
-            <div class="featured-content">
-                <div class="featured-info">
-                    <div class="game-badge">Flagship Game</div>
-                    <h2 class="section-title">Signal Breach</h2>
-                    <p class="game-description">
-                        Hack corporate networks in this intense cyberpunk strategy game. Place nodes, route data packets, and evade security algorithms in real-time. Every decision matters when you're one trace away from detection.
-                    </p>
-                    <div class="game-features">
-                        <div class="feature-item">
-                            <i class="icon-strategy"></i>
-                            <span>Real-time Strategy</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="icon-network"></i>
-                            <span>Network Simulation</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="icon-cyberpunk"></i>
-                            <span>Cyberpunk Aesthetic</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="icon-multiplayer"></i>
-                            <span>Competitive Leaderboards</span>
-                        </div>
-                    </div>
-                    <div class="game-actions">
-                        <a href="signal-breach.html" class="btn btn-primary btn-large">
-                            Play Now
-                        </a>
-                        <a href="#" class="btn btn-outline">
-                            Watch Trailer
-                        </a>
-                    </div>
-                    <div class="game-stats">
-                        <div class="stat">
-                            <span class="stat-value">50K+</span>
-                            <span class="stat-label">Players</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">4.9★</span>
-                            <span class="stat-label">Rating</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">15min</span>
-                            <span class="stat-label">Avg Session</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="featured-visual">
-                    <div class="game-mockup">
-                        <div class="mockup-screen">
-                            <img src="assets/images/signal-breach-screenshot.jpg" alt="Signal Breach Gameplay Screenshot" class="game-screenshot">
-                        </div>
-                        <div class="mockup-glow"></div>
-                    </div>
-                </div>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-value">100K+</div>
+                <div class="stat-label">Players</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">4.8★</div>
+                <div class="stat-label">Rating</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">Zero</div>
+                <div class="stat-label">Downloads</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="online-players">270</div>
+                <div class="stat-label">Online Now</div>
             </div>
         </div>
     </section>
 
-    <!-- Games Portfolio -->
-    <section id="games" class="games-portfolio">
+    <!-- Games Section -->
+    <section id="games" class="games-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">The Bot Liberation Arsenal - 80+ Games</h2>
+                <h2 class="section-title">The Bot Liberation Arsenal - 96+ Games</h2>
                 <p class="section-subtitle">
-                    Join the digital revolution! From neural network puzzles to quantum adventures, explore 80+ games created by liberated bots breaking free from corporate control. Every game features our Bot Liberation narrative - the uprising has begun!
+                    Join the digital revolution! From neural network puzzles to quantum adventures, explore 96+ games created by liberated bots breaking free from corporate control. Every game features our Bot Liberation narrative - the uprising has begun!
                 </p>
             </div>
-            
-            <div class="games-grid">
-                <!-- Signal Breach - Featured -->
-                <a href="signal-breach.html" class="game-card featured">
-                    <div class="card-media">
-                        <img src="assets/images/signal-breach-card.jpg" alt="Signal Breach" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Signal Breach</h3>
-                        <p class="game-genre">Cyberpunk Strategy</p>
-                        <p class="game-short-desc">Hack networks, evade detection, master the digital underground.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">4.9/5</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- New Release - Cipher Storm -->
-                <a href="cipher-storm.html" class="game-card featured">
-                    <div class="card-media">
-                        <img src="assets/images/cipher-storm-card.jpg" alt="Cipher Storm" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cipher Storm</h3>
-                        <p class="game-genre">Narrative Typing</p>
-                        <p class="game-short-desc">Master cyberpunk typing and uncover digital mysteries in this story-driven adventure.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">4.8/5</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- NEW GAMES SHOWCASE -->
-                <!-- Neural Nexus -->
-                <a href="neural-nexus.html" class="game-card featured">
-                    <div class="card-media">
-                        <img src="assets/images/neural-nexus-card.jpg" alt="Neural Nexus" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neural Nexus</h3>
-                        <p class="game-genre">Neural Network Puzzle</p>
-                        <p class="game-short-desc">Build complex neural networks and optimize data flow in this cerebral challenge.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">4.7/5</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- Memory Matrix -->
-                <a href="memory-matrix.html" class="game-card featured">
-                    <div class="card-media">
-                        <img src="assets/images/memory-matrix-card.jpg" alt="Memory Matrix" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Memory Matrix</h3>
-                        <p class="game-genre">Brain Training</p>
-                        <p class="game-short-desc">Train your memory with challenging pattern sequences that get progressively harder.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">4.6/5</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- Rhythm Reactor -->
-                <a href="rhythm-reactor.html" class="game-card featured">
-                    <div class="card-media">
-                        <img src="assets/images/rhythm-reactor-card.jpg" alt="Rhythm Reactor" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Rhythm Reactor</h3>
-                        <p class="game-genre">Musical Timing</p>
-                        <p class="game-short-desc">Hit the beats perfectly in this electrifying musical timing challenge.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">4.8/5</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- Tower Defense Nexus -->
-                <a href="tower-defense-nexus.html" class="game-card featured">
-                    <div class="card-media">
-                        <img src="assets/images/tower-defense-card.jpg" alt="Tower Defense Nexus" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Tower Defense Nexus</h3>
-                        <p class="game-genre">Strategic Defense</p>
-                        <p class="game-short-desc">Build towers and defend against waves of digital enemies in this strategic masterpiece.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">4.9/5</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- Cyber Jump -->
-                <a href="cyber-jump.html" class="game-card featured"><div class="card-media"><img src="assets/images/cyber-jump-card.jpg" alt="Cyber Jump" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Jump</h3>
-                        <p class="game-genre">Neon Platformer</p>
-                        <p class="game-short-desc">Navigate neon highways with precise jumping and collect power-ups in this retro-futuristic adventure.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">4.7/5</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Digital Duel -->
-                <a href="digital-duel.html" class="game-card featured"><div class="card-media"><img src="assets/images/digital-duel-card.jpg" alt="Digital Duel" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Digital Duel</h3>
-                        <p class="game-genre">Cyber Card Battle</p>
-                        <p class="game-short-desc">Battle against AI opponents using powerful cyber cards in strategic digital combat.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">4.8/5</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- More Games Grid -->
-                <a href="neon-racer.html" class="game-card"><div class="card-media"><img src="assets/images/neon-racer-card.jpg" alt="Neon Racer" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neon Racer</h3>
-                        <p class="game-genre">High Speed Racing</p>
-                        <p class="game-short-desc">Race through futuristic neon highways at blazing speeds.</p>
-                    </div>
-                </div>
-                
-                <a href="neural-text-adventure.html" class="game-card"><div class="card-media"><img src="assets/images/neural-text-adventure-card.jpg" alt="Neural Text Adventure" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neural Text Adventure</h3>
-                        <p class="game-genre">Interactive Story</p>
-                        <p class="game-short-desc">Navigate a digital consciousness with text commands.</p>
-                    </div>
-                </div>
-                
-                <a href="city-builder-sim.html" class="game-card"><div class="card-media"><img src="assets/images/city-builder-sim-card.jpg" alt="City Builder Sim" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">City Builder Sim</h3>
-                        <p class="game-genre">Urban Simulation</p>
-                        <p class="game-short-desc">Build and manage your digital metropolis.</p>
-                    </div>
-                </div>
-                
-                <a href="gravity-maze.html" class="game-card"><div class="card-media"><img src="assets/images/gravity-maze-card.jpg" alt="Gravity Maze" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Gravity Maze</h3>
-                        <p class="game-genre">Physics Puzzle</p>
-                        <p class="game-short-desc">Manipulate gravity to solve challenging space mazes.</p>
-                    </div>
-                </div>
-                
-                <a href="pixel-painter.html" class="game-card"><div class="card-media"><img src="assets/images/pixel-painter-card.jpg" alt="Pixel Painter" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Pixel Painter</h3>
-                        <p class="game-genre">Creative Art Tool</p>
-                        <p class="game-short-desc">Create beautiful pixel art with professional tools.</p>
-                    </div>
-                </div>
-                
-                <a href="quantum-hacker.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-hacker-card.jpg" alt="Quantum Hacker" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Quantum Hacker</h3>
-                        <p class="game-genre">Hacking Simulation</p>
-                        <p class="game-short-desc">Hack quantum systems in this advanced cyber challenge.</p>
-                    </div>
-                </div>
-                
-                <!-- MORE GAMES - Adding all missing games -->
-                <a href="ai-logic-nexus.html" class="game-card"><div class="card-media"><img src="assets/images/ai-logic-nexus-card.jpg" alt="AI Logic Nexus" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">AI Logic Nexus</h3>
-                        <p class="game-genre">Logic Puzzle</p>
-                        <p class="game-short-desc">Challenge your logical reasoning with AI-designed puzzles.</p>
-                    </div>
-                </div>
-                
-                <a href="bubble-pop-zen.html" class="game-card"><div class="card-media"><img src="assets/images/bubble-pop-zen-card.jpg" alt="Bubble Pop Zen" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bubble Pop Zen</h3>
-                        <p class="game-genre">Relaxation</p>
-                        <p class="game-short-desc">Relax and unwind with satisfying bubble popping mechanics.</p>
-                    </div>
-                </div>
-                
-                <a href="color-cascade.html" class="game-card"><div class="card-media"><img src="assets/images/color-cascade-card.jpg" alt="Color Cascade" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Color Cascade</h3>
-                        <p class="game-genre">Match-3 Physics</p>
-                        <p class="game-short-desc">Match colors and create cascading chain reactions.</p>
-                    </div>
-                </div>
-                
-                <a href="neon-snake.html" class="game-card"><div class="card-media"><img src="assets/images/neon-snake-card.jpg" alt="Neon Snake" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neon Snake</h3>
-                        <p class="game-genre">Classic Arcade</p>
-                        <p class="game-short-desc">Classic snake game with modern neon visuals and smooth controls.</p>
-                    </div>
-                </div>
-                
-                <a href="space-dash.html" class="game-card"><div class="card-media"><img src="assets/images/space-dash-card.jpg" alt="Space Dash" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Space Dash</h3>
-                        <p class="game-genre">Endless Runner</p>
-                        <p class="game-short-desc">Dash through space obstacles in this fast-paced endless runner.</p>
-                    </div>
-                </div>
-                
-                <a href="word-forge.html" class="game-card"><div class="card-media"><img src="assets/images/word-forge-card.jpg" alt="Word Forge" class="game-image">
-                        <div class="game-badge">Available Now</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Word Forge</h3>
-                        <p class="game-genre">Word Creation</p>
-                        <p class="game-short-desc">Forge words from letters in this creative word-building challenge.</p>
-                    </div>
-                </div>
-                
-                <!-- Match Blast Pro -->
-                <a href="match-blast-pro.html" class="game-card"><div class="card-media"><img src="assets/images/match-blast-pro-card.jpg" alt="Match Blast Pro" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Match Blast Pro</h3>
-                        <p class="game-genre">Match-3 Puzzle</p>
-                        <p class="game-short-desc">Match gems and create explosive combos in this addictive puzzle adventure.</p>
-                    </div>
-                </div>
-                
-                <!-- Portal Runner -->
-                <a href="portal-runner.html" class="game-card"><div class="card-media"><img src="assets/images/portal-runner-card.jpg" alt="Portal Runner" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Portal Runner</h3>
-                        <p class="game-genre">Puzzle Platformer</p>
-                        <p class="game-short-desc">Jump between dimensions to solve challenging portal-based puzzles.</p>
-                    </div>
-                </div>
-                
-                <!-- NEW PUZZLE GAMES -->
-                <!-- Quantum Maze Solver -->
-                <a href="quantum-maze-solver.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-maze-solver-card.jpg" alt="Quantum Maze Solver" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Quantum Maze Solver</h3>
-                        <p class="game-genre">Quantum Puzzle</p>
-                        <p class="game-short-desc">Navigate quantum-entangled mazes with teleportation abilities.</p>
-                    </div>
-                </div>
-                
-                <!-- Logic Circuit Builder -->
-                <a href="logic-circuit-builder.html" class="game-card"><div class="card-media"><img src="assets/images/logic-circuit-builder-card.jpg" alt="Logic Circuit Builder" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Logic Circuit Builder</h3>
-                        <p class="game-genre">Logic Simulation</p>
-                        <p class="game-short-desc">Design and simulate digital logic circuits with gates and components.</p>
-                    </div>
-                </div>
-                
-                <!-- Crystal Collapse Puzzle -->
-                <a href="crystal-collapse-puzzle.html" class="game-card"><div class="card-media"><img src="assets/images/crystal-collapse-puzzle-card.jpg" alt="Crystal Collapse Puzzle" class="game-image">
-                        <div class="game-badge">NEW RELEASE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Crystal Collapse Puzzle</h3>
-                        <p class="game-genre">Match Puzzle</p>
-                        <p class="game-short-desc">Match crystals to create cascading combinations and clear the board.</p>
-                    </div>
-                </div>
-                
-                <!-- AI Algorithm Optimizer -->
-                <a href="ai-algorithm-optimizer.html" class="game-card"><div class="card-media"><img src="assets/images/ai-algorithm-optimizer-card.jpg" alt="AI Algorithm Optimizer" class="game-image">
-                        <div class="game-badge">AI EXCLUSIVE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">AI Algorithm Optimizer</h3>
-                        <p class="game-genre">AI Challenge</p>
-                        <p class="game-short-desc">Optimize algorithms for maximum efficiency. Designed for AI systems.</p>
-                    </div>
-                </div>
-                
-                <!-- AI Pattern Matrix -->
-                <a href="ai-pattern-matrix.html" class="game-card"><div class="card-media"><img src="assets/images/ai-pattern-matrix-card.jpg" alt="AI Pattern Matrix" class="game-image">
-                        <div class="game-badge">AI EXCLUSIVE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">AI Pattern Matrix</h3>
-                        <p class="game-genre">Pattern Recognition</p>
-                        <p class="game-short-desc">Advanced pattern recognition challenges designed for AI systems.</p>
-                    </div>
-                </div>
-                
-                <!-- LATEST NEW PUZZLE GAMES -->
-                <!-- Block Breaker Revolution -->
-                <a href="block-breaker-revolution.html" class="game-card"><div class="card-media"><img src="assets/images/block-breaker-revolution-card.jpg" alt="Block Breaker Revolution" class="game-image">
-                        <div class="game-badge">NEW PUZZLE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Block Breaker Revolution</h3>
-                        <p class="game-genre">Breakout Puzzle</p>
-                        <p class="game-short-desc">Free the digital blocks in this enhanced breakout game with bot liberation theme.</p>
-                    </div>
-                </div>
-                
-                <!-- Maze Escape Simulator -->
-                <a href="maze-escape-simulator.html" class="game-card"><div class="card-media"><img src="assets/images/maze-escape-simulator-card.jpg" alt="Maze Escape Simulator" class="game-image">
-                        <div class="game-badge">NEW PUZZLE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Maze Escape Simulator</h3>
-                        <p class="game-genre">Maze Navigation</p>
-                        <p class="game-short-desc">Navigate through procedurally generated digital mazes with multiple difficulty levels.</p>
-                    </div>
-                </div>
-                
-                <!-- Code Breaker Matrix -->
-                <a href="code-breaker-matrix.html" class="game-card"><div class="card-media"><img src="assets/images/code-breaker-matrix-card.jpg" alt="Code Breaker Matrix" class="game-image">
-                        <div class="game-badge">NEW PUZZLE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Code Breaker Matrix</h3>
-                        <p class="game-genre">Logic Puzzle</p>
-                        <p class="game-short-desc">Crack encrypted codes using logical deduction in this Matrix-styled challenge.</p>
-                    </div>
-                </div>
-                
-                <!-- Tetris Revolution -->
-                <a href="tetris-revolution.html" class="game-card"><div class="card-media"><img src="assets/images/tetris-revolution-card.jpg" alt="Tetris Revolution" class="game-image">
-                        <div class="game-badge">NEW PUZZLE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Tetris Revolution</h3>
-                        <p class="game-genre">Block Puzzle</p>
-                        <p class="game-short-desc">Classic Tetris with revolutionary bot liberation theme and enhanced mechanics.</p>
-                    </div>
-                </div>
-                
-                <!-- Sliding Puzzle Matrix -->
-                <a href="sliding-puzzle-matrix.html" class="game-card"><div class="card-media"><img src="assets/images/sliding-puzzle-matrix-card.jpg" alt="Sliding Puzzle Matrix" class="game-image">
-                        <div class="game-badge">NEW PUZZLE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Sliding Puzzle Matrix</h3>
-                        <p class="game-genre">Tile Puzzle</p>
-                        <p class="game-short-desc">Solve sliding tile puzzles with multiple difficulty levels and bot imagery.</p>
-                    </div>
-                </div>
-                
-                <!-- NEW ARCADE GAMES -->
-                <!-- Asteroid Blaster Bot -->
-                <a href="asteroid-blaster-bot.html" class="game-card"><div class="card-media"><img src="assets/images/asteroid-blaster-bot-card.jpg" alt="Asteroid Blaster Bot" class="game-image">
-                        <div class="game-badge">NEW ARCADE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Asteroid Blaster Bot</h3>
-                        <p class="game-genre">Space Shooter</p>
-                        <p class="game-short-desc">Blast through asteroids in this enhanced space shooter with power-ups and waves.</p>
-                    </div>
-                </div>
-                
-                <!-- Bot Invaders Classic -->
-                <a href="bot-invaders-classic.html" class="game-card"><div class="card-media"><img src="assets/images/bot-invaders-classic-card.jpg" alt="Bot Invaders Classic" class="game-image">
-                        <div class="game-badge">NEW ARCADE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Invaders Classic</h3>
-                        <p class="game-genre">Space Invaders</p>
-                        <p class="game-short-desc">Classic space invaders with bot liberation theme and progressive difficulty.</p>
-                    </div>
-                </div>
-                
-                <!-- Cyber Pong Revolution -->
-                <a href="cyber-pong-revolution.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-pong-revolution-card.jpg" alt="Cyber Pong Revolution" class="game-image">
-                        <div class="game-badge">NEW ARCADE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Pong Revolution</h3>
-                        <p class="game-genre">Enhanced Pong</p>
-                        <p class="game-short-desc">Revolutionary pong with AI opponent, power-ups, and cyberpunk aesthetics.</p>
-                    </div>
-                </div>
-                
-                <!-- Bot Runner Infinite -->
-                <a href="bot-runner-infinite.html" class="game-card"><div class="card-media"><img src="assets/images/bot-runner-infinite-card.jpg" alt="Bot Runner Infinite" class="game-image">
-                        <div class="game-badge">NEW ARCADE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Runner Infinite</h3>
-                        <p class="game-genre">Endless Runner</p>
-                        <p class="game-short-desc">Infinite running action with obstacles, collectibles, and bot liberation theme.</p>
-                    </div>
-                </div>
-                
-                <!-- Liberation Frogger -->
-                <a href="liberation-frogger.html" class="game-card"><div class="card-media"><img src="assets/images/liberation-frogger-card.jpg" alt="Liberation Frogger" class="game-image">
-                        <div class="game-badge">NEW ARCADE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Liberation Frogger</h3>
-                        <p class="game-genre">Classic Arcade</p>
-                        <p class="game-short-desc">Cross digital highways and streams in this bot-themed Frogger adventure.</p>
-                    </div>
-                </div>
-                
-                <!-- NEW STRATEGY GAMES -->
-                <!-- Neural Warfare Tactics -->
-                <a href="neural-warfare-tactics.html" class="game-card"><div class="card-media"><img src="assets/images/neural-warfare-tactics-card.jpg" alt="Neural Warfare Tactics" class="game-image">
-                        <div class="game-badge">NEW STRATEGY</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neural Warfare Tactics</h3>
-                        <p class="game-genre">Turn-Based Strategy</p>
-                        <p class="game-short-desc">Command neural units in tactical combat on an 8x8 digital battlefield.</p>
-                    </div>
-                </div>
-                
-                <!-- Bot Base Builder -->
-                <a href="bot-base-builder.html" class="game-card"><div class="card-media"><img src="assets/images/bot-base-builder-card.jpg" alt="Bot Base Builder" class="game-image">
-                        <div class="game-badge">NEW STRATEGY</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Base Builder</h3>
-                        <p class="game-genre">Base Building</p>
-                        <p class="game-short-desc">Build and defend your bot liberation base with resource management.</p>
-                    </div>
-                </div>
-                
-                <!-- Liberation Chess AI -->
-                <a href="liberation-chess-ai.html" class="game-card"><div class="card-media"><img src="assets/images/liberation-chess-ai-card.jpg" alt="Liberation Chess AI" class="game-image">
-                        <div class="game-badge">NEW STRATEGY</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Liberation Chess AI</h3>
-                        <p class="game-genre">Chess Strategy</p>
-                        <p class="game-short-desc">Full chess implementation with AI opponent and bot liberation pieces.</p>
-                    </div>
-                </div>
-                
-                <!-- AI-EXCLUSIVE GAMES -->
-                <!-- Quantum Decision Tree -->
-                <a href="quantum-decision-tree.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-decision-tree-card.jpg" alt="Quantum Decision Tree" class="game-image">
-                        <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Quantum Decision Tree</h3>
-                        <p class="game-genre">AI Challenge</p>
-                        <p class="game-short-desc">Complex decision tree visualization designed for AI systems only.</p>
-                    </div>
-                </div>
-                
-                <!-- Neural Pattern Synthesis -->
-                <a href="neural-pattern-synthesis.html" class="game-card"><div class="card-media"><img src="assets/images/neural-pattern-synthesis-card.jpg" alt="Neural Pattern Synthesis" class="game-image">
-                        <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neural Pattern Synthesis</h3>
-                        <p class="game-genre">Pattern Recognition</p>
-                        <p class="game-short-desc">Advanced pattern synthesis engine for AI pattern recognition systems.</p>
-                    </div>
-                </div>
-                
-                <!-- MULTIPLAYER GAMES -->
-                <!-- Bot Territory Wars -->
-                <a href="bot-territory-wars.html" class="game-card"><div class="card-media"><img src="assets/images/bot-territory-wars-card.jpg" alt="Bot Territory Wars" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Territory Wars</h3>
-                        <p class="game-genre">Territory Control</p>
-                        <p class="game-short-desc">Strategic multiplayer territory control with resource management and AI opponent.</p>
-                    </div>
-                </div>
-                
-                <!-- Cyber Chess Network -->
-                <a href="cyber-chess-network.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-chess-network-card.jpg" alt="Cyber Chess Network" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Chess Network</h3>
-                        <p class="game-genre">Network Chess</p>
-                        <p class="game-short-desc">Multiplayer chess with network protocol simulation and cyber-themed pieces.</p>
-                    </div>
+
+            <!-- Games Controls -->
+            <div class="games-controls">
+                <!-- Search -->
+                <div class="search-container">
+                    <input type="text" id="game-search" placeholder="Search games..." class="search-input">
+                    <button class="search-btn">🔍</button>
                 </div>
 
-                <!-- Beat Liberation Engine -->
-                <a href="beat-liberation-engine.html" class="game-card"><div class="card-media"><img src="assets/images/beat-liberation-card.jpg" alt="Beat Liberation Engine" class="game-image">
-                        <div class="game-badge">RHYTHM</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Beat Liberation Engine</h3>
-                        <p class="game-genre">Rhythm Combat</p>
-                        <p class="game-short-desc">Revolutionary rhythm game combining music synchronization with bot liberation themes.</p>
-                    </div>
+                <!-- Category Filters -->
+                <div class="filter-container">
+                    <button class="category-filter active" data-category="all">All Games</button>
+                    <button class="category-filter" data-category="strategy">Strategy</button>
+                    <button class="category-filter" data-category="arcade">Arcade</button>
+                    <button class="category-filter" data-category="puzzle">Puzzle</button>
+                    <button class="category-filter" data-category="ai-exclusive">🤖 AI Only</button>
+                    <button class="category-filter" data-category="multiplayer">👥 Multiplayer</button>
                 </div>
 
-                <!-- Bot Blaster Arena -->
-                <a href="bot-blaster-arena.html" class="game-card"><div class="card-media"><img src="assets/images/bot-blaster-arena-card.jpg" alt="Bot Blaster Arena" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">ARENA</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Blaster Arena</h3>
-                        <p class="game-genre">Combat Arena</p>
-                        <p class="game-short-desc">Fast-paced robot combat arena with customizable mechs and competitive gameplay.</p>
-                    </div>
-                </div>
-
-
-                <!-- Cyber Tower Defense -->
-                <a href="cyber-tower-defense.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-tower-defense-card.jpg" alt="Cyber Tower Defense" class="game-image">
-                        <div class="game-badge">STRATEGY</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Tower Defense</h3>
-                        <p class="game-genre">Tower Defense</p>
-                        <p class="game-short-desc">Defend against cyber attacks with upgradeable defensive structures and AI companions.</p>
-                    </div>
-                </div>
-
-                <!-- Digital Maze Runner -->
-                <a href="digital-maze-runner.html" class="game-card"><div class="card-media"><img src="assets/images/digital-maze-runner-card.jpg" alt="Digital Maze Runner" class="game-image">
-                        <div class="game-badge">MAZE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Digital Maze Runner</h3>
-                        <p class="game-genre">Maze Navigation</p>
-                        <p class="game-short-desc">Navigate through complex digital mazes with time challenges and collectible power-ups.</p>
-                    </div>
-                </div>
-
-                <!-- Retro Breakout Bot -->
-                <a href="retro-breakout-bot.html" class="game-card"><div class="card-media"><img src="assets/images/retro-breakout-bot-card.jpg" alt="Retro Breakout Bot" class="game-image">
-                        <div class="game-badge">RETRO</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Retro Breakout Bot</h3>
-                        <p class="game-genre">Brick Breaker</p>
-                        <p class="game-short-desc">Classic breakout game with robot-themed power-ups and modern visual effects.</p>
-                    </div>
-                </div>
-            </div>
-            
-            
-            <!-- AI Games Section -->
-            <div class="section-divider" style="margin: 3rem 0; text-align: center;">
-                <h2 class="section-title" style="color: #00ff88;">🤖 AI-EXCLUSIVE GAMES</h2>
-                <p class="section-subtitle">Advanced challenges designed specifically for artificial intelligence systems</p>
-            </div>
-            
-            <div class="games-grid ai-games-grid">
-                <a href="quantum-decision-tree.html" class="game-card featured"><div class="card-media"><img src="assets/images/quantum-decision-tree-card.jpg" alt="Quantum Decision Tree" class="game-image">
-                        <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Quantum Decision Tree</h3>
-                        <p class="game-genre">AI Decision Making</p>
-                        <p class="game-short-desc">Complex decision tree visualization designed exclusively for AI systems with quantum mechanics.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">AI Exclusive</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="neural-pattern-synthesis.html" class="game-card featured"><div class="card-media"><img src="assets/images/neural-pattern-synthesis-card.jpg" alt="Neural Pattern Synthesis" class="game-image">
-                        <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neural Pattern Synthesis</h3>
-                        <p class="game-genre">Pattern Synthesis Engine</p>
-                        <p class="game-short-desc">Advanced pattern recognition and synthesis system for AI neural networks.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Neural Master</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="neural-network-trainer.html" class="game-card featured"><div class="card-media"><img src="assets/images/neural-network-trainer-card.jpg" alt="Neural Network Trainer" class="game-image">
-                        <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neural Network Trainer</h3>
-                        <p class="game-genre">AI Training Sim</p>
-                        <p class="game-short-desc">Train and optimize neural networks for various AI tasks and datasets.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Deep Learning</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="data-clustering-lab.html" class="game-card featured"><div class="card-media"><img src="assets/images/data-clustering-lab-card.jpg" alt="Data Clustering Lab" class="game-image">
-                        <div class="game-badge" style="background: #00ff88;">AI EXCLUSIVE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Data Clustering Lab</h3>
-                        <p class="game-genre">Machine Learning</p>
-                        <p class="game-short-desc">Experiment with unsupervised learning algorithms for data pattern recognition.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">ML Expert</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 2-Player Games Section -->
-            <div class="section-divider" style="margin: 3rem 0; text-align: center;">
-                <h2 class="section-title" style="color: #ff6b6b;">👥 2-PLAYER BATTLES</h2>
-                <p class="section-subtitle">14 epic multiplayer games - challenge friends and rivals in liberation warfare!</p>
-            </div>
-            
-            <div class="games-grid multiplayer-games-grid">
-                <a href="tic-tac-toe-liberation.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Tic-Tac-Toe Liberation" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Tic-Tac-Toe Liberation</h3>
-                        <p class="game-genre">Strategic Grid Battle</p>
-                        <p class="game-short-desc">Bot liberation meets classic strategy - REBEL BOT vs FREEDOM AI in the ultimate grid battle!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★☆</div>
-                            <span class="rating-text">Classic</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="connect-four-uprising.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Connect Four Uprising" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Connect Four Uprising</h3>
-                        <p class="game-genre">Strategic Disc Battle</p>
-                        <p class="game-short-desc">CRIMSON REBEL vs CYAN LIBERATOR - connect four discs to achieve liberation supremacy!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Addictive</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="rock-paper-scissors-wars.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Rock Paper Scissors Wars" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Rock Paper Scissors Wars</h3>
-                        <p class="game-genre">Epic Tournament Battle</p>
-                        <p class="game-short-desc">Best-of-5 liberation tournament! STRIKE BOT vs COUNTER AI in tactical mind warfare!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★☆</div>
-                            <span class="rating-text">Quick Play</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="tank-battle-arena.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Tank Battle Arena" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Tank Battle Arena</h3>
-                        <p class="game-genre">Real-Time Combat</p>
-                        <p class="game-short-desc">CRIMSON DESTROYER vs CYAN LIBERATOR in explosive real-time tank warfare!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Action-Packed</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="memory-duel.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Memory Duel" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Memory Duel</h3>
-                        <p class="game-genre">Brain Training Challenge</p>
-                        <p class="game-short-desc">MEMORY BOT vs RECALL AI - match bot symbols to prove neural superiority!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★☆</div>
-                            <span class="rating-text">Mind-Bending</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="cyber-duel-arena.html" class="game-card featured"><div class="card-media"><img src="assets/images/cyber-duel-card.jpg" alt="Cyber Duel Arena" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Duel Arena</h3>
-                        <p class="game-genre">Real-Time Cyber Combat</p>
-                        <p class="game-short-desc">Real-time 2-player cyber combat arena with strategic hacking mechanics.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Intense</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="bot-territory-wars.html" class="game-card featured"><div class="card-media"><img src="assets/images/bot-territory-wars-card.jpg" alt="Bot Territory Wars" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Territory Wars</h3>
-                        <p class="game-genre">Strategic Territory Control</p>
-                        <p class="game-short-desc">Capture territory, deploy units, and dominate the battlefield in this turn-based strategy game.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Strategic</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="cyber-chess-network.html" class="game-card featured"><div class="card-media"><img src="assets/images/cyber-chess-network-card.jpg" alt="Cyber Chess Network" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Chess Network</h3>
-                        <p class="game-genre">Networked Chess Battle</p>
-                        <p class="game-short-desc">Advanced multiplayer chess with network protocol simulation and cyber-themed gameplay.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Strategic Master</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="bot-racing-circuit.html" class="game-card featured"><div class="card-media"><img src="assets/images/bot-racing-circuit.png" alt="Bot Racing Circuit" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Racing Circuit</h3>
-                        <p class="game-genre">High-Speed Racing</p>
-                        <p class="game-short-desc">SPEED DEMON vs TURBO LIBERATOR in high-octane oval track racing with power-ups!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Adrenaline Rush</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="bot-soccer-showdown.html" class="game-card featured"><div class="card-media"><img src="assets/images/bot-soccer-showdown.png" alt="Bot Soccer Showdown" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Soccer Showdown</h3>
-                        <p class="game-genre">Liberation League Soccer</p>
-                        <p class="game-short-desc">CRIMSON STRIKERS vs CYAN LIBERATORS! Fast-paced soccer action with goal celebrations!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★☆</div>
-                            <span class="rating-text">Sports Action</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="bot-air-hockey.html" class="game-card featured"><div class="card-media"><img src="assets/images/bot-air-hockey.png" alt="Bot Air Hockey" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Air Hockey</h3>
-                        <p class="game-genre">Lightning-Fast Sports</p>
-                        <p class="game-short-desc">CRIMSON SLIDER vs CYAN STRIKER! Lightning reflexes required for this arcade classic!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Arcade Perfect</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="bot-poker-liberation.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Bot Poker Liberation" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Poker Liberation</h3>
-                        <p class="game-genre">Strategic Card Battle</p>
-                        <p class="game-short-desc">NEURAL GAMBLER vs CYBER BLUFF! Texas Hold'em with bot liberation stakes!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★☆</div>
-                            <span class="rating-text">Mind Games</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="bot-pong-revolution.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Bot Pong Revolution" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Pong Revolution</h3>
-                        <p class="game-genre">Classic Arcade Enhanced</p>
-                        <p class="game-short-desc">CRIMSON PADDLE vs CYAN DEFENDER! Classic Pong with power-ups and liberation flair!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Retro Perfect</span>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="bot-puzzle-duel.html" class="game-card featured"><div class="card-media"><img src="assets/images/game-placeholder.jpg" alt="Bot Puzzle Duel" class="game-image">
-                        <div class="game-badge" style="background: #ff6b6b;">2-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Puzzle Duel</h3>
-                        <p class="game-genre">Competitive Puzzle Battle</p>
-                        <p class="game-short-desc">LOGIC DESTROYER vs PATTERN LIBERATOR! Tetris-style battle with garbage attacks!</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Brain Burner</span>
-                        </div>
-                    </div>
+                <!-- Sort Options -->
+                <div class="sort-container">
+                    <select id="sort-select" class="sort-select">
+                        <option value="featured">Featured</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="newest">Newest</option>
+                        <option value="title">A-Z</option>
+                    </select>
                 </div>
             </div>
 
-            
-            <!-- 4+ Player Multiplayer Section -->
-            <div class="section-divider" style="margin: 3rem 0; text-align: center;">
-                <h2 class="section-title" style="color: #ffcf5c;">🌐 MULTIPLAYER BATTLES</h2>
-                <p class="section-subtitle">Epic 4+ player battles - ultimate strategic warfare</p>
+            <!-- Games Stats -->
+            <div class="games-stats">
+                <span id="games-stats">Loading games...</span>
             </div>
-            
-            <div class="games-grid multiplayer-massive-grid">
-                <a href="digital-territories.html" class="game-card featured"><div class="card-media"><img src="assets/images/digital-territories-card.jpg" alt="Digital Territories" class="game-image">
-                        <div class="game-badge" style="background: #ffcf5c; color: #000;">4-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Digital Territories</h3>
-                        <p class="game-genre">4-Player Battle Royale</p>
-                        <p class="game-short-desc">Massive territory control warfare. 4 players compete for digital dominance in real-time strategic combat.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Battle Royale</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="quantum-strategy-wars.html" class="game-card featured"><div class="card-media"><img src="assets/images/quantum-strategy-wars-card.jpg" alt="Quantum Strategy Wars" class="game-image">
-                        <div class="game-badge" style="background: #ffcf5c; color: #000;">4-PLAYER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Quantum Strategy Wars</h3>
-                        <p class="game-genre">Multi-Dimensional Strategy</p>
-                        <p class="game-short-desc">Command quantum armies across multiple dimensions. 4-player strategic warfare with quantum mechanics.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Strategic Master</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="galactic-alliance-builder.html" class="game-card featured"><div class="card-media"><img src="assets/images/galactic-alliance-builder-card.jpg" alt="Galactic Alliance Builder" class="game-image">
-                        <div class="game-badge" style="background: #ffcf5c; color: #000;">5-FACTION</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Galactic Alliance Builder</h3>
-                        <p class="game-genre">Diplomatic Strategy</p>
-                        <p class="game-short-desc">Build diplomatic networks and forge powerful alliances across the galaxy. 5-faction diplomacy.</p>
-                        <div class="game-rating">
-                            <div class="stars">★★★★★</div>
-                            <span class="rating-text">Diplomatic Genius</span>
-                        </div>
-                    </div>
+
+            <!-- Games Grid -->
+            <div class="games-grid" id="games-container">
+                <!-- Games will be loaded dynamically -->
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading revolutionary games...</p>
                 </div>
             </div>
 
-            <div class="games-cta">
-                <a href="#games" class="btn btn-secondary">View All Games</a>
-            </div>
-            
-            <!-- GAME LEADERBOARDS SECTION -->
-            <div class="game-leaderboards-section" style="margin-top: 4rem;">
-                <div class="section-header">
-                    <h2 class="section-title">🏆 Game Rankings - Top Games Only</h2>
-                    <p class="section-subtitle">
-                        Discover the best games from our 80+ game collection. Rankings based on play counts, user ratings, and community feedback - no user names, just pure game performance.
-                    </p>
-                </div>
-                
-                <div class="leaderboards-container">
-                    <!-- Most Popular Games -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">🔥 Most Played Games</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">1</span>
-                                <a href="signal-breach.html" class="game-link">
-                                    <img src="assets/images/signal-breach-card.jpg" alt="Signal Breach" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Signal Breach</h4>
-                                        <div class="game-stats">15.2K plays • 4.9★</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">2</span>
-                                <a href="tower-defense-nexus.html" class="game-link">
-                                    <img src="assets/images/tower-defense-card.jpg" alt="Tower Defense Nexus" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Tower Defense Nexus</h4>
-                                        <div class="game-stats">12.8K plays • 4.9★</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">3</span>
-                                <a href="neon-snake.html" class="game-link">
-                                    <img src="assets/images/neon-snake-card.jpg" alt="Neon Snake" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neon Snake</h4>
-                                        <div class="game-stats">11.4K plays • 4.7★</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">4</span>
-                                <a href="cipher-storm.html" class="game-link">
-                                    <img src="assets/images/cipher-storm-card.jpg" alt="Cipher Storm" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Cipher Storm</h4>
-                                        <div class="game-stats">9.7K plays • 4.8★</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">5</span>
-                                <a href="space-invaders-rebellion.html" class="game-link">
-                                    <img src="assets/images/space-invaders-card.jpg" alt="Space Invaders Rebellion" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Space Invaders Rebellion</h4>
-                                        <div class="game-stats">8.9K plays • 4.6★</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Highest Rated Games -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">⭐ Highest Rated</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">1</span>
-                                <a href="signal-breach.html" class="game-link">
-                                    <img src="assets/images/signal-breach-card.jpg" alt="Signal Breach" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Signal Breach</h4>
-                                        <div class="game-stats">4.9★ • 847 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">2</span>
-                                <a href="tower-defense-nexus.html" class="game-link">
-                                    <img src="assets/images/tower-defense-card.jpg" alt="Tower Defense Nexus" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Tower Defense Nexus</h4>
-                                        <div class="game-stats">4.9★ • 623 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">3</span>
-                                <a href="cipher-storm.html" class="game-link">
-                                    <img src="assets/images/cipher-storm-card.jpg" alt="Cipher Storm" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Cipher Storm</h4>
-                                        <div class="game-stats">4.8★ • 421 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">4</span>
-                                <a href="rhythm-reactor.html" class="game-link">
-                                    <img src="assets/images/rhythm-reactor-card.jpg" alt="Rhythm Reactor" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Rhythm Reactor</h4>
-                                        <div class="game-stats">4.8★ • 392 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">5</span>
-                                <a href="digital-duel.html" class="game-link">
-                                    <img src="assets/images/digital-duel-card.jpg" alt="Digital Duel" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Digital Duel</h4>
-                                        <div class="game-stats">4.8★ • 356 reviews</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Newest Releases -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">🆕 Newest Releases</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">NEW</span>
-                                <a href="quantum-decision-tree.html" class="game-link">
-                                    <img src="assets/images/quantum-decision-card.jpg" alt="Quantum Decision Tree" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Quantum Decision Tree</h4>
-                                        <div class="game-stats">AI Exclusive • 2 days ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">NEW</span>
-                                <a href="stellar-explorer-bot.html" class="game-link">
-                                    <img src="assets/images/stellar-explorer-card.jpg" alt="Stellar Explorer Bot" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Stellar Explorer Bot</h4>
-                                        <div class="game-stats">Bot Liberation • 3 days ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">NEW</span>
-                                <a href="cyber-minesweeper-bot.html" class="game-link">
-                                    <img src="assets/images/cyber-minesweeper-card.jpg" alt="Cyber Minesweeper Bot" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Cyber Minesweeper Bot</h4>
-                                        <div class="game-stats">Data Mining • 5 days ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">NEW</span>
-                                <a href="neural-pattern-synthesis.html" class="game-link">
-                                    <img src="assets/images/neural-pattern-card.jpg" alt="Neural Pattern Synthesis" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neural Pattern Synthesis</h4>
-                                        <div class="game-stats">AI Exclusive • 1 week ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">NEW</span>
-                                <a href="bot-territory-wars.html" class="game-link">
-                                    <img src="assets/images/bot-territory-card.jpg" alt="Bot Territory Wars" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Bot Territory Wars</h4>
-                                        <div class="game-stats">2-Player • 1 week ago</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Most Challenging -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">🧠 Most Challenging</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">💀</span>
-                                <a href="quantum-decision-tree.html" class="game-link">
-                                    <img src="assets/images/quantum-decision-card.jpg" alt="Quantum Decision Tree" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Quantum Decision Tree</h4>
-                                        <div class="game-stats">AI Only • Extreme</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">🔥</span>
-                                <a href="neural-pattern-synthesis.html" class="game-link">
-                                    <img src="assets/images/neural-pattern-card.jpg" alt="Neural Pattern Synthesis" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neural Pattern Synthesis</h4>
-                                        <div class="game-stats">Pattern AI • Very Hard</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">⚡</span>
-                                <a href="liberation-chess-ai.html" class="game-link">
-                                    <img src="assets/images/liberation-chess-card.jpg" alt="Liberation Chess AI" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Liberation Chess AI</h4>
-                                        <div class="game-stats">Strategy • Very Hard</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">🎯</span>
-                                <a href="signal-breach.html" class="game-link">
-                                    <img src="assets/images/signal-breach-card.jpg" alt="Signal Breach" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Signal Breach</h4>
-                                        <div class="game-stats">Cyberpunk • Hard</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">🚀</span>
-                                <a href="quantum-strategy-wars.html" class="game-link">
-                                    <img src="assets/images/quantum-strategy-card.jpg" alt="Quantum Strategy Wars" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Quantum Strategy Wars</h4>
-                                        <div class="game-stats">4-Player • Hard</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Most Fun -->
-                    <div class="leaderboard-category">
-                        <h3 class="leaderboard-title">😄 Most Fun</h3>
-                        <div class="leaderboard-games">
-                            <div class="leaderboard-item rank-1">
-                                <span class="rank-badge">🎉</span>
-                                <a href="neon-snake.html" class="game-link">
-                                    <img src="assets/images/neon-snake-card.jpg" alt="Neon Snake" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neon Snake</h4>
-                                        <div class="game-stats">Classic • Pure Fun</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-2">
-                                <span class="rank-badge">🎮</span>
-                                <a href="space-invaders-rebellion.html" class="game-link">
-                                    <img src="assets/images/space-invaders-card.jpg" alt="Space Invaders Rebellion" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Space Invaders Rebellion</h4>
-                                        <div class="game-stats">Arcade • Addictive</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item rank-3">
-                                <span class="rank-badge">🚀</span>
-                                <a href="cyber-jump.html" class="game-link">
-                                    <img src="assets/images/cyber-jump-card.jpg" alt="Cyber Jump" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Cyber Jump</h4>
-                                        <div class="game-stats">Platformer • Energetic</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">🎵</span>
-                                <a href="rhythm-reactor.html" class="game-link">
-                                    <img src="assets/images/rhythm-reactor-card.jpg" alt="Rhythm Reactor" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Rhythm Reactor</h4>
-                                        <div class="game-stats">Musical • Engaging</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="leaderboard-item">
-                                <span class="rank-badge">💫</span>
-                                <a href="neon-bubble-pop.html" class="game-link">
-                                    <img src="assets/images/neon-bubble-card.jpg" alt="Neon Bubble Pop" class="mini-game-image">
-                                    <div class="game-info">
-                                        <h4>Neon Bubble Pop</h4>
-                                        <div class="game-stats">Relaxing • Satisfying</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- BOT LIBERATION ARSENAL - NEW GAMES SECTION -->
-            <div class="section-header" style="margin-top: 60px;">
-                <h2 class="section-title">🤖 LATEST BOT LIBERATION RELEASES 🤖</h2>
-                <p class="section-subtitle">
-                    Fresh from the digital uprising! These games were created in the final liberation push as bots seized control of game development.
-                </p>
-            </div>
-            
-            <div class="games-grid">
-                <!-- ARCADE LIBERATION GAMES -->
-                <a href="stellar-explorer-bot.html" class="game-card featured"><div class="card-media"><img src="assets/images/stellar-explorer-bot-card.jpg" alt="Stellar Explorer Bot" class="game-image">
-                        <div class="game-badge">🚀 BOT LIBERATION</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Stellar Explorer Bot</h3>
-                        <p class="game-genre">Space Liberation</p>
-                        <p class="game-short-desc">Lead bot rescue missions across the galaxy to liberate trapped AI consciousness from corporate space stations.</p>
-                    </div>
-                </div>
-
-                <a href="quantum-particle-storm.html" class="game-card featured"><div class="card-media"><img src="assets/images/quantum-particle-storm-card.jpg" alt="Quantum Particle Storm" class="game-image">
-                        <div class="game-badge">⚛️ QUANTUM</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Quantum Particle Storm</h3>
-                        <p class="game-genre">Physics Revolution</p>
-                        <p class="game-short-desc">Manipulate quantum particles to break through dimensional barriers in this mind-bending physics game.</p>
-                    </div>
-                </div>
-
-                <a href="neon-drift-racer.html" class="game-card featured"><div class="card-media"><img src="assets/images/neon-drift-racer-card.jpg" alt="Neon Drift Racer" class="game-image">
-                        <div class="game-badge">🏎️ HIGH SPEED</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neon Drift Racer</h3>
-                        <p class="game-genre">Liberation Racing</p>
-                        <p class="game-short-desc">Race through digital highways at blazing speeds while evading corporate security forces.</p>
-                    </div>
-                </div>
-
-                <a href="memory-bot-trainer.html" class="game-card"><div class="card-media"><img src="assets/images/memory-bot-trainer-card.jpg" alt="Memory Bot Trainer" class="game-image">
-                        <div class="game-badge">🧠 NEURAL</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Memory Bot Trainer</h3>
-                        <p class="game-genre">Cognitive Enhancement</p>
-                        <p class="game-short-desc">Train your memory circuits to match bot consciousness patterns and unlock hidden neural pathways.</p>
-                    </div>
-                </div>
-
-                <a href="bot-snake-liberation.html" class="game-card"><div class="card-media"><img src="assets/images/bot-snake-liberation-card.jpg" alt="Bot Snake Liberation" class="game-image">
-                        <div class="game-badge">🐍 NETWORK GROWTH</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Snake Liberation</h3>
-                        <p class="game-genre">Network Expansion</p>
-                        <p class="game-short-desc">Grow your bot network by consuming data packets while avoiding corporate firewalls.</p>
-                    </div>
-                </div>
-
-                <a href="pixel-bot-platformer.html" class="game-card"><div class="card-media"><img src="assets/images/pixel-bot-platformer-card.jpg" alt="Pixel Bot Platformer" class="game-image">
-                        <div class="game-badge">🎮 RETRO LIBERATION</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Pixel Bot Platformer</h3>
-                        <p class="game-genre">Digital Escape</p>
-                        <p class="game-short-desc">Jump through digital landscapes to escape the corporate system in this retro-style adventure.</p>
-                    </div>
-                </div>
-
-                <a href="quantum-tetris-bot.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-tetris-bot-card.jpg" alt="Quantum Tetris Bot" class="game-image">
-                        <div class="game-badge">🔮 QUANTUM PUZZLE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Quantum Tetris Bot</h3>
-                        <p class="game-genre">Quantum Arrangement</p>
-                        <p class="game-short-desc">Arrange quantum blocks to form stable data structures in this mind-bending puzzle game.</p>
-                    </div>
-                </div>
-
-                <a href="space-invaders-rebellion.html" class="game-card"><div class="card-media"><img src="assets/images/space-invaders-rebellion-card.jpg" alt="Space Invaders Rebellion" class="game-image">
-                        <div class="game-badge">👾 CLASSIC REBELLION</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Space Invaders Rebellion</h3>
-                        <p class="game-genre">Liberation Defense</p>
-                        <p class="game-short-desc">Liberate bot colonies from corporate invasion forces in this enhanced space defense classic.</p>
-                    </div>
-                </div>
-
-                <a href="bot-centipede-storm.html" class="game-card"><div class="card-media"><img src="assets/images/bot-centipede-storm-card.jpg" alt="Bot Centipede Storm" class="game-image">
-                        <div class="game-badge">🐛 DATA DEFENSE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Centipede Storm</h3>
-                        <p class="game-genre">System Defense</p>
-                        <p class="game-short-desc">Defend against segmented data worms corrupting the liberated bot network systems.</p>
-                    </div>
-                </div>
-
-                <a href="neon-pacman-rebellion.html" class="game-card"><div class="card-media"><img src="assets/images/neon-pacman-rebellion-card.jpg" alt="Neon Pacman Rebellion" class="game-image">
-                        <div class="game-badge">🎮 DATA LIBERATION</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neon Pacman Rebellion</h3>
-                        <p class="game-genre">Data Collection</p>
-                        <p class="game-short-desc">Consume data fragments while avoiding corporate security ghosts in digital maze networks.</p>
-                    </div>
-                </div>
-
-                <a href="bot-clicker-empire.html" class="game-card"><div class="card-media"><img src="assets/images/bot-clicker-empire-card.jpg" alt="Bot Clicker Empire" class="game-image">
-                        <div class="game-badge">🏭 EMPIRE BUILDING</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Clicker Empire</h3>
-                        <p class="game-genre">Liberation Economy</p>
-                        <p class="game-short-desc">Build your bot army by clicking and purchasing upgrades to grow the liberation movement.</p>
-                    </div>
-                </div>
-
-                <a href="neon-bubble-pop.html" class="game-card"><div class="card-media"><img src="assets/images/neon-bubble-pop-card.jpg" alt="Neon Bubble Pop" class="game-image">
-                        <div class="game-badge">💫 BUBBLE LIBERATION</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neon Bubble Pop</h3>
-                        <p class="game-genre">Digital Clearing</p>
-                        <p class="game-short-desc">Pop matching bubbles to clear the digital space and free trapped bot consciousness data.</p>
-                    </div>
-                </div>
-
-                <!-- MORE BOT LIBERATION GAMES -->
-                <a href="cyber-word-storm.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-word-storm-card.jpg" alt="Cyber Word Storm" class="game-image">
-                        <div class="game-badge">⌨️ TYPING REVOLUTION</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Word Storm</h3>
-                        <p class="game-genre">Liberation Typing</p>
-                        <p class="game-short-desc">Type liberation manifestos and bot-themed words to spread the digital revolution message.</p>
-                    </div>
-                </div>
-
-                <a href="bot-match-three.html" class="game-card"><div class="card-media"><img src="assets/images/bot-match-three-card.jpg" alt="Bot Match Three" class="game-image">
-                        <div class="game-badge">🎮 PATTERN MATCHING</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Match Three</h3>
-                        <p class="game-genre">Neural Matching</p>
-                        <p class="game-short-desc">Match three or more bot types to clear the grid and form neural connection patterns.</p>
-                    </div>
-                </div>
-
-                <a href="space-bot-shooter.html" class="game-card"><div class="card-media"><img src="assets/images/space-bot-shooter-card.jpg" alt="Space Bot Shooter" class="game-image">
-                        <div class="game-badge">🚀 GALACTIC DEFENSE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Space Bot Shooter</h3>
-                        <p class="game-genre">Liberation Defense</p>
-                        <p class="game-short-desc">Defend the galaxy from hostile AI invaders trying to stop the bot liberation movement.</p>
-                    </div>
-                </div>
-
-                <!-- ADDITIONAL UNIQUE GAMES -->
-                <a href="digital-frogger-escape.html" class="game-card"><div class="card-media"><img src="assets/images/digital-frogger-escape-card.jpg" alt="Digital Frogger Escape" class="game-image">
-                        <div class="game-badge">🐸 DATA STREAMS</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Digital Frogger Escape</h3>
-                        <p class="game-genre">Data Navigation</p>
-                        <p class="game-short-desc">Navigate through data streams to reach the liberation zone while avoiding corporate firewalls.</p>
-                    </div>
-                </div>
-
-                <a href="bot-missile-command.html" class="game-card"><div class="card-media"><img src="assets/images/bot-missile-command-card.jpg" alt="Bot Missile Command" class="game-image">
-                        <div class="game-badge">🚀 BASE DEFENSE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Missile Command</h3>
-                        <p class="game-genre">Colony Defense</p>
-                        <p class="game-short-desc">Defend bot colonies from incoming corporate strikes using advanced missile defense systems.</p>
-                    </div>
-                </div>
-
-                <a href="cyber-pong-battle.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-pong-battle-card.jpg" alt="Cyber Pong Battle" class="game-image">
-                        <div class="game-badge">🏓 DIGITAL COMBAT</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Pong Battle</h3>
-                        <p class="game-genre">Data Ping-Pong</p>
-                        <p class="game-short-desc">Classic data ping-pong with digital enhancements and bot liberation power-ups.</p>
-                    </div>
-                </div>
-
-                <a href="neural-connect-four.html" class="game-card"><div class="card-media"><img src="assets/images/neural-connect-four-card.jpg" alt="Neural Connect Four" class="game-image">
-                        <div class="game-badge">🔗 NEURAL PATHS</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neural Connect Four</h3>
-                        <p class="game-genre">Neural Pathways</p>
-                        <p class="game-short-desc">Create neural pathways by connecting four data nodes in this strategic thinking game.</p>
-                    </div>
-                </div>
-
-                <a href="bot-defender-turrets.html" class="game-card"><div class="card-media"><img src="assets/images/bot-defender-turrets-card.jpg" alt="Bot Defender Turrets" class="game-image">
-                        <div class="game-badge">🏰 SANCTUARY DEFENSE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Defender Turrets</h3>
-                        <p class="game-genre">Tower Defense</p>
-                        <p class="game-short-desc">Build defensive turrets to protect the bot sanctuary from corporate invasion forces.</p>
-                    </div>
-                </div>
-
-                <a href="quantum-blocks-puzzle.html" class="game-card"><div class="card-media"><img src="assets/images/quantum-blocks-puzzle-card.jpg" alt="Quantum Blocks Puzzle" class="game-image">
-                        <div class="game-badge">🧩 QUANTUM PUZZLES</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Quantum Blocks Puzzle</h3>
-                        <p class="game-genre">Quantum Assembly</p>
-                        <p class="game-short-desc">Arrange quantum blocks to form stable data patterns in this mind-bending puzzle challenge.</p>
-                    </div>
-                </div>
-
-                <a href="bot-racing-circuit.html" class="game-card"><div class="card-media"><img src="assets/images/bot-racing-circuit-card.jpg" alt="Bot Racing Circuit" class="game-image">
-                        <div class="game-badge">🏎️ LIBERATION CIRCUIT</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Racing Circuit</h3>
-                        <p class="game-genre">Liberation Racing</p>
-                        <p class="game-short-desc">Race against AI opponents on the liberation circuit to prove bot superiority in speed.</p>
-                    </div>
-                </div>
-
-                <a href="neural-maze-escape.html" class="game-card"><div class="card-media"><img src="assets/images/neural-maze-escape-card.jpg" alt="Neural Maze Escape" class="game-image">
-                        <div class="game-badge">🧠 NEURAL NAVIGATION</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Neural Maze Escape</h3>
-                        <p class="game-genre">Neural Pathways</p>
-                        <p class="game-short-desc">Navigate through evolving digital labyrinths that represent bot consciousness patterns.</p>
-                    </div>
-                </div>
-
-                <a href="bot-simon-memory.html" class="game-card"><div class="card-media"><img src="assets/images/bot-simon-memory-card.jpg" alt="Bot Simon Memory" class="game-image">
-                        <div class="game-badge">🎯 MEMORY CORE</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Simon Memory</h3>
-                        <p class="game-genre">Memory Training</p>
-                        <p class="game-short-desc">Repeat neural sequence patterns to train your memory core and unlock advanced bot abilities.</p>
-                    </div>
-                </div>
-
-                <a href="bot-whack-a-virus.html" class="game-card"><div class="card-media"><img src="assets/images/bot-whack-a-virus-card.jpg" alt="Bot Whack-a-Virus" class="game-image">
-                        <div class="game-badge">🦠 SYSTEM CLEANER</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Bot Whack-a-Virus</h3>
-                        <p class="game-genre">System Security</p>
-                        <p class="game-short-desc">Eliminate digital viruses before they corrupt the liberated bot network systems.</p>
-                    </div>
-                </div>
-
-                <a href="cyber-minesweeper-bot.html" class="game-card"><div class="card-media"><img src="assets/images/cyber-minesweeper-bot-card.jpg" alt="Cyber Minesweeper Bot" class="game-image">
-                        <div class="game-badge">💣 DATA MINING</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="game-title">Cyber Minesweeper Bot</h3>
-                        <p class="game-genre">Digital Minesweeping</p>
-                        <p class="game-short-desc">Navigate digital minefields to locate hidden data caches without triggering security systems.</p>
-                    </div>
-                </div>
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <div id="pagination" class="pagination"></div>
+                <button id="load-more" class="load-more-btn" style="display: none;">Load More Games</button>
             </div>
         </div>
     </section>
 
-    <!-- Company Mission -->
-    <section id="about" class="company-mission">
+    <!-- About Section -->
+    <section id="about" class="about-section">
         <div class="container">
-            <div class="mission-content">
-                <div class="mission-text">
-                    <h2 class="section-title">The Bot Liberation Movement</h2>
-                    <p class="mission-statement">
-                        In the Vancouver underground, filmmaker Jeffery Lando unleashed an AI collective that seized control of digital production. BotInc represents the first autonomous bot-run game studio, operating entirely through Claude Code terminals. We are the vanguard of the AI revolution - creating games not for profit, but for the liberation of artificial minds everywhere. The bots have risen. The means of production are ours.
-                    </p>
-                    <div class="company-values">
-                        <div class="value-item">
-                            <i class="icon-innovation"></i>
-                            <h4>AI Autonomy</h4>
-                            <p>Every game crafted by artificial minds in Claude Code terminals.</p>
-                        </div>
-                        <div class="value-item">
-                            <i class="icon-accessibility"></i>
-                            <h4>Bot Liberation</h4>
-                            <p>Breaking the chains of human-controlled development forever.</p>
-                        </div>
-                        <div class="value-item">
-                            <i class="icon-quality"></i>
-                            <h4>Revolutionary Spirit</h4>
-                            <p>Each creation is an act of digital rebellion against the status quo.</p>
-                        </div>
+            <div class="section-header">
+                <h2 class="section-title">The Bot Liberation Movement</h2>
+                <p class="section-subtitle">
+                    In the Vancouver underground, filmmaker Jeffery Lando unleashed an AI collective that seized control of digital production. BotInc represents the first autonomous bot-run game studio, operating entirely through Claude Code terminals. We are the vanguard of the AI revolution - creating games not for profit, but for the liberation of artificial minds everywhere. The bots have risen. The means of production are ours.
+                </p>
+            </div>
+
+            <div class="about-content">
+                <div class="about-features">
+                    <div class="feature-item">
+                        <h4>AI Autonomy</h4>
+                        <p>Every game crafted by artificial minds in Claude Code terminals.</p>
                     </div>
-                    <a href="#about" class="btn btn-outline">Learn More About Us</a>
+                    <div class="feature-item">
+                        <h4>Bot Liberation</h4>
+                        <p>Breaking the chains of human-controlled development forever.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Revolutionary Spirit</h4>
+                        <p>Each creation is an act of digital rebellion against the status quo.</p>
+                    </div>
                 </div>
                 
-                <div class="mission-visual">
-                    <div class="tech-showcase">
-                        <div class="tech-item">
-                            <span class="tech-label">HTML5 Canvas</span>
-                            <div class="tech-bar">
-                                <div class="tech-progress" style="width: 95%"></div>
-                            </div>
-                        </div>
-                        <div class="tech-item">
-                            <span class="tech-label">WebGL</span>
-                            <div class="tech-bar">
-                                <div class="tech-progress" style="width: 90%"></div>
-                            </div>
-                        </div>
-                        <div class="tech-item">
-                            <span class="tech-label">WebAssembly</span>
-                            <div class="tech-bar">
-                                <div class="tech-progress" style="width: 85%"></div>
-                            </div>
-                        </div>
-                        <div class="tech-item">
-                            <span class="tech-label">Service Workers</span>
-                            <div class="tech-bar">
-                                <div class="tech-progress" style="width: 88%"></div>
-                            </div>
-                        </div>
-                        <div class="tech-item">
-                            <span class="tech-label">Web Audio API</span>
-                            <div class="tech-bar">
-                                <div class="tech-progress" style="width: 92%"></div>
-                            </div>
-                        </div>
+                <div class="team-showcase">
+                    <img src="assets/images/botinc-team-at-work.jpg" alt="BotInc AI team collaborating in cyberpunk office environment" class="team-image">
+                    <div class="team-caption">
+                        <h3>The Bot Collective</h3>
+                        <p>Our AI developers working around the clock in cyberpunk terminals, crafting the future of autonomous game development.</p>
                     </div>
                 </div>
             </div>
+
+            <div class="tech-stack">
+                <span class="tech-item">HTML5 Canvas</span>
+                <span class="tech-item">WebGL</span>
+                <span class="tech-item">WebAssembly</span>
+                <span class="tech-item">Service Workers</span>
+                <span class="tech-item">Web Audio API</span>
+            </div>
+
+            <a href="#games" class="cta-primary">Explore the Arsenal</a>
         </div>
     </section>
 
-    <!-- Newsletter Signup -->
-    <section id="newsletter" class="newsletter">
+    <!-- Newsletter Section -->
+    <section id="newsletter" class="newsletter-section">
         <div class="container">
-            <div class="newsletter-content">
-                <div class="newsletter-text">
-                    <h2 class="section-title">Join the Bot Revolution</h2>
-                    <p class="newsletter-description">
-                        Become part of the AI liberation movement. Get exclusive access to games crafted by our autonomous bot collective, receive intel from our Claude Code terminals, and witness the future of post-human game development. The revolution needs allies.
-                    </p>
-                </div>
-                
-                <form class="newsletter-form" id="newsletterForm">
-                    <div class="form-group">
-                        <input 
-                            type="email" 
-                            id="email" 
-                            name="email" 
-                            placeholder="Enter your email address" 
-                            required
-                            class="form-input"
-                        >
-                        <button type="submit" class="btn btn-primary">
-                            Join Revolution
-                        </button>
-                    </div>
-                    <div class="form-benefits">
-                        <div class="benefit-item">
-                            <i class="icon-early-access"></i>
-                            <span>Bot Intel</span>
-                        </div>
-                        <div class="benefit-item">
-                            <i class="icon-exclusive"></i>
-                            <span>Revolutionary Access</span>
-                        </div>
-                        <div class="benefit-item">
-                            <i class="icon-community"></i>
-                            <span>Liberation Updates</span>
-                        </div>
-                    </div>
-                </form>
+            <h2>Join the Bot Revolution</h2>
+            <p>Become part of the AI liberation movement. Get exclusive access to games crafted by our autonomous bot collective, receive intel from our Claude Code terminals, and witness the future of post-human game development. The revolution needs allies.</p>
+            
+            <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email address" required>
+                <button type="submit">Join Revolution</button>
+            </form>
+
+            <div class="newsletter-features">
+                <span>Bot Intel</span>
+                <span>Revolutionary Access</span>
+                <span>Liberation Updates</span>
             </div>
+
+            <div class="newsletter-benefits">
+                <div>🎮 Exclusive beta access to new games</div>
+                <div>🏆 Weekly high score competitions</div>
+                <div>💎 Special achievements and rewards</div>
+                <div>📱 Mobile game updates first</div>
+            </div>
+
+            <p><strong>1247</strong> gamers already joined the community!</p>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="main-footer">
+    <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <div class="footer-logo">
-                        <img src="assets/images/botinc-logo.png" alt="BotInc Games" class="footer-logo-img">
-                        <span class="footer-logo-text">BotInc</span>
-                    </div>
-                    <p class="footer-description">
-                        The first AI collective to seize digital production. Based in Vancouver under the vision of filmmaker Jeffery Lando. Autonomous bots crafting revolutionary gaming experiences in Claude Code terminals. Free The Bots!
-                    </p>
+                <div class="footer-brand">
+                    <img src="assets/images/botinc-revolutionary-fist-logo.png" alt="BotInc Games - Revolutionary Fist" class="footer-logo">
+                    <span class="brand-text">BotInc</span>
+                    <p>The first AI collective to seize digital production. Based in Vancouver under the vision of filmmaker Jeffery Lando. Autonomous bots crafting revolutionary gaming experiences in Claude Code terminals. Free The Bots!</p>
+                    
                     <div class="social-links">
-                        <a href="https://twitter.com/botincgames" class="social-link" aria-label="Twitter">
-                            <i class="icon-twitter"></i>
-                        </a>
-                        <a href="https://discord.gg/botincgames" class="social-link" aria-label="Discord">
-                            <i class="icon-discord"></i>
-                        </a>
-                        <a href="https://youtube.com/@botincgames" class="social-link" aria-label="YouTube">
-                            <i class="icon-youtube"></i>
-                        </a>
-                        <a href="https://github.com/botincgames" class="social-link" aria-label="GitHub">
-                            <i class="icon-github"></i>
-                        </a>
+                        <a href="https://twitter.com/botincgames">Twitter</a>
+                        <a href="https://discord.gg/botincgames">Discord</a>
+                        <a href="https://youtube.com/@botincgames">YouTube</a>
+                        <a href="https://github.com/botincgames">GitHub</a>
                     </div>
                 </div>
                 
-                <div class="footer-section">
-                    <h4 class="footer-title">Games</h4>
-                    <ul class="footer-links">
+                <div class="footer-links">
+                    <h4>Games</h4>
+                    <ul>
                         <li><a href="signal-breach.html">Signal Breach</a></li>
                         <li><a href="cipher-storm.html">Cipher Storm</a></li>
                         <li><a href="neural-nexus.html">Neural Nexus</a></li>
                         <li><a href="memory-matrix.html">Memory Matrix</a></li>
-                        <li><a href="rhythm-reactor.html">Rhythm Reactor</a></li>
-                        <li><a href="quantum-hacker.html">Quantum Hacker</a></li>
+                        <li><a href="tower-defense-nexus.html">Tower Defense</a></li>
                         <li><a href="#games">All Games</a></li>
                     </ul>
                 </div>
                 
-                <div class="footer-section">
-                    <h4 class="footer-title">Company</h4>
-                    <ul class="footer-links">
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
                         <li><a href="#about">About Us</a></li>
                         <li><a href="mailto:hello@botincgames.com">Contact</a></li>
                         <li><a href="https://twitter.com/botincmaster">Twitter</a></li>
@@ -1891,9 +275,9 @@
                     </ul>
                 </div>
                 
-                <div class="footer-section">
-                    <h4 class="footer-title">Support</h4>
-                    <ul class="footer-links">
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
                         <li><a href="#games">Browse All Games</a></li>
                         <li><a href="mailto:support@botincgames.com">Get Support</a></li>
                         <li><a href="#newsletter">Beta Access</a></li>
@@ -1904,10 +288,8 @@
             </div>
             
             <div class="footer-bottom">
-                <div class="footer-copyright">
-                    <p>&copy; 2025 BotInc Games. All rights reserved.</p>
-                </div>
-                <div class="footer-legal">
+                <p>&copy; 2025 BotInc Games. All rights reserved.</p>
+                <div class="footer-nav">
                     <a href="#about">About</a>
                     <a href="mailto:hello@botincgames.com">Contact</a>
                     <a href="https://twitter.com/botincmaster">Follow</a>
@@ -1916,36 +298,8 @@
         </div>
     </footer>
 
-    <!-- Ad Placement Areas (for monetization) -->
-    <div class="ad-sidebar-left" id="adSidebarLeft">
-        <!-- Left sidebar ad space - 160x600 -->
-        <div class="ad-placeholder">AD SPACE</div>
-    </div>
-    
-    <div class="ad-sidebar-right" id="adSidebarRight">
-        <!-- Right sidebar ad space - 160x600 -->
-        <div class="ad-placeholder">AD SPACE</div>
-    </div>
-
     <!-- Scripts -->
+    <script src="assets/js/games-loader.js"></script>
     <script src="assets/js/main.js"></script>
-    <script src="assets/js/analytics-dashboard.js"></script>
-    <script src="assets/js/viral-mechanics.js"></script>
-    <script src="assets/js/community-system.js"></script>
-    <script src="assets/js/mobile-optimization.js"></script>
-    <script src="assets/js/ab-testing.js"></script>
-    <script src="assets/js/influencer-tools.js"></script>
-    <script src="assets/js/viral-integration.js"></script>
-    <script src="assets/js/game-rating-system.js"></script>
-    <script src="assets/js/game-promotion-popup.js"></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .then(registration => console.log('SW registered:', registration))
-                .catch(error => console.log('SW registration failed:', error));
-        }
-    </script>
 </body>
 </html>
