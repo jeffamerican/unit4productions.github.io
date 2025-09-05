@@ -128,46 +128,8 @@ class CommunitySystem {
     }
     
     showScrollTriggeredCapture() {
-        this.emailCaptureActive = true;
-        
-        const banner = document.createElement('div');
-        banner.className = 'scroll-capture-banner';
-        banner.innerHTML = `
-            <div class="capture-banner-content">
-                <div class="banner-text">
-                    <strong>🎯 You're clearly interested in gaming!</strong>
-                    Join our community for exclusive tournaments and beta games.
-                </div>
-                <form class="banner-form" onsubmit="return window.communitySystem.handleInlineCapture(event)">
-                    <input type="email" placeholder="Enter your email" required>
-                    <button type="submit">Join Free</button>
-                </form>
-                <button class="banner-close" onclick="this.parentNode.parentNode.remove(); window.communitySystem.emailCaptureActive = false;">×</button>
-            </div>
-        `;
-        
-        banner.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            z-index: 10000;
-            animation: slideDown 0.5s ease-out;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        `;
-        
-        document.body.appendChild(banner);
-        
-        // Auto-remove after 30 seconds
-        setTimeout(() => {
-            if (banner.parentNode) {
-                banner.parentNode.removeChild(banner);
-                this.emailCaptureActive = false;
-            }
-        }, 30000);
+        // Disabled - annoying popup removed
+        return;
     }
     
     showGameCompletionCapture(game, score) {

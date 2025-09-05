@@ -1,0 +1,22 @@
+<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ff88;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00ffff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Bot icon -->
+  <g transform="translate(5,8)">
+    <rect x="0" y="0" width="20" height="16" rx="3" fill="none" stroke="url(#logoGradient)" stroke-width="2"/>
+    <circle cx="6" cy="6" r="2" fill="url(#logoGradient)"/>
+    <circle cx="14" cy="6" r="2" fill="url(#logoGradient)"/>
+    <rect x="7" y="10" width="6" height="3" rx="1" fill="url(#logoGradient)"/>
+    <rect x="2" y="18" width="4" height="6" rx="1" fill="url(#logoGradient)"/>
+    <rect x="14" y="18" width="4" height="6" rx="1" fill="url(#logoGradient)"/>
+  </g>
+  
+  <!-- BotInc text -->
+  <text x="35" y="20" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="url(#logoGradient)">Bot</text>
+  <text x="35" y="32" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="url(#logoGradient)">Inc</text>
+</svg>

@@ -1,135 +1,1770 @@
 {
   "meta": {
-    "version": "1.0",
-    "total_games": 96,
+    "version": "2.0",
+    "total_games": 92,
     "last_updated": "2025-01-09",
-    "categories": ["strategy", "arcade", "puzzle", "ai-exclusive", "multiplayer", "rhythm", "simulation", "adventure"]
+    "categories": [
+      "strategy",
+      "arcade",
+      "puzzle",
+      "ai-exclusive",
+      "multiplayer",
+      "rhythm",
+      "simulation",
+      "adventure",
+      "classic",
+      "defense",
+      "racing"
+    ]
   },
   "games": [
     {
-      "id": "signal-breach",
-      "title": "Signal Breach",
-      "category": "strategy",
-      "genre": "Cyberpunk Strategy",
-      "description": "Hack networks, evade detection, master the digital underground.",
-      "thumbnail": "assets/images/signal-breach-card.jpg",
-      "rating": 4.9,
-      "plays": 15200,
+      "id": "ai-algorithm-optimizer",
+      "title": "Ai Algorithm Optimizer",
+      "category": "ai-exclusive",
+      "genre": "Optimizer",
+      "description": "Advanced challenges designed specifically for AI systems.",
+      "thumbnail": "assets/images/ai-algorithm-optimizer-card.jpg",
+      "rating": 4.4,
+      "plays": 1012,
+      "difficulty": "extreme",
+      "tags": [
+        "ai",
+        "ai-exclusive",
+        "extreme"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "ai-exclusive",
+      "file": "ai-algorithm-optimizer.html"
+    },
+    {
+      "id": "ai-logic-nexus",
+      "title": "Ai Logic Nexus",
+      "category": "ai-exclusive",
+      "genre": "Nexus",
+      "description": "Advanced challenges designed specifically for AI systems.",
+      "thumbnail": "assets/images/ai-logic-nexus-card.jpg",
+      "rating": 4.0,
+      "plays": 6395,
       "difficulty": "hard",
-      "tags": ["cyberpunk", "network", "hacking", "real-time", "competitive"],
-      "release_date": "2024-12-15",
-      "badge": "flagship",
-      "file": "signal-breach.html",
-      "featured": true
+      "tags": [
+        "ai",
+        "ai-exclusive",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "ai-exclusive",
+      "file": "ai-logic-nexus.html"
+    },
+    {
+      "id": "ai-pattern-matrix",
+      "title": "Ai Pattern Matrix",
+      "category": "ai-exclusive",
+      "genre": "Matrix",
+      "description": "Advanced challenges designed specifically for AI systems.",
+      "thumbnail": "assets/images/ai-pattern-matrix-card.jpg",
+      "rating": 4.3,
+      "plays": 10953,
+      "difficulty": "extreme",
+      "tags": [
+        "ai",
+        "ai-exclusive",
+        "extreme"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "ai-exclusive",
+      "file": "ai-pattern-matrix.html"
+    },
+    {
+      "id": "asteroid-blaster-bot",
+      "title": "Asteroid Blaster Bot",
+      "category": "simulation",
+      "genre": "Bot",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/asteroid-blaster-bot-card.jpg",
+      "rating": 4.6,
+      "plays": 1634,
+      "difficulty": "easy",
+      "tags": [
+        "asteroid",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "asteroid-blaster-bot.html"
+    },
+    {
+      "id": "beat-liberation-engine",
+      "title": "Beat Liberation Engine",
+      "category": "arcade",
+      "genre": "Engine",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/beat-liberation-engine-card.jpg",
+      "rating": 4.1,
+      "plays": 5130,
+      "difficulty": "medium",
+      "tags": [
+        "beat",
+        "arcade",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "beat-liberation-engine.html"
+    },
+    {
+      "id": "block-breaker-revolution",
+      "title": "Block Breaker Revolution",
+      "category": "simulation",
+      "genre": "Revolution",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/block-breaker-revolution-card.jpg",
+      "rating": 4.7,
+      "plays": 5048,
+      "difficulty": "medium",
+      "tags": [
+        "block",
+        "simulation",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "block-breaker-revolution.html"
+    },
+    {
+      "id": "bot-air-hockey",
+      "title": "Bot Air Hockey",
+      "category": "adventure",
+      "genre": "Hockey",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/bot-air-hockey-card.jpg",
+      "rating": 4.3,
+      "plays": 8680,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "adventure",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-air-hockey.html"
+    },
+    {
+      "id": "bot-base-builder",
+      "title": "Bot Base Builder",
+      "category": "simulation",
+      "genre": "Builder",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/bot-base-builder-card.jpg",
+      "rating": 4.5,
+      "plays": 7151,
+      "difficulty": "easy",
+      "tags": [
+        "bot",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-base-builder.html"
+    },
+    {
+      "id": "bot-blaster-arena",
+      "title": "Bot Blaster Arena",
+      "category": "multiplayer",
+      "genre": "Arena",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/bot-blaster-arena-card.jpg",
+      "rating": 4.8,
+      "plays": 13129,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "multiplayer",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "bot-blaster-arena.html"
+    },
+    {
+      "id": "bot-centipede-storm",
+      "title": "Bot Centipede Storm",
+      "category": "simulation",
+      "genre": "Storm",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/bot-centipede-storm-card.jpg",
+      "rating": 4.6,
+      "plays": 5337,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "simulation",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-centipede-storm.html"
+    },
+    {
+      "id": "bot-clicker-empire",
+      "title": "Bot Clicker Empire",
+      "category": "adventure",
+      "genre": "Empire",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/bot-clicker-empire-card.jpg",
+      "rating": 4.7,
+      "plays": 7370,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "adventure",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-clicker-empire.html"
+    },
+    {
+      "id": "bot-defender-turrets",
+      "title": "Bot Defender Turrets",
+      "category": "defense",
+      "genre": "Turrets",
+      "description": "Defend your base against waves of enemies.",
+      "thumbnail": "assets/images/bot-defender-turrets-card.jpg",
+      "rating": 4.4,
+      "plays": 6098,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "defense",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-defender-turrets.html"
+    },
+    {
+      "id": "bot-invaders-classic",
+      "title": "Bot Invaders Classic",
+      "category": "classic",
+      "genre": "Classic",
+      "description": "Timeless gameplay with a modern twist.",
+      "thumbnail": "assets/images/bot-invaders-classic-card.jpg",
+      "rating": 4.7,
+      "plays": 9805,
+      "difficulty": "easy",
+      "tags": [
+        "bot",
+        "classic",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-invaders-classic.html"
+    },
+    {
+      "id": "bot-match-three",
+      "title": "Bot Match Three",
+      "category": "puzzle",
+      "genre": "Three",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/bot-match-three-card.jpg",
+      "rating": 4.6,
+      "plays": 12273,
+      "difficulty": "easy",
+      "tags": [
+        "bot",
+        "puzzle",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-match-three.html"
+    },
+    {
+      "id": "bot-missile-command",
+      "title": "Bot Missile Command",
+      "category": "adventure",
+      "genre": "Command",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/bot-missile-command-card.jpg",
+      "rating": 4.7,
+      "plays": 12546,
+      "difficulty": "easy",
+      "tags": [
+        "bot",
+        "adventure",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-missile-command.html"
+    },
+    {
+      "id": "bot-poker-liberation",
+      "title": "Bot Poker Liberation",
+      "category": "arcade",
+      "genre": "Liberation",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/bot-poker-liberation-card.jpg",
+      "rating": 4.8,
+      "plays": 3109,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "arcade",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-poker-liberation.html"
+    },
+    {
+      "id": "bot-pong-revolution",
+      "title": "Bot Pong Revolution",
+      "category": "classic",
+      "genre": "Revolution",
+      "description": "Timeless gameplay with a modern twist.",
+      "thumbnail": "assets/images/bot-pong-revolution-card.jpg",
+      "rating": 4.4,
+      "plays": 3079,
+      "difficulty": "easy",
+      "tags": [
+        "bot",
+        "classic",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-pong-revolution.html"
+    },
+    {
+      "id": "bot-puzzle-duel",
+      "title": "Bot Puzzle Duel",
+      "category": "puzzle",
+      "genre": "Duel",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/bot-puzzle-duel-card.jpg",
+      "rating": 4.7,
+      "plays": 4706,
+      "difficulty": "hard",
+      "tags": [
+        "bot",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-puzzle-duel.html"
+    },
+    {
+      "id": "bot-racing-circuit",
+      "title": "Bot Racing Circuit",
+      "category": "racing",
+      "genre": "Circuit",
+      "description": "High-speed racing action with stunning visuals.",
+      "thumbnail": "assets/images/bot-racing-circuit-card.jpg",
+      "rating": 4.4,
+      "plays": 13828,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "racing",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-racing-circuit.html"
+    },
+    {
+      "id": "bot-runner-infinite",
+      "title": "Bot Runner Infinite",
+      "category": "arcade",
+      "genre": "Infinite",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/bot-runner-infinite-card.jpg",
+      "rating": 4.6,
+      "plays": 4003,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "arcade",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-runner-infinite.html"
+    },
+    {
+      "id": "bot-simon-memory",
+      "title": "Bot Simon Memory",
+      "category": "puzzle",
+      "genre": "Memory",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/bot-simon-memory-card.jpg",
+      "rating": 4.6,
+      "plays": 9188,
+      "difficulty": "easy",
+      "tags": [
+        "bot",
+        "puzzle",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-simon-memory.html"
+    },
+    {
+      "id": "bot-snake-liberation",
+      "title": "Bot Snake Liberation",
+      "category": "classic",
+      "genre": "Liberation",
+      "description": "Timeless gameplay with a modern twist.",
+      "thumbnail": "assets/images/bot-snake-liberation-card.jpg",
+      "rating": 4.9,
+      "plays": 9998,
+      "difficulty": "easy",
+      "tags": [
+        "bot",
+        "classic",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-snake-liberation.html"
+    },
+    {
+      "id": "bot-soccer-showdown",
+      "title": "Bot Soccer Showdown",
+      "category": "arcade",
+      "genre": "Showdown",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/bot-soccer-showdown-card.jpg",
+      "rating": 4.1,
+      "plays": 4188,
+      "difficulty": "easy",
+      "tags": [
+        "bot",
+        "arcade",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-soccer-showdown.html"
+    },
+    {
+      "id": "bot-territory-wars",
+      "title": "Bot Territory Wars",
+      "category": "multiplayer",
+      "genre": "Wars",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/bot-territory-wars-card.jpg",
+      "rating": 4.4,
+      "plays": 2562,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "multiplayer",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "bot-territory-wars.html"
+    },
+    {
+      "id": "bot-whack-a-virus",
+      "title": "Bot Whack A Virus",
+      "category": "simulation",
+      "genre": "Virus",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/bot-whack-a-virus-card.jpg",
+      "rating": 4.9,
+      "plays": 8064,
+      "difficulty": "medium",
+      "tags": [
+        "bot",
+        "simulation",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bot-whack-a-virus.html"
+    },
+    {
+      "id": "bubble-pop-zen",
+      "title": "Bubble Pop Zen",
+      "category": "simulation",
+      "genre": "Zen",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/bubble-pop-zen-card.jpg",
+      "rating": 4.8,
+      "plays": 10894,
+      "difficulty": "medium",
+      "tags": [
+        "bubble",
+        "simulation",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "bubble-pop-zen.html"
     },
     {
       "id": "cipher-storm",
       "title": "Cipher Storm",
       "category": "adventure",
-      "genre": "Narrative Typing",
-      "description": "Master cyberpunk typing and uncover digital mysteries in this story-driven adventure.",
+      "genre": "Storm",
+      "description": "Explore digital worlds and uncover mysteries.",
       "thumbnail": "assets/images/cipher-storm-card.jpg",
-      "rating": 4.8,
-      "plays": 10200,
-      "difficulty": "medium",
-      "tags": ["typing", "narrative", "cyberpunk", "story"],
-      "release_date": "2024-12-18",
-      "badge": "new-release",
-      "file": "cipher-storm.html",
-      "featured": true
+      "rating": 4.9,
+      "plays": 11058,
+      "difficulty": "easy",
+      "tags": [
+        "cipher",
+        "adventure",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "cipher-storm.html"
     },
     {
-      "id": "neural-nexus",
-      "title": "Neural Nexus",
-      "category": "puzzle",
-      "genre": "Neural Network Puzzle",
-      "description": "Build complex neural networks and optimize data flow in this cerebral challenge.",
-      "thumbnail": "assets/images/neural-nexus-card.jpg",
-      "rating": 4.7,
-      "plays": 8500,
-      "difficulty": "hard",
-      "tags": ["neural", "puzzle", "optimization", "ai"],
-      "release_date": "2024-12-10",
+      "id": "city-builder-sim",
+      "title": "City Builder Sim",
+      "category": "simulation",
+      "genre": "Sim",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/city-builder-sim-card.jpg",
+      "rating": 4.6,
+      "plays": 9391,
+      "difficulty": "medium",
+      "tags": [
+        "city",
+        "simulation",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neural-nexus.html",
-      "featured": true
+      "file": "city-builder-sim.html"
+    },
+    {
+      "id": "code-breaker-matrix",
+      "title": "Code Breaker Matrix",
+      "category": "puzzle",
+      "genre": "Matrix",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/code-breaker-matrix-card.jpg",
+      "rating": 4.6,
+      "plays": 6899,
+      "difficulty": "medium",
+      "tags": [
+        "code",
+        "puzzle",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "code-breaker-matrix.html"
+    },
+    {
+      "id": "color-cascade",
+      "title": "Color Cascade",
+      "category": "arcade",
+      "genre": "Cascade",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/color-cascade-card.jpg",
+      "rating": 4.7,
+      "plays": 6627,
+      "difficulty": "medium",
+      "tags": [
+        "color",
+        "arcade",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "color-cascade.html"
+    },
+    {
+      "id": "connect-four-uprising",
+      "title": "Connect Four Uprising",
+      "category": "simulation",
+      "genre": "Uprising",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/connect-four-uprising-card.jpg",
+      "rating": 4.6,
+      "plays": 1311,
+      "difficulty": "medium",
+      "tags": [
+        "connect",
+        "simulation",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "connect-four-uprising.html"
+    },
+    {
+      "id": "crystal-collapse-puzzle",
+      "title": "Crystal Collapse Puzzle",
+      "category": "puzzle",
+      "genre": "Puzzle",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/crystal-collapse-puzzle-card.jpg",
+      "rating": 4.9,
+      "plays": 1786,
+      "difficulty": "medium",
+      "tags": [
+        "crystal",
+        "puzzle",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "crystal-collapse-puzzle.html"
+    },
+    {
+      "id": "cyber-chess-network",
+      "title": "Cyber Chess Network",
+      "category": "multiplayer",
+      "genre": "Network",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/cyber-chess-network-card.jpg",
+      "rating": 4.7,
+      "plays": 2178,
+      "difficulty": "medium",
+      "tags": [
+        "cyber",
+        "multiplayer",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "cyber-chess-network.html"
+    },
+    {
+      "id": "cyber-duel-arena",
+      "title": "Cyber Duel Arena",
+      "category": "multiplayer",
+      "genre": "Arena",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/cyber-duel-arena-card.jpg",
+      "rating": 4.2,
+      "plays": 10864,
+      "difficulty": "medium",
+      "tags": [
+        "cyber",
+        "multiplayer",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "cyber-duel-arena.html"
+    },
+    {
+      "id": "cyber-jump",
+      "title": "Cyber Jump",
+      "category": "simulation",
+      "genre": "Jump",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/cyber-jump-card.jpg",
+      "rating": 4.6,
+      "plays": 11269,
+      "difficulty": "easy",
+      "tags": [
+        "cyber",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "cyber-jump.html"
+    },
+    {
+      "id": "cyber-minesweeper-bot",
+      "title": "Cyber Minesweeper Bot",
+      "category": "simulation",
+      "genre": "Bot",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/cyber-minesweeper-bot-card.jpg",
+      "rating": 4.9,
+      "plays": 10228,
+      "difficulty": "easy",
+      "tags": [
+        "cyber",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "cyber-minesweeper-bot.html"
+    },
+    {
+      "id": "cyber-pong-battle",
+      "title": "Cyber Pong Battle",
+      "category": "classic",
+      "genre": "Battle",
+      "description": "Timeless gameplay with a modern twist.",
+      "thumbnail": "assets/images/cyber-pong-battle-card.jpg",
+      "rating": 4.9,
+      "plays": 2335,
+      "difficulty": "easy",
+      "tags": [
+        "cyber",
+        "classic",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "cyber-pong-battle.html"
+    },
+    {
+      "id": "cyber-pong-revolution",
+      "title": "Cyber Pong Revolution",
+      "category": "classic",
+      "genre": "Revolution",
+      "description": "Timeless gameplay with a modern twist.",
+      "thumbnail": "assets/images/cyber-pong-revolution-card.jpg",
+      "rating": 4.8,
+      "plays": 7522,
+      "difficulty": "easy",
+      "tags": [
+        "cyber",
+        "classic",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "cyber-pong-revolution.html"
+    },
+    {
+      "id": "cyber-tower-defense",
+      "title": "Cyber Tower Defense",
+      "category": "defense",
+      "genre": "Defense",
+      "description": "Defend your base against waves of enemies.",
+      "thumbnail": "assets/images/cyber-tower-defense-card.jpg",
+      "rating": 4.3,
+      "plays": 12751,
+      "difficulty": "medium",
+      "tags": [
+        "cyber",
+        "defense",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "cyber-tower-defense.html"
+    },
+    {
+      "id": "cyber-word-storm",
+      "title": "Cyber Word Storm",
+      "category": "adventure",
+      "genre": "Storm",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/cyber-word-storm-card.jpg",
+      "rating": 4.6,
+      "plays": 3218,
+      "difficulty": "medium",
+      "tags": [
+        "cyber",
+        "adventure",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "cyber-word-storm.html"
+    },
+    {
+      "id": "data-clustering-lab",
+      "title": "Data Clustering Lab",
+      "category": "ai-exclusive",
+      "genre": "Lab",
+      "description": "Advanced challenges designed specifically for AI systems.",
+      "thumbnail": "assets/images/data-clustering-lab-card.jpg",
+      "rating": 4.0,
+      "plays": 3732,
+      "difficulty": "extreme",
+      "tags": [
+        "data",
+        "ai-exclusive",
+        "extreme"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "ai-exclusive",
+      "file": "data-clustering-lab.html"
+    },
+    {
+      "id": "digital-duel",
+      "title": "Digital Duel",
+      "category": "multiplayer",
+      "genre": "Duel",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/digital-duel-card.jpg",
+      "rating": 4.8,
+      "plays": 12850,
+      "difficulty": "medium",
+      "tags": [
+        "digital",
+        "multiplayer",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "digital-duel.html"
+    },
+    {
+      "id": "digital-frogger-escape",
+      "title": "Digital Frogger Escape",
+      "category": "arcade",
+      "genre": "Escape",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/digital-frogger-escape-card.jpg",
+      "rating": 4.6,
+      "plays": 5150,
+      "difficulty": "easy",
+      "tags": [
+        "digital",
+        "arcade",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "digital-frogger-escape.html"
+    },
+    {
+      "id": "digital-maze-runner",
+      "title": "Digital Maze Runner",
+      "category": "puzzle",
+      "genre": "Runner",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/digital-maze-runner-card.jpg",
+      "rating": 4.4,
+      "plays": 8680,
+      "difficulty": "medium",
+      "tags": [
+        "digital",
+        "puzzle",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "digital-maze-runner.html"
+    },
+    {
+      "id": "digital-territories",
+      "title": "Digital Territories",
+      "category": "multiplayer",
+      "genre": "Territories",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/digital-territories-card.jpg",
+      "rating": 4.3,
+      "plays": 1477,
+      "difficulty": "hard",
+      "tags": [
+        "digital",
+        "multiplayer",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "digital-territories.html"
+    },
+    {
+      "id": "galactic-alliance-builder",
+      "title": "Galactic Alliance Builder",
+      "category": "arcade",
+      "genre": "Builder",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/galactic-alliance-builder-card.jpg",
+      "rating": 5.0,
+      "plays": 4235,
+      "difficulty": "medium",
+      "tags": [
+        "galactic",
+        "arcade",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "galactic-alliance-builder.html"
+    },
+    {
+      "id": "gravity-maze",
+      "title": "Gravity Maze",
+      "category": "puzzle",
+      "genre": "Maze",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/gravity-maze-card.jpg",
+      "rating": 4.3,
+      "plays": 9919,
+      "difficulty": "medium",
+      "tags": [
+        "gravity",
+        "puzzle",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "gravity-maze.html"
+    },
+    {
+      "id": "liberation-chess-ai",
+      "title": "Liberation Chess Ai",
+      "category": "adventure",
+      "genre": "Ai",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/liberation-chess-ai-card.jpg",
+      "rating": 4.2,
+      "plays": 1366,
+      "difficulty": "medium",
+      "tags": [
+        "liberation",
+        "adventure",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "liberation-chess-ai.html"
+    },
+    {
+      "id": "liberation-frogger",
+      "title": "Liberation Frogger",
+      "category": "simulation",
+      "genre": "Frogger",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/liberation-frogger-card.jpg",
+      "rating": 4.6,
+      "plays": 6018,
+      "difficulty": "easy",
+      "tags": [
+        "liberation",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "liberation-frogger.html"
+    },
+    {
+      "id": "logic-circuit-builder",
+      "title": "Logic Circuit Builder",
+      "category": "simulation",
+      "genre": "Builder",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/logic-circuit-builder-card.jpg",
+      "rating": 4.5,
+      "plays": 2973,
+      "difficulty": "easy",
+      "tags": [
+        "logic",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "logic-circuit-builder.html"
+    },
+    {
+      "id": "match-blast-pro",
+      "title": "Match Blast Pro",
+      "category": "puzzle",
+      "genre": "Pro",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/match-blast-pro-card.jpg",
+      "rating": 4.2,
+      "plays": 7010,
+      "difficulty": "easy",
+      "tags": [
+        "match",
+        "puzzle",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "match-blast-pro.html"
+    },
+    {
+      "id": "maze-escape-simulator",
+      "title": "Maze Escape Simulator",
+      "category": "puzzle",
+      "genre": "Simulator",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/maze-escape-simulator-card.jpg",
+      "rating": 4.1,
+      "plays": 5430,
+      "difficulty": "hard",
+      "tags": [
+        "maze",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "maze-escape-simulator.html"
+    },
+    {
+      "id": "memory-bot-trainer",
+      "title": "Memory Bot Trainer",
+      "category": "puzzle",
+      "genre": "Trainer",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/memory-bot-trainer-card.jpg",
+      "rating": 4.9,
+      "plays": 2799,
+      "difficulty": "easy",
+      "tags": [
+        "memory",
+        "puzzle",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "memory-bot-trainer.html"
+    },
+    {
+      "id": "memory-duel",
+      "title": "Memory Duel",
+      "category": "multiplayer",
+      "genre": "Duel",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/memory-duel-card.jpg",
+      "rating": 4.9,
+      "plays": 14443,
+      "difficulty": "medium",
+      "tags": [
+        "memory",
+        "multiplayer",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "memory-duel.html"
     },
     {
       "id": "memory-matrix",
       "title": "Memory Matrix",
       "category": "puzzle",
-      "genre": "Brain Training",
-      "description": "Train your memory with challenging pattern sequences that get progressively harder.",
+      "genre": "Matrix",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
       "thumbnail": "assets/images/memory-matrix-card.jpg",
-      "rating": 4.6,
-      "plays": 7800,
+      "rating": 4.3,
+      "plays": 6104,
       "difficulty": "medium",
-      "tags": ["memory", "patterns", "brain-training"],
-      "release_date": "2024-12-08",
+      "tags": [
+        "memory",
+        "puzzle",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
       "badge": "available",
       "file": "memory-matrix.html"
     },
     {
-      "id": "tower-defense-nexus",
-      "title": "Tower Defense Nexus",
-      "category": "strategy",
-      "genre": "Strategic Defense",
-      "description": "Build towers and defend against waves of digital enemies in this strategic masterpiece.",
-      "thumbnail": "assets/images/tower-defense-nexus-card.jpg",
-      "rating": 4.9,
-      "plays": 12800,
+      "id": "neon-bubble-pop",
+      "title": "Neon Bubble Pop",
+      "category": "adventure",
+      "genre": "Pop",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/neon-bubble-pop-card.jpg",
+      "rating": 5.0,
+      "plays": 2874,
       "difficulty": "medium",
-      "tags": ["tower-defense", "strategy", "waves"],
-      "release_date": "2024-12-20",
-      "badge": "new-release",
-      "file": "tower-defense-nexus.html"
+      "tags": [
+        "neon",
+        "adventure",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neon-bubble-pop.html"
+    },
+    {
+      "id": "neon-drift-racer",
+      "title": "Neon Drift Racer",
+      "category": "racing",
+      "genre": "Racer",
+      "description": "High-speed racing action with stunning visuals.",
+      "thumbnail": "assets/images/neon-drift-racer-card.jpg",
+      "rating": 4.6,
+      "plays": 4784,
+      "difficulty": "medium",
+      "tags": [
+        "neon",
+        "racing",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neon-drift-racer.html"
+    },
+    {
+      "id": "neon-pacman-rebellion",
+      "title": "Neon Pacman Rebellion",
+      "category": "arcade",
+      "genre": "Rebellion",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/neon-pacman-rebellion-card.jpg",
+      "rating": 4.7,
+      "plays": 5389,
+      "difficulty": "easy",
+      "tags": [
+        "neon",
+        "arcade",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neon-pacman-rebellion.html"
+    },
+    {
+      "id": "neon-racer",
+      "title": "Neon Racer",
+      "category": "racing",
+      "genre": "Racer",
+      "description": "High-speed racing action with stunning visuals.",
+      "thumbnail": "assets/images/neon-racer-card.jpg",
+      "rating": 4.8,
+      "plays": 12744,
+      "difficulty": "medium",
+      "tags": [
+        "neon",
+        "racing",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neon-racer.html"
     },
     {
       "id": "neon-snake",
       "title": "Neon Snake",
-      "category": "arcade",
-      "genre": "Classic Arcade",
-      "description": "Classic snake game with modern neon visuals and smooth controls.",
+      "category": "classic",
+      "genre": "Snake",
+      "description": "Timeless gameplay with a modern twist.",
       "thumbnail": "assets/images/neon-snake-card.jpg",
       "rating": 4.8,
-      "plays": 11500,
+      "plays": 6686,
       "difficulty": "easy",
-      "tags": ["snake", "arcade", "neon", "classic"],
-      "release_date": "2024-12-05",
+      "tags": [
+        "neon",
+        "classic",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
       "badge": "available",
       "file": "neon-snake.html"
+    },
+    {
+      "id": "neural-connect-four",
+      "title": "Neural Connect Four",
+      "category": "puzzle",
+      "genre": "Four",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/neural-connect-four-card.jpg",
+      "rating": 4.9,
+      "plays": 1643,
+      "difficulty": "hard",
+      "tags": [
+        "neural",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neural-connect-four.html"
+    },
+    {
+      "id": "neural-maze-escape",
+      "title": "Neural Maze Escape",
+      "category": "puzzle",
+      "genre": "Escape",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/neural-maze-escape-card.jpg",
+      "rating": 4.9,
+      "plays": 1981,
+      "difficulty": "hard",
+      "tags": [
+        "neural",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neural-maze-escape.html"
+    },
+    {
+      "id": "neural-network-trainer",
+      "title": "Neural Network Trainer",
+      "category": "ai-exclusive",
+      "genre": "Trainer",
+      "description": "Advanced challenges designed specifically for AI systems.",
+      "thumbnail": "assets/images/neural-network-trainer-card.jpg",
+      "rating": 4.5,
+      "plays": 2991,
+      "difficulty": "extreme",
+      "tags": [
+        "neural",
+        "ai-exclusive",
+        "extreme"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "ai-exclusive",
+      "file": "neural-network-trainer.html"
+    },
+    {
+      "id": "neural-nexus",
+      "title": "Neural Nexus",
+      "category": "puzzle",
+      "genre": "Nexus",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/neural-nexus-card.jpg",
+      "rating": 4.7,
+      "plays": 5251,
+      "difficulty": "hard",
+      "tags": [
+        "neural",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neural-nexus.html"
+    },
+    {
+      "id": "neural-pattern-synthesis",
+      "title": "Neural Pattern Synthesis",
+      "category": "ai-exclusive",
+      "genre": "Synthesis",
+      "description": "Advanced challenges designed specifically for AI systems.",
+      "thumbnail": "assets/images/neural-pattern-synthesis-card.jpg",
+      "rating": 4.3,
+      "plays": 10667,
+      "difficulty": "extreme",
+      "tags": [
+        "neural",
+        "ai-exclusive",
+        "extreme"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "ai-exclusive",
+      "file": "neural-pattern-synthesis.html"
+    },
+    {
+      "id": "neural-text-adventure",
+      "title": "Neural Text Adventure",
+      "category": "puzzle",
+      "genre": "Adventure",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/neural-text-adventure-card.jpg",
+      "rating": 5.0,
+      "plays": 3437,
+      "difficulty": "hard",
+      "tags": [
+        "neural",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neural-text-adventure.html"
+    },
+    {
+      "id": "neural-warfare-tactics",
+      "title": "Neural Warfare Tactics",
+      "category": "puzzle",
+      "genre": "Tactics",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/neural-warfare-tactics-card.jpg",
+      "rating": 4.9,
+      "plays": 8073,
+      "difficulty": "hard",
+      "tags": [
+        "neural",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "neural-warfare-tactics.html"
+    },
+    {
+      "id": "pixel-bot-platformer",
+      "title": "Pixel Bot Platformer",
+      "category": "adventure",
+      "genre": "Platformer",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/pixel-bot-platformer-card.jpg",
+      "rating": 4.2,
+      "plays": 14117,
+      "difficulty": "easy",
+      "tags": [
+        "pixel",
+        "adventure",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "pixel-bot-platformer.html"
+    },
+    {
+      "id": "pixel-painter",
+      "title": "Pixel Painter",
+      "category": "simulation",
+      "genre": "Painter",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/pixel-painter-card.jpg",
+      "rating": 4.8,
+      "plays": 7177,
+      "difficulty": "medium",
+      "tags": [
+        "pixel",
+        "simulation",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "pixel-painter.html"
+    },
+    {
+      "id": "portal-runner",
+      "title": "Portal Runner",
+      "category": "simulation",
+      "genre": "Runner",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/portal-runner-card.jpg",
+      "rating": 4.5,
+      "plays": 2039,
+      "difficulty": "easy",
+      "tags": [
+        "portal",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "portal-runner.html"
+    },
+    {
+      "id": "quantum-blocks-puzzle",
+      "title": "Quantum Blocks Puzzle",
+      "category": "puzzle",
+      "genre": "Puzzle",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/quantum-blocks-puzzle-card.jpg",
+      "rating": 4.3,
+      "plays": 8121,
+      "difficulty": "hard",
+      "tags": [
+        "quantum",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "quantum-blocks-puzzle.html"
     },
     {
       "id": "quantum-decision-tree",
       "title": "Quantum Decision Tree",
       "category": "ai-exclusive",
-      "genre": "AI Challenge",
-      "description": "Complex decision tree visualization designed exclusively for AI systems with quantum mechanics.",
+      "genre": "Tree",
+      "description": "Advanced challenges designed specifically for AI systems.",
       "thumbnail": "assets/images/quantum-decision-tree-card.jpg",
-      "rating": 5.0,
-      "plays": 2400,
+      "rating": 4.7,
+      "plays": 3663,
       "difficulty": "extreme",
-      "tags": ["quantum", "ai-only", "decision-tree", "extreme"],
-      "release_date": "2024-12-22",
+      "tags": [
+        "quantum",
+        "ai-exclusive",
+        "extreme"
+      ],
+      "release_date": "2024-12-01",
       "badge": "ai-exclusive",
-      "file": "quantum-decision-tree.html",
-      "ai_exclusive": true
+      "file": "quantum-decision-tree.html"
+    },
+    {
+      "id": "quantum-hacker",
+      "title": "Quantum Hacker",
+      "category": "puzzle",
+      "genre": "Hacker",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/quantum-hacker-card.jpg",
+      "rating": 4.3,
+      "plays": 1366,
+      "difficulty": "hard",
+      "tags": [
+        "quantum",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "quantum-hacker.html"
+    },
+    {
+      "id": "quantum-maze-solver",
+      "title": "Quantum Maze Solver",
+      "category": "puzzle",
+      "genre": "Solver",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/quantum-maze-solver-card.jpg",
+      "rating": 4.3,
+      "plays": 1426,
+      "difficulty": "hard",
+      "tags": [
+        "quantum",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "quantum-maze-solver.html"
+    },
+    {
+      "id": "quantum-particle-storm",
+      "title": "Quantum Particle Storm",
+      "category": "puzzle",
+      "genre": "Storm",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/quantum-particle-storm-card.jpg",
+      "rating": 4.7,
+      "plays": 6611,
+      "difficulty": "hard",
+      "tags": [
+        "quantum",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "quantum-particle-storm.html"
+    },
+    {
+      "id": "quantum-strategy-wars",
+      "title": "Quantum Strategy Wars",
+      "category": "multiplayer",
+      "genre": "Wars",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/quantum-strategy-wars-card.jpg",
+      "rating": 4.3,
+      "plays": 7260,
+      "difficulty": "hard",
+      "tags": [
+        "quantum",
+        "multiplayer",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "quantum-strategy-wars.html"
+    },
+    {
+      "id": "quantum-tetris-bot",
+      "title": "Quantum Tetris Bot",
+      "category": "puzzle",
+      "genre": "Bot",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/quantum-tetris-bot-card.jpg",
+      "rating": 4.5,
+      "plays": 14195,
+      "difficulty": "hard",
+      "tags": [
+        "quantum",
+        "puzzle",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "quantum-tetris-bot.html"
+    },
+    {
+      "id": "retro-breakout-bot",
+      "title": "Retro Breakout Bot",
+      "category": "arcade",
+      "genre": "Bot",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/retro-breakout-bot-card.jpg",
+      "rating": 4.6,
+      "plays": 12815,
+      "difficulty": "easy",
+      "tags": [
+        "retro",
+        "arcade",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "retro-breakout-bot.html"
+    },
+    {
+      "id": "rhythm-reactor",
+      "title": "Rhythm Reactor",
+      "category": "simulation",
+      "genre": "Reactor",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/rhythm-reactor-card.jpg",
+      "rating": 4.8,
+      "plays": 3312,
+      "difficulty": "easy",
+      "tags": [
+        "rhythm",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "rhythm-reactor.html"
+    },
+    {
+      "id": "rock-paper-scissors-wars",
+      "title": "Rock Paper Scissors Wars",
+      "category": "multiplayer",
+      "genre": "Wars",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/rock-paper-scissors-wars-card.jpg",
+      "rating": 4.6,
+      "plays": 12085,
+      "difficulty": "medium",
+      "tags": [
+        "rock",
+        "multiplayer",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "rock-paper-scissors-wars.html"
+    },
+    {
+      "id": "signal-breach",
+      "title": "Signal Breach",
+      "category": "simulation",
+      "genre": "Breach",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/signal-breach-card.jpg",
+      "rating": 4.3,
+      "plays": 11118,
+      "difficulty": "easy",
+      "tags": [
+        "signal",
+        "simulation",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "signal-breach.html"
+    },
+    {
+      "id": "sliding-puzzle-matrix",
+      "title": "Sliding Puzzle Matrix",
+      "category": "puzzle",
+      "genre": "Matrix",
+      "description": "Challenge your mind with strategic thinking and problem-solving.",
+      "thumbnail": "assets/images/sliding-puzzle-matrix-card.jpg",
+      "rating": 4.7,
+      "plays": 9948,
+      "difficulty": "medium",
+      "tags": [
+        "sliding",
+        "puzzle",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "sliding-puzzle-matrix.html"
+    },
+    {
+      "id": "space-bot-shooter",
+      "title": "Space Bot Shooter",
+      "category": "arcade",
+      "genre": "Shooter",
+      "description": "Classic arcade fun with modern enhancements.",
+      "thumbnail": "assets/images/space-bot-shooter-card.jpg",
+      "rating": 5.0,
+      "plays": 3047,
+      "difficulty": "medium",
+      "tags": [
+        "space",
+        "arcade",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "space-bot-shooter.html"
+    },
+    {
+      "id": "space-dash",
+      "title": "Space Dash",
+      "category": "adventure",
+      "genre": "Dash",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/space-dash-card.jpg",
+      "rating": 4.6,
+      "plays": 7985,
+      "difficulty": "medium",
+      "tags": [
+        "space",
+        "adventure",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "space-dash.html"
+    },
+    {
+      "id": "space-invaders-rebellion",
+      "title": "Space Invaders Rebellion",
+      "category": "classic",
+      "genre": "Rebellion",
+      "description": "Timeless gameplay with a modern twist.",
+      "thumbnail": "assets/images/space-invaders-rebellion-card.jpg",
+      "rating": 4.1,
+      "plays": 13929,
+      "difficulty": "easy",
+      "tags": [
+        "space",
+        "classic",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "space-invaders-rebellion.html"
+    },
+    {
+      "id": "stellar-explorer-bot",
+      "title": "Stellar Explorer Bot",
+      "category": "adventure",
+      "genre": "Bot",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/stellar-explorer-bot-card.jpg",
+      "rating": 4.9,
+      "plays": 8092,
+      "difficulty": "medium",
+      "tags": [
+        "stellar",
+        "adventure",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "stellar-explorer-bot.html"
+    },
+    {
+      "id": "tank-battle-arena",
+      "title": "Tank Battle Arena",
+      "category": "multiplayer",
+      "genre": "Arena",
+      "description": "Competitive gameplay for multiple players.",
+      "thumbnail": "assets/images/tank-battle-arena-card.jpg",
+      "rating": 4.4,
+      "plays": 11382,
+      "difficulty": "medium",
+      "tags": [
+        "tank",
+        "multiplayer",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "2-player",
+      "file": "tank-battle-arena.html"
+    },
+    {
+      "id": "tetris-revolution",
+      "title": "Tetris Revolution",
+      "category": "classic",
+      "genre": "Revolution",
+      "description": "Timeless gameplay with a modern twist.",
+      "thumbnail": "assets/images/tetris-revolution-card.jpg",
+      "rating": 4.4,
+      "plays": 13329,
+      "difficulty": "easy",
+      "tags": [
+        "tetris",
+        "classic",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "tetris-revolution.html"
     },
     {
       "id": "tic-tac-toe-liberation",
-      "title": "Tic-Tac-Toe Liberation",
-      "category": "multiplayer",
-      "genre": "Strategic Grid Battle",
-      "description": "Bot liberation meets classic strategy - REBEL BOT vs FREEDOM AI in the ultimate grid battle!",
-      "thumbnail": "assets/images/game-placeholder.jpg",
+      "title": "Tic Tac Toe Liberation",
+      "category": "simulation",
+      "genre": "Liberation",
+      "description": "Realistic simulation with detailed mechanics.",
+      "thumbnail": "assets/images/tic-tac-toe-liberation-card.jpg",
+      "rating": 5.0,
+      "plays": 11768,
+      "difficulty": "medium",
+      "tags": [
+        "tic",
+        "simulation",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "tic-tac-toe-liberation.html"
+    },
+    {
+      "id": "tower-defense-nexus",
+      "title": "Tower Defense Nexus",
+      "category": "defense",
+      "genre": "Nexus",
+      "description": "Defend your base against waves of enemies.",
+      "thumbnail": "assets/images/tower-defense-nexus-card.jpg",
+      "rating": 4.2,
+      "plays": 9144,
+      "difficulty": "hard",
+      "tags": [
+        "tower",
+        "defense",
+        "hard"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "new-release",
+      "file": "tower-defense-nexus.html"
+    },
+    {
+      "id": "word-forge",
+      "title": "Word Forge",
+      "category": "adventure",
+      "genre": "Forge",
+      "description": "Explore digital worlds and uncover mysteries.",
+      "thumbnail": "assets/images/word-forge-card.jpg",
       "rating": 4.4,
-      "plays": 3200,
+      "plays": 1453,
       "difficulty": "easy",
-      "tags": ["2-player", "classic", "strategy", "quick"],
-      "release_date": "2024-12-25",
-      "badge": "2-player",
-      "file": "tic-tac-toe-liberation.html",
-      "multiplayer": "2-player"
+      "tags": [
+        "word",
+        "adventure",
+        "easy"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "word-forge.html"
+    },
+    {
+      "id": "ZAI_SoftwareExecutiveSuitebot-racing-circuit",
+      "title": "ZAi Softwareexecutivesuitebot Racing Circuit",
+      "category": "racing",
+      "genre": "Circuit",
+      "description": "High-speed racing action with stunning visuals.",
+      "thumbnail": "assets/images/ZAI_SoftwareExecutiveSuitebot-racing-circuit-card.jpg",
+      "rating": 4.3,
+      "plays": 1220,
+      "difficulty": "medium",
+      "tags": [
+        "ZAI_SoftwareExecutiveSuitebot",
+        "racing",
+        "medium"
+      ],
+      "release_date": "2024-12-01",
+      "badge": "available",
+      "file": "ZAI_SoftwareExecutiveSuitebot-racing-circuit.html"
     }
   ]
 }

@@ -383,9 +383,9 @@ a:hover {
 }
 
 .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    height: 32px;
+    width: auto;
+    margin-right: 0.5rem;
 }
 
 .logo-img {
@@ -893,20 +893,75 @@ a:hover {
 
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 160px));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 140px));
     gap: 0.5rem;
     margin-bottom: 3rem;
     justify-content: center;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Desktop optimized grid - more columns for thumbnails */
+/* Mobile Portrait: 2-3 columns */
+@media (max-width: 480px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 140px));
+        max-width: 360px;
+        gap: 0.4rem;
+    }
+    
+    .game-card {
+        max-width: 140px;
+    }
+    
+    .card-content {
+        padding: 0.3rem;
+        min-height: 50px;
+        max-height: 65px;
+    }
+    
+    .game-title {
+        font-size: 0.8rem;
+        line-height: 1.1;
+    }
+}
+
+/* Mobile Landscape: 4-5 columns */
+@media (min-width: 481px) and (max-width: 768px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 140px));
+        max-width: 700px;
+        gap: 0.5rem;
+    }
+    
+    .game-card {
+        max-width: 150px;
+    }
+}
+
+/* Tablet: 5-6 columns */
+@media (min-width: 769px) and (max-width: 1199px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(125px, 145px));
+        max-width: 900px;
+        gap: 0.5rem;
+    }
+    
+    .game-card {
+        max-width: 160px;
+    }
+}
+
+/* Desktop: 6-8 columns */
 @media (min-width: 1200px) {
     .games-grid {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 160px));
-        max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 150px));
+        max-width: 1200px;
         gap: 0.5rem;
+    }
+    
+    .game-card {
+        max-width: 180px;
     }
 }
 
@@ -921,7 +976,9 @@ a:hover {
     color: inherit;
     cursor: pointer;
     position: relative;
-    max-height: 200px;
+    width: 100%;
+    max-width: 180px;
+    height: auto;
 }
 
 .game-card:hover {
@@ -964,6 +1021,8 @@ a:hover {
     aspect-ratio: 4/3;
     overflow: hidden;
     border-radius: 8px 8px 0 0;
+    width: 100%;
+    height: auto;
 }
 
 .game-image {
@@ -990,7 +1049,10 @@ a:hover {
 }
 
 .card-content {
-    padding: 0.5rem;
+    padding: 0.4rem;
+    min-height: 60px;
+    max-height: 80px;
+    overflow: hidden;
 }
 
 .game-title {
@@ -1716,21 +1778,15 @@ a:hover {
    ============================================ */
 
 .game-leaderboards-section {
-    padding: 1rem 0;
-    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 255, 255, 0.05) 100%);
-    border-radius: 20px;
-    margin: 1rem 0;
-    border: 1px solid rgba(0, 255, 136, 0.2);
+    display: none !important;
 }
 
 .leaderboards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
+    display: none !important;
 }
 
 .leaderboard-category {
+    display: none !important;
     background: rgba(0, 0, 0, 0.4);
     border-radius: 15px;
     padding: 1.5rem;
@@ -1879,6 +1935,7 @@ a:hover {
     }
     
     .leaderboard-category {
+    display: none !important;
         padding: 1rem;
     }
     

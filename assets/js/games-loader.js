@@ -103,11 +103,8 @@ class GamesLoader {
 
         switch (sortBy) {
             case 'featured':
-                this.filteredGames.sort((a, b) => {
-                    if (a.featured && !b.featured) return -1;
-                    if (!a.featured && b.featured) return 1;
-                    return b.plays - a.plays;
-                });
+                // Random shuffle for discovery
+                this.filteredGames.sort(() => Math.random() - 0.5);
                 break;
             case 'popular':
                 this.filteredGames.sort((a, b) => b.plays - a.plays);
