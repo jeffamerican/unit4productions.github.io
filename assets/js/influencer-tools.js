@@ -997,6 +997,90 @@ class InfluencerTools {
             }
         }, 3000);
     }
+    
+    setupHighlightDetection() {
+        // Detect and highlight exciting gameplay moments
+        this.highlightMoments = [];
+        this.setupMomentDetection();
+        this.setupAutoHighlighting();
+    }
+    
+    setupMomentDetection() {
+        // Monitor game events for highlight-worthy moments
+        document.addEventListener('gameEvent', (event) => {
+            const { type, data } = event.detail;
+            
+            if (this.isHighlightMoment(type, data)) {
+                this.captureHighlightMoment(type, data);
+            }
+        });
+    }
+    
+    isHighlightMoment(type, data) {
+        // Define criteria for highlight moments
+        const highlightCriteria = {
+            'highScore': data.score > 1000,
+            'combo': data.combo > 5,
+            'achievement': data.achievement !== undefined,
+            'perfect': data.accuracy === 100,
+            'rare': data.rarity === 'legendary'
+        };
+        
+        return highlightCriteria[type] || false;
+    }
+    
+    captureHighlightMoment(type, data) {
+        const moment = {
+            type,
+            data,
+            timestamp: Date.now(),
+            screenshot: this.captureMomentScreenshot()
+        };
+        
+        this.highlightMoments.push(moment);
+        this.notifyHighlightMoment(moment);
+    }
+    
+    captureMomentScreenshot() {
+        // Capture screenshot of the highlight moment
+        return this.captureGameplayScreenshot(true);
+    }
+    
+    notifyHighlightMoment(moment) {
+        // Notify content creation systems about highlight moment
+        const event = new CustomEvent('highlightMoment', {
+            detail: moment
+        });
+        document.dispatchEvent(event);
+    }
+    
+    setupAutoHighlighting() {
+        // Auto-highlight based on performance metrics
+        setInterval(() => {
+            this.checkForAutoHighlights();
+        }, 5000);
+    }
+    
+    checkForAutoHighlights() {
+        // Check various metrics for auto-highlight opportunities
+        const metrics = this.getCurrentMetrics();
+        
+        if (metrics.performance > 0.9) {
+            this.captureHighlightMoment('autoHighlight', {
+                reason: 'high_performance',
+                metrics
+            });
+        }
+    }
+    
+    getCurrentMetrics() {
+        // Get current performance metrics
+        return {
+            performance: Math.random(), // Placeholder
+            engagement: Math.random(),
+            retention: Math.random()
+        };
+    }
 }
 
 // Initialize influencer tools

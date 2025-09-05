@@ -539,13 +539,18 @@ a:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
+    opacity: 1;
     transition: opacity 0.3s ease;
     cursor: pointer;
+}
+
+.play-overlay:hover {
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 1;
 }
 
 .mockup-screen:hover .play-overlay {
@@ -1253,3 +1258,210 @@ a:hover {
         image-rendering: crisp-edges;
     }
 }
+
+/* ============================================
+   Game Leaderboards
+   ============================================ */
+
+.game-leaderboards-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 255, 255, 0.05) 100%);
+    border-radius: 20px;
+    margin: 2rem 0;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.leaderboards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.leaderboard-category {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 15px;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.leaderboard-category:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 136, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+}
+
+.leaderboard-title {
+    font-size: 1.25rem;
+    color: #00ff88;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.leaderboard-games {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.leaderboard-item:hover {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: rgba(0, 255, 136, 0.3);
+    transform: translateX(5px);
+}
+
+.leaderboard-item.rank-1 {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+    border-color: rgba(255, 215, 0, 0.4);
+}
+
+.leaderboard-item.rank-2 {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.1));
+    border-color: rgba(192, 192, 192, 0.4);
+}
+
+.leaderboard-item.rank-3 {
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.1));
+    border-color: rgba(205, 127, 50, 0.4);
+}
+
+.rank-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 255, 136, 0.2);
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #00ff88;
+    flex-shrink: 0;
+    border: 2px solid rgba(0, 255, 136, 0.4);
+}
+
+.rank-1 .rank-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #000;
+    border-color: #ffd700;
+}
+
+.rank-2 .rank-badge {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    color: #000;
+    border-color: #c0c0c0;
+}
+
+.rank-3 .rank-badge {
+    background: linear-gradient(135deg, #cd7f32, #daa558);
+    color: #000;
+    border-color: #cd7f32;
+}
+
+.game-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.game-link:hover {
+    color: #00ff88;
+}
+
+.mini-game-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid rgba(0, 255, 136, 0.2);
+    flex-shrink: 0;
+}
+
+.game-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.game-info h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.game-stats {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Leaderboard Responsive Design */
+@media (max-width: 768px) {
+    .leaderboards-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .leaderboard-category {
+        padding: 1rem;
+    }
+    
+    .leaderboard-item {
+        padding: 0.5rem;
+    }
+    
+    .mini-game-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .game-info h4 {
+        font-size: 0.9rem;
+    }
+    
+    .game-stats {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-leaderboards-section {
+        padding: 2rem 0;
+        margin: 1rem 0;
+    }
+    
+    .leaderboard-title {
+        font-size: 1.1rem;
+    }
+    
+    .rank-badge {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+}
+

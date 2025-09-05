@@ -765,6 +765,107 @@ class ViralIntegration {
             });
         }
     }
+    
+    setupCrossSystemIntegration() {
+        // Set up integration between different systems
+        this.setupAnalyticsIntegration();
+        this.setupCommunityIntegration();
+        this.setupViralMechanicsIntegration();
+        this.setupCrossSystemEventHandling();
+    }
+    
+    setupAnalyticsIntegration() {
+        // Integrate with analytics system
+        if (this.systems.analytics) {
+            this.systems.analytics.on('viralEvent', (data) => {
+                this.handleViralAnalyticsEvent(data);
+            });
+        }
+    }
+    
+    setupCommunityIntegration() {
+        // Integrate with community system
+        if (this.systems.community) {
+            this.systems.community.on('userEngagement', (data) => {
+                this.handleCommunityEngagement(data);
+            });
+        }
+    }
+    
+    setupViralMechanicsIntegration() {
+        // Integrate with viral mechanics system
+        if (this.systems.viral) {
+            this.systems.viral.on('viralTrigger', (data) => {
+                this.handleViralTrigger(data);
+            });
+        }
+    }
+    
+    setupCrossSystemEventHandling() {
+        // Handle events that span multiple systems
+        document.addEventListener('crossSystemEvent', (event) => {
+            this.processCrossSystemEvent(event.detail);
+        });
+    }
+    
+    handleViralAnalyticsEvent(data) {
+        // Process viral-related analytics events
+        this.trackViralEvent('analytics', data);
+    }
+    
+    handleCommunityEngagement(data) {
+        // Process community engagement for viral potential
+        this.trackViralEvent('community', data);
+    }
+    
+    handleViralTrigger(data) {
+        // Process viral mechanics triggers
+        this.trackViralEvent('mechanics', data);
+    }
+    
+    processCrossSystemEvent(eventData) {
+        // Process events that involve multiple systems
+        const { systems, event, data } = eventData;
+        
+        // Coordinate response across systems
+        systems.forEach(system => {
+            if (this.systems[system]) {
+                this.systems[system].handleCrossSystemEvent(event, data);
+            }
+        });
+    }
+    
+    trackViralEvent(source, data) {
+        // Track viral events from different sources
+        const viralEvent = {
+            source,
+            data,
+            timestamp: Date.now(),
+            viralCoefficient: this.calculateViralCoefficient(data)
+        };
+        
+        this.crossSystemEvents.set(`${source}_${Date.now()}`, viralEvent);
+        this.emitViralEvent(viralEvent);
+    }
+    
+    calculateViralCoefficient(data) {
+        // Calculate viral coefficient based on event data
+        let coefficient = 0;
+        
+        if (data.engagement) coefficient += 0.3;
+        if (data.sharing) coefficient += 0.4;
+        if (data.retention) coefficient += 0.3;
+        
+        return Math.min(coefficient, 1.0);
+    }
+    
+    emitViralEvent(event) {
+        // Emit viral event to other systems
+        const customEvent = new CustomEvent('viralEvent', {
+            detail: event
+        });
+        document.dispatchEvent(customEvent);
+    }
 }
 
 // Initialize viral integration when DOM is ready
