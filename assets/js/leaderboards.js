@@ -818,14 +818,14 @@ class GamePromotionSystem {
     }
 }
 
-// Initialize leaderboard system
-const leaderboardSystem = new LeaderboardSystem();
-window.leaderboardSystem = leaderboardSystem;
+// Initialize leaderboard system - DISABLED
+// const leaderboardSystem = new LeaderboardSystem();
+// window.leaderboardSystem = leaderboardSystem;
 
-// Add CSS animations
-if (!document.getElementById('leaderboard-animations')) {
-    const animations = document.createElement('style');
-    animations.id = 'leaderboard-animations';
+// Add CSS animations - DISABLED
+// if (!document.getElementById('leaderboard-animations')) {
+//     const animations = document.createElement('style');
+//     animations.id = 'leaderboard-animations';
     animations.textContent = `
         @keyframes achievementPulse {
             0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
@@ -854,5 +854,5 @@ if (!document.getElementById('leaderboard-animations')) {
             transform: translateY(-2px);
         }
     `;
-    document.head.appendChild(animations);
-}
+//     document.head.appendChild(animations);
+// }
