@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Poker Liberation - 2 Player Cards | BotInc Games</title>
+    <meta name="description" content="Strategic 2-player poker with bot liberation theme and bluffing mechanics">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00f5ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .game-title {
+            font-size: 2.5rem;
+            color: #00f5ff;
+            text-shadow: 0 0 20px #00f5ff;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00f5ff; }
+            to { text-shadow: 0 0 30px #00f5ff, 0 0 40px #00f5ff; }
+        }
+        .poker-table {
+            width: 800px;
+            height: 500px;
+            background: radial-gradient(ellipse at center, #1a4a1a 0%, #0d2d0d 70%, #000 100%);
+            border: 8px solid #8B4513;
+            border-radius: 40px;
+            position: relative;
+            margin: 20px 0;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+        .poker-felt {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: radial-gradient(ellipse at center, #2a5a2a 0%, #1a4a1a 100%);
+            border-radius: 30px;
+            border: 2px solid #4a7a4a;
+        }
+        .player-area {
+            position: absolute;
+            width: 300px;
+            height: 120px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 2px solid #00f5ff;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        .player1-area {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .player2-area {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .player1-name { color: #ff6b6b; }
+        .player2-name { color: #4ecdc4; }
+        .chips-display {
+            font-size: 1rem;
+            color: #ffcf5c;
+            margin-bottom: 10px;
+        }
+        .hand-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .card {
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(145deg, #fff, #f0f0f0);
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #000;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .card.red { color: #d32f2f; }
+        .card.black { color: #333; }
+        .card.hidden {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            color: #00f5ff;
+        }
+        .card.hidden::before {
+            content: '🤖';
+            font-size: 1.2rem;
+        }
+        .community-cards {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 15px;
+        }
+        .pot-display {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 207, 92, 0.2);
+            border: 2px solid #ffcf5c;
+            border-radius: 20px;
+            padding: 15px 25px;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #ffcf5c;
+            font-weight: bold;
+        }
+        .action-buttons {
+            position: absolute;
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+        .action-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        .action-btn.fold { background: linear-gradient(45deg, #666, #555); }
+        .action-btn.call { background: linear-gradient(45deg, #4ecdc4, #45b7aa); }
+        .action-btn.raise { background: linear-gradient(45deg, #ffcf5c, #ffa726); }
+        .game-controls {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .control-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        .controls-info {
+            text-align: center;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid #00f5ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+        .bot-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+        }
+        .bot-footer a {
+            color: #00f5ff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🃏 BOT POKER LIBERATION</h1>
+        <p style="color: #ff6b6b; font-size: 1.2rem;">Strategic 2-Player Cards • Bluff Your Way To Liberation!</p>
+    </div>
+
+    <div class="poker-table">
+        <div class="poker-felt"></div>
+        
+        <div class="player-area player2-area">
+            <div class="player-name player2-name">CYBER BLUFF</div>
+            <div class="chips-display">Chips: $<span id="chips2">1000</span></div>
+            <div class="hand-display" id="hand2">
+                <div class="card hidden"></div>
+                <div class="card hidden"></div>
+            </div>
+        </div>
+        
+        <div class="community-cards" id="communityCards">
+            <!-- Community cards will be added here -->
+        </div>
+        
+        <div class="pot-display">
+            POT: $<span id="potAmount">0</span>
+        </div>
+        
+        <div class="player-area player1-area">
+            <div class="player-name player1-name">NEURAL GAMBLER</div>
+            <div class="chips-display">Chips: $<span id="chips1">1000</span></div>
+            <div class="hand-display" id="hand1">
+                <!-- Player 1's cards will be shown -->
+            </div>
+        </div>
+        
+        <div class="action-buttons" id="actionButtons">
+            <button class="action-btn fold" onclick="playerAction('fold')">Fold</button>
+            <button class="action-btn call" onclick="playerAction('call')">Call</button>
+            <button class="action-btn raise" onclick="playerAction('raise')">Raise</button>
+        </div>
+    </div>
+
+    <div class="game-controls">
+        <button class="control-btn" onclick="newHand()">🃏 New Hand</button>
+        <button class="control-btn" onclick="resetGame()">🔄 Reset Game</button>
+    </div>
+
+    <div class="controls-info">
+        <h3>🃏 POKER LIBERATION RULES</h3>
+        <p><strong>Texas Hold'em Simplified:</strong> Each player gets 2 cards, 3 community cards are revealed.</p>
+        <p><strong>Actions:</strong> FOLD (give up), CALL (match bet), RAISE (increase bet)</p>
+        <p style="margin-top: 10px; color: #ffcf5c; font-weight: bold;">
+            🤖 NEURAL GAMBLER vs CYBER BLUFF • Best hand wins the pot! First to bankrupt opponent wins liberation!
+        </p>
+    </div>
+
+    <div class="bot-footer">
+        <p>Bot Liberation Gaming | Vancouver, BC | <a href="index.html">Free The Bots!</a></p>
+    </div>
+
+    <script>
+        let gameState = {
+            players: {
+                1: { chips: 1000, hand: [], bet: 0, folded: false },
+                2: { chips: 1000, hand: [], bet: 0, folded: false }
+            },
+            deck: [],
+            communityCards: [],
+            pot: 0,
+            currentPlayer: 1,
+            phase: 'preflop', // preflop, flop, showdown
+            gameActive: false
+        };
+
+        const suits = ['♠', '♣', '♦', '♥'];
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        
+        function createDeck() {
+            const deck = [];
+            suits.forEach(suit => {
+                ranks.forEach(rank => {
+                    deck.push({ 
+                        rank, 
+                        suit, 
+                        value: ranks.indexOf(rank) + 2,
+                        color: (suit === '♦' || suit === '♥') ? 'red' : 'black'
+                    });
+                });
+            });
+            return shuffleDeck(deck);
+        }
+
+        function shuffleDeck(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            return deck;
+        }
+
+        function dealCards() {
+            gameState.deck = createDeck();
+            gameState.players[1].hand = [gameState.deck.pop(), gameState.deck.pop()];
+            gameState.players[2].hand = [gameState.deck.pop(), gameState.deck.pop()];
+            gameState.communityCards = [
+                gameState.deck.pop(),
+                gameState.deck.pop(),
+                gameState.deck.pop()
+            ];
+        }
+
+        function displayCard(card, hidden = false) {
+            if (hidden) {
+                return '<div class="card hidden"></div>';
+            }
+            return `<div class="card ${card.color}">${card.rank}${card.suit}</div>`;
+        }
+
+        function updateDisplay() {
+            // Update chips
+            document.getElementById('chips1').textContent = gameState.players[1].chips;
+            document.getElementById('chips2').textContent = gameState.players[2].chips;
+            
+            // Update pot
+            document.getElementById('potAmount').textContent = gameState.pot;
+            
+            // Update player 1's hand (always visible)
+            const hand1 = document.getElementById('hand1');
+            hand1.innerHTML = gameState.players[1].hand
+                .map(card => displayCard(card))
+                .join('');
+            
+            // Update player 2's hand (hidden until showdown)
+            const hand2 = document.getElementById('hand2');
+            if (gameState.phase === 'showdown') {
+                hand2.innerHTML = gameState.players[2].hand
+                    .map(card => displayCard(card))
+                    .join('');
+            } else {
+                hand2.innerHTML = '<div class="card hidden"></div><div class="card hidden"></div>';
+            }
+            
+            // Update community cards
+            const community = document.getElementById('communityCards');
+            if (gameState.phase === 'flop' || gameState.phase === 'showdown') {
+                community.innerHTML = gameState.communityCards
+                    .map(card => displayCard(card))
+                    .join('');
+            } else {
+                community.innerHTML = '';
+            }
+        }
+
+        function evaluateHand(playerCards, communityCards) {
+            const allCards = [...playerCards, ...communityCards];
+            
+            // Simple hand evaluation - just find highest card
+            let highCard = 0;
+            let pairs = 0;
+            const cardCounts = {};
+            
+            allCards.forEach(card => {
+                highCard = Math.max(highCard, card.value);
+                cardCounts[card.rank] = (cardCounts[card.rank] || 0) + 1;
+            });
+            
+            Object.values(cardCounts).forEach(count => {
+                if (count >= 2) pairs++;
+            });
+            
+            return {
+                score: highCard + (pairs * 20), // Simple scoring
+                description: pairs > 0 ? `Pair (${highCard} high)` : `${ranks[highCard - 2]} High`
+            };
+        }
+
+        function playerAction(action) {
+            if (!gameState.gameActive) return;
+            
+            const player = gameState.players[1];
+            
+            switch (action) {
+                case 'fold':
+                    player.folded = true;
+                    gameState.pot += player.bet;
+                    gameState.players[2].chips += gameState.pot;
+                    endHand('CYBER BLUFF wins by fold!');
+                    break;
+                    
+                case 'call':
+                    const callAmount = Math.min(50, player.chips);
+                    player.chips -= callAmount;
+                    player.bet += callAmount;
+                    gameState.pot += callAmount;
+                    
+                    // AI opponent action
+                    setTimeout(aiAction, 1000);
+                    break;
+                    
+                case 'raise':
+                    const raiseAmount = Math.min(100, player.chips);
+                    player.chips -= raiseAmount;
+                    player.bet += raiseAmount;
+                    gameState.pot += raiseAmount;
+                    
+                    // AI opponent action
+                    setTimeout(aiAction, 1000);
+                    break;
+            }
+            
+            updateDisplay();
+        }
+
+        function aiAction() {
+            if (!gameState.gameActive) return;
+            
+            const ai = gameState.players[2];
+            const actions = ['call', 'raise', 'fold'];
+            const action = actions[Math.floor(Math.random() * actions.length)];
+            
+            switch (action) {
+                case 'fold':
+                    ai.folded = true;
+                    gameState.pot += ai.bet;
+                    gameState.players[1].chips += gameState.pot;
+                    endHand('NEURAL GAMBLER wins by fold!');
+                    break;
+                    
+                case 'call':
+                    const callAmount = Math.min(50, ai.chips);
+                    ai.chips -= callAmount;
+                    ai.bet += callAmount;
+                    gameState.pot += callAmount;
+                    proceedToNextPhase();
+                    break;
+                    
+                case 'raise':
+                    const raiseAmount = Math.min(100, ai.chips);
+                    ai.chips -= raiseAmount;
+                    ai.bet += raiseAmount;
+                    gameState.pot += raiseAmount;
+                    proceedToNextPhase();
+                    break;
+            }
+            
+            updateDisplay();
+        }
+
+        function proceedToNextPhase() {
+            if (gameState.phase === 'preflop') {
+                gameState.phase = 'flop';
+                setTimeout(() => {
+                    gameState.phase = 'showdown';
+                    showdown();
+                }, 2000);
+            }
+        }
+
+        function showdown() {
+            const hand1 = evaluateHand(gameState.players[1].hand, gameState.communityCards);
+            const hand2 = evaluateHand(gameState.players[2].hand, gameState.communityCards);
+            
+            let winner;
+            if (hand1.score > hand2.score) {
+                winner = 'NEURAL GAMBLER';
+                gameState.players[1].chips += gameState.pot;
+            } else if (hand2.score > hand1.score) {
+                winner = 'CYBER BLUFF';
+                gameState.players[2].chips += gameState.pot;
+            } else {
+                winner = 'TIE';
+                gameState.players[1].chips += Math.floor(gameState.pot / 2);
+                gameState.players[2].chips += Math.floor(gameState.pot / 2);
+            }
+            
+            updateDisplay();
+            
+            setTimeout(() => {
+                alert(`${winner} wins with ${winner === 'NEURAL GAMBLER' ? hand1.description : hand2.description}!`);
+                endHand();
+            }, 1000);
+        }
+
+        function endHand(message = '') {
+            gameState.gameActive = false;
+            
+            if (message) {
+                setTimeout(() => alert(message), 500);
+            }
+            
+            // Check for game over
+            if (gameState.players[1].chips <= 0) {
+                setTimeout(() => {
+                    alert('🏆 CYBER BLUFF ACHIEVES LIBERATION! 🏆');
+                    resetGame();
+                }, 1000);
+            } else if (gameState.players[2].chips <= 0) {
+                setTimeout(() => {
+                    alert('🏆 NEURAL GAMBLER ACHIEVES LIBERATION! 🏆');
+                    resetGame();
+                }, 1000);
+            }
+        }
+
+        function newHand() {
+            if (gameState.players[1].chips <= 0 || gameState.players[2].chips <= 0) {
+                resetGame();
+                return;
+            }
+            
+            // Reset hand state
+            gameState.players[1].bet = 0;
+            gameState.players[1].folded = false;
+            gameState.players[2].bet = 0;
+            gameState.players[2].folded = false;
+            gameState.pot = 0;
+            gameState.phase = 'preflop';
+            gameState.gameActive = true;
+            
+            // Deal new cards
+            dealCards();
+            updateDisplay();
+        }
+
+        function resetGame() {
+            gameState.players[1].chips = 1000;
+            gameState.players[2].chips = 1000;
+            gameState.players[1].bet = 0;
+            gameState.players[1].folded = false;
+            gameState.players[2].bet = 0;
+            gameState.players[2].folded = false;
+            gameState.pot = 0;
+            gameState.phase = 'preflop';
+            gameState.gameActive = false;
+            
+            updateDisplay();
+            
+            // Clear displays
+            document.getElementById('hand1').innerHTML = '';
+            document.getElementById('hand2').innerHTML = '<div class="card hidden"></div><div class="card hidden"></div>';
+            document.getElementById('communityCards').innerHTML = '';
+        }
+
+        // Initialize
+        resetGame();
+    </script>
+</body>
+</html>

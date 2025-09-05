@@ -50,10 +50,10 @@ class GamePromotionSystem {
         
         // Initialize with fake data if empty
         if (Object.keys(this.leaderboards).length === 0) {
-            this.seedLeaderboards();
-        }
-        
-        this.createLeaderboardUI();
+                    this.seedLeaderboards();
+    }
+    
+    // this.createLeaderboardUI(); // DISABLED - no more leaderboard widget
     }
     
     seedLeaderboards() {
