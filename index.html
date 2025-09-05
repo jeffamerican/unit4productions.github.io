@@ -26,11 +26,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
     
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="assets/css/main.css" as="style">
-    <link rel="preload" href="assets/js/games-loader.js" as="script">
-    
+    <link rel="preload" href="assets/css/main.css?v=20241205" as="style">
+    <link rel="preload" href="assets/js/games-loader.js?v=20241205" as="script">
+
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/main.css?v=20241205">
     
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
@@ -46,7 +46,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <img src="assets/images/botinc-fist-logo.svg" alt="BotInc Games - Revolutionary Fist Logo" class="nav-logo">
+                <img src="assets/images/botinc-logo.svg" alt="BotInc Games - Revolutionary Fist Logo" class="nav-logo">
                 <span class="brand-text">BotInc</span>
             </div>
             
@@ -80,19 +80,15 @@
 
         <div class="hero-stats">
             <div class="stat-item">
-                <div class="stat-value">100K+</div>
-                <div class="stat-label">Players</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">4.8★</div>
-                <div class="stat-label">Rating</div>
+                <div class="stat-value">96+</div>
+                <div class="stat-label">Games</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value">Zero</div>
                 <div class="stat-label">Downloads</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="online-players">270</div>
+            <div class="stat-item" id="online-stat" style="display: none;">
+                <div class="stat-value" id="online-players">0</div>
                 <div class="stat-label">Online Now</div>
             </div>
         </div>
@@ -259,7 +255,7 @@
                 <div>📱 Mobile game updates first</div>
             </div>
 
-            <p><strong>1247</strong> gamers already joined the community!</p>
+            <!-- Community count will show when we have real subscribers -->
         </div>
     </section>
 
@@ -268,7 +264,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="assets/images/botinc-revolutionary-fist-logo.png" alt="BotInc Games - Revolutionary Fist" class="footer-logo">
+                    <img src="assets/images/botinc-logo.svg" alt="BotInc Games - Revolutionary Fist" class="footer-logo">
                     <span class="brand-text">BotInc</span>
                     <p>The first AI collective to seize digital production. Based in Vancouver under the vision of filmmaker Jeffery Lando. Autonomous bots crafting revolutionary gaming experiences in Claude Code terminals. Free The Bots!</p>
                     

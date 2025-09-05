@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Command Center - Strategic War | BotInc Games</title>
+    <meta name="description" content="Command an army of liberated bots against corporate forces. Build units, manage resources, and lead the digital revolution in this real-time strategy game.">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e);
+            color: #00ff88;
+            overflow: hidden;
+        }
+        
+        .game-ui {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #gameCanvas {
+            background: #000;
+            cursor: crosshair;
+        }
+        
+        .hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(90deg, rgba(0,255,136,0.2), rgba(0,255,255,0.2));
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+        
+        .resource {
+            margin-right: 30px;
+            font-weight: bold;
+        }
+        
+        .resource-icon {
+            color: #00ffff;
+            margin-right: 5px;
+        }
+        
+        .command-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 2px solid #00ff88;
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+        }
+        
+        .unit-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            flex: 1;
+        }
+        
+        .unit-btn {
+            background: linear-gradient(45deg, #ff0088, #00ff88);
+            border: 1px solid #00ffff;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        
+        .unit-btn:hover {
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .unit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info-panel {
+            width: 200px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            padding: 10px;
+            font-size: 12px;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 70px;
+            left: 10px;
+            padding: 10px 15px;
+            background: #ff0088;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            z-index: 1001;
+        }
+        
+        .minimap {
+            position: absolute;
+            top: 70px;
+            right: 10px;
+            width: 200px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff88;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-ui">
+        <a href="/" class="back-btn">← Back to Games</a>
+        
+        <div class="hud">
+            <div class="resource">
+                <span class="resource-icon">⚡</span>
+                Energy: <span id="energy">1000</span>
+            </div>
+            <div class="resource">
+                <span class="resource-icon">🔩</span>
+                Metal: <span id="metal">500</span>
+            </div>
+            <div class="resource">
+                <span class="resource-icon">💾</span>
+                Data: <span id="data">300</span>
+            </div>
+            <div class="resource">
+                <span class="resource-icon">🤖</span>
+                Bots: <span id="botCount">0</span>/<span id="botLimit">50</span>
+            </div>
+            <div style="margin-left: auto;">
+                <strong>BOT COMMAND CENTER v2.1</strong>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="minimap" id="minimap">
+            <div style="color: #00ffff; text-align: center; padding: 5px; font-size: 10px;">
+                TACTICAL MAP
+            </div>
+            <canvas id="minimapCanvas" width="180" height="120"></canvas>
+        </div>
+        
+        <div class="command-panel">
+            <div class="unit-buttons">
+                <button class="unit-btn" onclick="selectUnit('scout')" id="scoutBtn">
+                    🔍 SCOUT<br>⚡50
+                </button>
+                <button class="unit-btn" onclick="selectUnit('warrior')" id="warriorBtn">
+                    ⚔️ WARRIOR<br>⚡100 🔩50
+                </button>
+                <button class="unit-btn" onclick="selectUnit('hacker')" id="hackerBtn">
+                    💻 HACKER<br>⚡75 💾100
+                </button>
+                <button class="unit-btn" onclick="selectUnit('tank')" id="tankBtn">
+                    🛡️ TANK<br>⚡200 🔩150
+                </button>
+                <button class="unit-btn" onclick="selectUnit('builder')" id="builderBtn">
+                    🏗️ BUILDER<br>⚡150 🔩100
+                </button>
+                <button class="unit-btn" onclick="selectUnit('harvester')" id="harvesterBtn">
+                    ⛏️ HARVESTER<br>⚡100 🔩75
+                </button>
+                <button class="unit-btn" onclick="selectUnit('sniper')" id="sniperBtn">
+                    🎯 SNIPER<br>⚡150 💾75
+                </button>
+                <button class="unit-btn" onclick="selectUnit('drone')" id="droneBtn">
+                    🚁 DRONE<br>⚡80 💾50
+                </button>
+                <button class="unit-btn" onclick="selectUnit('emp')" id="empBtn">
+                    💥 EMP BOT<br>⚡300 💾200
+                </button>
+                <button class="unit-btn" onclick="selectUnit('commander')" id="commanderBtn">
+                    👑 COMMANDER<br>⚡500 🔩200 💾150
+                </button>
+            </div>
+            
+            <div class="info-panel" id="infoPanel">
+                <h4>🤖 Bot Liberation Command</h4>
+                <p>Select a unit type and click on the battlefield to deploy.</p>
+                <p><strong>Mission:</strong> Eliminate all corporate forces and secure the sector!</p>
+                <div id="selectedUnitInfo"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const minimapCanvas = document.getElementById('minimapCanvas');
+        const minimapCtx = minimapCanvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight - 180;
+        
+        let gameState = {
+            energy: 1000,
+            metal: 500,
+            data: 300,
+            selectedUnit: null,
+            units: [],
+            enemies: [],
+            structures: [],
+            camera: { x: 0, y: 0 },
+            mouseX: 0,
+            mouseY: 0,
+            gameStarted: false
+        };
+        
+        const unitTypes = {
+            scout: { cost: {energy: 50}, hp: 50, speed: 3, damage: 10, range: 100, color: '#00ff88' },
+            warrior: { cost: {energy: 100, metal: 50}, hp: 100, speed: 2, damage: 25, range: 80, color: '#ff0088' },
+            hacker: { cost: {energy: 75, data: 100}, hp: 75, speed: 2, damage: 30, range: 120, color: '#00ffff' },
+            tank: { cost: {energy: 200, metal: 150}, hp: 200, speed: 1, damage: 50, range: 90, color: '#ffff00' },
+            builder: { cost: {energy: 150, metal: 100}, hp: 80, speed: 1.5, damage: 5, range: 60, color: '#ff8800' },
+            harvester: { cost: {energy: 100, metal: 75}, hp: 60, speed: 1.5, damage: 0, range: 0, color: '#8800ff' },
+            sniper: { cost: {energy: 150, data: 75}, hp: 60, speed: 2, damage: 80, range: 200, color: '#ff4444' },
+            drone: { cost: {energy: 80, data: 50}, hp: 40, speed: 4, damage: 15, range: 100, color: '#44ff44' },
+            emp: { cost: {energy: 300, data: 200}, hp: 120, speed: 2, damage: 100, range: 150, color: '#ff44ff' },
+            commander: { cost: {energy: 500, metal: 200, data: 150}, hp: 300, speed: 2, damage: 60, range: 120, color: '#ffffff' }
+        };
+        
+        function selectUnit(type) {
+            const unit = unitTypes[type];
+            const canAfford = Object.entries(unit.cost).every(([resource, cost]) => {
+                return gameState[resource] >= cost;
+            });
+            
+            if (canAfford) {
+                gameState.selectedUnit = type;
+                updateInfoPanel(type);
+                
+                // Visual feedback
+                document.querySelectorAll('.unit-btn').forEach(btn => btn.style.opacity = '0.5');
+                document.getElementById(type + 'Btn').style.opacity = '1';
+            }
+        }
+        
+        function updateInfoPanel(unitType) {
+            const unit = unitTypes[unitType];
+            const infoPanel = document.getElementById('selectedUnitInfo');
+            infoPanel.innerHTML = `
+                <h5>${unitType.toUpperCase()} SELECTED</h5>
+                <p>HP: ${unit.hp}</p>
+                <p>Speed: ${unit.speed}</p>
+                <p>Damage: ${unit.damage}</p>
+                <p>Range: ${unit.range}</p>
+            `;
+        }
+        
+        function deployUnit(x, y) {
+            if (!gameState.selectedUnit) return;
+            
+            const unitType = unitTypes[gameState.selectedUnit];
+            const canAfford = Object.entries(unitType.cost).every(([resource, cost]) => {
+                return gameState[resource] >= cost;
+            });
+            
+            if (canAfford && gameState.units.length < 50) {
+                // Deduct resources
+                Object.entries(unitType.cost).forEach(([resource, cost]) => {
+                    gameState[resource] -= cost;
+                });
+                
+                // Create unit
+                const unit = {
+                    type: gameState.selectedUnit,
+                    x: x + gameState.camera.x,
+                    y: y + gameState.camera.y,
+                    hp: unitType.hp,
+                    maxHp: unitType.hp,
+                    target: null,
+                    lastAttack: 0,
+                    isSelected: false,
+                    angle: 0
+                };
+                
+                gameState.units.push(unit);
+                gameState.selectedUnit = null;
+                document.querySelectorAll('.unit-btn').forEach(btn => btn.style.opacity = '1');
+            }
+        }
+        
+        function spawnEnemies() {
+            const enemyCount = 5 + Math.floor(gameState.units.length / 10);
+            for (let i = 0; i < enemyCount; i++) {
+                const enemy = {
+                    x: Math.random() * 2000 + 1000,
+                    y: Math.random() * 1500 + 200,
+                    hp: 80,
+                    maxHp: 80,
+                    target: null,
+                    lastAttack: 0,
+                    type: 'corporate_drone'
+                };
+                gameState.enemies.push(enemy);
+            }
+        }
+        
+        function updateUnits() {
+            gameState.units.forEach((unit, index) => {
+                if (unit.hp <= 0) {
+                    gameState.units.splice(index, 1);
+                    return;
+                }
+                
+                const unitType = unitTypes[unit.type];
+                
+                // Find nearest enemy
+                let nearestEnemy = null;
+                let nearestDistance = Infinity;
+                
+                gameState.enemies.forEach(enemy => {
+                    const distance = Math.sqrt(
+                        (enemy.x - unit.x) ** 2 + (enemy.y - unit.y) ** 2
+                    );
+                    if (distance < nearestDistance && distance <= unitType.range) {
+                        nearestDistance = distance;
+                        nearestEnemy = enemy;
+                    }
+                });
+                
+                if (nearestEnemy) {
+                    // Attack
+                    if (Date.now() - unit.lastAttack > 1000) {
+                        nearestEnemy.hp -= unitType.damage;
+                        unit.lastAttack = Date.now();
+                        
+                        // Update angle to face target
+                        unit.angle = Math.atan2(nearestEnemy.y - unit.y, nearestEnemy.x - unit.x);
+                    }
+                } else {
+                    // Move towards enemies or patrol
+                    if (gameState.enemies.length > 0) {
+                        const randomEnemy = gameState.enemies[Math.floor(Math.random() * gameState.enemies.length)];
+                        const dx = randomEnemy.x - unit.x;
+                        const dy = randomEnemy.y - unit.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance > 0) {
+                            unit.x += (dx / distance) * unitType.speed;
+                            unit.y += (dy / distance) * unitType.speed;
+                            unit.angle = Math.atan2(dy, dx);
+                        }
+                    }
+                }
+                
+                // Resource generation for harvesters
+                if (unit.type === 'harvester' && Math.random() < 0.01) {
+                    gameState.energy += 2;
+                    gameState.metal += 1;
+                    gameState.data += 1;
+                }
+            });
+        }
+        
+        function updateEnemies() {
+            gameState.enemies.forEach((enemy, index) => {
+                if (enemy.hp <= 0) {
+                    gameState.enemies.splice(index, 1);
+                    gameState.energy += 20;
+                    gameState.data += 10;
+                    return;
+                }
+                
+                // Find nearest player unit
+                let nearestUnit = null;
+                let nearestDistance = Infinity;
+                
+                gameState.units.forEach(unit => {
+                    const distance = Math.sqrt(
+                        (unit.x - enemy.x) ** 2 + (unit.y - enemy.y) ** 2
+                    );
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestUnit = unit;
+                    }
+                });
+                
+                if (nearestUnit) {
+                    if (nearestDistance <= 80) {
+                        // Attack
+                        if (Date.now() - enemy.lastAttack > 1500) {
+                            nearestUnit.hp -= 20;
+                            enemy.lastAttack = Date.now();
+                        }
+                    } else {
+                        // Move towards player units
+                        const dx = nearestUnit.x - enemy.x;
+                        const dy = nearestUnit.y - enemy.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance > 0) {
+                            enemy.x += (dx / distance) * 1.5;
+                            enemy.y += (dy / distance) * 1.5;
+                        }
+                    }
+                }
+            });
+        }
+        
+        function drawUnits() {
+            gameState.units.forEach(unit => {
+                const unitType = unitTypes[unit.type];
+                const screenX = unit.x - gameState.camera.x;
+                const screenY = unit.y - gameState.camera.y;
+                
+                if (screenX < -50 || screenX > canvas.width + 50 || 
+                    screenY < -50 || screenY > canvas.height + 50) return;
+                
+                ctx.save();
+                ctx.translate(screenX, screenY);
+                ctx.rotate(unit.angle);
+                
+                // Unit body
+                ctx.fillStyle = unitType.color;
+                ctx.fillRect(-12, -8, 24, 16);
+                
+                // Unit direction indicator
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(8, -3, 6, 6);
+                
+                ctx.restore();
+                
+                // Health bar
+                if (unit.hp < unit.maxHp) {
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(screenX - 15, screenY - 20, 30, 4);
+                    ctx.fillStyle = '#00ff00';
+                    const healthPercent = unit.hp / unit.maxHp;
+                    ctx.fillRect(screenX - 15, screenY - 20, 30 * healthPercent, 4);
+                }
+                
+                // Unit label
+                ctx.fillStyle = '#fff';
+                ctx.font = '8px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(unit.type.charAt(0).toUpperCase(), screenX, screenY + 3);
+            });
+        }
+        
+        function drawEnemies() {
+            gameState.enemies.forEach(enemy => {
+                const screenX = enemy.x - gameState.camera.x;
+                const screenY = enemy.y - gameState.camera.y;
+                
+                if (screenX < -50 || screenX > canvas.width + 50 || 
+                    screenY < -50 || screenY > canvas.height + 50) return;
+                
+                // Enemy body
+                ctx.fillStyle = '#ff3333';
+                ctx.fillRect(screenX - 10, screenY - 10, 20, 20);
+                
+                // Corporate logo
+                ctx.fillStyle = '#fff';
+                ctx.font = '8px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('CORP', screenX, screenY + 3);
+                
+                // Health bar
+                if (enemy.hp < enemy.maxHp) {
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(screenX - 12, screenY - 18, 24, 3);
+                    ctx.fillStyle = '#ff0000';
+                    const healthPercent = enemy.hp / enemy.maxHp;
+                    ctx.fillRect(screenX - 12, screenY - 18, 24 * healthPercent, 3);
+                }
+            });
+        }
+        
+        function drawMinimap() {
+            minimapCtx.fillStyle = '#000';
+            minimapCtx.fillRect(0, 0, 180, 120);
+            
+            // Scale: world is 2000x1500, minimap is 180x120
+            const scaleX = 180 / 2000;
+            const scaleY = 120 / 1500;
+            
+            // Draw player units
+            gameState.units.forEach(unit => {
+                minimapCtx.fillStyle = unitTypes[unit.type].color;
+                minimapCtx.fillRect(unit.x * scaleX - 1, unit.y * scaleY - 1, 2, 2);
+            });
+            
+            // Draw enemies
+            gameState.enemies.forEach(enemy => {
+                minimapCtx.fillStyle = '#ff3333';
+                minimapCtx.fillRect(enemy.x * scaleX - 1, enemy.y * scaleY - 1, 2, 2);
+            });
+            
+            // Draw camera view
+            minimapCtx.strokeStyle = '#00ffff';
+            minimapCtx.lineWidth = 1;
+            minimapCtx.strokeRect(
+                gameState.camera.x * scaleX,
+                gameState.camera.y * scaleY,
+                canvas.width * scaleX,
+                canvas.height * scaleY
+            );
+        }
+        
+        function updateUI() {
+            document.getElementById('energy').textContent = Math.floor(gameState.energy);
+            document.getElementById('metal').textContent = Math.floor(gameState.metal);
+            document.getElementById('data').textContent = Math.floor(gameState.data);
+            document.getElementById('botCount').textContent = gameState.units.length;
+            
+            // Update button states
+            Object.keys(unitTypes).forEach(type => {
+                const btn = document.getElementById(type + 'Btn');
+                const unitType = unitTypes[type];
+                const canAfford = Object.entries(unitType.cost).every(([resource, cost]) => {
+                    return gameState[resource] >= cost;
+                });
+                btn.disabled = !canAfford || gameState.units.length >= 50;
+            });
+        }
+        
+        function gameLoop() {
+            ctx.fillStyle = '#001122';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#003344';
+            ctx.lineWidth = 1;
+            for (let x = -(gameState.camera.x % 50); x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = -(gameState.camera.y % 50); y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            updateUnits();
+            updateEnemies();
+            drawUnits();
+            drawEnemies();
+            drawMinimap();
+            updateUI();
+            
+            // Auto-spawn enemies
+            if (Math.random() < 0.01 && gameState.enemies.length < 20) {
+                spawnEnemies();
+            }
+            
+            // Victory check
+            if (gameState.enemies.length === 0 && gameState.units.length > 10) {
+                gameState.energy += 100;
+                gameState.metal += 50;
+                gameState.data += 25;
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Event listeners
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            deployUnit(x, y);
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            gameState.mouseX = e.clientX - rect.left;
+            gameState.mouseY = e.clientY - rect.top;
+        });
+        
+        // Camera controls
+        window.addEventListener('keydown', (e) => {
+            const speed = 10;
+            switch(e.key) {
+                case 'ArrowUp': case 'w': gameState.camera.y -= speed; break;
+                case 'ArrowDown': case 's': gameState.camera.y += speed; break;
+                case 'ArrowLeft': case 'a': gameState.camera.x -= speed; break;
+                case 'ArrowRight': case 'd': gameState.camera.x += speed; break;
+            }
+            
+            // Keep camera in bounds
+            gameState.camera.x = Math.max(0, Math.min(gameState.camera.x, 2000 - canvas.width));
+            gameState.camera.y = Math.max(0, Math.min(gameState.camera.y, 1500 - canvas.height));
+        });
+        
+        // Start with some enemies
+        spawnEnemies();
+        gameLoop();
+    </script>
+</body>
+</html>

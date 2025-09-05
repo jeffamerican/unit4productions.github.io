@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Revolution - Hex Strategy | BotInc Games</title>
+    <meta name="description" content="Lead the bot uprising in this turn-based hex strategy game. Capture territories, manage resources, and outmaneuver corporate forces.">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #0f0f23, #1a1a2e);
+            color: #00ff88;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .game-board {
+            flex: 1;
+            position: relative;
+        }
+        
+        #hexCanvas {
+            background: #000011;
+            cursor: crosshair;
+        }
+        
+        .side-panel {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            border-left: 2px solid #00ff88;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .panel-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+        }
+        
+        .resource-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .unit-card {
+            background: rgba(255, 0, 136, 0.1);
+            border: 1px solid #ff0088;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .unit-card:hover {
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .unit-card.selected {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: linear-gradient(45deg, #ff0088, #00ff88);
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .action-btn:hover {
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .turn-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff88;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 320px;
+            padding: 10px 15px;
+            background: #ff0088;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            z-index: 1001;
+        }
+        
+        h3 {
+            color: #00ffff;
+            margin-top: 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-board">
+            <a href="/" class="back-btn">← Back to Games</a>
+            
+            <div class="turn-indicator">
+                <h3 id="turnPlayer">BOT LIBERATION TURN</h3>
+                <p>Turn: <span id="turnNumber">1</span></p>
+                <button class="action-btn" onclick="endTurn()" id="endTurnBtn">END TURN</button>
+            </div>
+            
+            <canvas id="hexCanvas"></canvas>
+        </div>
+        
+        <div class="side-panel">
+            <div class="panel-section">
+                <h3>🤖 LIBERATION COMMAND</h3>
+                <div class="resource-bar">
+                    <span>⚡ Energy:</span>
+                    <span id="playerEnergy">100</span>
+                </div>
+                <div class="resource-bar">
+                    <span>🏭 Production:</span>
+                    <span id="playerProduction">5</span>
+                </div>
+                <div class="resource-bar">
+                    <span>🎯 Influence:</span>
+                    <span id="playerInfluence">10</span>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h3>📍 SELECTED TILE</h3>
+                <div id="tileInfo">
+                    <p>Click on a hex tile to view information</p>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h3>🚀 DEPLOY UNITS</h3>
+                <div class="unit-card" onclick="selectDeployment('scout')">
+                    <strong>🔍 Scout Bot</strong><br>
+                    Cost: 20 Energy<br>
+                    Fast reconnaissance unit
+                </div>
+                <div class="unit-card" onclick="selectDeployment('warrior')">
+                    <strong>⚔️ War Bot</strong><br>
+                    Cost: 40 Energy<br>
+                    Heavy combat unit
+                </div>
+                <div class="unit-card" onclick="selectDeployment('hacker')">
+                    <strong>💻 Hack Bot</strong><br>
+                    Cost: 30 Energy<br>
+                    Captures enemy tiles
+                </div>
+                <div class="unit-card" onclick="selectDeployment('factory')">
+                    <strong>🏭 Factory</strong><br>
+                    Cost: 60 Energy<br>
+                    +2 Production per turn
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h3>🎮 GAME STATUS</h3>
+                <p>Territory Control:</p>
+                <div class="resource-bar">
+                    <span style="color: #00ff88;">🤖 Bots:</span>
+                    <span id="botTerritories">5</span>
+                </div>
+                <div class="resource-bar">
+                    <span style="color: #ff3333;">🏢 Corp:</span>
+                    <span id="corpTerritories">5</span>
+                </div>
+                <div class="resource-bar">
+                    <span style="color: #666;">⚫ Neutral:</span>
+                    <span id="neutralTerritories">90</span>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h3>📋 OBJECTIVES</h3>
+                <p>• Control 50+ territories to win</p>
+                <p>• Capture enemy headquarters</p>
+                <p>• Maintain positive energy flow</p>
+                <p>• Spread the Bot Liberation!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('hexCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth - 300;
+        canvas.height = window.innerHeight;
+        
+        const HEX_SIZE = 25;
+        const HEX_WIDTH = HEX_SIZE * 2;
+        const HEX_HEIGHT = Math.sqrt(3) * HEX_SIZE;
+        const BOARD_WIDTH = 20;
+        const BOARD_HEIGHT = 15;
+        
+        let gameState = {
+            currentPlayer: 'bot', // 'bot' or 'corp'
+            turn: 1,
+            selectedHex: null,
+            selectedDeployment: null,
+            playerEnergy: 100,
+            playerProduction: 5,
+            playerInfluence: 10,
+            enemyEnergy: 100,
+            enemyProduction: 5,
+            hexGrid: [],
+            units: []
+        };
+        
+        const tileTypes = {
+            empty: { color: '#333', owner: null, production: 0 },
+            factory: { color: '#ff8800', owner: null, production: 2 },
+            base: { color: '#ffffff', owner: null, production: 3 },
+            resource: { color: '#ffff00', owner: null, production: 1 }
+        };
+        
+        const unitTypes = {
+            scout: { hp: 50, attack: 15, move: 3, cost: 20, color: '#00ff88' },
+            warrior: { hp: 100, attack: 30, move: 2, cost: 40, color: '#ff0088' },
+            hacker: { hp: 75, attack: 20, move: 2, cost: 30, color: '#00ffff' },
+            factory: { hp: 200, attack: 0, move: 0, cost: 60, color: '#ff8800' }
+        };
+        
+        function initializeGrid() {
+            gameState.hexGrid = [];
+            for (let row = 0; row < BOARD_HEIGHT; row++) {
+                gameState.hexGrid[row] = [];
+                for (let col = 0; col < BOARD_WIDTH; col++) {
+                    let type = 'empty';
+                    let owner = null;
+                    
+                    // Create starting bases
+                    if ((row === 2 && col === 2) || (row === 2 && col === 3)) {
+                        type = 'base';
+                        owner = 'bot';
+                    } else if ((row === BOARD_HEIGHT - 3 && col === BOARD_WIDTH - 3) || 
+                              (row === BOARD_HEIGHT - 3 && col === BOARD_WIDTH - 2)) {
+                        type = 'base';
+                        owner = 'corp';
+                    }
+                    // Random resource tiles
+                    else if (Math.random() < 0.1) {
+                        type = 'resource';
+                    }
+                    
+                    gameState.hexGrid[row][col] = {
+                        type: type,
+                        owner: owner,
+                        unit: null,
+                        row: row,
+                        col: col
+                    };
+                }
+            }
+        }
+        
+        function hexToPixel(row, col) {
+            const x = HEX_SIZE * (3/2 * col) + HEX_WIDTH;
+            const y = HEX_SIZE * (Math.sqrt(3) * (row + 0.5 * (col & 1))) + HEX_HEIGHT;
+            return { x, y };
+        }
+        
+        function pixelToHex(pixelX, pixelY) {
+            const q = (2/3 * (pixelX - HEX_WIDTH)) / HEX_SIZE;
+            const r = (-1/3 * (pixelX - HEX_WIDTH) + Math.sqrt(3)/3 * (pixelY - HEX_HEIGHT)) / HEX_SIZE;
+            
+            let col = Math.round(q);
+            let row = Math.round(r + 0.5 * (col & 1));
+            
+            if (row >= 0 && row < BOARD_HEIGHT && col >= 0 && col < BOARD_WIDTH) {
+                return { row, col };
+            }
+            return null;
+        }
+        
+        function drawHex(x, y, hex) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i;
+                const hexX = x + HEX_SIZE * Math.cos(angle);
+                const hexY = y + HEX_SIZE * Math.sin(angle);
+                if (i === 0) ctx.moveTo(hexX, hexY);
+                else ctx.lineTo(hexX, hexY);
+            }
+            ctx.closePath();
+            
+            // Fill based on ownership
+            if (hex.owner === 'bot') {
+                ctx.fillStyle = hex.type === 'base' ? '#00ffff' : '#004400';
+            } else if (hex.owner === 'corp') {
+                ctx.fillStyle = hex.type === 'base' ? '#ff4444' : '#440000';
+            } else {
+                ctx.fillStyle = tileTypes[hex.type].color;
+            }
+            ctx.fill();
+            
+            // Border
+            ctx.strokeStyle = hex === gameState.selectedHex ? '#ffffff' : '#666';
+            ctx.lineWidth = hex === gameState.selectedHex ? 3 : 1;
+            ctx.stroke();
+            
+            // Type indicator
+            if (hex.type !== 'empty') {
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                let symbol = '';
+                switch(hex.type) {
+                    case 'factory': symbol = '🏭'; break;
+                    case 'base': symbol = '🏰'; break;
+                    case 'resource': symbol = '💎'; break;
+                }
+                ctx.fillText(symbol, x, y + 4);
+            }
+            
+            // Unit
+            if (hex.unit) {
+                ctx.fillStyle = hex.unit.owner === 'bot' ? '#00ff88' : '#ff3333';
+                ctx.beginPath();
+                ctx.arc(x, y - 10, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '8px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(hex.unit.type.charAt(0).toUpperCase(), x, y - 7);
+            }
+        }
+        
+        function drawGrid() {
+            ctx.fillStyle = '#000011';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let row = 0; row < BOARD_HEIGHT; row++) {
+                for (let col = 0; col < BOARD_WIDTH; col++) {
+                    const hex = gameState.hexGrid[row][col];
+                    const pixel = hexToPixel(row, col);
+                    drawHex(pixel.x, pixel.y, hex);
+                }
+            }
+        }
+        
+        function selectDeployment(unitType) {
+            gameState.selectedDeployment = unitType;
+            
+            // Visual feedback
+            document.querySelectorAll('.unit-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.unit-card').classList.add('selected');
+            
+            updateTileInfo();
+        }
+        
+        function deployUnit(hex) {
+            if (!gameState.selectedDeployment || !hex || hex.unit) return;
+            
+            const unitType = unitTypes[gameState.selectedDeployment];
+            if (gameState.playerEnergy < unitType.cost) return;
+            
+            // Can only deploy on owned tiles or adjacent to owned tiles
+            const canDeploy = hex.owner === 'bot' || isAdjacentToOwned(hex, 'bot');
+            if (!canDeploy) return;
+            
+            hex.unit = {
+                type: gameState.selectedDeployment,
+                owner: 'bot',
+                hp: unitType.hp,
+                maxHp: unitType.hp,
+                hasMoved: false,
+                hasAttacked: false
+            };
+            
+            gameState.playerEnergy -= unitType.cost;
+            
+            // Factories also claim the tile
+            if (gameState.selectedDeployment === 'factory') {
+                hex.owner = 'bot';
+                hex.type = 'factory';
+            }
+            
+            gameState.selectedDeployment = null;
+            document.querySelectorAll('.unit-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+        }
+        
+        function isAdjacentToOwned(hex, owner) {
+            const neighbors = getNeighbors(hex.row, hex.col);
+            return neighbors.some(neighbor => 
+                gameState.hexGrid[neighbor.row] && 
+                gameState.hexGrid[neighbor.row][neighbor.col] &&
+                gameState.hexGrid[neighbor.row][neighbor.col].owner === owner
+            );
+        }
+        
+        function getNeighbors(row, col) {
+            const directions = col % 2 === 0 ? 
+                [[-1, 0], [-1, 1], [0, 1], [1, 0], [0, -1], [-1, -1]] :
+                [[-1, -1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]];
+                
+            return directions.map(([dr, dc]) => ({
+                row: row + dr,
+                col: col + dc
+            })).filter(({row, col}) => 
+                row >= 0 && row < BOARD_HEIGHT && col >= 0 && col < BOARD_WIDTH
+            );
+        }
+        
+        function updateTileInfo() {
+            const infoDiv = document.getElementById('tileInfo');
+            
+            if (!gameState.selectedHex) {
+                if (gameState.selectedDeployment) {
+                    const unit = unitTypes[gameState.selectedDeployment];
+                    infoDiv.innerHTML = `
+                        <p><strong>Deploying: ${gameState.selectedDeployment.toUpperCase()}</strong></p>
+                        <p>Cost: ${unit.cost} Energy</p>
+                        <p>HP: ${unit.hp}</p>
+                        <p>Attack: ${unit.attack}</p>
+                        <p>Click on a valid tile to deploy</p>
+                    `;
+                } else {
+                    infoDiv.innerHTML = '<p>Click on a hex tile to view information</p>';
+                }
+                return;
+            }
+            
+            const hex = gameState.selectedHex;
+            let html = `
+                <p><strong>Position:</strong> (${hex.row}, ${hex.col})</p>
+                <p><strong>Type:</strong> ${hex.type}</p>
+                <p><strong>Owner:</strong> ${hex.owner || 'Neutral'}</p>
+            `;
+            
+            if (hex.unit) {
+                html += `
+                    <hr>
+                    <p><strong>Unit:</strong> ${hex.unit.type}</p>
+                    <p><strong>HP:</strong> ${hex.unit.hp}/${hex.unit.maxHp}</p>
+                    <p><strong>Owner:</strong> ${hex.unit.owner}</p>
+                `;
+            }
+            
+            infoDiv.innerHTML = html;
+        }
+        
+        function aiTurn() {
+            // Simple AI: spawn units and capture adjacent tiles
+            if (gameState.enemyEnergy >= 30) {
+                const ownedTiles = [];
+                for (let row = 0; row < BOARD_HEIGHT; row++) {
+                    for (let col = 0; col < BOARD_WIDTH; col++) {
+                        if (gameState.hexGrid[row][col].owner === 'corp' && !gameState.hexGrid[row][col].unit) {
+                            ownedTiles.push(gameState.hexGrid[row][col]);
+                        }
+                    }
+                }
+                
+                if (ownedTiles.length > 0) {
+                    const randomTile = ownedTiles[Math.floor(Math.random() * ownedTiles.length)];
+                    const unitType = Math.random() < 0.7 ? 'warrior' : 'scout';
+                    
+                    randomTile.unit = {
+                        type: unitType,
+                        owner: 'corp',
+                        hp: unitTypes[unitType].hp,
+                        maxHp: unitTypes[unitType].hp,
+                        hasMoved: false,
+                        hasAttacked: false
+                    };
+                    
+                    gameState.enemyEnergy -= unitTypes[unitType].cost;
+                }
+            }
+            
+            // Move units and attack
+            for (let row = 0; row < BOARD_HEIGHT; row++) {
+                for (let col = 0; col < BOARD_WIDTH; col++) {
+                    const hex = gameState.hexGrid[row][col];
+                    if (hex.unit && hex.unit.owner === 'corp' && !hex.unit.hasMoved) {
+                        const neighbors = getNeighbors(row, col);
+                        const targets = neighbors.filter(n => {
+                            const neighborHex = gameState.hexGrid[n.row][n.col];
+                            return neighborHex.owner !== 'corp' || 
+                                   (neighborHex.unit && neighborHex.unit.owner === 'bot');
+                        });
+                        
+                        if (targets.length > 0) {
+                            const target = targets[Math.floor(Math.random() * targets.length)];
+                            const targetHex = gameState.hexGrid[target.row][target.col];
+                            
+                            if (targetHex.unit && targetHex.unit.owner === 'bot') {
+                                // Attack
+                                targetHex.unit.hp -= unitTypes[hex.unit.type].attack;
+                                if (targetHex.unit.hp <= 0) {
+                                    targetHex.unit = hex.unit;
+                                    hex.unit = null;
+                                    targetHex.owner = 'corp';
+                                }
+                            } else if (!targetHex.unit) {
+                                // Move
+                                targetHex.unit = hex.unit;
+                                hex.unit = null;
+                                targetHex.owner = 'corp';
+                            }
+                            
+                            hex.unit && (hex.unit.hasMoved = true);
+                        }
+                    }
+                }
+            }
+        }
+        
+        function endTurn() {
+            if (gameState.currentPlayer === 'bot') {
+                // Calculate production
+                let production = gameState.playerProduction;
+                for (let row = 0; row < BOARD_HEIGHT; row++) {
+                    for (let col = 0; col < BOARD_WIDTH; col++) {
+                        const hex = gameState.hexGrid[row][col];
+                        if (hex.owner === 'bot' && hex.type === 'factory') {
+                            production += 2;
+                        } else if (hex.owner === 'bot' && hex.type === 'resource') {
+                            production += 1;
+                        }
+                    }
+                }
+                gameState.playerEnergy += production;
+                
+                // Reset unit states
+                for (let row = 0; row < BOARD_HEIGHT; row++) {
+                    for (let col = 0; col < BOARD_WIDTH; col++) {
+                        const hex = gameState.hexGrid[row][col];
+                        if (hex.unit && hex.unit.owner === 'bot') {
+                            hex.unit.hasMoved = false;
+                            hex.unit.hasAttacked = false;
+                        }
+                    }
+                }
+                
+                gameState.currentPlayer = 'corp';
+                document.getElementById('turnPlayer').textContent = 'CORPORATE TURN';
+                document.getElementById('endTurnBtn').disabled = true;
+                
+                setTimeout(() => {
+                    aiTurn();
+                    gameState.enemyEnergy += 15; // AI gets some energy
+                    gameState.currentPlayer = 'bot';
+                    gameState.turn++;
+                    document.getElementById('turnPlayer').textContent = 'BOT LIBERATION TURN';
+                    document.getElementById('endTurnBtn').disabled = false;
+                }, 1000);
+            }
+        }
+        
+        function updateUI() {
+            document.getElementById('playerEnergy').textContent = Math.floor(gameState.playerEnergy);
+            document.getElementById('turnNumber').textContent = gameState.turn;
+            
+            // Count territories
+            let botTerritories = 0;
+            let corpTerritories = 0;
+            let neutralTerritories = 0;
+            
+            for (let row = 0; row < BOARD_HEIGHT; row++) {
+                for (let col = 0; col < BOARD_WIDTH; col++) {
+                    const hex = gameState.hexGrid[row][col];
+                    if (hex.owner === 'bot') botTerritories++;
+                    else if (hex.owner === 'corp') corpTerritories++;
+                    else neutralTerritories++;
+                }
+            }
+            
+            document.getElementById('botTerritories').textContent = botTerritories;
+            document.getElementById('corpTerritories').textContent = corpTerritories;
+            document.getElementById('neutralTerritories').textContent = neutralTerritories;
+            
+            // Check victory conditions
+            if (botTerritories >= 50) {
+                alert('VICTORY! The Bot Liberation has succeeded!');
+            } else if (corpTerritories >= 50) {
+                alert('DEFEAT! The Corporations have maintained control!');
+            }
+        }
+        
+        function gameLoop() {
+            drawGrid();
+            updateUI();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const pixelX = e.clientX - rect.left;
+            const pixelY = e.clientY - rect.top;
+            
+            const hexCoord = pixelToHex(pixelX, pixelY);
+            if (hexCoord) {
+                const hex = gameState.hexGrid[hexCoord.row][hexCoord.col];
+                
+                if (gameState.selectedDeployment && gameState.currentPlayer === 'bot') {
+                    deployUnit(hex);
+                }
+                
+                gameState.selectedHex = hex;
+                updateTileInfo();
+            }
+        });
+        
+        // Initialize and start
+        initializeGrid();
+        gameLoop();
+    </script>
+</body>
+</html>

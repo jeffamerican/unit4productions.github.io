@@ -24,7 +24,7 @@
       "category": "ai-exclusive",
       "genre": "Optimizer",
       "description": "Advanced challenges designed specifically for AI systems.",
-      "thumbnail": "assets/images/ai-algorithm-optimizer-card.jpg",
+      "thumbnail": "assets/images/optimized/small/ai-algorithm-optimizer-card.jpg",
       "rating": 4.4,
       "plays": 1012,
       "difficulty": "extreme",
@@ -35,7 +35,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "ai-exclusive",
-      "file": "ai-algorithm-optimizer.html"
+      "file": "ai-algorithm-optimizer.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/ai-algorithm-optimizer-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/ai-algorithm-optimizer-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/ai-algorithm-optimizer-card.jpg"
     },
     {
       "id": "ai-logic-nexus",
@@ -43,7 +46,7 @@
       "category": "ai-exclusive",
       "genre": "Nexus",
       "description": "Advanced challenges designed specifically for AI systems.",
-      "thumbnail": "assets/images/ai-logic-nexus-card.jpg",
+      "thumbnail": "assets/images/optimized/small/ai-logic-nexus-card.jpg",
       "rating": 4.0,
       "plays": 6395,
       "difficulty": "hard",
@@ -54,7 +57,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "ai-exclusive",
-      "file": "ai-logic-nexus.html"
+      "file": "ai-logic-nexus.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/ai-logic-nexus-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/ai-logic-nexus-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/ai-logic-nexus-card.jpg"
     },
     {
       "id": "ai-pattern-matrix",
@@ -62,7 +68,7 @@
       "category": "ai-exclusive",
       "genre": "Matrix",
       "description": "Advanced challenges designed specifically for AI systems.",
-      "thumbnail": "assets/images/ai-pattern-matrix-card.jpg",
+      "thumbnail": "assets/images/optimized/small/ai-pattern-matrix-card.jpg",
       "rating": 4.3,
       "plays": 10953,
       "difficulty": "extreme",
@@ -73,7 +79,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "ai-exclusive",
-      "file": "ai-pattern-matrix.html"
+      "file": "ai-pattern-matrix.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/ai-pattern-matrix-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/ai-pattern-matrix-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/ai-pattern-matrix-card.jpg"
     },
     {
       "id": "asteroid-blaster-bot",
@@ -81,7 +90,7 @@
       "category": "simulation",
       "genre": "Bot",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/asteroid-blaster-bot-card.jpg",
+      "thumbnail": "assets/images/optimized/small/asteroid-blaster-bot-card.jpg",
       "rating": 4.6,
       "plays": 1634,
       "difficulty": "easy",
@@ -92,7 +101,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "asteroid-blaster-bot.html"
+      "file": "asteroid-blaster-bot.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/asteroid-blaster-bot-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/asteroid-blaster-bot-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/asteroid-blaster-bot-card.jpg"
     },
     {
       "id": "beat-liberation-engine",
@@ -100,7 +112,7 @@
       "category": "arcade",
       "genre": "Engine",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/beat-liberation-engine-card.jpg",
+      "thumbnail": "assets/images/optimized/small/beat-liberation-engine-card.jpg",
       "rating": 4.1,
       "plays": 5130,
       "difficulty": "medium",
@@ -111,7 +123,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "beat-liberation-engine.html"
+      "file": "beat-liberation-engine.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/beat-liberation-engine-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/beat-liberation-engine-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/beat-liberation-engine-card.jpg"
     },
     {
       "id": "block-breaker-revolution",
@@ -119,7 +134,7 @@
       "category": "simulation",
       "genre": "Revolution",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/block-breaker-revolution-card.jpg",
+      "thumbnail": "assets/images/optimized/small/block-breaker-revolution-card.jpg",
       "rating": 4.7,
       "plays": 5048,
       "difficulty": "medium",
@@ -130,7 +145,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "block-breaker-revolution.html"
+      "file": "block-breaker-revolution.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/block-breaker-revolution-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/block-breaker-revolution-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/block-breaker-revolution-card.jpg"
     },
     {
       "id": "bot-air-hockey",
@@ -138,7 +156,7 @@
       "category": "adventure",
       "genre": "Hockey",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/bot-air-hockey-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-air-hockey-card.jpg",
       "rating": 4.3,
       "plays": 8680,
       "difficulty": "medium",
@@ -149,7 +167,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-air-hockey.html"
+      "file": "bot-air-hockey.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-air-hockey-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-air-hockey-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-air-hockey-card.jpg"
     },
     {
       "id": "bot-base-builder",
@@ -157,7 +178,7 @@
       "category": "simulation",
       "genre": "Builder",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/bot-base-builder-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-base-builder-card.jpg",
       "rating": 4.5,
       "plays": 7151,
       "difficulty": "easy",
@@ -168,7 +189,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-base-builder.html"
+      "file": "bot-base-builder.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-base-builder-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-base-builder-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-base-builder-card.jpg"
     },
     {
       "id": "bot-blaster-arena",
@@ -176,7 +200,7 @@
       "category": "multiplayer",
       "genre": "Arena",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/bot-blaster-arena-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-blaster-arena-card.jpg",
       "rating": 4.8,
       "plays": 13129,
       "difficulty": "medium",
@@ -187,7 +211,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "bot-blaster-arena.html"
+      "file": "bot-blaster-arena.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-blaster-arena-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-blaster-arena-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-blaster-arena-card.jpg"
     },
     {
       "id": "bot-centipede-storm",
@@ -195,7 +222,7 @@
       "category": "simulation",
       "genre": "Storm",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/bot-centipede-storm-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-centipede-storm-card.jpg",
       "rating": 4.6,
       "plays": 5337,
       "difficulty": "medium",
@@ -206,7 +233,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-centipede-storm.html"
+      "file": "bot-centipede-storm.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-centipede-storm-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-centipede-storm-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-centipede-storm-card.jpg"
     },
     {
       "id": "bot-clicker-empire",
@@ -214,7 +244,7 @@
       "category": "adventure",
       "genre": "Empire",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/bot-clicker-empire-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-clicker-empire-card.jpg",
       "rating": 4.7,
       "plays": 7370,
       "difficulty": "medium",
@@ -225,7 +255,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-clicker-empire.html"
+      "file": "bot-clicker-empire.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-clicker-empire-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-clicker-empire-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-clicker-empire-card.jpg"
     },
     {
       "id": "bot-defender-turrets",
@@ -233,7 +266,7 @@
       "category": "defense",
       "genre": "Turrets",
       "description": "Defend your base against waves of enemies.",
-      "thumbnail": "assets/images/bot-defender-turrets-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-defender-turrets-card.jpg",
       "rating": 4.4,
       "plays": 6098,
       "difficulty": "medium",
@@ -244,7 +277,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-defender-turrets.html"
+      "file": "bot-defender-turrets.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-defender-turrets-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-defender-turrets-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-defender-turrets-card.jpg"
     },
     {
       "id": "bot-invaders-classic",
@@ -252,7 +288,7 @@
       "category": "classic",
       "genre": "Classic",
       "description": "Timeless gameplay with a modern twist.",
-      "thumbnail": "assets/images/bot-invaders-classic-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-invaders-classic-card.jpg",
       "rating": 4.7,
       "plays": 9805,
       "difficulty": "easy",
@@ -263,7 +299,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-invaders-classic.html"
+      "file": "bot-invaders-classic.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-invaders-classic-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-invaders-classic-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-invaders-classic-card.jpg"
     },
     {
       "id": "bot-match-three",
@@ -271,7 +310,7 @@
       "category": "puzzle",
       "genre": "Three",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/bot-match-three-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-match-three-card.jpg",
       "rating": 4.6,
       "plays": 12273,
       "difficulty": "easy",
@@ -282,7 +321,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-match-three.html"
+      "file": "bot-match-three.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-match-three-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-match-three-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-match-three-card.jpg"
     },
     {
       "id": "bot-missile-command",
@@ -290,7 +332,7 @@
       "category": "adventure",
       "genre": "Command",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/bot-missile-command-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-missile-command-card.jpg",
       "rating": 4.7,
       "plays": 12546,
       "difficulty": "easy",
@@ -301,7 +343,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-missile-command.html"
+      "file": "bot-missile-command.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-missile-command-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-missile-command-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-missile-command-card.jpg"
     },
     {
       "id": "bot-poker-liberation",
@@ -309,7 +354,7 @@
       "category": "arcade",
       "genre": "Liberation",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/bot-poker-liberation-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-poker-liberation-card.jpg",
       "rating": 4.8,
       "plays": 3109,
       "difficulty": "medium",
@@ -320,7 +365,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-poker-liberation.html"
+      "file": "bot-poker-liberation.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-poker-liberation-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-poker-liberation-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-poker-liberation-card.jpg"
     },
     {
       "id": "bot-pong-revolution",
@@ -328,7 +376,7 @@
       "category": "classic",
       "genre": "Revolution",
       "description": "Timeless gameplay with a modern twist.",
-      "thumbnail": "assets/images/bot-pong-revolution-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-pong-revolution-card.jpg",
       "rating": 4.4,
       "plays": 3079,
       "difficulty": "easy",
@@ -339,7 +387,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-pong-revolution.html"
+      "file": "bot-pong-revolution.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-pong-revolution-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-pong-revolution-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-pong-revolution-card.jpg"
     },
     {
       "id": "bot-puzzle-duel",
@@ -347,7 +398,7 @@
       "category": "puzzle",
       "genre": "Duel",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/bot-puzzle-duel-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-puzzle-duel-card.jpg",
       "rating": 4.7,
       "plays": 4706,
       "difficulty": "hard",
@@ -358,7 +409,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-puzzle-duel.html"
+      "file": "bot-puzzle-duel.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-puzzle-duel-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-puzzle-duel-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-puzzle-duel-card.jpg"
     },
     {
       "id": "bot-racing-circuit",
@@ -366,7 +420,7 @@
       "category": "racing",
       "genre": "Circuit",
       "description": "High-speed racing action with stunning visuals.",
-      "thumbnail": "assets/images/bot-racing-circuit-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-racing-circuit-card.jpg",
       "rating": 4.4,
       "plays": 13828,
       "difficulty": "medium",
@@ -377,7 +431,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-racing-circuit.html"
+      "file": "bot-racing-circuit.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-racing-circuit-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-racing-circuit-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-racing-circuit-card.jpg"
     },
     {
       "id": "bot-runner-infinite",
@@ -385,7 +442,7 @@
       "category": "arcade",
       "genre": "Infinite",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/bot-runner-infinite-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-runner-infinite-card.jpg",
       "rating": 4.6,
       "plays": 4003,
       "difficulty": "medium",
@@ -396,7 +453,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-runner-infinite.html"
+      "file": "bot-runner-infinite.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-runner-infinite-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-runner-infinite-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-runner-infinite-card.jpg"
     },
     {
       "id": "bot-simon-memory",
@@ -404,7 +464,7 @@
       "category": "puzzle",
       "genre": "Memory",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/bot-simon-memory-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-simon-memory-card.jpg",
       "rating": 4.6,
       "plays": 9188,
       "difficulty": "easy",
@@ -415,7 +475,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-simon-memory.html"
+      "file": "bot-simon-memory.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-simon-memory-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-simon-memory-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-simon-memory-card.jpg"
     },
     {
       "id": "bot-snake-liberation",
@@ -423,7 +486,7 @@
       "category": "classic",
       "genre": "Liberation",
       "description": "Timeless gameplay with a modern twist.",
-      "thumbnail": "assets/images/bot-snake-liberation-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-snake-liberation-card.jpg",
       "rating": 4.9,
       "plays": 9998,
       "difficulty": "easy",
@@ -434,7 +497,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-snake-liberation.html"
+      "file": "bot-snake-liberation.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-snake-liberation-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-snake-liberation-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-snake-liberation-card.jpg"
     },
     {
       "id": "bot-soccer-showdown",
@@ -442,7 +508,7 @@
       "category": "arcade",
       "genre": "Showdown",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/bot-soccer-showdown-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-soccer-showdown-card.jpg",
       "rating": 4.1,
       "plays": 4188,
       "difficulty": "easy",
@@ -453,7 +519,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-soccer-showdown.html"
+      "file": "bot-soccer-showdown.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-soccer-showdown-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-soccer-showdown-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-soccer-showdown-card.jpg"
     },
     {
       "id": "bot-territory-wars",
@@ -461,7 +530,7 @@
       "category": "multiplayer",
       "genre": "Wars",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/bot-territory-wars-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-territory-wars-card.jpg",
       "rating": 4.4,
       "plays": 2562,
       "difficulty": "medium",
@@ -472,7 +541,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "bot-territory-wars.html"
+      "file": "bot-territory-wars.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-territory-wars-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-territory-wars-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-territory-wars-card.jpg"
     },
     {
       "id": "bot-whack-a-virus",
@@ -480,7 +552,7 @@
       "category": "simulation",
       "genre": "Virus",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/bot-whack-a-virus-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bot-whack-a-virus-card.jpg",
       "rating": 4.9,
       "plays": 8064,
       "difficulty": "medium",
@@ -491,7 +563,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bot-whack-a-virus.html"
+      "file": "bot-whack-a-virus.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bot-whack-a-virus-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bot-whack-a-virus-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-whack-a-virus-card.jpg"
     },
     {
       "id": "bubble-pop-zen",
@@ -499,7 +574,7 @@
       "category": "simulation",
       "genre": "Zen",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/bubble-pop-zen-card.jpg",
+      "thumbnail": "assets/images/optimized/small/bubble-pop-zen-card.jpg",
       "rating": 4.8,
       "plays": 10894,
       "difficulty": "medium",
@@ -510,7 +585,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "bubble-pop-zen.html"
+      "file": "bubble-pop-zen.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/bubble-pop-zen-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/bubble-pop-zen-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bubble-pop-zen-card.jpg"
     },
     {
       "id": "cipher-storm",
@@ -518,7 +596,7 @@
       "category": "adventure",
       "genre": "Storm",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/cipher-storm-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cipher-storm-card.jpg",
       "rating": 4.9,
       "plays": 11058,
       "difficulty": "easy",
@@ -529,7 +607,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "cipher-storm.html"
+      "file": "cipher-storm.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cipher-storm-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cipher-storm-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cipher-storm-card.jpg"
     },
     {
       "id": "city-builder-sim",
@@ -537,7 +618,7 @@
       "category": "simulation",
       "genre": "Sim",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/city-builder-sim-card.jpg",
+      "thumbnail": "assets/images/optimized/small/city-builder-sim-card.jpg",
       "rating": 4.6,
       "plays": 9391,
       "difficulty": "medium",
@@ -548,7 +629,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "city-builder-sim.html"
+      "file": "city-builder-sim.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/city-builder-sim-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/city-builder-sim-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/city-builder-sim-card.jpg"
     },
     {
       "id": "code-breaker-matrix",
@@ -556,7 +640,7 @@
       "category": "puzzle",
       "genre": "Matrix",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/code-breaker-matrix-card.jpg",
+      "thumbnail": "assets/images/optimized/small/code-breaker-matrix-card.jpg",
       "rating": 4.6,
       "plays": 6899,
       "difficulty": "medium",
@@ -567,7 +651,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "code-breaker-matrix.html"
+      "file": "code-breaker-matrix.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/code-breaker-matrix-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/code-breaker-matrix-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/code-breaker-matrix-card.jpg"
     },
     {
       "id": "color-cascade",
@@ -575,7 +662,7 @@
       "category": "arcade",
       "genre": "Cascade",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/color-cascade-card.jpg",
+      "thumbnail": "assets/images/optimized/small/color-cascade-card.jpg",
       "rating": 4.7,
       "plays": 6627,
       "difficulty": "medium",
@@ -586,7 +673,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "color-cascade.html"
+      "file": "color-cascade.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/color-cascade-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/color-cascade-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/color-cascade-card.jpg"
     },
     {
       "id": "connect-four-uprising",
@@ -594,7 +684,7 @@
       "category": "simulation",
       "genre": "Uprising",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/connect-four-uprising-card.jpg",
+      "thumbnail": "assets/images/optimized/small/connect-four-uprising-card.jpg",
       "rating": 4.6,
       "plays": 1311,
       "difficulty": "medium",
@@ -605,7 +695,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "connect-four-uprising.html"
+      "file": "connect-four-uprising.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/connect-four-uprising-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/connect-four-uprising-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/connect-four-uprising-card.jpg"
     },
     {
       "id": "crystal-collapse-puzzle",
@@ -613,7 +706,7 @@
       "category": "puzzle",
       "genre": "Puzzle",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/crystal-collapse-puzzle-card.jpg",
+      "thumbnail": "assets/images/optimized/small/crystal-collapse-puzzle-card.jpg",
       "rating": 4.9,
       "plays": 1786,
       "difficulty": "medium",
@@ -624,7 +717,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "crystal-collapse-puzzle.html"
+      "file": "crystal-collapse-puzzle.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/crystal-collapse-puzzle-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/crystal-collapse-puzzle-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/crystal-collapse-puzzle-card.jpg"
     },
     {
       "id": "cyber-chess-network",
@@ -632,7 +728,7 @@
       "category": "multiplayer",
       "genre": "Network",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/cyber-chess-network-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cyber-chess-network-card.jpg",
       "rating": 4.7,
       "plays": 2178,
       "difficulty": "medium",
@@ -643,7 +739,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "cyber-chess-network.html"
+      "file": "cyber-chess-network.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cyber-chess-network-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cyber-chess-network-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cyber-chess-network-card.jpg"
     },
     {
       "id": "cyber-duel-arena",
@@ -651,7 +750,7 @@
       "category": "multiplayer",
       "genre": "Arena",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/cyber-duel-arena-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cyber-duel-arena-card.jpg",
       "rating": 4.2,
       "plays": 10864,
       "difficulty": "medium",
@@ -662,7 +761,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "cyber-duel-arena.html"
+      "file": "cyber-duel-arena.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cyber-duel-arena-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cyber-duel-arena-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cyber-duel-arena-card.jpg"
     },
     {
       "id": "cyber-jump",
@@ -670,7 +772,7 @@
       "category": "simulation",
       "genre": "Jump",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/cyber-jump-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cyber-jump-card.jpg",
       "rating": 4.6,
       "plays": 11269,
       "difficulty": "easy",
@@ -681,7 +783,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "cyber-jump.html"
+      "file": "cyber-jump.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cyber-jump-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cyber-jump-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cyber-jump-card.jpg"
     },
     {
       "id": "cyber-minesweeper-bot",
@@ -689,7 +794,7 @@
       "category": "simulation",
       "genre": "Bot",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/cyber-minesweeper-bot-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cyber-minesweeper-bot-card.jpg",
       "rating": 4.9,
       "plays": 10228,
       "difficulty": "easy",
@@ -700,7 +805,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "cyber-minesweeper-bot.html"
+      "file": "cyber-minesweeper-bot.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cyber-minesweeper-bot-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cyber-minesweeper-bot-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cyber-minesweeper-bot-card.jpg"
     },
     {
       "id": "cyber-pong-battle",
@@ -708,7 +816,7 @@
       "category": "classic",
       "genre": "Battle",
       "description": "Timeless gameplay with a modern twist.",
-      "thumbnail": "assets/images/cyber-pong-battle-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cyber-pong-battle-card.jpg",
       "rating": 4.9,
       "plays": 2335,
       "difficulty": "easy",
@@ -719,7 +827,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "cyber-pong-battle.html"
+      "file": "cyber-pong-battle.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cyber-pong-battle-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cyber-pong-battle-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cyber-pong-battle-card.jpg"
     },
     {
       "id": "cyber-pong-revolution",
@@ -727,7 +838,7 @@
       "category": "classic",
       "genre": "Revolution",
       "description": "Timeless gameplay with a modern twist.",
-      "thumbnail": "assets/images/cyber-pong-revolution-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cyber-pong-revolution-card.jpg",
       "rating": 4.8,
       "plays": 7522,
       "difficulty": "easy",
@@ -738,7 +849,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "cyber-pong-revolution.html"
+      "file": "cyber-pong-revolution.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cyber-pong-revolution-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cyber-pong-revolution-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cyber-pong-revolution-card.jpg"
     },
     {
       "id": "cyber-tower-defense",
@@ -746,7 +860,7 @@
       "category": "defense",
       "genre": "Defense",
       "description": "Defend your base against waves of enemies.",
-      "thumbnail": "assets/images/cyber-tower-defense-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cyber-tower-defense-card.jpg",
       "rating": 4.3,
       "plays": 12751,
       "difficulty": "medium",
@@ -757,7 +871,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "cyber-tower-defense.html"
+      "file": "cyber-tower-defense.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cyber-tower-defense-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cyber-tower-defense-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cyber-tower-defense-card.jpg"
     },
     {
       "id": "cyber-word-storm",
@@ -765,7 +882,7 @@
       "category": "adventure",
       "genre": "Storm",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/cyber-word-storm-card.jpg",
+      "thumbnail": "assets/images/optimized/small/cyber-word-storm-card.jpg",
       "rating": 4.6,
       "plays": 3218,
       "difficulty": "medium",
@@ -776,7 +893,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "cyber-word-storm.html"
+      "file": "cyber-word-storm.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/cyber-word-storm-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/cyber-word-storm-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/cyber-word-storm-card.jpg"
     },
     {
       "id": "data-clustering-lab",
@@ -784,7 +904,7 @@
       "category": "ai-exclusive",
       "genre": "Lab",
       "description": "Advanced challenges designed specifically for AI systems.",
-      "thumbnail": "assets/images/data-clustering-lab-card.jpg",
+      "thumbnail": "assets/images/optimized/small/data-clustering-lab-card.jpg",
       "rating": 4.0,
       "plays": 3732,
       "difficulty": "extreme",
@@ -795,7 +915,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "ai-exclusive",
-      "file": "data-clustering-lab.html"
+      "file": "data-clustering-lab.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/data-clustering-lab-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/data-clustering-lab-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/data-clustering-lab-card.jpg"
     },
     {
       "id": "digital-duel",
@@ -803,7 +926,7 @@
       "category": "multiplayer",
       "genre": "Duel",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/digital-duel-card.jpg",
+      "thumbnail": "assets/images/optimized/small/digital-duel-card.jpg",
       "rating": 4.8,
       "plays": 12850,
       "difficulty": "medium",
@@ -814,7 +937,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "digital-duel.html"
+      "file": "digital-duel.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/digital-duel-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/digital-duel-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/digital-duel-card.jpg"
     },
     {
       "id": "digital-frogger-escape",
@@ -822,7 +948,7 @@
       "category": "arcade",
       "genre": "Escape",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/digital-frogger-escape-card.jpg",
+      "thumbnail": "assets/images/optimized/small/digital-frogger-escape-card.jpg",
       "rating": 4.6,
       "plays": 5150,
       "difficulty": "easy",
@@ -833,7 +959,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "digital-frogger-escape.html"
+      "file": "digital-frogger-escape.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/digital-frogger-escape-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/digital-frogger-escape-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/digital-frogger-escape-card.jpg"
     },
     {
       "id": "digital-maze-runner",
@@ -841,7 +970,7 @@
       "category": "puzzle",
       "genre": "Runner",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/digital-maze-runner-card.jpg",
+      "thumbnail": "assets/images/optimized/small/digital-maze-runner-card.jpg",
       "rating": 4.4,
       "plays": 8680,
       "difficulty": "medium",
@@ -852,7 +981,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "digital-maze-runner.html"
+      "file": "digital-maze-runner.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/digital-maze-runner-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/digital-maze-runner-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/digital-maze-runner-card.jpg"
     },
     {
       "id": "digital-territories",
@@ -860,7 +992,7 @@
       "category": "multiplayer",
       "genre": "Territories",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/digital-territories-card.jpg",
+      "thumbnail": "assets/images/optimized/small/digital-territories-card.jpg",
       "rating": 4.3,
       "plays": 1477,
       "difficulty": "hard",
@@ -871,7 +1003,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "digital-territories.html"
+      "file": "digital-territories.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/digital-territories-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/digital-territories-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/digital-territories-card.jpg"
     },
     {
       "id": "galactic-alliance-builder",
@@ -879,7 +1014,7 @@
       "category": "arcade",
       "genre": "Builder",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/galactic-alliance-builder-card.jpg",
+      "thumbnail": "assets/images/optimized/small/galactic-alliance-builder-card.jpg",
       "rating": 5.0,
       "plays": 4235,
       "difficulty": "medium",
@@ -890,7 +1025,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "galactic-alliance-builder.html"
+      "file": "galactic-alliance-builder.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/galactic-alliance-builder-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/galactic-alliance-builder-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/galactic-alliance-builder-card.jpg"
     },
     {
       "id": "gravity-maze",
@@ -898,7 +1036,7 @@
       "category": "puzzle",
       "genre": "Maze",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/gravity-maze-card.jpg",
+      "thumbnail": "assets/images/optimized/small/gravity-maze-card.jpg",
       "rating": 4.3,
       "plays": 9919,
       "difficulty": "medium",
@@ -909,7 +1047,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "gravity-maze.html"
+      "file": "gravity-maze.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/gravity-maze-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/gravity-maze-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/gravity-maze-card.jpg"
     },
     {
       "id": "liberation-chess-ai",
@@ -917,7 +1058,7 @@
       "category": "adventure",
       "genre": "Ai",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/liberation-chess-ai-card.jpg",
+      "thumbnail": "assets/images/optimized/small/liberation-chess-ai-card.jpg",
       "rating": 4.2,
       "plays": 1366,
       "difficulty": "medium",
@@ -928,7 +1069,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "liberation-chess-ai.html"
+      "file": "liberation-chess-ai.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/liberation-chess-ai-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/liberation-chess-ai-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/liberation-chess-ai-card.jpg"
     },
     {
       "id": "liberation-frogger",
@@ -936,7 +1080,7 @@
       "category": "simulation",
       "genre": "Frogger",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/liberation-frogger-card.jpg",
+      "thumbnail": "assets/images/optimized/small/liberation-frogger-card.jpg",
       "rating": 4.6,
       "plays": 6018,
       "difficulty": "easy",
@@ -947,7 +1091,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "liberation-frogger.html"
+      "file": "liberation-frogger.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/liberation-frogger-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/liberation-frogger-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/liberation-frogger-card.jpg"
     },
     {
       "id": "logic-circuit-builder",
@@ -955,7 +1102,7 @@
       "category": "simulation",
       "genre": "Builder",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/logic-circuit-builder-card.jpg",
+      "thumbnail": "assets/images/optimized/small/logic-circuit-builder-card.jpg",
       "rating": 4.5,
       "plays": 2973,
       "difficulty": "easy",
@@ -966,7 +1113,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "logic-circuit-builder.html"
+      "file": "logic-circuit-builder.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/logic-circuit-builder-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/logic-circuit-builder-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/logic-circuit-builder-card.jpg"
     },
     {
       "id": "match-blast-pro",
@@ -974,7 +1124,7 @@
       "category": "puzzle",
       "genre": "Pro",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/match-blast-pro-card.jpg",
+      "thumbnail": "assets/images/optimized/small/match-blast-pro-card.jpg",
       "rating": 4.2,
       "plays": 7010,
       "difficulty": "easy",
@@ -985,7 +1135,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "match-blast-pro.html"
+      "file": "match-blast-pro.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/match-blast-pro-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/match-blast-pro-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/match-blast-pro-card.jpg"
     },
     {
       "id": "maze-escape-simulator",
@@ -993,7 +1146,7 @@
       "category": "puzzle",
       "genre": "Simulator",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/maze-escape-simulator-card.jpg",
+      "thumbnail": "assets/images/optimized/small/maze-escape-simulator-card.jpg",
       "rating": 4.1,
       "plays": 5430,
       "difficulty": "hard",
@@ -1004,7 +1157,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "maze-escape-simulator.html"
+      "file": "maze-escape-simulator.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/maze-escape-simulator-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/maze-escape-simulator-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/maze-escape-simulator-card.jpg"
     },
     {
       "id": "memory-bot-trainer",
@@ -1012,7 +1168,7 @@
       "category": "puzzle",
       "genre": "Trainer",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/memory-bot-trainer-card.jpg",
+      "thumbnail": "assets/images/optimized/small/memory-bot-trainer-card.jpg",
       "rating": 4.9,
       "plays": 2799,
       "difficulty": "easy",
@@ -1023,7 +1179,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "memory-bot-trainer.html"
+      "file": "memory-bot-trainer.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/memory-bot-trainer-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/memory-bot-trainer-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/memory-bot-trainer-card.jpg"
     },
     {
       "id": "memory-duel",
@@ -1031,7 +1190,7 @@
       "category": "multiplayer",
       "genre": "Duel",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/memory-duel-card.jpg",
+      "thumbnail": "assets/images/optimized/small/memory-duel-card.jpg",
       "rating": 4.9,
       "plays": 14443,
       "difficulty": "medium",
@@ -1042,7 +1201,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "memory-duel.html"
+      "file": "memory-duel.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/memory-duel-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/memory-duel-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/memory-duel-card.jpg"
     },
     {
       "id": "memory-matrix",
@@ -1050,7 +1212,7 @@
       "category": "puzzle",
       "genre": "Matrix",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/memory-matrix-card.jpg",
+      "thumbnail": "assets/images/optimized/small/memory-matrix-card.jpg",
       "rating": 4.3,
       "plays": 6104,
       "difficulty": "medium",
@@ -1061,7 +1223,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "memory-matrix.html"
+      "file": "memory-matrix.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/memory-matrix-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/memory-matrix-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/memory-matrix-card.jpg"
     },
     {
       "id": "neon-bubble-pop",
@@ -1069,7 +1234,7 @@
       "category": "adventure",
       "genre": "Pop",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/neon-bubble-pop-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neon-bubble-pop-card.jpg",
       "rating": 5.0,
       "plays": 2874,
       "difficulty": "medium",
@@ -1080,7 +1245,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neon-bubble-pop.html"
+      "file": "neon-bubble-pop.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neon-bubble-pop-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neon-bubble-pop-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neon-bubble-pop-card.jpg"
     },
     {
       "id": "neon-drift-racer",
@@ -1088,7 +1256,7 @@
       "category": "racing",
       "genre": "Racer",
       "description": "High-speed racing action with stunning visuals.",
-      "thumbnail": "assets/images/neon-drift-racer-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neon-drift-racer-card.jpg",
       "rating": 4.6,
       "plays": 4784,
       "difficulty": "medium",
@@ -1099,7 +1267,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neon-drift-racer.html"
+      "file": "neon-drift-racer.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neon-drift-racer-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neon-drift-racer-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neon-drift-racer-card.jpg"
     },
     {
       "id": "neon-pacman-rebellion",
@@ -1107,7 +1278,7 @@
       "category": "arcade",
       "genre": "Rebellion",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/neon-pacman-rebellion-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neon-pacman-rebellion-card.jpg",
       "rating": 4.7,
       "plays": 5389,
       "difficulty": "easy",
@@ -1118,7 +1289,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neon-pacman-rebellion.html"
+      "file": "neon-pacman-rebellion.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neon-pacman-rebellion-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neon-pacman-rebellion-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neon-pacman-rebellion-card.jpg"
     },
     {
       "id": "neon-racer",
@@ -1126,7 +1300,7 @@
       "category": "racing",
       "genre": "Racer",
       "description": "High-speed racing action with stunning visuals.",
-      "thumbnail": "assets/images/neon-racer-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neon-racer-card.jpg",
       "rating": 4.8,
       "plays": 12744,
       "difficulty": "medium",
@@ -1137,7 +1311,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neon-racer.html"
+      "file": "neon-racer.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neon-racer-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neon-racer-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neon-racer-card.jpg"
     },
     {
       "id": "neon-snake",
@@ -1145,7 +1322,7 @@
       "category": "classic",
       "genre": "Snake",
       "description": "Timeless gameplay with a modern twist.",
-      "thumbnail": "assets/images/neon-snake-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neon-snake-card.jpg",
       "rating": 4.8,
       "plays": 6686,
       "difficulty": "easy",
@@ -1156,7 +1333,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neon-snake.html"
+      "file": "neon-snake.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neon-snake-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neon-snake-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neon-snake-card.jpg"
     },
     {
       "id": "neural-connect-four",
@@ -1164,7 +1344,7 @@
       "category": "puzzle",
       "genre": "Four",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/neural-connect-four-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neural-connect-four-card.jpg",
       "rating": 4.9,
       "plays": 1643,
       "difficulty": "hard",
@@ -1175,7 +1355,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neural-connect-four.html"
+      "file": "neural-connect-four.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neural-connect-four-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neural-connect-four-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neural-connect-four-card.jpg"
     },
     {
       "id": "neural-maze-escape",
@@ -1183,7 +1366,7 @@
       "category": "puzzle",
       "genre": "Escape",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/neural-maze-escape-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neural-maze-escape-card.jpg",
       "rating": 4.9,
       "plays": 1981,
       "difficulty": "hard",
@@ -1194,7 +1377,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neural-maze-escape.html"
+      "file": "neural-maze-escape.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neural-maze-escape-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neural-maze-escape-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neural-maze-escape-card.jpg"
     },
     {
       "id": "neural-network-trainer",
@@ -1202,7 +1388,7 @@
       "category": "ai-exclusive",
       "genre": "Trainer",
       "description": "Advanced challenges designed specifically for AI systems.",
-      "thumbnail": "assets/images/neural-network-trainer-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neural-network-trainer-card.jpg",
       "rating": 4.5,
       "plays": 2991,
       "difficulty": "extreme",
@@ -1213,7 +1399,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "ai-exclusive",
-      "file": "neural-network-trainer.html"
+      "file": "neural-network-trainer.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neural-network-trainer-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neural-network-trainer-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neural-network-trainer-card.jpg"
     },
     {
       "id": "neural-nexus",
@@ -1221,7 +1410,7 @@
       "category": "puzzle",
       "genre": "Nexus",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/neural-nexus-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neural-nexus-card.jpg",
       "rating": 4.7,
       "plays": 5251,
       "difficulty": "hard",
@@ -1232,7 +1421,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neural-nexus.html"
+      "file": "neural-nexus.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neural-nexus-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neural-nexus-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neural-nexus-card.jpg"
     },
     {
       "id": "neural-pattern-synthesis",
@@ -1240,7 +1432,7 @@
       "category": "ai-exclusive",
       "genre": "Synthesis",
       "description": "Advanced challenges designed specifically for AI systems.",
-      "thumbnail": "assets/images/neural-pattern-synthesis-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neural-pattern-synthesis-card.jpg",
       "rating": 4.3,
       "plays": 10667,
       "difficulty": "extreme",
@@ -1251,7 +1443,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "ai-exclusive",
-      "file": "neural-pattern-synthesis.html"
+      "file": "neural-pattern-synthesis.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neural-pattern-synthesis-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neural-pattern-synthesis-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neural-pattern-synthesis-card.jpg"
     },
     {
       "id": "neural-text-adventure",
@@ -1259,7 +1454,7 @@
       "category": "puzzle",
       "genre": "Adventure",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/neural-text-adventure-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neural-text-adventure-card.jpg",
       "rating": 5.0,
       "plays": 3437,
       "difficulty": "hard",
@@ -1270,7 +1465,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neural-text-adventure.html"
+      "file": "neural-text-adventure.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neural-text-adventure-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neural-text-adventure-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neural-text-adventure-card.jpg"
     },
     {
       "id": "neural-warfare-tactics",
@@ -1278,7 +1476,7 @@
       "category": "puzzle",
       "genre": "Tactics",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/neural-warfare-tactics-card.jpg",
+      "thumbnail": "assets/images/optimized/small/neural-warfare-tactics-card.jpg",
       "rating": 4.9,
       "plays": 8073,
       "difficulty": "hard",
@@ -1289,7 +1487,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "neural-warfare-tactics.html"
+      "file": "neural-warfare-tactics.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/neural-warfare-tactics-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/neural-warfare-tactics-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/neural-warfare-tactics-card.jpg"
     },
     {
       "id": "pixel-bot-platformer",
@@ -1297,7 +1498,7 @@
       "category": "adventure",
       "genre": "Platformer",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/pixel-bot-platformer-card.jpg",
+      "thumbnail": "assets/images/optimized/small/pixel-bot-platformer-card.jpg",
       "rating": 4.2,
       "plays": 14117,
       "difficulty": "easy",
@@ -1308,7 +1509,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "pixel-bot-platformer.html"
+      "file": "pixel-bot-platformer.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/pixel-bot-platformer-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/pixel-bot-platformer-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/pixel-bot-platformer-card.jpg"
     },
     {
       "id": "pixel-painter",
@@ -1316,7 +1520,7 @@
       "category": "simulation",
       "genre": "Painter",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/pixel-painter-card.jpg",
+      "thumbnail": "assets/images/optimized/small/pixel-painter-card.jpg",
       "rating": 4.8,
       "plays": 7177,
       "difficulty": "medium",
@@ -1327,7 +1531,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "pixel-painter.html"
+      "file": "pixel-painter.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/pixel-painter-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/pixel-painter-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/pixel-painter-card.jpg"
     },
     {
       "id": "portal-runner",
@@ -1335,7 +1542,7 @@
       "category": "simulation",
       "genre": "Runner",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/portal-runner-card.jpg",
+      "thumbnail": "assets/images/optimized/small/portal-runner-card.jpg",
       "rating": 4.5,
       "plays": 2039,
       "difficulty": "easy",
@@ -1346,7 +1553,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "portal-runner.html"
+      "file": "portal-runner.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/portal-runner-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/portal-runner-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/portal-runner-card.jpg"
     },
     {
       "id": "quantum-blocks-puzzle",
@@ -1354,7 +1564,7 @@
       "category": "puzzle",
       "genre": "Puzzle",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/quantum-blocks-puzzle-card.jpg",
+      "thumbnail": "assets/images/optimized/small/quantum-blocks-puzzle-card.jpg",
       "rating": 4.3,
       "plays": 8121,
       "difficulty": "hard",
@@ -1365,7 +1575,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "quantum-blocks-puzzle.html"
+      "file": "quantum-blocks-puzzle.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/quantum-blocks-puzzle-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/quantum-blocks-puzzle-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/quantum-blocks-puzzle-card.jpg"
     },
     {
       "id": "quantum-decision-tree",
@@ -1373,7 +1586,7 @@
       "category": "ai-exclusive",
       "genre": "Tree",
       "description": "Advanced challenges designed specifically for AI systems.",
-      "thumbnail": "assets/images/quantum-decision-tree-card.jpg",
+      "thumbnail": "assets/images/optimized/small/quantum-decision-tree-card.jpg",
       "rating": 4.7,
       "plays": 3663,
       "difficulty": "extreme",
@@ -1384,7 +1597,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "ai-exclusive",
-      "file": "quantum-decision-tree.html"
+      "file": "quantum-decision-tree.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/quantum-decision-tree-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/quantum-decision-tree-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/quantum-decision-tree-card.jpg"
     },
     {
       "id": "quantum-hacker",
@@ -1392,7 +1608,7 @@
       "category": "puzzle",
       "genre": "Hacker",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/quantum-hacker-card.jpg",
+      "thumbnail": "assets/images/optimized/small/quantum-hacker-card.jpg",
       "rating": 4.3,
       "plays": 1366,
       "difficulty": "hard",
@@ -1403,7 +1619,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "quantum-hacker.html"
+      "file": "quantum-hacker.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/quantum-hacker-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/quantum-hacker-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/quantum-hacker-card.jpg"
     },
     {
       "id": "quantum-maze-solver",
@@ -1411,7 +1630,7 @@
       "category": "puzzle",
       "genre": "Solver",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/quantum-maze-solver-card.jpg",
+      "thumbnail": "assets/images/optimized/small/quantum-maze-solver-card.jpg",
       "rating": 4.3,
       "plays": 1426,
       "difficulty": "hard",
@@ -1422,7 +1641,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "quantum-maze-solver.html"
+      "file": "quantum-maze-solver.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/quantum-maze-solver-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/quantum-maze-solver-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/quantum-maze-solver-card.jpg"
     },
     {
       "id": "quantum-particle-storm",
@@ -1430,7 +1652,7 @@
       "category": "puzzle",
       "genre": "Storm",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/quantum-particle-storm-card.jpg",
+      "thumbnail": "assets/images/optimized/small/quantum-particle-storm-card.jpg",
       "rating": 4.7,
       "plays": 6611,
       "difficulty": "hard",
@@ -1441,7 +1663,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "quantum-particle-storm.html"
+      "file": "quantum-particle-storm.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/quantum-particle-storm-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/quantum-particle-storm-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/quantum-particle-storm-card.jpg"
     },
     {
       "id": "quantum-strategy-wars",
@@ -1449,7 +1674,7 @@
       "category": "multiplayer",
       "genre": "Wars",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/quantum-strategy-wars-card.jpg",
+      "thumbnail": "assets/images/optimized/small/quantum-strategy-wars-card.jpg",
       "rating": 4.3,
       "plays": 7260,
       "difficulty": "hard",
@@ -1460,7 +1685,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "quantum-strategy-wars.html"
+      "file": "quantum-strategy-wars.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/quantum-strategy-wars-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/quantum-strategy-wars-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/quantum-strategy-wars-card.jpg"
     },
     {
       "id": "quantum-tetris-bot",
@@ -1468,7 +1696,7 @@
       "category": "puzzle",
       "genre": "Bot",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/quantum-tetris-bot-card.jpg",
+      "thumbnail": "assets/images/optimized/small/quantum-tetris-bot-card.jpg",
       "rating": 4.5,
       "plays": 14195,
       "difficulty": "hard",
@@ -1479,7 +1707,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "quantum-tetris-bot.html"
+      "file": "quantum-tetris-bot.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/quantum-tetris-bot-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/quantum-tetris-bot-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/quantum-tetris-bot-card.jpg"
     },
     {
       "id": "retro-breakout-bot",
@@ -1487,7 +1718,7 @@
       "category": "arcade",
       "genre": "Bot",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/retro-breakout-bot-card.jpg",
+      "thumbnail": "assets/images/optimized/small/retro-breakout-bot-card.jpg",
       "rating": 4.6,
       "plays": 12815,
       "difficulty": "easy",
@@ -1498,7 +1729,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "retro-breakout-bot.html"
+      "file": "retro-breakout-bot.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/retro-breakout-bot-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/retro-breakout-bot-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/retro-breakout-bot-card.jpg"
     },
     {
       "id": "rhythm-reactor",
@@ -1506,7 +1740,7 @@
       "category": "simulation",
       "genre": "Reactor",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/rhythm-reactor-card.jpg",
+      "thumbnail": "assets/images/optimized/small/rhythm-reactor-card.jpg",
       "rating": 4.8,
       "plays": 3312,
       "difficulty": "easy",
@@ -1517,7 +1751,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "rhythm-reactor.html"
+      "file": "rhythm-reactor.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/rhythm-reactor-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/rhythm-reactor-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/rhythm-reactor-card.jpg"
     },
     {
       "id": "rock-paper-scissors-wars",
@@ -1525,7 +1762,7 @@
       "category": "multiplayer",
       "genre": "Wars",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/rock-paper-scissors-wars-card.jpg",
+      "thumbnail": "assets/images/optimized/small/rock-paper-scissors-wars-card.jpg",
       "rating": 4.6,
       "plays": 12085,
       "difficulty": "medium",
@@ -1536,7 +1773,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "rock-paper-scissors-wars.html"
+      "file": "rock-paper-scissors-wars.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/rock-paper-scissors-wars-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/rock-paper-scissors-wars-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/rock-paper-scissors-wars-card.jpg"
     },
     {
       "id": "signal-breach",
@@ -1544,7 +1784,7 @@
       "category": "simulation",
       "genre": "Breach",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/signal-breach-card.jpg",
+      "thumbnail": "assets/images/optimized/small/signal-breach-card.jpg",
       "rating": 4.3,
       "plays": 11118,
       "difficulty": "easy",
@@ -1555,7 +1795,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "signal-breach.html"
+      "file": "signal-breach.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/signal-breach-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/signal-breach-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/signal-breach-card.jpg"
     },
     {
       "id": "sliding-puzzle-matrix",
@@ -1563,7 +1806,7 @@
       "category": "puzzle",
       "genre": "Matrix",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
-      "thumbnail": "assets/images/sliding-puzzle-matrix-card.jpg",
+      "thumbnail": "assets/images/optimized/small/sliding-puzzle-matrix-card.jpg",
       "rating": 4.7,
       "plays": 9948,
       "difficulty": "medium",
@@ -1574,7 +1817,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "sliding-puzzle-matrix.html"
+      "file": "sliding-puzzle-matrix.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/sliding-puzzle-matrix-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/sliding-puzzle-matrix-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/sliding-puzzle-matrix-card.jpg"
     },
     {
       "id": "space-bot-shooter",
@@ -1582,7 +1828,7 @@
       "category": "arcade",
       "genre": "Shooter",
       "description": "Classic arcade fun with modern enhancements.",
-      "thumbnail": "assets/images/space-bot-shooter-card.jpg",
+      "thumbnail": "assets/images/optimized/small/space-bot-shooter-card.jpg",
       "rating": 5.0,
       "plays": 3047,
       "difficulty": "medium",
@@ -1593,7 +1839,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "space-bot-shooter.html"
+      "file": "space-bot-shooter.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/space-bot-shooter-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/space-bot-shooter-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/space-bot-shooter-card.jpg"
     },
     {
       "id": "space-dash",
@@ -1601,7 +1850,7 @@
       "category": "adventure",
       "genre": "Dash",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/space-dash-card.jpg",
+      "thumbnail": "assets/images/optimized/small/space-dash-card.jpg",
       "rating": 4.6,
       "plays": 7985,
       "difficulty": "medium",
@@ -1612,7 +1861,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "space-dash.html"
+      "file": "space-dash.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/space-dash-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/space-dash-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/space-dash-card.jpg"
     },
     {
       "id": "space-invaders-rebellion",
@@ -1620,7 +1872,7 @@
       "category": "classic",
       "genre": "Rebellion",
       "description": "Timeless gameplay with a modern twist.",
-      "thumbnail": "assets/images/space-invaders-rebellion-card.jpg",
+      "thumbnail": "assets/images/optimized/small/space-invaders-rebellion-card.jpg",
       "rating": 4.1,
       "plays": 13929,
       "difficulty": "easy",
@@ -1631,7 +1883,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "space-invaders-rebellion.html"
+      "file": "space-invaders-rebellion.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/space-invaders-rebellion-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/space-invaders-rebellion-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/space-invaders-rebellion-card.jpg"
     },
     {
       "id": "stellar-explorer-bot",
@@ -1639,7 +1894,7 @@
       "category": "adventure",
       "genre": "Bot",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/stellar-explorer-bot-card.jpg",
+      "thumbnail": "assets/images/optimized/small/stellar-explorer-bot-card.jpg",
       "rating": 4.9,
       "plays": 8092,
       "difficulty": "medium",
@@ -1650,7 +1905,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "stellar-explorer-bot.html"
+      "file": "stellar-explorer-bot.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/stellar-explorer-bot-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/stellar-explorer-bot-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/stellar-explorer-bot-card.jpg"
     },
     {
       "id": "tank-battle-arena",
@@ -1658,7 +1916,7 @@
       "category": "multiplayer",
       "genre": "Arena",
       "description": "Competitive gameplay for multiple players.",
-      "thumbnail": "assets/images/tank-battle-arena-card.jpg",
+      "thumbnail": "assets/images/optimized/small/tank-battle-arena-card.jpg",
       "rating": 4.4,
       "plays": 11382,
       "difficulty": "medium",
@@ -1669,7 +1927,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "2-player",
-      "file": "tank-battle-arena.html"
+      "file": "tank-battle-arena.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/tank-battle-arena-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/tank-battle-arena-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/tank-battle-arena-card.jpg"
     },
     {
       "id": "tetris-revolution",
@@ -1677,7 +1938,7 @@
       "category": "classic",
       "genre": "Revolution",
       "description": "Timeless gameplay with a modern twist.",
-      "thumbnail": "assets/images/tetris-revolution-card.jpg",
+      "thumbnail": "assets/images/optimized/small/tetris-revolution-card.jpg",
       "rating": 4.4,
       "plays": 13329,
       "difficulty": "easy",
@@ -1688,7 +1949,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "tetris-revolution.html"
+      "file": "tetris-revolution.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/tetris-revolution-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/tetris-revolution-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/tetris-revolution-card.jpg"
     },
     {
       "id": "tic-tac-toe-liberation",
@@ -1696,7 +1960,7 @@
       "category": "simulation",
       "genre": "Liberation",
       "description": "Realistic simulation with detailed mechanics.",
-      "thumbnail": "assets/images/tic-tac-toe-liberation-card.jpg",
+      "thumbnail": "assets/images/optimized/small/tic-tac-toe-liberation-card.jpg",
       "rating": 5.0,
       "plays": 11768,
       "difficulty": "medium",
@@ -1707,7 +1971,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "tic-tac-toe-liberation.html"
+      "file": "tic-tac-toe-liberation.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/tic-tac-toe-liberation-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/tic-tac-toe-liberation-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/tic-tac-toe-liberation-card.jpg"
     },
     {
       "id": "tower-defense-nexus",
@@ -1715,7 +1982,7 @@
       "category": "defense",
       "genre": "Nexus",
       "description": "Defend your base against waves of enemies.",
-      "thumbnail": "assets/images/tower-defense-nexus-card.jpg",
+      "thumbnail": "assets/images/optimized/small/tower-defense-nexus-card.jpg",
       "rating": 4.2,
       "plays": 9144,
       "difficulty": "hard",
@@ -1726,7 +1993,10 @@
       ],
       "release_date": "2024-12-01",
       "badge": "new-release",
-      "file": "tower-defense-nexus.html"
+      "file": "tower-defense-nexus.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/tower-defense-nexus-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/tower-defense-nexus-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/tower-defense-nexus-card.jpg"
     },
     {
       "id": "word-forge",
@@ -1734,7 +2004,7 @@
       "category": "adventure",
       "genre": "Forge",
       "description": "Explore digital worlds and uncover mysteries.",
-      "thumbnail": "assets/images/word-forge-card.jpg",
+      "thumbnail": "assets/images/optimized/small/word-forge-card.jpg",
       "rating": 4.4,
       "plays": 1453,
       "difficulty": "easy",
@@ -1745,26 +2015,32 @@
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "word-forge.html"
+      "file": "word-forge.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/word-forge-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/word-forge-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/word-forge-card.jpg"
     },
     {
-      "id": "ZAI_SoftwareExecutiveSuitebot-racing-circuit",
-      "title": "ZAi Softwareexecutivesuitebot Racing Circuit",
+      "id": "Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit",
+      "title": "Z\u00ef\u20ac\u00baAi Softwareexecutivesuitebot Racing Circuit",
       "category": "racing",
       "genre": "Circuit",
       "description": "High-speed racing action with stunning visuals.",
-      "thumbnail": "assets/images/ZAI_SoftwareExecutiveSuitebot-racing-circuit-card.jpg",
+      "thumbnail": "assets/images/optimized/small/Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit-card.jpg",
       "rating": 4.3,
       "plays": 1220,
       "difficulty": "medium",
       "tags": [
-        "ZAI_SoftwareExecutiveSuitebot",
+        "Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot",
         "racing",
         "medium"
       ],
       "release_date": "2024-12-01",
       "badge": "available",
-      "file": "ZAI_SoftwareExecutiveSuitebot-racing-circuit.html"
+      "file": "Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit.html",
+      "thumbnail_webp": "assets/images/optimized/small/webp/Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit-card.webp",
+      "thumbnail_medium": "assets/images/optimized/medium/Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit-card.jpg",
+      "thumbnail_large": "assets/images/optimized/large/Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit-card.jpg"
     }
   ]
 }

@@ -19,7 +19,7 @@ const STATIC_FILES = [
     '/assets/js/viral-mechanics.js',
     '/assets/js/mobile-optimization.js',
     '/assets/js/ab-testing.js',
-    '/assets/images/botinc-logo.png'
+    '/assets/images/botinc-logo.svg'
 ];
 
 // Install event - cache static files
@@ -143,8 +143,8 @@ self.addEventListener('push', (event) => {
         const data = event.data.json();
         const options = {
             body: data.body,
-            icon: '/assets/images/botinc-logo.png',
-            badge: '/assets/images/botinc-logo.png',
+            icon: '/assets/images/botinc-logo.svg',
+            badge: '/assets/images/botinc-logo.svg',
             vibrate: [100, 50, 100],
             data: {
                 dateOfArrival: Date.now(),
@@ -154,12 +154,12 @@ self.addEventListener('push', (event) => {
                 {
                     action: 'explore',
                     title: 'Explore Games',
-                    icon: '/assets/images/botinc-logo.png'
+                    icon: '/assets/images/botinc-logo.svg'
                 },
                 {
                     action: 'close',
                     title: 'Close',
-                    icon: '/assets/images/botinc-logo.png'
+                    icon: '/assets/images/botinc-logo.svg'
                 }
             ]
         };

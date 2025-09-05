@@ -385,7 +385,7 @@ class InfluencerTools {
         if (config.logo) {
             overlayHTML += `
                 <div class="overlay-logo">
-                    <img src="/assets/images/botinc-logo.png" alt="BotInc Games">
+                    <img src="/assets/images/botinc-logo.svg" alt="BotInc Games">
                     <span>BotInc Games</span>
                 </div>
             `;

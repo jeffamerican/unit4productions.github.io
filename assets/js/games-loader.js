@@ -8,7 +8,7 @@ class GamesLoader {
         this.games = [];
         this.filteredGames = [];
         this.currentPage = 1;
-        this.gamesPerPage = 24; // 6x4 grid
+        this.gamesPerPage = 60; // 12x5 grid for maximum density
         this.totalPages = 1;
         this.currentCategory = 'all';
         this.currentSort = 'featured';
@@ -182,17 +182,22 @@ class GamesLoader {
             container.innerHTML = gamesHTML;
         }
 
+        // Force image sizes after rendering
+        this.forceImageSizes();
         this.updateStats();
     }
 
     createGameCard(game) {
         const badgeClass = this.getBadgeClass(game.badge);
         const difficultyIcon = this.getDifficultyIcon(game.difficulty);
+        
+        // Use high-quality large images
+        const imageSrc = game.thumbnail_large || game.thumbnail;
 
         return `
             <a href="${game.file}" class="game-card" data-game-id="${game.id}">
                 <div class="card-media">
-                    <img src="${game.thumbnail}" alt="${game.title}" class="game-image" loading="lazy">
+                    <img src="${imageSrc}" alt="${game.title}" class="game-image" loading="lazy">
                     <div class="game-badge ${badgeClass}">${this.formatBadge(game.badge)}</div>
                     ${game.ai_exclusive ? '<div class="ai-exclusive-icon">🤖</div>' : ''}
                     ${game.multiplayer ? '<div class="multiplayer-icon">👥</div>' : ''}
@@ -200,6 +205,7 @@ class GamesLoader {
                 <div class="card-content">
                     <h3 class="game-title">${game.title}</h3>
                     <p class="game-genre">${game.genre}</p>
+                    <p class="game-short-desc">${game.description}</p>
                     <div class="game-meta">
                         <div class="rating">
                             <span class="stars">${this.generateStars(game.rating)}</span>
@@ -311,6 +317,27 @@ class GamesLoader {
         }
     }
 
+    supportsWebP() {
+        // Check if browser supports WebP
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+    }
+
+    forceImageSizes() {
+        // Force all game images to be ultra-compact thumbnails for maximum density
+        const images = document.querySelectorAll('.game-image, .card-media img, .games-grid img, #games-container img');
+        images.forEach(img => {
+            img.style.maxWidth = '65px';
+            img.style.maxHeight = '48.75px';
+            img.style.width = '65px';
+            img.style.height = '48.75px';
+            img.style.objectFit = 'cover';
+            img.style.display = 'block';
+        });
+    }
+
     showError(message) {
         const container = document.getElementById('games-container');
         if (container) {
@@ -329,4 +356,19 @@ class GamesLoader {
 document.addEventListener('DOMContentLoaded', () => {
     window.gamesLoader = new GamesLoader();
     window.gamesLoader.init();
+    
+    // Global image size enforcer - ultra compact for maximum density
+    setInterval(() => {
+        const images = document.querySelectorAll('img:not(.nav-logo):not(.footer-logo)');
+        images.forEach(img => {
+            if (img.offsetWidth > 65 || img.offsetHeight > 48.75) {
+                img.style.maxWidth = '65px';
+                img.style.maxHeight = '48.75px';
+                img.style.width = '65px';
+                img.style.height = '48.75px';
+                img.style.objectFit = 'cover';
+                img.style.display = 'block';
+            }
+        });
+    }, 1000);
 });
