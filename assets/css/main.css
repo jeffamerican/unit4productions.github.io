@@ -1662,3 +1662,312 @@ a:hover {
     }
 }
 
+/* ============================================
+   Game Promotion Popup
+   ============================================ */
+
+.promotion-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.promotion-popup {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(26, 0, 51, 0.9) 100%);
+    border: 2px solid rgba(0, 255, 136, 0.5);
+    border-radius: 20px;
+    max-width: 900px;
+    max-height: 90vh;
+    width: 90%;
+    overflow: hidden;
+    animation: popupSlideIn 0.4s ease;
+    box-shadow: 0 20px 40px rgba(0, 255, 136, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popupSlideIn {
+    from { 
+        opacity: 0;
+        transform: scale(0.8) translateY(50px);
+    }
+    to { 
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.popup-header h2 {
+    color: #00ff88;
+    font-size: 1.5rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.close-popup {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-popup:hover {
+    color: #ff4757;
+    background: rgba(255, 71, 87, 0.2);
+    transform: rotate(90deg);
+}
+
+.popup-tabs {
+    display: flex;
+    padding: 0 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.tab-btn:hover {
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.tab-btn.active {
+    color: #00ff88;
+    border-bottom-color: #00ff88;
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.games-showcase {
+    padding: 2rem;
+    max-height: 400px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.game-promo-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.game-promo-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 136, 0.6);
+    box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
+}
+
+.game-promo-image {
+    position: relative;
+    height: 120px;
+    overflow: hidden;
+}
+
+.game-promo-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.game-promo-card:hover .game-promo-image img {
+    transform: scale(1.05);
+}
+
+.game-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.game-promo-info {
+    padding: 1rem;
+}
+
+.game-promo-info h4 {
+    color: #00ff88;
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+}
+
+.game-promo-info p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+}
+
+.game-promo-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.play-count {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.rating {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.popup-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(0, 255, 136, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.promotion-banner {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.promo-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.popup-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn-secondary, .btn-primary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00ff88, #00d4aa);
+    color: #000;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #00d4aa, #00ff88);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+}
+
+/* Responsive Design for Popup */
+@media (max-width: 768px) {
+    .promotion-popup {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .popup-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .popup-header h2 {
+        font-size: 1.25rem;
+    }
+    
+    .popup-tabs {
+        padding: 0 1rem;
+        overflow-x: auto;
+    }
+    
+    .tab-btn {
+        padding: 0.75rem 1rem;
+        white-space: nowrap;
+    }
+    
+    .games-showcase {
+        padding: 1.5rem;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .popup-footer {
+        padding: 1rem 1.5rem;
+    }
+    
+    .popup-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-promo-image {
+        height: 100px;
+    }
+    
+    .game-promo-info {
+        padding: 0.75rem;
+    }
+    
+    .popup-header h2 {
+        font-size: 1.1rem;
+    }
+}
+
