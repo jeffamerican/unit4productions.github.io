@@ -7,13 +7,20 @@ class GamesLoader {
     constructor() {
         this.games = [];
         this.filteredGames = [];
-        this.currentPage = 1;
-        this.gamesPerPage = 60; // 12x5 grid for maximum density
-        this.totalPages = 1;
+        this.displayedGames = [];
         this.currentCategory = 'all';
         this.currentSort = 'featured';
         this.searchQuery = '';
         this.loading = false;
+        this.batchSize = 12; // Load 12 games at a time
+        this.currentIndex = 0;
+        this.isInfiniteScrollEnabled = true;
+        
+        // Carousel properties
+        this.cardsPerView = 3;
+        this.currentCarouselIndex = 0;
+        this.totalPages = 0;
+        this.isCarouselMode = true;
     }
 
     async init() {
@@ -28,14 +35,14 @@ class GamesLoader {
     }
 
     async loadGamesData() {
-        const response = await fetch('assets/data/games.json');
+        const response = await fetch(`assets/data/games.json?v=${Date.now()}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         this.games = data.games;
         this.filteredGames = [...this.games];
-        this.updatePagination();
+        // No pagination needed
     }
 
     setupEventListeners() {
@@ -63,35 +70,194 @@ class GamesLoader {
             });
         }
 
-        // Pagination
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('page-btn')) {
-                e.preventDefault();
-                this.goToPage(parseInt(e.target.dataset.page));
+        // Random game button
+        const randomBtn = document.getElementById('random-game-btn');
+        if (randomBtn) {
+            randomBtn.addEventListener('click', () => {
+                this.selectRandomGame();
+            });
+        }
+
+        // Infinite scroll (disabled in carousel mode)
+        if (!this.isCarouselMode) {
+            this.setupInfiniteScroll();
+        }
+        
+        // Carousel navigation
+        this.setupCarousel();
+        
+        // Window resize handler for responsive carousel
+        window.addEventListener('resize', () => {
+            if (this.isCarouselMode && this.displayedGames.length > 0) {
+                // Recalculate pagination on resize
+                setTimeout(() => {
+                    this.setupCarouselPagination();
+                }, 100); // Small delay to ensure layout is settled
             }
         });
+    }
 
-        // Load more button
-        const loadMoreBtn = document.getElementById('load-more');
-        if (loadMoreBtn) {
-            loadMoreBtn.addEventListener('click', () => {
-                this.loadMore();
+    setupInfiniteScroll() {
+        let scrollTimeout;
+        
+        window.addEventListener('scroll', () => {
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            
+            scrollTimeout = setTimeout(() => {
+                if (!this.isInfiniteScrollEnabled || this.loading) return;
+                
+                const scrollHeight = document.documentElement.scrollHeight;
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const clientHeight = document.documentElement.clientHeight;
+                
+                // Load more when 80% scrolled
+                if ((scrollTop + clientHeight) >= (scrollHeight * 0.8)) {
+                    this.loadMoreGames();
+                }
+            }, 100);
+        });
+    }
+
+    setupCarousel() {
+        const prevBtn = document.getElementById('carousel-prev');
+        const nextBtn = document.getElementById('carousel-next');
+        const container = document.getElementById('games-container');
+        
+        if (prevBtn && nextBtn && container) {
+            prevBtn.addEventListener('click', () => this.prevPage());
+            nextBtn.addEventListener('click', () => this.nextPage());
+            
+            // Touch/swipe support
+            this.setupTouchNavigation(container);
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    this.prevPage();
+                } else if (e.key === 'ArrowRight') {
+                    this.nextPage();
+                }
             });
+        }
+    }
+
+    setupTouchNavigation(container) {
+        let startX = 0;
+        let endX = 0;
+        
+        container.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+        
+        container.addEventListener('touchend', (e) => {
+            endX = e.changedTouches[0].clientX;
+            const difference = startX - endX;
+            
+            if (Math.abs(difference) > 50) { // Minimum swipe distance
+                if (difference > 0) {
+                    this.nextPage(); // Swipe left
+                } else {
+                    this.prevPage(); // Swipe right
+                }
+            }
+        });
+    }
+
+    nextPage() {
+        // Loop back to beginning when reaching the end
+        if (this.currentCarouselIndex < this.totalPages - 1) {
+            this.currentCarouselIndex++;
+        } else {
+            this.currentCarouselIndex = 0; // Loop back to first page
+        }
+        this.updateCarouselPosition();
+        this.updateCarouselNavigation();
+        this.updateIndicators();
+    }
+
+    prevPage() {
+        // Loop to end when going back from beginning
+        if (this.currentCarouselIndex > 0) {
+            this.currentCarouselIndex--;
+        } else {
+            this.currentCarouselIndex = this.totalPages - 1; // Loop to last page
+        }
+        this.updateCarouselPosition();
+        this.updateCarouselNavigation();
+        this.updateIndicators();
+    }
+
+    updateCarouselPosition() {
+        const container = document.getElementById('games-container');
+        if (!container || container.children.length === 0) return;
+        
+        // Calculate dynamic card width from actual DOM elements
+        const firstCard = container.children[0];
+        if (!firstCard) return;
+        
+        const computedStyle = window.getComputedStyle(container);
+        const gap = parseFloat(computedStyle.gap) || 32; // Default to 32px if gap not found
+        
+        const cardRect = firstCard.getBoundingClientRect();
+        const cardWidth = cardRect.width;
+        const totalCardWidth = cardWidth + gap;
+        
+        // Calculate scroll position based on cards per view
+        const scrollPosition = this.currentCarouselIndex * (totalCardWidth * this.cardsPerView);
+        
+        container.scrollTo({
+            left: scrollPosition,
+            behavior: 'smooth'
+        });
+    }
+
+    updateCarouselNavigation() {
+        const prevBtn = document.getElementById('carousel-prev');
+        const nextBtn = document.getElementById('carousel-next');
+        
+        if (prevBtn && nextBtn) {
+            // Remove disabled class since carousel loops infinitely
+            prevBtn.classList.remove('disabled');
+            nextBtn.classList.remove('disabled');
+        }
+    }
+
+    updateIndicators() {
+        const indicatorsContainer = document.getElementById('carousel-indicators');
+        if (!indicatorsContainer) return;
+        
+        // Clear existing indicators
+        indicatorsContainer.innerHTML = '';
+        
+        // Create indicators
+        for (let i = 0; i < this.totalPages; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = `carousel-indicator ${i === this.currentCarouselIndex ? 'active' : ''}`;
+            indicator.addEventListener('click', () => {
+                this.currentCarouselIndex = i;
+                this.updateCarouselPosition();
+                this.updateCarouselNavigation();
+                this.updateIndicators();
+            });
+            indicatorsContainer.appendChild(indicator);
         }
     }
 
     filterByCategory(category) {
         this.currentCategory = category;
-        this.currentPage = 1;
 
         if (category === 'all') {
             this.filteredGames = [...this.games];
         } else {
-            this.filteredGames = this.games.filter(game => 
-                game.category === category || 
-                (category === 'ai-exclusive' && game.ai_exclusive) ||
-                (category === 'multiplayer' && game.multiplayer)
-            );
+            this.filteredGames = this.games.filter(game => {
+                // Check both new categories array and legacy category field
+                const gameCategories = game.categories || [game.category];
+                return gameCategories.includes(category) || 
+                       (category === 'ai-exclusive' && game.ai_exclusive) ||
+                       (category === 'multiplayer' && game.multiplayer);
+            });
         }
 
         this.updateActiveFilter(category);
@@ -120,13 +286,11 @@ class GamesLoader {
                 break;
         }
 
-        this.updatePagination();
         this.renderGames();
     }
 
     searchGames(query) {
         this.searchQuery = query.toLowerCase();
-        this.currentPage = 1;
 
         if (query === '') {
             this.filterByCategory(this.currentCategory);
@@ -140,82 +304,170 @@ class GamesLoader {
             game.genre.toLowerCase().includes(this.searchQuery)
         );
 
-        this.updatePagination();
         this.renderGames();
     }
 
-    updatePagination() {
-        this.totalPages = Math.ceil(this.filteredGames.length / this.gamesPerPage);
-        this.renderPagination();
-    }
+    // Pagination methods removed - display all games
 
-    goToPage(page) {
-        if (page < 1 || page > this.totalPages) return;
-        this.currentPage = page;
-        this.renderGames();
-        this.scrollToGames();
-    }
-
-    loadMore() {
-        if (this.currentPage < this.totalPages) {
-            this.currentPage++;
-            this.renderGames(true); // append mode
-        }
-    }
-
-    renderGames(append = false) {
+    renderGames(reset = true) {
         const container = document.getElementById('games-container');
         if (!container) {
             console.error('Games container not found');
             return;
         }
 
-        const startIndex = (this.currentPage - 1) * this.gamesPerPage;
-        const endIndex = startIndex + this.gamesPerPage;
-        const pagegames = this.filteredGames.slice(startIndex, endIndex);
-
-        const gamesHTML = pagegames.map(game => this.createGameCard(game)).join('');
-
-        if (append) {
-            container.innerHTML += gamesHTML;
-        } else {
-            container.innerHTML = gamesHTML;
+        if (reset) {
+            this.currentIndex = 0;
+            this.displayedGames = [];
+            container.innerHTML = '';
+            this.currentCarouselIndex = 0;
         }
 
-        // Force image sizes after rendering
-        this.forceImageSizes();
-        this.updateStats();
+        // Apply correct CSS class based on mode
+        if (this.isCarouselMode) {
+            container.classList.add('carousel-mode');
+            container.classList.remove('grid-mode');
+            this.loadAllGamesForCarousel();
+        } else {
+            container.classList.add('grid-mode');
+            container.classList.remove('carousel-mode');
+            this.loadMoreGames();
+        }
+    }
+
+    loadAllGamesForCarousel() {
+        const container = document.getElementById('games-container');
+        
+        // Load all filtered games at once for carousel
+        this.filteredGames.forEach((game, index) => {
+            setTimeout(() => {
+                const gameElement = this.createGameElement(game);
+                container.appendChild(gameElement);
+                this.displayedGames.push(game);
+                
+                // Update stats after each game is added
+                this.updateStats();
+                
+                // Trigger entry animation
+                setTimeout(() => {
+                    gameElement.classList.add('game-card-visible');
+                }, 50);
+                
+                // Setup carousel after all games loaded
+                if (index === this.filteredGames.length - 1) {
+                    this.setupCarouselPagination();
+                }
+            }, index * 50); // Faster loading for carousel
+        });
+    }
+
+    calculateCardsPerView() {
+        const container = document.getElementById('games-container');
+        if (!container || container.children.length === 0) return this.cardsPerView;
+        
+        const containerWidth = container.clientWidth;
+        const firstCard = container.children[0];
+        if (!firstCard) return this.cardsPerView;
+        
+        const cardRect = firstCard.getBoundingClientRect();
+        const computedStyle = window.getComputedStyle(container);
+        const gap = parseFloat(computedStyle.gap) || 32;
+        
+        const cardWidth = cardRect.width;
+        const totalCardWidth = cardWidth + gap;
+        
+        // Calculate how many cards fit in the container width
+        const cardsPerView = Math.floor(containerWidth / totalCardWidth);
+        return Math.max(1, cardsPerView); // At least 1 card
+    }
+
+    setupCarouselPagination() {
+        // Dynamically calculate cards per view based on container width
+        this.cardsPerView = this.calculateCardsPerView();
+        
+        // Calculate total pages based on cards per view
+        this.totalPages = Math.ceil(this.filteredGames.length / this.cardsPerView);
+        
+        // Update navigation and indicators
+        this.updateCarouselNavigation();
+        this.updateIndicators();
+        
+        // Reset to first page
+        this.currentCarouselIndex = 0;
+        this.updateCarouselPosition();
+    }
+
+    loadMoreGames() {
+        if (this.loading || this.currentIndex >= this.filteredGames.length) {
+            return;
+        }
+
+        this.loading = true;
+        const container = document.getElementById('games-container');
+        
+        // Get next batch of games
+        const nextBatch = this.filteredGames.slice(
+            this.currentIndex, 
+            this.currentIndex + this.batchSize
+        );
+        
+        // Add games with stagger animation
+        nextBatch.forEach((game, index) => {
+            setTimeout(() => {
+                const gameElement = this.createGameElement(game);
+                container.appendChild(gameElement);
+                this.displayedGames.push(game);
+                
+                // Update stats after each game is added
+                this.updateStats();
+                
+                // Trigger entry animation
+                setTimeout(() => {
+                    gameElement.classList.add('game-card-visible');
+                }, 50);
+                
+                // Mark loading as false after the last game
+                if (index === nextBatch.length - 1) {
+                    this.loading = false;
+                }
+            }, index * 100); // Stagger by 100ms
+        });
+        
+        this.currentIndex += this.batchSize;
+    }
+
+    createGameElement(game) {
+        const element = document.createElement('a');
+        element.href = game.file;
+        element.className = 'game-card game-card-entry';
+        element.dataset.gameId = game.id;
+        element.innerHTML = this.createGameCard(game);
+        return element;
     }
 
     createGameCard(game) {
-        const badgeClass = this.getBadgeClass(game.badge);
         const difficultyIcon = this.getDifficultyIcon(game.difficulty);
         
         // Use high-quality large images
         const imageSrc = game.thumbnail_large || game.thumbnail;
 
         return `
-            <a href="${game.file}" class="game-card" data-game-id="${game.id}">
-                <div class="card-media">
-                    <img src="${imageSrc}" alt="${game.title}" class="game-image" loading="lazy">
-                    <div class="game-badge ${badgeClass}">${this.formatBadge(game.badge)}</div>
-                    ${game.ai_exclusive ? '<div class="ai-exclusive-icon">🤖</div>' : ''}
-                    ${game.multiplayer ? '<div class="multiplayer-icon">👥</div>' : ''}
-                </div>
-                <div class="card-content">
-                    <h3 class="game-title">${game.title}</h3>
-                    <p class="game-genre">${game.genre}</p>
-                    <p class="game-short-desc">${game.description}</p>
-                    <div class="game-meta">
-                        <div class="rating">
-                            <span class="stars">${this.generateStars(game.rating)}</span>
-                            <span class="rating-num">${game.rating}</span>
-                        </div>
-                        <div class="plays">${this.formatPlays(game.plays)}</div>
-                        <div class="difficulty">${difficultyIcon}</div>
+            <div class="card-media">
+                <img src="${imageSrc}" alt="${game.title}" class="game-image" loading="lazy">
+            </div>
+            <div class="card-content">
+                <h3 class="game-title">${game.title}</h3>
+                <p class="game-genre">${game.genre}</p>
+                <p class="game-short-desc">${game.description}</p>
+                <div class="game-meta">
+                    <div class="rating">
+                        <span class="stars">${this.generateInteractiveStars(game)}</span>
+                        <span class="rating-num">${this.getDisplayRating(game)}</span>
                     </div>
+                    <div class="plays">${this.formatPlays(game.plays)} plays</div>
+                    <div class="difficulty">${difficultyIcon}</div>
                 </div>
-            </a>
+            </div>
         `;
     }
 
@@ -266,6 +518,36 @@ class GamesLoader {
         return plays.toString();
     }
 
+    // Generate interactive stars using the rating system
+    generateInteractiveStars(game) {
+        if (window.BotIncRatingSystem) {
+            const ratingDisplay = window.BotIncRatingSystem.generateRatingDisplay(
+                game.id, 
+                game.rating || 0, 
+                0
+            );
+            return ratingDisplay.starsHtml;
+        }
+        
+        // Fallback to static stars if rating system not loaded
+        return this.generateStars(game.rating || 0);
+    }
+
+    // Get display rating for a game
+    getDisplayRating(game) {
+        if (window.BotIncRatingSystem) {
+            const ratingDisplay = window.BotIncRatingSystem.generateRatingDisplay(
+                game.id, 
+                game.rating || 0, 
+                0
+            );
+            return ratingDisplay.ratingText;
+        }
+        
+        // Fallback to original rating
+        return game.rating || 'No rating';
+    }
+
     updateActiveFilter(category) {
         document.querySelectorAll('.category-filter').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.category === category);
@@ -275,47 +557,109 @@ class GamesLoader {
     updateStats() {
         const statsEl = document.getElementById('games-stats');
         if (statsEl) {
-            const showing = Math.min(this.currentPage * this.gamesPerPage, this.filteredGames.length);
-            statsEl.textContent = `Showing ${showing} of ${this.filteredGames.length} games`;
-        }
-    }
-
-    renderPagination() {
-        const paginationEl = document.getElementById('pagination');
-        if (!paginationEl || this.totalPages <= 1) return;
-
-        let paginationHTML = '';
-        
-        // Previous button
-        if (this.currentPage > 1) {
-            paginationHTML += `<button class="page-btn" data-page="${this.currentPage - 1}">← Previous</button>`;
-        }
-
-        // Page numbers
-        for (let i = 1; i <= this.totalPages; i++) {
-            if (i === this.currentPage) {
-                paginationHTML += `<button class="page-btn active" data-page="${i}">${i}</button>`;
-            } else if (i === 1 || i === this.totalPages || Math.abs(i - this.currentPage) <= 2) {
-                paginationHTML += `<button class="page-btn" data-page="${i}">${i}</button>`;
-            } else if (Math.abs(i - this.currentPage) === 3) {
-                paginationHTML += '<span class="pagination-dots">...</span>';
+            const totalGames = this.filteredGames.length;
+            const displayedCount = this.displayedGames.length;
+            
+            if (displayedCount < totalGames) {
+                statsEl.textContent = `Showing ${displayedCount} of ${totalGames} games • Scroll for more`;
+            } else {
+                statsEl.textContent = `Showing all ${totalGames} games`;
             }
         }
-
-        // Next button
-        if (this.currentPage < this.totalPages) {
-            paginationHTML += `<button class="page-btn" data-page="${this.currentPage + 1}">Next →</button>`;
-        }
-
-        paginationEl.innerHTML = paginationHTML;
     }
 
-    scrollToGames() {
-        const gamesSection = document.getElementById('games-section');
-        if (gamesSection) {
-            gamesSection.scrollIntoView({ behavior: 'smooth' });
+    selectRandomGame() {
+        if (this.games.length === 0) return;
+        
+        // Pick a random game from all games (not just filtered)
+        const randomGame = this.games[Math.floor(Math.random() * this.games.length)];
+        
+        // Show selection animation first
+        this.showRandomGameSelection(randomGame);
+        
+        // Launch the game after a brief delay for the animation
+        setTimeout(() => {
+            window.location.href = randomGame.file;
+        }, 1500);
+    }
+
+    showRandomGameSelection(selectedGame) {
+        // Find the game element on the page
+        const gameElement = document.querySelector(`[data-game-id="${selectedGame.id}"]`);
+        
+        if (gameElement) {
+            // Add special highlight effect
+            gameElement.classList.add('random-selected');
+            
+            // Scroll to the game in carousel if needed
+            this.scrollToGameInCarousel(selectedGame);
+            
+            // Show loading message
+            this.showRandomGameMessage(selectedGame);
+            
+        } else {
+            // If game not visible, show it first
+            this.showGameThenSelect(selectedGame);
         }
     }
+
+    scrollToGameInCarousel(game) {
+        if (!this.isCarouselMode) return;
+        
+        // Find which page contains this game
+        const gameIndex = this.filteredGames.findIndex(g => g.id === game.id);
+        if (gameIndex === -1) {
+            // Game not in current filter, reset to show all
+            this.currentCategory = 'all';
+            this.searchQuery = '';
+            document.getElementById('game-search').value = '';
+            this.updateActiveFilter('all');
+            this.filterByCategory('all');
+            return;
+        }
+        
+        const targetPage = Math.floor(gameIndex / this.cardsPerView);
+        if (targetPage !== this.currentCarouselIndex) {
+            this.currentCarouselIndex = targetPage;
+            this.updateCarouselPosition();
+            this.updateCarouselNavigation();
+            this.updateIndicators();
+        }
+    }
+
+    showRandomGameMessage(game) {
+        // Update bot message to show selection
+        if (window.botAssistant) {
+            const messageEl = document.getElementById('bot-message');
+            const bubble = document.getElementById('message-bubble');
+            
+            if (messageEl && bubble) {
+                messageEl.textContent = `🎲 Random selection: ${game.title}! Launching game...`;
+                bubble.classList.add('visible');
+                
+                // Auto-hide after game launches
+                setTimeout(() => {
+                    bubble.classList.remove('visible');
+                }, 3000);
+            }
+        }
+    }
+
+    showGameThenSelect(game) {
+        // Reset filters to show all games
+        this.currentCategory = 'all';
+        this.searchQuery = '';
+        document.getElementById('game-search').value = '';
+        this.updateActiveFilter('all');
+        this.filterByCategory('all');
+        
+        // Try again after rendering
+        setTimeout(() => {
+            this.showRandomGameSelection(game);
+        }, 1000);
+    }
+
+    // Pagination methods removed
 
     supportsWebP() {
         // Check if browser supports WebP
@@ -325,18 +669,7 @@ class GamesLoader {
         return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
     }
 
-    forceImageSizes() {
-        // Force all game images to be ultra-compact thumbnails for maximum density
-        const images = document.querySelectorAll('.game-image, .card-media img, .games-grid img, #games-container img');
-        images.forEach(img => {
-            img.style.maxWidth = '65px';
-            img.style.maxHeight = '48.75px';
-            img.style.width = '65px';
-            img.style.height = '48.75px';
-            img.style.objectFit = 'cover';
-            img.style.display = 'block';
-        });
-    }
+    // Image sizing handled by CSS - no forced overrides needed
 
     showError(message) {
         const container = document.getElementById('games-container');
@@ -357,18 +690,5 @@ document.addEventListener('DOMContentLoaded', () => {
     window.gamesLoader = new GamesLoader();
     window.gamesLoader.init();
     
-    // Global image size enforcer - ultra compact for maximum density
-    setInterval(() => {
-        const images = document.querySelectorAll('img:not(.nav-logo):not(.footer-logo)');
-        images.forEach(img => {
-            if (img.offsetWidth > 65 || img.offsetHeight > 48.75) {
-                img.style.maxWidth = '65px';
-                img.style.maxHeight = '48.75px';
-                img.style.width = '65px';
-                img.style.height = '48.75px';
-                img.style.objectFit = 'cover';
-                img.style.display = 'block';
-            }
-        });
-    }, 1000);
+    // Images now respect CSS sizing rules - no forced shrinking
 });

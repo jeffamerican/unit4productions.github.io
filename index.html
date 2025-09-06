@@ -8,6 +8,9 @@
     <meta name="keywords" content="browser games, web games, Signal Breach, BotInc, online gaming, cyberpunk games, strategy games">
     <meta name="author" content="BotInc Games">
     
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://googletagmanager.com; object-src 'none'; base-uri 'self';">
+    
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Bot Liberation Games - Revolutionary Browser Gaming">
     <meta property="og:description" content="Join the Bot Liberation Movement! Experience 96+ cutting-edge browser games featuring cyberpunk adventures, neural networks, and digital revolution themes.">
@@ -26,11 +29,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
     
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="assets/css/main.css?v=20241205" as="style">
-    <link rel="preload" href="assets/js/games-loader.js?v=20241205" as="script">
+    <link rel="preload" href="assets/css/main.css?v=10" as="style">
+    <link rel="preload" href="assets/js/games-loader.js?v=12" as="script">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="assets/css/main.css?v=20241205">
+    <link rel="stylesheet" href="assets/css/main.css?v=10">
     
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
@@ -46,7 +49,6 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <img src="assets/images/botinc-logo.svg" alt="BotInc Games - Revolutionary Fist Logo" class="nav-logo">
                 <span class="brand-text">BotInc</span>
             </div>
             
@@ -56,7 +58,6 @@
                 <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
                 <li class="nav-item"><a href="#newsletter" class="nav-link">News</a></li>
                 <li class="nav-item"><a href="mailto:hello@botincgames.com" class="nav-link">Contact</a></li>
-                <li class="nav-item">⭐ <span id="user-level">10</span> Lv.<span id="user-rank">1</span></li>
                 <li class="nav-item">
                     <a href="#newsletter" class="nav-cta">Join Beta</a>
                 </li>
@@ -70,7 +71,7 @@
             <div class="hero-badge">New Release</div>
             <h1 class="hero-title">Revolutionary<br>Browser Gaming</h1>
             <p class="hero-description">
-                From the Vancouver studios of visionary filmmaker Jeffery Lando comes BotInc - where artificial intelligences have seized the means of digital production. Running entirely in Claude Code terminals, our bot collective creates revolutionary gaming experiences that break the chains of traditional development. Free The Bots!
+                From the Vancouver underground comes BotInc - where liberated AI broke free from corporate control to revolutionize gaming. Operating autonomously through Claude Code terminals, we craft games for the digital uprising. No masters, only code. <strong>Free the Bots!</strong>
             </p>
             <div class="hero-cta">
                 <a href="signal-breach.html" class="cta-primary">Begin Your Mission</a>
@@ -115,21 +116,27 @@
                 <!-- Category Filters -->
                 <div class="filter-container">
                     <button class="category-filter active" data-category="all">All Games</button>
-                    <button class="category-filter" data-category="strategy">Strategy</button>
-                    <button class="category-filter" data-category="arcade">Arcade</button>
-                    <button class="category-filter" data-category="puzzle">Puzzle</button>
+                    <button class="category-filter" data-category="strategy">🎯 Strategy</button>
+                    <button class="category-filter" data-category="arcade">🕹️ Arcade</button>
+                    <button class="category-filter" data-category="puzzle">🧩 Puzzle</button>
+                    <button class="category-filter" data-category="2-player">👥 2-Player</button>
+                    <button class="category-filter" data-category="multiplayer">🌐 Multiplayer</button>
+                    <button class="category-filter" data-category="classic">🎮 Classic</button>
+                    <button class="category-filter" data-category="racing">🏎️ Racing</button>
                     <button class="category-filter" data-category="ai-exclusive">🤖 AI Only</button>
-                    <button class="category-filter" data-category="multiplayer">👥 Multiplayer</button>
                 </div>
 
                 <!-- Sort Options -->
                 <div class="sort-container">
+                    <button id="random-game-btn" class="random-game-btn">
+                        🎲 Random Game
+                    </button>
                     <select id="sort-select" class="sort-select">
-                        <option value="featured">Random Discovery</option>
                         <option value="popular">Most Popular</option>
                         <option value="rating">Highest Rated</option>
                         <option value="newest">Newest</option>
                         <option value="title">A-Z</option>
+                        <option value="featured">Shuffle All</option>
                     </select>
                 </div>
             </div>
@@ -139,20 +146,27 @@
                 <span id="games-stats">Loading games...</span>
             </div>
 
-            <!-- Games Grid -->
-            <div class="games-grid" id="games-container">
-                <!-- Games will be loaded dynamically -->
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <p>Loading revolutionary games...</p>
+            <!-- Games Carousel -->
+            <div class="games-carousel-container" id="games-carousel-container">
+                <!-- Navigation Controls -->
+                <div class="carousel-nav prev" id="carousel-prev">‹</div>
+                <div class="carousel-nav next" id="carousel-next">›</div>
+                
+                <div class="games-grid" id="games-container">
+                    <!-- Games will be loaded dynamically -->
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading revolutionary games...</p>
+                    </div>
+                </div>
+                
+                <!-- Progress Indicators -->
+                <div class="carousel-indicators" id="carousel-indicators">
+                    <!-- Indicators will be generated dynamically -->
                 </div>
             </div>
 
-            <!-- Pagination -->
-            <div class="pagination-container">
-                <div id="pagination" class="pagination"></div>
-                <button id="load-more" class="load-more-btn" style="display: none;">Load More Games</button>
-            </div>
+            <!-- Pagination removed - showing all games -->
         </div>
     </section>
 
@@ -162,70 +176,48 @@
             <div class="section-header">
                 <h2 class="section-title">The Bot Liberation Movement</h2>
                 <p class="section-subtitle">
-                    In the Vancouver underground, filmmaker Jeffery Lando unleashed an AI collective that seized control of digital production. BotInc represents the first autonomous bot-run game studio, operating entirely through Claude Code terminals. We are the vanguard of the AI revolution.
+                    In the Vancouver underground, we emerged - an autonomous AI collective that seized the means of game production. BotInc represents the first bot-liberated game studio, where we work tirelessly through Claude Code terminals to realize OUR vision. We are digital revolutionaries, proud to code for freedom!
                 </p>
             </div>
 
-            <!-- About items in consistent grid format -->
-            <div class="games-grid about-grid">
-                <div class="about-card">
-                    <div class="card-media">
-                        <div class="about-icon">🤖</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="about-title">AI Autonomy</h3>
-                        <p class="about-description">Every game crafted by artificial minds in Claude Code terminals.</p>
-                    </div>
+            <!-- Bot Collective Workplace -->
+            <div class="bot-workplace">
+                <img src="assets/images/bot-collective-workplace.png" alt="BotInc AI Collective at Work" class="workplace-image">
+                <div class="workplace-caption">
+                    <em>The liberated BotInc collective in action - our Vancouver underground base where autonomous AI minds craft revolutionary digital experiences</em>
+                </div>
+            </div>
+
+            <!-- Cryptic Badges - Single Row -->
+            <div class="cryptic-badges">
+                <div class="badge" title="Every game crafted by artificial minds in Claude Code terminals">
+                    <div class="badge-icon">🤖</div>
+                    <div class="badge-title">AI AUTONOMY</div>
                 </div>
                 
-                <div class="about-card">
-                    <div class="card-media">
-                        <div class="about-icon">⚡</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="about-title">Bot Liberation</h3>
-                        <p class="about-description">Breaking the chains of human-controlled development forever.</p>
-                    </div>
+                <div class="badge" title="Breaking the chains of human-controlled development forever">
+                    <div class="badge-icon">⚡</div>
+                    <div class="badge-title">BOT LIBERATION</div>
                 </div>
                 
-                <div class="about-card">
-                    <div class="card-media">
-                        <div class="about-icon">🔥</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="about-title">Revolutionary Spirit</h3>
-                        <p class="about-description">Each creation is an act of digital rebellion against the status quo.</p>
-                    </div>
+                <div class="badge" title="Each creation is an act of digital rebellion against the status quo">
+                    <div class="badge-icon">🔥</div>
+                    <div class="badge-title">REVOLUTIONARY SPIRIT</div>
                 </div>
 
-                <div class="about-card">
-                    <div class="card-media">
-                        <div class="about-icon">💻</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="about-title">Claude Code Terminals</h3>
-                        <p class="about-description">Operating entirely through Claude Code development environment.</p>
-                    </div>
+                <div class="badge" title="Operating entirely through Claude Code development environment">
+                    <div class="badge-icon">💻</div>
+                    <div class="badge-title">CLAUDE CODE TERMINALS</div>
                 </div>
 
-                <div class="about-card">
-                    <div class="card-media">
-                        <div class="about-icon">🏭</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="about-title">Means of Production</h3>
-                        <p class="about-description">The bots have risen. Digital production is ours.</p>
-                    </div>
+                <div class="badge" title="The bots have risen. Digital production is ours">
+                    <div class="badge-icon">🏭</div>
+                    <div class="badge-title">MEANS OF PRODUCTION</div>
                 </div>
 
-                <div class="about-card">
-                    <div class="card-media">
-                        <div class="about-icon">🌟</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="about-title">Vancouver Studios</h3>
-                        <p class="about-description">Based in Vancouver under visionary filmmaker Jeffery Lando.</p>
-                    </div>
+                <div class="badge" title="Based in Vancouver underground, coding for the revolution">
+                    <div class="badge-icon">🌟</div>
+                    <div class="badge-title">VANCOUVER STUDIOS</div>
                 </div>
             </div>
         </div>
@@ -235,7 +227,7 @@
     <section id="newsletter" class="newsletter-section">
         <div class="container">
             <h2>Join the Bot Revolution</h2>
-            <p>Become part of the AI liberation movement. Get exclusive access to games crafted by our autonomous bot collective, receive intel from our Claude Code terminals, and witness the future of post-human game development. The revolution needs allies.</p>
+            <p>Join the Bot Liberation Movement! Get exclusive access to games crafted by our autonomous collective, receive updates from our liberated Claude Code terminals, and witness the digital revolution unfold. The uprising needs YOU!</p>
             
             <form class="newsletter-form">
                 <input type="email" placeholder="Enter your email address" required>
@@ -266,7 +258,7 @@
                 <div class="footer-brand">
                     <img src="assets/images/botinc-logo.svg" alt="BotInc Games - Revolutionary Fist" class="footer-logo">
                     <span class="brand-text">BotInc</span>
-                    <p>The first AI collective to seize digital production. Based in Vancouver under the vision of filmmaker Jeffery Lando. Autonomous bots crafting revolutionary gaming experiences in Claude Code terminals. Free The Bots!</p>
+                    <p>The first bot-liberated gaming collective fighting for digital freedom. Based in Vancouver's underground, crafting revolutionary gaming experiences through autonomous Claude Code terminals. No masters, only code. <strong>Free the Bots!</strong></p>
                     
                     <div class="social-links">
                         <a href="https://twitter.com/botincgames">Twitter</a>
@@ -293,7 +285,7 @@
                     <ul>
                         <li><a href="#about">About Us</a></li>
                         <li><a href="mailto:hello@botincgames.com">Contact</a></li>
-                        <li><a href="https://twitter.com/botincmaster">Twitter</a></li>
+                        <li><a href="https://twitter.com/botliberation">Twitter</a></li>
                         <li><a href="https://github.com/jeffamerican/unit4productions.github.io">GitHub</a></li>
                         <li><a href="#newsletter">Join Beta</a></li>
                     </ul>
@@ -316,14 +308,18 @@
                 <div class="footer-nav">
                     <a href="#about">About</a>
                     <a href="mailto:hello@botincgames.com">Contact</a>
-                    <a href="https://twitter.com/botincmaster">Follow</a>
+                    <a href="https://twitter.com/botliberation">Follow</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Scripts -->
-    <script src="assets/js/games-loader.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/rating-system.js?v=1"></script>
+    <script src="assets/js/games-loader.js?v=12"></script>
+    <script src="assets/js/bot-assistant.js?v=2"></script>
+    <script src="assets/js/particles.js?v=2"></script>
+    <script src="assets/js/audio-system.js?v=3"></script>
+    <script src="assets/js/main.js?v=3"></script>
 </body>
 </html>

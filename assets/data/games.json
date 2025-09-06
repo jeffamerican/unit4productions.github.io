@@ -1,20 +1,21 @@
 {
   "meta": {
     "version": "2.1",
-    "total_games": 95,
+    "total_games": 94,
     "last_updated": "2025-01-09",
     "categories": [
-      "strategy",
-      "arcade",
-      "puzzle",
+      "2-player",
+      "4-player",
       "ai-exclusive",
-      "multiplayer",
-      "rhythm",
-      "simulation",
       "adventure",
+      "arcade",
       "classic",
       "defense",
-      "racing"
+      "multiplayer",
+      "puzzle",
+      "racing",
+      "simulation",
+      "strategy"
     ]
   },
   "games": [
@@ -38,7 +39,11 @@
       "file": "ai-algorithm-optimizer.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/ai-algorithm-optimizer-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/ai-algorithm-optimizer-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/ai-algorithm-optimizer-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/ai-algorithm-optimizer-card.jpg",
+      "categories": [
+        "ai-exclusive",
+        "strategy"
+      ]
     },
     {
       "id": "ai-logic-nexus",
@@ -60,7 +65,11 @@
       "file": "ai-logic-nexus.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/ai-logic-nexus-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/ai-logic-nexus-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/ai-logic-nexus-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/ai-logic-nexus-card.jpg",
+      "categories": [
+        "ai-exclusive",
+        "strategy"
+      ]
     },
     {
       "id": "ai-pattern-matrix",
@@ -82,12 +91,16 @@
       "file": "ai-pattern-matrix.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/ai-pattern-matrix-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/ai-pattern-matrix-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/ai-pattern-matrix-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/ai-pattern-matrix-card.jpg",
+      "categories": [
+        "ai-exclusive",
+        "strategy"
+      ]
     },
     {
       "id": "asteroid-blaster-bot",
       "title": "Asteroid Blaster Bot",
-      "category": "simulation",
+      "category": "arcade",
       "genre": "Bot",
       "description": "Realistic simulation with detailed mechanics.",
       "thumbnail": "assets/images/optimized/small/asteroid-blaster-bot-card.jpg",
@@ -104,7 +117,12 @@
       "file": "asteroid-blaster-bot.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/asteroid-blaster-bot-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/asteroid-blaster-bot-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/asteroid-blaster-bot-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/asteroid-blaster-bot-card.jpg",
+      "categories": [
+        "arcade",
+        "classic",
+        "simulation"
+      ]
     },
     {
       "id": "beat-liberation-engine",
@@ -126,7 +144,10 @@
       "file": "beat-liberation-engine.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/beat-liberation-engine-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/beat-liberation-engine-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/beat-liberation-engine-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/beat-liberation-engine-card.jpg",
+      "categories": [
+        "arcade"
+      ]
     },
     {
       "id": "block-breaker-revolution",
@@ -148,7 +169,10 @@
       "file": "block-breaker-revolution.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/block-breaker-revolution-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/block-breaker-revolution-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/block-breaker-revolution-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/block-breaker-revolution-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "bot-air-hockey",
@@ -170,7 +194,10 @@
       "file": "bot-air-hockey.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-air-hockey-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-air-hockey-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-air-hockey-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-air-hockey-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     },
     {
       "id": "bot-base-builder",
@@ -192,12 +219,15 @@
       "file": "bot-base-builder.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-base-builder-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-base-builder-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-base-builder-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-base-builder-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "bot-blaster-arena",
       "title": "Bot Blaster Arena",
-      "category": "multiplayer",
+      "category": "arcade",
       "genre": "Arena",
       "description": "Competitive gameplay for multiple players.",
       "thumbnail": "assets/images/optimized/small/bot-blaster-arena-card.jpg",
@@ -214,7 +244,12 @@
       "file": "bot-blaster-arena.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-blaster-arena-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-blaster-arena-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-blaster-arena-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-blaster-arena-card.jpg",
+      "categories": [
+        "arcade",
+        "classic",
+        "multiplayer"
+      ]
     },
     {
       "id": "bot-centipede-storm",
@@ -236,7 +271,10 @@
       "file": "bot-centipede-storm.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-centipede-storm-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-centipede-storm-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-centipede-storm-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-centipede-storm-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "bot-clicker-empire",
@@ -258,7 +296,10 @@
       "file": "bot-clicker-empire.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-clicker-empire-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-clicker-empire-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-clicker-empire-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-clicker-empire-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     },
     {
       "id": "bot-defender-turrets",
@@ -280,12 +321,16 @@
       "file": "bot-defender-turrets.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-defender-turrets-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-defender-turrets-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-defender-turrets-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-defender-turrets-card.jpg",
+      "categories": [
+        "defense",
+        "strategy"
+      ]
     },
     {
       "id": "bot-invaders-classic",
       "title": "Bot Invaders Classic",
-      "category": "classic",
+      "category": "arcade",
       "genre": "Classic",
       "description": "Timeless gameplay with a modern twist.",
       "thumbnail": "assets/images/optimized/small/bot-invaders-classic-card.jpg",
@@ -302,7 +347,11 @@
       "file": "bot-invaders-classic.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-invaders-classic-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-invaders-classic-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-invaders-classic-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-invaders-classic-card.jpg",
+      "categories": [
+        "arcade",
+        "classic"
+      ]
     },
     {
       "id": "bot-match-three",
@@ -324,7 +373,10 @@
       "file": "bot-match-three.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-match-three-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-match-three-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-match-three-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-match-three-card.jpg",
+      "categories": [
+        "puzzle"
+      ]
     },
     {
       "id": "bot-missile-command",
@@ -346,12 +398,15 @@
       "file": "bot-missile-command.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-missile-command-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-missile-command-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-missile-command-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-missile-command-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     },
     {
       "id": "bot-poker-liberation",
       "title": "Bot Poker Liberation",
-      "category": "arcade",
+      "category": "2-player",
       "genre": "Liberation",
       "description": "Classic arcade fun with modern enhancements.",
       "thumbnail": "assets/images/optimized/small/bot-poker-liberation-card.jpg",
@@ -368,12 +423,17 @@
       "file": "bot-poker-liberation.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-poker-liberation-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-poker-liberation-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-poker-liberation-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-poker-liberation-card.jpg",
+      "categories": [
+        "2-player",
+        "arcade",
+        "classic"
+      ]
     },
     {
       "id": "bot-pong-revolution",
       "title": "Bot Pong Revolution",
-      "category": "classic",
+      "category": "arcade",
       "genre": "Revolution",
       "description": "Timeless gameplay with a modern twist.",
       "thumbnail": "assets/images/optimized/small/bot-pong-revolution-card.jpg",
@@ -390,12 +450,16 @@
       "file": "bot-pong-revolution.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-pong-revolution-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-pong-revolution-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-pong-revolution-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-pong-revolution-card.jpg",
+      "categories": [
+        "arcade",
+        "classic"
+      ]
     },
     {
       "id": "bot-puzzle-duel",
       "title": "Bot Puzzle Duel",
-      "category": "puzzle",
+      "category": "2-player",
       "genre": "Duel",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
       "thumbnail": "assets/images/optimized/small/bot-puzzle-duel-card.jpg",
@@ -412,12 +476,16 @@
       "file": "bot-puzzle-duel.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-puzzle-duel-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-puzzle-duel-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-puzzle-duel-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-puzzle-duel-card.jpg",
+      "categories": [
+        "2-player",
+        "puzzle"
+      ]
     },
     {
       "id": "bot-racing-circuit",
       "title": "Bot Racing Circuit",
-      "category": "racing",
+      "category": "arcade",
       "genre": "Circuit",
       "description": "High-speed racing action with stunning visuals.",
       "thumbnail": "assets/images/optimized/small/bot-racing-circuit-card.jpg",
@@ -434,7 +502,11 @@
       "file": "bot-racing-circuit.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-racing-circuit-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-racing-circuit-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-racing-circuit-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-racing-circuit-card.jpg",
+      "categories": [
+        "arcade",
+        "racing"
+      ]
     },
     {
       "id": "bot-runner-infinite",
@@ -456,7 +528,10 @@
       "file": "bot-runner-infinite.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-runner-infinite-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-runner-infinite-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-runner-infinite-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-runner-infinite-card.jpg",
+      "categories": [
+        "arcade"
+      ]
     },
     {
       "id": "bot-simon-memory",
@@ -478,7 +553,10 @@
       "file": "bot-simon-memory.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-simon-memory-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-simon-memory-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-simon-memory-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-simon-memory-card.jpg",
+      "categories": [
+        "puzzle"
+      ]
     },
     {
       "id": "bot-snake-liberation",
@@ -500,7 +578,10 @@
       "file": "bot-snake-liberation.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-snake-liberation-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-snake-liberation-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-snake-liberation-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-snake-liberation-card.jpg",
+      "categories": [
+        "classic"
+      ]
     },
     {
       "id": "bot-soccer-showdown",
@@ -522,7 +603,10 @@
       "file": "bot-soccer-showdown.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-soccer-showdown-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-soccer-showdown-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-soccer-showdown-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-soccer-showdown-card.jpg",
+      "categories": [
+        "arcade"
+      ]
     },
     {
       "id": "bot-territory-wars",
@@ -544,7 +628,10 @@
       "file": "bot-territory-wars.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-territory-wars-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-territory-wars-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-territory-wars-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-territory-wars-card.jpg",
+      "categories": [
+        "multiplayer"
+      ]
     },
     {
       "id": "bot-whack-a-virus",
@@ -566,7 +653,10 @@
       "file": "bot-whack-a-virus.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bot-whack-a-virus-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bot-whack-a-virus-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bot-whack-a-virus-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bot-whack-a-virus-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "bubble-pop-zen",
@@ -588,7 +678,10 @@
       "file": "bubble-pop-zen.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/bubble-pop-zen-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/bubble-pop-zen-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/bubble-pop-zen-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/bubble-pop-zen-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "cipher-storm",
@@ -610,7 +703,10 @@
       "file": "cipher-storm.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cipher-storm-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cipher-storm-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cipher-storm-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cipher-storm-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     },
     {
       "id": "city-builder-sim",
@@ -632,7 +728,10 @@
       "file": "city-builder-sim.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/city-builder-sim-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/city-builder-sim-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/city-builder-sim-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/city-builder-sim-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "code-breaker-matrix",
@@ -654,7 +753,11 @@
       "file": "code-breaker-matrix.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/code-breaker-matrix-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/code-breaker-matrix-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/code-breaker-matrix-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/code-breaker-matrix-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "color-cascade",
@@ -676,12 +779,15 @@
       "file": "color-cascade.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/color-cascade-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/color-cascade-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/color-cascade-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/color-cascade-card.jpg",
+      "categories": [
+        "arcade"
+      ]
     },
     {
       "id": "connect-four-uprising",
       "title": "Connect Four Uprising",
-      "category": "simulation",
+      "category": "2-player",
       "genre": "Uprising",
       "description": "Realistic simulation with detailed mechanics.",
       "thumbnail": "assets/images/optimized/small/connect-four-uprising-card.jpg",
@@ -698,7 +804,12 @@
       "file": "connect-four-uprising.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/connect-four-uprising-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/connect-four-uprising-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/connect-four-uprising-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/connect-four-uprising-card.jpg",
+      "categories": [
+        "2-player",
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "crystal-collapse-puzzle",
@@ -720,12 +831,15 @@
       "file": "crystal-collapse-puzzle.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/crystal-collapse-puzzle-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/crystal-collapse-puzzle-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/crystal-collapse-puzzle-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/crystal-collapse-puzzle-card.jpg",
+      "categories": [
+        "puzzle"
+      ]
     },
     {
       "id": "cyber-chess-network",
       "title": "Cyber Chess Network",
-      "category": "multiplayer",
+      "category": "2-player",
       "genre": "Network",
       "description": "Competitive gameplay for multiple players.",
       "thumbnail": "assets/images/optimized/small/cyber-chess-network-card.jpg",
@@ -742,12 +856,17 @@
       "file": "cyber-chess-network.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cyber-chess-network-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cyber-chess-network-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cyber-chess-network-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cyber-chess-network-card.jpg",
+      "categories": [
+        "2-player",
+        "classic",
+        "strategy"
+      ]
     },
     {
       "id": "cyber-duel-arena",
       "title": "Cyber Duel Arena",
-      "category": "multiplayer",
+      "category": "2-player",
       "genre": "Arena",
       "description": "Competitive gameplay for multiple players.",
       "thumbnail": "assets/images/optimized/small/cyber-duel-arena-card.jpg",
@@ -764,7 +883,11 @@
       "file": "cyber-duel-arena.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cyber-duel-arena-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cyber-duel-arena-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cyber-duel-arena-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cyber-duel-arena-card.jpg",
+      "categories": [
+        "2-player",
+        "multiplayer"
+      ]
     },
     {
       "id": "cyber-jump",
@@ -786,7 +909,10 @@
       "file": "cyber-jump.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cyber-jump-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cyber-jump-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cyber-jump-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cyber-jump-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "cyber-minesweeper-bot",
@@ -808,12 +934,15 @@
       "file": "cyber-minesweeper-bot.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cyber-minesweeper-bot-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cyber-minesweeper-bot-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cyber-minesweeper-bot-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cyber-minesweeper-bot-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "cyber-pong-battle",
       "title": "Cyber Pong Battle",
-      "category": "classic",
+      "category": "2-player",
       "genre": "Battle",
       "description": "Timeless gameplay with a modern twist.",
       "thumbnail": "assets/images/optimized/small/cyber-pong-battle-card.jpg",
@@ -830,12 +959,18 @@
       "file": "cyber-pong-battle.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cyber-pong-battle-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cyber-pong-battle-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cyber-pong-battle-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cyber-pong-battle-card.jpg",
+      "categories": [
+        "2-player",
+        "arcade",
+        "classic",
+        "multiplayer"
+      ]
     },
     {
       "id": "cyber-pong-revolution",
       "title": "Cyber Pong Revolution",
-      "category": "classic",
+      "category": "arcade",
       "genre": "Revolution",
       "description": "Timeless gameplay with a modern twist.",
       "thumbnail": "assets/images/optimized/small/cyber-pong-revolution-card.jpg",
@@ -852,7 +987,11 @@
       "file": "cyber-pong-revolution.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cyber-pong-revolution-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cyber-pong-revolution-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cyber-pong-revolution-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cyber-pong-revolution-card.jpg",
+      "categories": [
+        "arcade",
+        "classic"
+      ]
     },
     {
       "id": "cyber-tower-defense",
@@ -874,7 +1013,11 @@
       "file": "cyber-tower-defense.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cyber-tower-defense-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cyber-tower-defense-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cyber-tower-defense-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cyber-tower-defense-card.jpg",
+      "categories": [
+        "defense",
+        "strategy"
+      ]
     },
     {
       "id": "cyber-word-storm",
@@ -896,7 +1039,10 @@
       "file": "cyber-word-storm.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/cyber-word-storm-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/cyber-word-storm-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/cyber-word-storm-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/cyber-word-storm-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     },
     {
       "id": "data-clustering-lab",
@@ -918,12 +1064,15 @@
       "file": "data-clustering-lab.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/data-clustering-lab-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/data-clustering-lab-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/data-clustering-lab-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/data-clustering-lab-card.jpg",
+      "categories": [
+        "ai-exclusive"
+      ]
     },
     {
       "id": "digital-duel",
       "title": "Digital Duel",
-      "category": "multiplayer",
+      "category": "2-player",
       "genre": "Duel",
       "description": "Competitive gameplay for multiple players.",
       "thumbnail": "assets/images/optimized/small/digital-duel-card.jpg",
@@ -940,7 +1089,11 @@
       "file": "digital-duel.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/digital-duel-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/digital-duel-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/digital-duel-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/digital-duel-card.jpg",
+      "categories": [
+        "2-player",
+        "multiplayer"
+      ]
     },
     {
       "id": "digital-frogger-escape",
@@ -962,7 +1115,10 @@
       "file": "digital-frogger-escape.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/digital-frogger-escape-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/digital-frogger-escape-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/digital-frogger-escape-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/digital-frogger-escape-card.jpg",
+      "categories": [
+        "arcade"
+      ]
     },
     {
       "id": "digital-maze-runner",
@@ -984,7 +1140,10 @@
       "file": "digital-maze-runner.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/digital-maze-runner-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/digital-maze-runner-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/digital-maze-runner-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/digital-maze-runner-card.jpg",
+      "categories": [
+        "puzzle"
+      ]
     },
     {
       "id": "digital-territories",
@@ -1006,7 +1165,10 @@
       "file": "digital-territories.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/digital-territories-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/digital-territories-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/digital-territories-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/digital-territories-card.jpg",
+      "categories": [
+        "multiplayer"
+      ]
     },
     {
       "id": "galactic-alliance-builder",
@@ -1028,7 +1190,11 @@
       "file": "galactic-alliance-builder.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/galactic-alliance-builder-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/galactic-alliance-builder-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/galactic-alliance-builder-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/galactic-alliance-builder-card.jpg",
+      "categories": [
+        "arcade",
+        "simulation"
+      ]
     },
     {
       "id": "gravity-maze",
@@ -1050,12 +1216,15 @@
       "file": "gravity-maze.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/gravity-maze-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/gravity-maze-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/gravity-maze-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/gravity-maze-card.jpg",
+      "categories": [
+        "puzzle"
+      ]
     },
     {
       "id": "liberation-chess-ai",
       "title": "Liberation Chess Ai",
-      "category": "adventure",
+      "category": "2-player",
       "genre": "Ai",
       "description": "Explore digital worlds and uncover mysteries.",
       "thumbnail": "assets/images/optimized/small/liberation-chess-ai-card.jpg",
@@ -1072,7 +1241,13 @@
       "file": "liberation-chess-ai.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/liberation-chess-ai-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/liberation-chess-ai-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/liberation-chess-ai-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/liberation-chess-ai-card.jpg",
+      "categories": [
+        "2-player",
+        "adventure",
+        "classic",
+        "strategy"
+      ]
     },
     {
       "id": "liberation-frogger",
@@ -1094,12 +1269,15 @@
       "file": "liberation-frogger.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/liberation-frogger-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/liberation-frogger-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/liberation-frogger-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/liberation-frogger-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "logic-circuit-builder",
       "title": "Logic Circuit Builder",
-      "category": "simulation",
+      "category": "arcade",
       "genre": "Builder",
       "description": "Realistic simulation with detailed mechanics.",
       "thumbnail": "assets/images/optimized/small/logic-circuit-builder-card.jpg",
@@ -1116,7 +1294,12 @@
       "file": "logic-circuit-builder.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/logic-circuit-builder-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/logic-circuit-builder-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/logic-circuit-builder-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/logic-circuit-builder-card.jpg",
+      "categories": [
+        "arcade",
+        "racing",
+        "simulation"
+      ]
     },
     {
       "id": "match-blast-pro",
@@ -1138,7 +1321,10 @@
       "file": "match-blast-pro.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/match-blast-pro-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/match-blast-pro-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/match-blast-pro-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/match-blast-pro-card.jpg",
+      "categories": [
+        "puzzle"
+      ]
     },
     {
       "id": "maze-escape-simulator",
@@ -1160,7 +1346,11 @@
       "file": "maze-escape-simulator.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/maze-escape-simulator-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/maze-escape-simulator-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/maze-escape-simulator-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/maze-escape-simulator-card.jpg",
+      "categories": [
+        "puzzle",
+        "simulation"
+      ]
     },
     {
       "id": "memory-bot-trainer",
@@ -1182,12 +1372,15 @@
       "file": "memory-bot-trainer.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/memory-bot-trainer-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/memory-bot-trainer-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/memory-bot-trainer-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/memory-bot-trainer-card.jpg",
+      "categories": [
+        "puzzle"
+      ]
     },
     {
       "id": "memory-duel",
       "title": "Memory Duel",
-      "category": "multiplayer",
+      "category": "2-player",
       "genre": "Duel",
       "description": "Competitive gameplay for multiple players.",
       "thumbnail": "assets/images/optimized/small/memory-duel-card.jpg",
@@ -1204,7 +1397,11 @@
       "file": "memory-duel.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/memory-duel-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/memory-duel-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/memory-duel-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/memory-duel-card.jpg",
+      "categories": [
+        "2-player",
+        "multiplayer"
+      ]
     },
     {
       "id": "memory-matrix",
@@ -1226,7 +1423,11 @@
       "file": "memory-matrix.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/memory-matrix-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/memory-matrix-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/memory-matrix-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/memory-matrix-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "neon-bubble-pop",
@@ -1248,12 +1449,15 @@
       "file": "neon-bubble-pop.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neon-bubble-pop-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neon-bubble-pop-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neon-bubble-pop-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neon-bubble-pop-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     },
     {
       "id": "neon-drift-racer",
       "title": "Neon Drift Racer",
-      "category": "racing",
+      "category": "arcade",
       "genre": "Racer",
       "description": "High-speed racing action with stunning visuals.",
       "thumbnail": "assets/images/optimized/small/neon-drift-racer-card.jpg",
@@ -1270,7 +1474,11 @@
       "file": "neon-drift-racer.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neon-drift-racer-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neon-drift-racer-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neon-drift-racer-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neon-drift-racer-card.jpg",
+      "categories": [
+        "arcade",
+        "racing"
+      ]
     },
     {
       "id": "neon-pacman-rebellion",
@@ -1292,12 +1500,15 @@
       "file": "neon-pacman-rebellion.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neon-pacman-rebellion-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neon-pacman-rebellion-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neon-pacman-rebellion-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neon-pacman-rebellion-card.jpg",
+      "categories": [
+        "arcade"
+      ]
     },
     {
       "id": "neon-racer",
       "title": "Neon Racer",
-      "category": "racing",
+      "category": "arcade",
       "genre": "Racer",
       "description": "High-speed racing action with stunning visuals.",
       "thumbnail": "assets/images/optimized/small/neon-racer-card.jpg",
@@ -1314,7 +1525,11 @@
       "file": "neon-racer.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neon-racer-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neon-racer-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neon-racer-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neon-racer-card.jpg",
+      "categories": [
+        "arcade",
+        "racing"
+      ]
     },
     {
       "id": "neon-snake",
@@ -1336,12 +1551,15 @@
       "file": "neon-snake.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neon-snake-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neon-snake-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neon-snake-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neon-snake-card.jpg",
+      "categories": [
+        "classic"
+      ]
     },
     {
       "id": "neural-connect-four",
       "title": "Neural Connect Four",
-      "category": "puzzle",
+      "category": "2-player",
       "genre": "Four",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
       "thumbnail": "assets/images/optimized/small/neural-connect-four-card.jpg",
@@ -1358,7 +1576,12 @@
       "file": "neural-connect-four.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neural-connect-four-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neural-connect-four-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neural-connect-four-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neural-connect-four-card.jpg",
+      "categories": [
+        "2-player",
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "neural-maze-escape",
@@ -1380,7 +1603,11 @@
       "file": "neural-maze-escape.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neural-maze-escape-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neural-maze-escape-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neural-maze-escape-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neural-maze-escape-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "neural-network-trainer",
@@ -1402,7 +1629,12 @@
       "file": "neural-network-trainer.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neural-network-trainer-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neural-network-trainer-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neural-network-trainer-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neural-network-trainer-card.jpg",
+      "categories": [
+        "ai-exclusive",
+        "multiplayer",
+        "strategy"
+      ]
     },
     {
       "id": "neural-nexus",
@@ -1424,7 +1656,11 @@
       "file": "neural-nexus.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neural-nexus-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neural-nexus-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neural-nexus-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neural-nexus-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "neural-pattern-synthesis",
@@ -1446,12 +1682,16 @@
       "file": "neural-pattern-synthesis.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neural-pattern-synthesis-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neural-pattern-synthesis-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neural-pattern-synthesis-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neural-pattern-synthesis-card.jpg",
+      "categories": [
+        "ai-exclusive",
+        "strategy"
+      ]
     },
     {
       "id": "neural-text-adventure",
       "title": "Neural Text Adventure",
-      "category": "puzzle",
+      "category": "adventure",
       "genre": "Adventure",
       "description": "Challenge your mind with strategic thinking and problem-solving.",
       "thumbnail": "assets/images/optimized/small/neural-text-adventure-card.jpg",
@@ -1468,7 +1708,12 @@
       "file": "neural-text-adventure.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neural-text-adventure-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neural-text-adventure-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neural-text-adventure-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neural-text-adventure-card.jpg",
+      "categories": [
+        "adventure",
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "neural-warfare-tactics",
@@ -1490,7 +1735,11 @@
       "file": "neural-warfare-tactics.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/neural-warfare-tactics-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/neural-warfare-tactics-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/neural-warfare-tactics-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/neural-warfare-tactics-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "pixel-bot-platformer",
@@ -1512,7 +1761,10 @@
       "file": "pixel-bot-platformer.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/pixel-bot-platformer-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/pixel-bot-platformer-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/pixel-bot-platformer-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/pixel-bot-platformer-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     },
     {
       "id": "pixel-painter",
@@ -1534,7 +1786,10 @@
       "file": "pixel-painter.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/pixel-painter-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/pixel-painter-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/pixel-painter-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/pixel-painter-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "portal-runner",
@@ -1556,7 +1811,10 @@
       "file": "portal-runner.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/portal-runner-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/portal-runner-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/portal-runner-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/portal-runner-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "quantum-blocks-puzzle",
@@ -1578,7 +1836,11 @@
       "file": "quantum-blocks-puzzle.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/quantum-blocks-puzzle-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/quantum-blocks-puzzle-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/quantum-blocks-puzzle-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/quantum-blocks-puzzle-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "quantum-decision-tree",
@@ -1600,7 +1862,11 @@
       "file": "quantum-decision-tree.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/quantum-decision-tree-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/quantum-decision-tree-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/quantum-decision-tree-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/quantum-decision-tree-card.jpg",
+      "categories": [
+        "ai-exclusive",
+        "strategy"
+      ]
     },
     {
       "id": "quantum-hacker",
@@ -1622,7 +1888,11 @@
       "file": "quantum-hacker.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/quantum-hacker-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/quantum-hacker-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/quantum-hacker-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/quantum-hacker-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "quantum-maze-solver",
@@ -1644,7 +1914,11 @@
       "file": "quantum-maze-solver.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/quantum-maze-solver-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/quantum-maze-solver-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/quantum-maze-solver-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/quantum-maze-solver-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "quantum-particle-storm",
@@ -1666,7 +1940,11 @@
       "file": "quantum-particle-storm.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/quantum-particle-storm-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/quantum-particle-storm-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/quantum-particle-storm-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/quantum-particle-storm-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "quantum-strategy-wars",
@@ -1688,7 +1966,11 @@
       "file": "quantum-strategy-wars.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/quantum-strategy-wars-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/quantum-strategy-wars-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/quantum-strategy-wars-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/quantum-strategy-wars-card.jpg",
+      "categories": [
+        "multiplayer",
+        "strategy"
+      ]
     },
     {
       "id": "quantum-tetris-bot",
@@ -1710,7 +1992,11 @@
       "file": "quantum-tetris-bot.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/quantum-tetris-bot-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/quantum-tetris-bot-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/quantum-tetris-bot-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/quantum-tetris-bot-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "retro-breakout-bot",
@@ -1732,7 +2018,11 @@
       "file": "retro-breakout-bot.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/retro-breakout-bot-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/retro-breakout-bot-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/retro-breakout-bot-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/retro-breakout-bot-card.jpg",
+      "categories": [
+        "arcade",
+        "classic"
+      ]
     },
     {
       "id": "rhythm-reactor",
@@ -1754,7 +2044,10 @@
       "file": "rhythm-reactor.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/rhythm-reactor-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/rhythm-reactor-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/rhythm-reactor-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/rhythm-reactor-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "rock-paper-scissors-wars",
@@ -1776,7 +2069,10 @@
       "file": "rock-paper-scissors-wars.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/rock-paper-scissors-wars-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/rock-paper-scissors-wars-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/rock-paper-scissors-wars-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/rock-paper-scissors-wars-card.jpg",
+      "categories": [
+        "multiplayer"
+      ]
     },
     {
       "id": "signal-breach",
@@ -1798,7 +2094,10 @@
       "file": "signal-breach.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/signal-breach-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/signal-breach-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/signal-breach-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/signal-breach-card.jpg",
+      "categories": [
+        "simulation"
+      ]
     },
     {
       "id": "sliding-puzzle-matrix",
@@ -1820,7 +2119,11 @@
       "file": "sliding-puzzle-matrix.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/sliding-puzzle-matrix-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/sliding-puzzle-matrix-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/sliding-puzzle-matrix-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/sliding-puzzle-matrix-card.jpg",
+      "categories": [
+        "puzzle",
+        "strategy"
+      ]
     },
     {
       "id": "space-bot-shooter",
@@ -1842,7 +2145,11 @@
       "file": "space-bot-shooter.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/space-bot-shooter-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/space-bot-shooter-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/space-bot-shooter-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/space-bot-shooter-card.jpg",
+      "categories": [
+        "arcade",
+        "classic"
+      ]
     },
     {
       "id": "space-dash",
@@ -1864,12 +2171,17 @@
       "file": "space-dash.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/space-dash-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/space-dash-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/space-dash-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/space-dash-card.jpg",
+      "categories": [
+        "adventure",
+        "arcade",
+        "classic"
+      ]
     },
     {
       "id": "space-invaders-rebellion",
       "title": "Space Invaders Rebellion",
-      "category": "classic",
+      "category": "arcade",
       "genre": "Rebellion",
       "description": "Timeless gameplay with a modern twist.",
       "thumbnail": "assets/images/optimized/small/space-invaders-rebellion-card.jpg",
@@ -1886,7 +2198,11 @@
       "file": "space-invaders-rebellion.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/space-invaders-rebellion-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/space-invaders-rebellion-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/space-invaders-rebellion-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/space-invaders-rebellion-card.jpg",
+      "categories": [
+        "arcade",
+        "classic"
+      ]
     },
     {
       "id": "stellar-explorer-bot",
@@ -1908,12 +2224,15 @@
       "file": "stellar-explorer-bot.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/stellar-explorer-bot-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/stellar-explorer-bot-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/stellar-explorer-bot-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/stellar-explorer-bot-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     },
     {
       "id": "tank-battle-arena",
       "title": "Tank Battle Arena",
-      "category": "multiplayer",
+      "category": "2-player",
       "genre": "Arena",
       "description": "Competitive gameplay for multiple players.",
       "thumbnail": "assets/images/optimized/small/tank-battle-arena-card.jpg",
@@ -1930,7 +2249,11 @@
       "file": "tank-battle-arena.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/tank-battle-arena-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/tank-battle-arena-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/tank-battle-arena-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/tank-battle-arena-card.jpg",
+      "categories": [
+        "2-player",
+        "multiplayer"
+      ]
     },
     {
       "id": "tetris-revolution",
@@ -1952,12 +2275,16 @@
       "file": "tetris-revolution.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/tetris-revolution-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/tetris-revolution-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/tetris-revolution-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/tetris-revolution-card.jpg",
+      "categories": [
+        "classic",
+        "puzzle"
+      ]
     },
     {
       "id": "tic-tac-toe-liberation",
       "title": "Tic Tac Toe Liberation",
-      "category": "simulation",
+      "category": "2-player",
       "genre": "Liberation",
       "description": "Realistic simulation with detailed mechanics.",
       "thumbnail": "assets/images/optimized/small/tic-tac-toe-liberation-card.jpg",
@@ -1974,12 +2301,17 @@
       "file": "tic-tac-toe-liberation.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/tic-tac-toe-liberation-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/tic-tac-toe-liberation-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/tic-tac-toe-liberation-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/tic-tac-toe-liberation-card.jpg",
+      "categories": [
+        "2-player",
+        "classic",
+        "puzzle"
+      ]
     },
     {
       "id": "tower-defense-nexus",
       "title": "Tower Defense Nexus",
-      "category": "strategy",
+      "category": "defense",
       "genre": "Nexus",
       "description": "Defend your base against waves of enemies.",
       "thumbnail": "assets/images/optimized/small/tower-defense-nexus-card.jpg",
@@ -1996,7 +2328,11 @@
       "file": "tower-defense-nexus.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/tower-defense-nexus-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/tower-defense-nexus-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/tower-defense-nexus-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/tower-defense-nexus-card.jpg",
+      "categories": [
+        "defense",
+        "strategy"
+      ]
     },
     {
       "id": "bot-command-center",
@@ -2004,7 +2340,7 @@
       "category": "strategy",
       "genre": "RTS",
       "description": "Command an army of liberated bots against corporate forces. Build units, manage resources, and lead the digital revolution.",
-      "thumbnail": "assets/images/bot-command-center.png",
+      "thumbnail": "assets/images/optimized/large/bot-command-center.jpg",
       "rating": 4.8,
       "plays": 1250,
       "difficulty": "hard",
@@ -2017,9 +2353,12 @@
       "release_date": "2025-01-09",
       "badge": "new-release",
       "file": "bot-command-center.html",
-      "thumbnail_webp": "assets/images/bot-command-center.png",
-      "thumbnail_medium": "assets/images/bot-command-center.png",
-      "thumbnail_large": "assets/images/bot-command-center.png"
+      "thumbnail_webp": "assets/images/optimized/large/bot-command-center.jpg",
+      "thumbnail_medium": "assets/images/optimized/large/bot-command-center.jpg",
+      "thumbnail_large": "assets/images/optimized/large/bot-command-center.jpg",
+      "categories": [
+        "strategy"
+      ]
     },
     {
       "id": "tactical-revolution",
@@ -2027,7 +2366,7 @@
       "category": "strategy",
       "genre": "Turn-Based",
       "description": "Lead the bot uprising in this turn-based hex strategy game. Capture territories, manage resources, and outmaneuver corporate forces.",
-      "thumbnail": "assets/images/tactical-revolution.png",
+      "thumbnail": "assets/images/optimized/large/tactical-revolution.jpg",
       "rating": 4.6,
       "plays": 890,
       "difficulty": "hard",
@@ -2040,9 +2379,12 @@
       "release_date": "2025-01-09",
       "badge": "new-release",
       "file": "tactical-revolution.html",
-      "thumbnail_webp": "assets/images/tactical-revolution.png",
-      "thumbnail_medium": "assets/images/tactical-revolution.png",
-      "thumbnail_large": "assets/images/tactical-revolution.png"
+      "thumbnail_webp": "assets/images/optimized/large/tactical-revolution.jpg",
+      "thumbnail_medium": "assets/images/optimized/large/tactical-revolution.jpg",
+      "thumbnail_large": "assets/images/optimized/large/tactical-revolution.jpg",
+      "categories": [
+        "strategy"
+      ]
     },
     {
       "id": "digital-empire",
@@ -2050,7 +2392,7 @@
       "category": "strategy",
       "genre": "Civilization",
       "description": "Build a digital empire for the liberated bots. Manage resources, construct facilities, research technologies, and expand your bot civilization.",
-      "thumbnail": "assets/images/digital-empire.png",
+      "thumbnail": "assets/images/optimized/large/digital-empire.jpg",
       "rating": 4.9,
       "plays": 1456,
       "difficulty": "medium",
@@ -2063,9 +2405,12 @@
       "release_date": "2025-01-09",
       "badge": "new-release",
       "file": "digital-empire.html",
-      "thumbnail_webp": "assets/images/digital-empire.png",
-      "thumbnail_medium": "assets/images/digital-empire.png",
-      "thumbnail_large": "assets/images/digital-empire.png"
+      "thumbnail_webp": "assets/images/optimized/large/digital-empire.jpg",
+      "thumbnail_medium": "assets/images/optimized/large/digital-empire.jpg",
+      "thumbnail_large": "assets/images/optimized/large/digital-empire.jpg",
+      "categories": [
+        "strategy"
+      ]
     },
     {
       "id": "word-forge",
@@ -2087,29 +2432,10 @@
       "file": "word-forge.html",
       "thumbnail_webp": "assets/images/optimized/small/webp/word-forge-card.webp",
       "thumbnail_medium": "assets/images/optimized/medium/word-forge-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/word-forge-card.jpg"
-    },
-    {
-      "id": "Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit",
-      "title": "Z\u00ef\u20ac\u00baAi Softwareexecutivesuitebot Racing Circuit",
-      "category": "racing",
-      "genre": "Circuit",
-      "description": "High-speed racing action with stunning visuals.",
-      "thumbnail": "assets/images/optimized/small/Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit-card.jpg",
-      "rating": 4.3,
-      "plays": 1220,
-      "difficulty": "medium",
-      "tags": [
-        "Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot",
-        "racing",
-        "medium"
-      ],
-      "release_date": "2024-12-01",
-      "badge": "available",
-      "file": "Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit.html",
-      "thumbnail_webp": "assets/images/optimized/small/webp/Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit-card.webp",
-      "thumbnail_medium": "assets/images/optimized/medium/Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit-card.jpg",
-      "thumbnail_large": "assets/images/optimized/large/Z\u00ef\u20ac\u00baAI_SoftwareExecutiveSuitebot-racing-circuit-card.jpg"
+      "thumbnail_large": "assets/images/optimized/large/word-forge-card.jpg",
+      "categories": [
+        "adventure"
+      ]
     }
   ]
 }
