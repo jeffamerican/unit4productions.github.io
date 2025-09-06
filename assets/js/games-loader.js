@@ -145,23 +145,77 @@ class GamesLoader {
 
     setupTouchNavigation(container) {
         let startX = 0;
+        let startY = 0;
         let endX = 0;
+        let endY = 0;
+        let isDragging = false;
+        let startTime = 0;
         
+        // Enhanced touch handling for better mobile experience
         container.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
-        });
+            startY = e.touches[0].clientY;
+            isDragging = true;
+            startTime = Date.now();
+            
+            // Prevent default scrolling behavior during swipe
+            if (e.touches.length === 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        container.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const diffX = Math.abs(currentX - startX);
+            const diffY = Math.abs(currentY - startY);
+            
+            // If horizontal swipe is detected, prevent vertical scrolling
+            if (diffX > diffY && diffX > 10) {
+                e.preventDefault();
+            }
+        }, { passive: false });
         
         container.addEventListener('touchend', (e) => {
-            endX = e.changedTouches[0].clientX;
-            const difference = startX - endX;
+            if (!isDragging) return;
             
-            if (Math.abs(difference) > 50) { // Minimum swipe distance
-                if (difference > 0) {
-                    this.nextPage(); // Swipe left
+            endX = e.changedTouches[0].clientX;
+            endY = e.changedTouches[0].clientY;
+            const endTime = Date.now();
+            
+            const differenceX = startX - endX;
+            const differenceY = Math.abs(startY - endY);
+            const swipeTime = endTime - startTime;
+            const swipeSpeed = Math.abs(differenceX) / swipeTime;
+            
+            // Enhanced swipe detection with speed and direction
+            const minSwipeDistance = window.innerWidth < 480 ? 30 : 50;
+            const maxVerticalDrift = 100;
+            
+            if (Math.abs(differenceX) > minSwipeDistance && 
+                differenceY < maxVerticalDrift &&
+                swipeTime < 500) {
+                
+                // Add haptic feedback on supported devices
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(10);
+                }
+                
+                if (differenceX > 0) {
+                    this.nextPage(); // Swipe left to go next
                 } else {
-                    this.prevPage(); // Swipe right
+                    this.prevPage(); // Swipe right to go previous
                 }
             }
+            
+            isDragging = false;
+        });
+        
+        // Handle touch cancel events
+        container.addEventListener('touchcancel', () => {
+            isDragging = false;
         });
     }
 
@@ -366,6 +420,16 @@ class GamesLoader {
         if (!container || container.children.length === 0) return this.cardsPerView;
         
         const containerWidth = container.clientWidth;
+        const screenWidth = window.innerWidth;
+        
+        // Mobile-specific card calculations
+        if (screenWidth <= 480) {
+            return 1; // Always show 1 card on small mobile
+        } else if (screenWidth <= 768) {
+            return 1; // Show 1 card on tablets and large mobile
+        }
+        
+        // Desktop calculation
         const firstCard = container.children[0];
         if (!firstCard) return this.cardsPerView;
         
