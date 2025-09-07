@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Battalion Command - 4 Player Tactical Warfare | BotInc Games</title>
+    <meta name="description" content="Real-time bot army command with immersive tactical warfare audio">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b, #374151, #0f172a);
+            color: #f59e0b;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        .battlefield-interface {
+            display: grid;
+            grid-template-areas: 
+                "header header header header"
+                "player1-command battlefield player2-command tactical-hud"
+                "player3-command battlefield player4-command audio-command"
+                "controls controls controls controls";
+            grid-template-columns: 200px 1fr 200px 250px;
+            grid-template-rows: 60px 1fr 180px 50px;
+            height: 100vh;
+            gap: 3px;
+            background: #000011;
+        }
+
+        .command-header {
+            grid-area: header;
+            background: linear-gradient(45deg, #1f2937, #374151);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 3px solid #f59e0b;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            color: #f59e0b;
+            text-shadow: 0 0 25px #f59e0b;
+            font-weight: bold;
+            animation: combat-ready 3s infinite alternate;
+        }
+
+        @keyframes combat-ready {
+            0% { text-shadow: 0 0 25px #f59e0b; }
+            50% { text-shadow: 0 0 35px #f59e0b, 0 0 45px #fbbf24; }
+            100% { text-shadow: 0 0 25px #f59e0b; }
+        }
+
+        .battle-status {
+            background: rgba(245, 158, 11, 0.15);
+            padding: 10px 16px;
+            border-radius: 20px;
+            border: 2px solid #f59e0b;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .battlefield {
+            grid-area: battlefield;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(239, 68, 68, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 75% 25%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 25% 75%, rgba(34, 197, 94, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 75% 75%, rgba(168, 85, 247, 0.15) 0%, transparent 40%),
+                linear-gradient(135deg, #000011, #001122);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #f59e0b;
+            border-radius: 8px;
+        }
+
+        .battlefield-grid {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            gap: 1px;
+        }
+
+        .battle-cell {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            position: relative;
+            cursor: crosshair;
+            transition: all 0.2s ease;
+        }
+
+        .battle-cell:hover {
+            background: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .bot-unit {
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            z-index: 5;
+        }
+
+        .unit-p1 {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            border: 1px solid #b91c1c;
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+        }
+        .unit-p2 {
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            border: 1px solid #1d4ed8;
+            box-shadow: 0 0 6px rgba(59, 130, 246, 0.6);
+        }
+        .unit-p3 {
+            background: linear-gradient(45deg, #22c55e, #16a34a);
+            border: 1px solid #15803d;
+            box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+        }
+        .unit-p4 {
+            background: linear-gradient(45deg, #a855f7, #9333ea);
+            border: 1px solid #7c3aed;
+            box-shadow: 0 0 6px rgba(168, 85, 247, 0.6);
+        }
+
+        .explosion {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.9), transparent);
+            border-radius: 50%;
+            animation: explode 0.8s ease-out forwards;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .muzzle-flash {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            animation: flash 0.2s ease-out forwards;
+            z-index: 8;
+        }
+
+        @keyframes flash {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .tracer-round {
+            position: absolute;
+            width: 2px;
+            height: 8px;
+            background: linear-gradient(180deg, #fbbf24, #f59e0b);
+            border-radius: 1px;
+            animation: tracer-fly 0.5s linear forwards;
+            z-index: 7;
+        }
+
+        @keyframes tracer-fly {
+            from { transform: translateY(0) scale(1); opacity: 1; }
+            to { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+
+        .command-post {
+            background: rgba(0, 0, 17, 0.9);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .player1-command { 
+            grid-area: player1-command; 
+            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        }
+        .player2-command { 
+            grid-area: player2-command; 
+            border: 2px solid #3b82f6;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+        }
+        .player3-command { 
+            grid-area: player3-command; 
+            border: 2px solid #22c55e;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+        }
+        .player4-command { 
+            grid-area: player4-command; 
+            border: 2px solid #a855f7;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.05));
+        }
+
+        .command-header-player {
+            font-weight: bold;
+            text-align: center;
+            padding: 6px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .player1-command .command-header-player { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .player2-command .command-header-player { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .player3-command .command-header-player { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .player4-command .command-header-player { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+
+        .battalion-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+
+        .stat-unit {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #f59e0b;
+            font-size: 0.9em;
+        }
+
+        .command-abilities {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .command-btn {
+            padding: 5px 7px;
+            background: linear-gradient(45deg, #1f2937, #374151);
+            border: 1px solid #f59e0b;
+            border-radius: 4px;
+            color: #f59e0b;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .command-btn:hover {
+            background: linear-gradient(45deg, #374151, #4b5563);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+            transform: scale(1.05);
+        }
+
+        .command-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tactical-hud {
+            grid-area: tactical-hud;
+            background: rgba(0, 0, 17, 0.9);
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hud-title {
+            color: #f59e0b;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .battlefield-log {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            overflow-y: auto;
+            max-height: 250px;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 4px;
+            border-left: 2px solid;
+            animation: log-flash 0.5s ease-out;
+        }
+
+        @keyframes log-flash {
+            0% { background: rgba(245, 158, 11, 0.3); }
+            100% { background: transparent; }
+        }
+
+        .log-p1 { border-left-color: #ef4444; color: #ff9999; }
+        .log-p2 { border-left-color: #3b82f6; color: #99ccff; }
+        .log-p3 { border-left-color: #22c55e; color: #99ff99; }
+        .log-p4 { border-left-color: #a855f7; color: #cc99ff; }
+        .log-combat { border-left-color: #f59e0b; color: #ffdd99; }
+
+        .minimap {
+            height: 80px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            position: relative;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            margin-top: 8px;
+        }
+
+        .minimap-unit {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+        }
+
+        .audio-command {
+            grid-area: audio-command;
+            background: rgba(0, 0, 17, 0.9);
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .audio-title {
+            color: #f59e0b;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .audio-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .audio-slider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .audio-slider input {
+            width: 70px;
+            accent-color: #f59e0b;
+        }
+
+        .battle-frequency {
+            height: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 8px;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .frequency-bar {
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #f59e0b, #fbbf24);
+            border-radius: 1px 1px 0 0;
+            transition: height 0.1s ease;
+        }
+
+        .controls {
+            grid-area: controls;
+            background: linear-gradient(45deg, #1f2937, #374151);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border-top: 3px solid #f59e0b;
+            padding: 0 20px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            background: linear-gradient(45deg, #1f2937, #374151);
+            border: 2px solid #f59e0b;
+            border-radius: 20px;
+            color: #f59e0b;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #374151, #4b5563);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+            transform: scale(1.1);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 8px 16px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid #f59e0b;
+            border-radius: 20px;
+            color: #f59e0b;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(245, 158, 11, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        @media (max-width: 1400px) {
+            .battlefield-interface {
+                grid-template-areas: 
+                    "header"
+                    "battlefield"
+                    "controls";
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr 50px;
+            }
+            
+            .command-post, .tactical-hud, .audio-command {
+                display: none;
+            }
+        }
+
+        /* Tactical overlays */
+        .airstrike-marker {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.3);
+            border: 2px dashed #ff0000;
+            border-radius: 50%;
+            animation: airstrike-warning 1s ease-in-out infinite;
+            z-index: 12;
+        }
+
+        @keyframes airstrike-warning {
+            0% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 0.8; transform: scale(1.2); }
+            100% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        .smoke-cloud {
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            top: -10%;
+            left: -10%;
+            background: radial-gradient(circle, rgba(128, 128, 128, 0.6), transparent);
+            border-radius: 50%;
+            animation: smoke-drift 3s ease-out forwards;
+            z-index: 4;
+        }
+
+        @keyframes smoke-drift {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+
+    <div class="battlefield-interface">
+        <div class="command-header">
+            <div class="game-title">⚔️ CYBER BATTALION COMMAND</div>
+            <div class="battle-status" id="battleStatus">🔴 ALPHA BATTALION COMMANDING</div>
+            <div id="battleTimer">Round 1 / 10</div>
+        </div>
+
+        <div class="command-post player1-command">
+            <div class="command-header-player">🔴 ALPHA BATTALION</div>
+            <div class="battalion-stats">
+                <div class="stat-unit">
+                    <div>Units</div>
+                    <div class="stat-value" id="p1Units">12</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Health</div>
+                    <div class="stat-value" id="p1Health">100</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Ammo</div>
+                    <div class="stat-value" id="p1Ammo">250</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Morale</div>
+                    <div class="stat-value" id="p1Morale">85</div>
+                </div>
+            </div>
+            <div class="command-abilities">
+                <button class="command-btn" onclick="game.deployReinforcements()">🚁 Deploy Reinforcements</button>
+                <button class="command-btn" onclick="game.callAirstrike()">💥 Call Airstrike</button>
+                <button class="command-btn" onclick="game.tacticalRetreat()">🛡️ Tactical Retreat</button>
+                <button class="command-btn" onclick="game.smokeBombs()">💨 Smoke Screen</button>
+            </div>
+        </div>
+
+        <div class="battlefield">
+            <div class="battlefield-grid" id="battlefieldGrid"></div>
+        </div>
+
+        <div class="command-post player2-command">
+            <div class="command-header-player">🔵 BRAVO BATTALION</div>
+            <div class="battalion-stats">
+                <div class="stat-unit">
+                    <div>Units</div>
+                    <div class="stat-value" id="p2Units">12</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Health</div>
+                    <div class="stat-value" id="p2Health">100</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Ammo</div>
+                    <div class="stat-value" id="p2Ammo">250</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Morale</div>
+                    <div class="stat-value" id="p2Morale">85</div>
+                </div>
+            </div>
+            <div class="command-abilities">
+                <button class="command-btn" onclick="game.suppressiveFire()">🔥 Suppressive Fire</button>
+                <button class="command-btn" onclick="game.flanking()">↗️ Flanking Maneuver</button>
+                <button class="command-btn" onclick="game.medicalEvac()">🏥 Medical Evac</button>
+                <button class="command-btn" onclick="game.mortarStrike()">🎯 Mortar Strike</button>
+            </div>
+        </div>
+
+        <div class="tactical-hud">
+            <h3 class="hud-title">📡 Tactical HUD</h3>
+            <div class="battlefield-log" id="battlefieldLog">
+                <div class="log-entry log-combat">⚔️ Cyber Battalion Command initialized</div>
+                <div class="log-entry log-combat">🤖 4 AI battalions detected and deployed</div>
+                <div class="log-entry log-combat">🎯 Real-time tactical warfare commencing</div>
+            </div>
+            <div class="minimap" id="minimap"></div>
+        </div>
+
+        <div class="command-post player3-command">
+            <div class="command-header-player">🟢 CHARLIE BATTALION</div>
+            <div class="battalion-stats">
+                <div class="stat-unit">
+                    <div>Units</div>
+                    <div class="stat-value" id="p3Units">12</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Health</div>
+                    <div class="stat-value" id="p3Health">100</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Ammo</div>
+                    <div class="stat-value" id="p3Ammo">250</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Morale</div>
+                    <div class="stat-value" id="p3Morale">85</div>
+                </div>
+            </div>
+            <div class="command-abilities">
+                <button class="command-btn" onclick="game.sniperOverwatch()">🔭 Sniper Overwatch</button>
+                <button class="command-btn" onclick="game.artilleryBarrage()">🎆 Artillery Barrage</button>
+                <button class="command-btn" onclick="game.reconDrone()">🛸 Recon Drone</button>
+                <button class="command-btn" onclick="game.empBlast()">⚡ EMP Blast</button>
+            </div>
+        </div>
+
+        <div class="command-post player4-command">
+            <div class="command-header-player">🟣 DELTA BATTALION</div>
+            <div class="battalion-stats">
+                <div class="stat-unit">
+                    <div>Units</div>
+                    <div class="stat-value" id="p4Units">12</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Health</div>
+                    <div class="stat-value" id="p4Health">100</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Ammo</div>
+                    <div class="stat-value" id="p4Ammo">250</div>
+                </div>
+                <div class="stat-unit">
+                    <div>Morale</div>
+                    <div class="stat-value" id="p4Morale">85</div>
+                </div>
+            </div>
+            <div class="command-abilities">
+                <button class="command-btn" onclick="game.cyberWarfare()">💻 Cyber Warfare</button>
+                <button class="command-btn" onclick="game.nuclearOption()">☢️ Nuclear Option</button>
+                <button class="command-btn" onclick="game.finalAssault()">⚔️ Final Assault</button>
+                <button class="command-btn" onclick="game.victorySalvo()">🎉 Victory Salvo</button>
+            </div>
+        </div>
+
+        <div class="audio-command">
+            <h3 class="audio-title">🎵 Combat Audio</h3>
+            <div class="audio-controls">
+                <div class="audio-slider">
+                    <label>Combat</label>
+                    <input type="range" min="0" max="100" value="80" id="combatVolume" 
+                           onchange="game.audioEngine.setCombatVolume(this.value/100)">
+                </div>
+                <div class="audio-slider">
+                    <label>Ambient</label>
+                    <input type="range" min="0" max="100" value="60" id="ambientVolume" 
+                           onchange="game.audioEngine.setAmbientVolume(this.value/100)">
+                </div>
+            </div>
+            <div class="battle-frequency" id="battleFrequency">
+                <div class="frequency-bar" style="left: 5px; height: 20px;"></div>
+                <div class="frequency-bar" style="left: 15px; height: 35px;"></div>
+                <div class="frequency-bar" style="left: 25px; height: 15px;"></div>
+                <div class="frequency-bar" style="left: 35px; height: 45px;"></div>
+                <div class="frequency-bar" style="left: 45px; height: 25px;"></div>
+                <div class="frequency-bar" style="left: 55px; height: 30px;"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" onclick="game.pauseCombat()">⏸️ Cease Fire</button>
+            <button class="control-btn" onclick="game.nextBattle()">⏭️ Next Battle</button>
+            <button class="control-btn" onclick="game.newWarfare()">🔄 New War</button>
+            <button class="control-btn" onclick="game.showTacticalHelp()">❓ Tactical Manual</button>
+        </div>
+    </div>
+
+    <script>
+        class TacticalAudioEngine {
+            constructor() {
+                this.context = null;
+                this.masterGain = null;
+                this.combatGain = null;
+                this.ambientGain = null;
+                this.musicGain = null;
+                this.analyser = null;
+                this.compressor = null;
+                this.isInitialized = false;
+                this.combatVolume = 0.8;
+                this.ambientVolume = 0.6;
+                this.combatIntensity = 0;
+                
+                this.initializeAudio();
+            }
+
+            async initializeAudio() {
+                try {
+                    this.context = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create tactical audio architecture
+                    this.masterGain = this.context.createGain();
+                    this.combatGain = this.context.createGain();
+                    this.ambientGain = this.context.createGain();
+                    this.musicGain = this.context.createGain();
+                    this.compressor = this.context.createDynamicsCompressor();
+                    this.analyser = this.context.createAnalyser();
+                    
+                    // Military-grade audio processing
+                    this.distortion = this.context.createWaveShaper();
+                    this.setupTacticalDistortion();
+                    
+                    // Connect tactical audio graph
+                    this.combatGain.connect(this.distortion);
+                    this.distortion.connect(this.masterGain);
+                    this.ambientGain.connect(this.masterGain);
+                    this.musicGain.connect(this.masterGain);
+                    this.masterGain.connect(this.compressor);
+                    this.compressor.connect(this.context.destination);
+                    this.masterGain.connect(this.analyser);
+                    
+                    // Configure tactical compressor
+                    this.compressor.threshold.value = -12;
+                    this.compressor.knee.value = 15;
+                    this.compressor.ratio.value = 6;
+                    this.compressor.attack.value = 0.001;
+                    this.compressor.release.value = 0.1;
+                    
+                    this.analyser.fftSize = 512;
+                    
+                    // Set tactical volumes
+                    this.masterGain.gain.value = 0.9;
+                    this.combatGain.gain.value = 0.8;
+                    this.ambientGain.gain.value = 0.6;
+                    this.musicGain.gain.value = 0.4;
+                    
+                    this.isInitialized = true;
+                    this.startBattleAmbience();
+                    this.startFrequencyVisualization();
+                    
+                } catch (error) {
+                    console.log('Tactical audio initialization failed:', error);
+                }
+            }
+
+            setupTacticalDistortion() {
+                const samples = 44100;
+                const curve = new Float32Array(samples);
+                
+                for (let i = 0; i < samples; i++) {
+                    const x = (i * 2) / samples - 1;
+                    // Military radio distortion
+                    curve[i] = Math.sign(x) * Math.pow(Math.abs(x), 0.7);
+                }
+                
+                this.distortion.curve = curve;
+                this.distortion.oversample = '4x';
+            }
+
+            ensureContext() {
+                if (this.context && this.context.state === 'suspended') {
+                    this.context.resume();
+                }
+            }
+
+            // Rifle fire - sharp crack with echo
+            playRifleShot() {
+                if (!this.isInitialized) return;
+                
+                this.ensureContext();
+                
+                // Main crack
+                const crackOsc = this.context.createOscillator();
+                const crackGain = this.context.createGain();
+                const crackFilter = this.context.createBiquadFilter();
+                
+                crackFilter.type = 'highpass';
+                crackFilter.frequency.value = 2000;
+                crackFilter.Q.value = 10;
+                
+                crackOsc.connect(crackFilter);
+                crackFilter.connect(crackGain);
+                crackGain.connect(this.combatGain);
+                
+                crackOsc.frequency.value = 1000;
+                crackOsc.type = 'square';
+                
+                const now = this.context.currentTime;
+                crackGain.gain.setValueAtTime(0, now);
+                crackGain.gain.linearRampToValueAtTime(0.8, now + 0.001);
+                crackGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                
+                crackOsc.start(now);
+                crackOsc.stop(now + 0.05);
+                
+                // Echo
+                setTimeout(() => {
+                    const echoOsc = this.context.createOscillator();
+                    const echoGain = this.context.createGain();
+                    const echoFilter = this.context.createBiquadFilter();
+                    
+                    echoFilter.type = 'lowpass';
+                    echoFilter.frequency.value = 800;
+                    
+                    echoOsc.connect(echoFilter);
+                    echoFilter.connect(echoGain);
+                    echoGain.connect(this.combatGain);
+                    
+                    echoOsc.frequency.value = 400;
+                    echoOsc.type = 'sawtooth';
+                    
+                    const echoNow = this.context.currentTime;
+                    echoGain.gain.setValueAtTime(0, echoNow);
+                    echoGain.gain.linearRampToValueAtTime(0.2, echoNow + 0.02);
+                    echoGain.gain.exponentialRampToValueAtTime(0.01, echoNow + 0.3);
+                    
+                    echoOsc.start(echoNow);
+                    echoOsc.stop(echoNow + 0.3);
+                }, 100);
+            }
+
+            // Machine gun burst - rapid fire sequence
+            playMachineGunBurst() {
+                if (!this.isInitialized) return;
+                
+                const burstCount = 8;
+                for (let i = 0; i < burstCount; i++) {
+                    setTimeout(() => {
+                        const mgOsc = this.context.createOscillator();
+                        const mgGain = this.context.createGain();
+                        const mgFilter = this.context.createBiquadFilter();
+                        
+                        mgFilter.type = 'bandpass';
+                        mgFilter.frequency.value = 1500 + Math.random() * 500;
+                        mgFilter.Q.value = 8;
+                        
+                        mgOsc.connect(mgFilter);
+                        mgFilter.connect(mgGain);
+                        mgGain.connect(this.combatGain);
+                        
+                        mgOsc.frequency.value = 800 + Math.random() * 400;
+                        mgOsc.type = 'square';
+                        
+                        const now = this.context.currentTime;
+                        mgGain.gain.setValueAtTime(0, now);
+                        mgGain.gain.linearRampToValueAtTime(0.4, now + 0.001);
+                        mgGain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+                        
+                        mgOsc.start(now);
+                        mgOsc.stop(now + 0.03);
+                    }, i * 60);
+                }
+            }
+
+            // Explosion - powerful blast with rumble
+            playExplosion() {
+                if (!this.isInitialized) return;
+                
+                // Main blast
+                const blastOsc = this.context.createOscillator();
+                const blastGain = this.context.createGain();
+                const blastFilter = this.context.createBiquadFilter();
+                
+                blastFilter.type = 'lowpass';
+                blastFilter.frequency.value = 500;
+                blastFilter.Q.value = 2;
+                
+                blastOsc.connect(blastFilter);
+                blastFilter.connect(blastGain);
+                blastGain.connect(this.combatGain);
+                
+                blastOsc.frequency.value = 60;
+                blastOsc.type = 'sawtooth';
+                
+                const now = this.context.currentTime;
+                blastGain.gain.setValueAtTime(0, now);
+                blastGain.gain.linearRampToValueAtTime(1.0, now + 0.01);
+                blastGain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
+                
+                // Frequency sweep for blast effect
+                blastOsc.frequency.setValueAtTime(60, now);
+                blastOsc.frequency.linearRampToValueAtTime(300, now + 0.1);
+                blastOsc.frequency.exponentialRampToValueAtTime(40, now + 1.2);
+                
+                blastOsc.start(now);
+                blastOsc.stop(now + 1.2);
+                
+                // High-frequency debris
+                setTimeout(() => {
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            const debrisOsc = this.context.createOscillator();
+                            const debrisGain = this.context.createGain();
+                            
+                            debrisOsc.connect(debrisGain);
+                            debrisGain.connect(this.combatGain);
+                            
+                            debrisOsc.frequency.value = 800 + Math.random() * 1200;
+                            debrisOsc.type = 'square';
+                            
+                            const debrisNow = this.context.currentTime;
+                            debrisGain.gain.setValueAtTime(0, debrisNow);
+                            debrisGain.gain.linearRampToValueAtTime(0.3, debrisNow + 0.01);
+                            debrisGain.gain.exponentialRampToValueAtTime(0.01, debrisNow + 0.2);
+                            
+                            debrisOsc.start(debrisNow);
+                            debrisOsc.stop(debrisNow + 0.2);
+                        }, i * 50);
+                    }
+                }, 50);
+            }
+
+            // Helicopter approach - realistic rotor sound
+            playHelicopterApproach() {
+                if (!this.isInitialized) return;
+                
+                // Main rotor
+                const rotorOsc = this.context.createOscillator();
+                const rotorGain = this.context.createGain();
+                const rotorFilter = this.context.createBiquadFilter();
+                const rotorLfo = this.context.createOscillator();
+                const rotorLfoGain = this.context.createGain();
+                
+                // Rotor blade modulation
+                rotorLfo.frequency.value = 18; // Realistic rotor frequency
+                rotorLfo.connect(rotorLfoGain);
+                rotorLfoGain.gain.value = 30;
+                rotorLfoGain.connect(rotorOsc.frequency);
+                
+                rotorFilter.type = 'lowpass';
+                rotorFilter.frequency.value = 400;
+                rotorFilter.Q.value = 3;
+                
+                rotorOsc.connect(rotorFilter);
+                rotorFilter.connect(rotorGain);
+                rotorGain.connect(this.ambientGain);
+                
+                rotorOsc.frequency.value = 120;
+                rotorOsc.type = 'sawtooth';
+                
+                const now = this.context.currentTime;
+                rotorGain.gain.setValueAtTime(0, now);
+                rotorGain.gain.linearRampToValueAtTime(0.3, now + 2);
+                rotorGain.gain.exponentialRampToValueAtTime(0.01, now + 6);
+                
+                rotorLfo.start(now);
+                rotorOsc.start(now);
+                rotorLfo.stop(now + 6);
+                rotorOsc.stop(now + 6);
+                
+                // Tail rotor
+                setTimeout(() => {
+                    const tailOsc = this.context.createOscillator();
+                    const tailGain = this.context.createGain();
+                    
+                    tailOsc.connect(tailGain);
+                    tailGain.connect(this.ambientGain);
+                    
+                    tailOsc.frequency.value = 240;
+                    tailOsc.type = 'square';
+                    
+                    const tailNow = this.context.currentTime;
+                    tailGain.gain.setValueAtTime(0, tailNow);
+                    tailGain.gain.linearRampToValueAtTime(0.1, tailNow + 1.5);
+                    tailGain.gain.exponentialRampToValueAtTime(0.01, tailNow + 5);
+                    
+                    tailOsc.start(tailNow);
+                    tailOsc.stop(tailNow + 5);
+                }, 500);
+            }
+
+            // Artillery barrage - distant thunder
+            playArtilleryBarrage() {
+                if (!this.isInitialized) return;
+                
+                const shells = 6;
+                for (let i = 0; i < shells; i++) {
+                    setTimeout(() => {
+                        // Incoming whistle
+                        const whistleOsc = this.context.createOscillator();
+                        const whistleGain = this.context.createGain();
+                        
+                        whistleOsc.connect(whistleGain);
+                        whistleGain.connect(this.combatGain);
+                        
+                        whistleOsc.frequency.value = 2000;
+                        whistleOsc.type = 'sine';
+                        
+                        const now = this.context.currentTime;
+                        whistleGain.gain.setValueAtTime(0, now);
+                        whistleGain.gain.linearRampToValueAtTime(0.2, now + 0.5);
+                        whistleGain.gain.exponentialRampToValueAtTime(0.01, now + 1);
+                        
+                        // Frequency drop as shell approaches
+                        whistleOsc.frequency.setValueAtTime(2000, now);
+                        whistleOsc.frequency.exponentialRampToValueAtTime(800, now + 1);
+                        
+                        whistleOsc.start(now);
+                        whistleOsc.stop(now + 1);
+                        
+                        // Impact explosion
+                        setTimeout(() => {
+                            this.playExplosion();
+                        }, 1000);
+                        
+                    }, i * 800 + Math.random() * 400);
+                }
+            }
+
+            // Radio chatter - command acknowledgment
+            playRadioChatter(commandType) {
+                if (!this.isInitialized) return;
+                
+                const frequencies = {
+                    'deploy': [400, 500, 350],
+                    'attack': [500, 600, 450],
+                    'retreat': [350, 400, 300],
+                    'victory': [600, 700, 800]
+                };
+                
+                const freqPattern = frequencies[commandType] || frequencies['attack'];
+                
+                freqPattern.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const radioOsc = this.context.createOscillator();
+                        const radioGain = this.context.createGain();
+                        const radioFilter = this.context.createBiquadFilter();
+                        
+                        radioFilter.type = 'bandpass';
+                        radioFilter.frequency.value = freq;
+                        radioFilter.Q.value = 5;
+                        
+                        radioOsc.connect(radioFilter);
+                        radioFilter.connect(radioGain);
+                        radioGain.connect(this.combatGain);
+                        
+                        radioOsc.frequency.value = freq;
+                        radioOsc.type = 'square';
+                        
+                        const now = this.context.currentTime;
+                        radioGain.gain.setValueAtTime(0, now);
+                        radioGain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+                        radioGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                        
+                        radioOsc.start(now);
+                        radioOsc.stop(now + 0.3);
+                    }, i * 100);
+                });
+            }
+
+            // Tank movement - heavy machinery
+            playTankMovement() {
+                if (!this.isInitialized) return;
+                
+                // Engine rumble
+                const engineOsc = this.context.createOscillator();
+                const engineGain = this.context.createGain();
+                const engineFilter = this.context.createBiquadFilter();
+                const engineLfo = this.context.createOscillator();
+                const engineLfoGain = this.context.createGain();
+                
+                // Engine RPM variation
+                engineLfo.frequency.value = 2;
+                engineLfo.connect(engineLfoGain);
+                engineLfoGain.gain.value = 20;
+                engineLfoGain.connect(engineOsc.frequency);
+                
+                engineFilter.type = 'lowpass';
+                engineFilter.frequency.value = 300;
+                engineFilter.Q.value = 2;
+                
+                engineOsc.connect(engineFilter);
+                engineFilter.connect(engineGain);
+                engineGain.connect(this.ambientGain);
+                
+                engineOsc.frequency.value = 80;
+                engineOsc.type = 'sawtooth';
+                
+                const now = this.context.currentTime;
+                engineGain.gain.setValueAtTime(0, now);
+                engineGain.gain.linearRampToValueAtTime(0.4, now + 1);
+                engineGain.gain.exponentialRampToValueAtTime(0.01, now + 4);
+                
+                engineLfo.start(now);
+                engineOsc.start(now);
+                engineLfo.stop(now + 4);
+                engineOsc.stop(now + 4);
+                
+                // Track clanking
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        const clankOsc = this.context.createOscillator();
+                        const clankGain = this.context.createGain();
+                        
+                        clankOsc.connect(clankGain);
+                        clankGain.connect(this.ambientGain);
+                        
+                        clankOsc.frequency.value = 200 + Math.random() * 100;
+                        clankOsc.type = 'square';
+                        
+                        const clankNow = this.context.currentTime;
+                        clankGain.gain.setValueAtTime(0, clankNow);
+                        clankGain.gain.linearRampToValueAtTime(0.2, clankNow + 0.01);
+                        clankGain.gain.exponentialRampToValueAtTime(0.01, clankNow + 0.1);
+                        
+                        clankOsc.start(clankNow);
+                        clankOsc.stop(clankNow + 0.1);
+                    }, i * 200);
+                }
+            }
+
+            // Victory fanfare - triumphant military theme
+            playVictoryFanfare() {
+                if (!this.isInitialized) return;
+                
+                const victoryProgression = [
+                    [523, 659, 784], // C major
+                    [587, 740, 880], // D major
+                    [659, 831, 988], // E major  
+                    [698, 880, 1047] // F major
+                ];
+                
+                victoryProgression.forEach((chord, chordIndex) => {
+                    setTimeout(() => {
+                        chord.forEach((freq, noteIndex) => {
+                            setTimeout(() => {
+                                const victoryOsc = this.context.createOscillator();
+                                const victoryGain = this.context.createGain();
+                                const victoryFilter = this.context.createBiquadFilter();
+                                
+                                victoryFilter.type = 'lowpass';
+                                victoryFilter.frequency.value = freq * 2;
+                                victoryFilter.Q.value = 2;
+                                
+                                victoryOsc.connect(victoryFilter);
+                                victoryFilter.connect(victoryGain);
+                                victoryGain.connect(this.musicGain);
+                                
+                                victoryOsc.frequency.value = freq;
+                                victoryOsc.type = 'triangle';
+                                
+                                const now = this.context.currentTime;
+                                victoryGain.gain.setValueAtTime(0, now);
+                                victoryGain.gain.linearRampToValueAtTime(0.15, now + 0.1);
+                                victoryGain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+                                
+                                victoryOsc.start(now);
+                                victoryOsc.stop(now + 1.5);
+                            }, noteIndex * 50);
+                        });
+                    }, chordIndex * 400);
+                });
+            }
+
+            // Battle ambience - ongoing warfare background
+            startBattleAmbience() {
+                if (!this.isInitialized) return;
+                
+                this.ensureContext();
+                
+                const playAmbienceLoop = () => {
+                    // Distant artillery rumble
+                    const rumbleOsc = this.context.createOscillator();
+                    const rumbleGain = this.context.createGain();
+                    const rumbleFilter = this.context.createBiquadFilter();
+                    const rumbleLfo = this.context.createOscillator();
+                    const rumbleLfoGain = this.context.createGain();
+                    
+                    rumbleLfo.frequency.value = 0.5;
+                    rumbleLfo.connect(rumbleLfoGain);
+                    rumbleLfoGain.gain.value = 10;
+                    rumbleLfoGain.connect(rumbleOsc.frequency);
+                    
+                    rumbleFilter.type = 'lowpass';
+                    rumbleFilter.frequency.value = 150;
+                    rumbleFilter.Q.value = 1;
+                    
+                    rumbleOsc.connect(rumbleFilter);
+                    rumbleFilter.connect(rumbleGain);
+                    rumbleGain.connect(this.ambientGain);
+                    
+                    rumbleOsc.frequency.value = 50;
+                    rumbleOsc.type = 'sawtooth';
+                    
+                    const now = this.context.currentTime;
+                    rumbleGain.gain.setValueAtTime(0, now);
+                    rumbleGain.gain.linearRampToValueAtTime(0.1, now + 2);
+                    rumbleGain.gain.exponentialRampToValueAtTime(0.01, now + 15);
+                    
+                    rumbleLfo.start(now);
+                    rumbleOsc.start(now);
+                    rumbleLfo.stop(now + 15);
+                    rumbleOsc.stop(now + 15);
+                    
+                    // Scattered gunfire
+                    setTimeout(() => {
+                        if (Math.random() < 0.3) {
+                            this.playRifleShot();
+                        }
+                    }, Math.random() * 5000);
+                    
+                    setTimeout(() => {
+                        if (Math.random() < 0.2) {
+                            this.playMachineGunBurst();
+                        }
+                    }, Math.random() * 7000);
+                };
+                
+                // Start ambience and repeat
+                playAmbienceLoop();
+                this.ambienceLoop = setInterval(playAmbienceLoop, 15000);
+            }
+
+            // Frequency visualization for battle intensity
+            startFrequencyVisualization() {
+                if (!this.analyser) return;
+                
+                const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+                const freqContainer = document.getElementById('battleFrequency');
+                const bars = freqContainer.children;
+                
+                const updateFrequencyViz = () => {
+                    this.analyser.getByteFrequencyData(dataArray);
+                    
+                    for (let i = 0; i < bars.length && i < dataArray.length; i++) {
+                        const value = dataArray[i * 8] || 0;
+                        const height = (value / 255) * 60;
+                        bars[i].style.height = height + 'px';
+                        
+                        // Color based on intensity
+                        if (height > 40) {
+                            bars[i].style.background = 'linear-gradient(180deg, #ef4444, #dc2626)';
+                        } else if (height > 20) {
+                            bars[i].style.background = 'linear-gradient(180deg, #f59e0b, #fbbf24)';
+                        } else {
+                            bars[i].style.background = 'linear-gradient(180deg, #f59e0b, #fbbf24)';
+                        }
+                    }
+                    
+                    requestAnimationFrame(updateFrequencyViz);
+                };
+                
+                updateFrequencyViz();
+            }
+
+            setCombatVolume(volume) {
+                if (this.combatGain) {
+                    this.combatGain.gain.value = volume;
+                }
+            }
+
+            setAmbientVolume(volume) {
+                if (this.ambientGain) {
+                    this.ambientGain.gain.value = volume;
+                }
+            }
+
+            stopAll() {
+                if (this.ambienceLoop) {
+                    clearInterval(this.ambienceLoop);
+                }
+            }
+        }
+
+        class CyberBattalionCommand {
+            constructor() {
+                this.gridWidth = 20;
+                this.gridHeight = 15;
+                this.currentPlayer = 1;
+                this.maxPlayers = 4;
+                this.currentRound = 1;
+                this.maxRounds = 10;
+                this.gameActive = true;
+                
+                this.players = {
+                    1: { name: 'ALPHA BATTALION', units: 12, health: 100, ammo: 250, morale: 85, color: '#ef4444' },
+                    2: { name: 'BRAVO BATTALION', units: 12, health: 100, ammo: 250, morale: 85, color: '#3b82f6' },
+                    3: { name: 'CHARLIE BATTALION', units: 12, health: 100, ammo: 250, morale: 85, color: '#22c55e' },
+                    4: { name: 'DELTA BATTALION', units: 12, health: 100, ammo: 250, morale: 85, color: '#a855f7' }
+                };
+                
+                this.battleGrid = [];
+                this.units = [];
+                this.combatActive = false;
+                this.battleIntensity = 0;
+                
+                // Initialize audio engine
+                this.audioEngine = new TacticalAudioEngine();
+                
+                this.initializeBattlefield();
+                this.deployInitialForces();
+                this.startCombatCycle();
+                
+                // User interaction for audio context
+                document.addEventListener('click', () => {
+                    this.audioEngine.ensureContext();
+                }, { once: true });
+            }
+
+            initializeBattlefield() {
+                const gridElement = document.getElementById('battlefieldGrid');
+                gridElement.innerHTML = '';
+                
+                this.battleGrid = [];
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    this.battleGrid[y] = [];
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'battle-cell';
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+                        cell.addEventListener('click', () => this.cellClicked(x, y));
+                        gridElement.appendChild(cell);
+                        
+                        this.battleGrid[y][x] = {
+                            element: cell,
+                            unit: null,
+                            cover: Math.random() < 0.2,
+                            elevation: Math.random() < 0.1
+                        };
+                    }
+                }
+            }
+
+            deployInitialForces() {
+                // Deploy starting units for each player
+                const deploymentZones = [
+                    { x: 2, y: 2, w: 4, h: 3 },   // Player 1 - NW
+                    { x: 14, y: 2, w: 4, h: 3 },  // Player 2 - NE
+                    { x: 2, y: 10, w: 4, h: 3 },  // Player 3 - SW  
+                    { x: 14, y: 10, w: 4, h: 3 }  // Player 4 - SE
+                ];
+                
+                deploymentZones.forEach((zone, index) => {
+                    const playerId = index + 1;
+                    const unitsPerPlayer = 8;
+                    
+                    for (let i = 0; i < unitsPerPlayer; i++) {
+                        let x, y;
+                        do {
+                            x = zone.x + Math.floor(Math.random() * zone.w);
+                            y = zone.y + Math.floor(Math.random() * zone.h);
+                        } while (this.battleGrid[y][x].unit !== null);
+                        
+                        this.deployUnit(x, y, playerId, this.getRandomUnitType());
+                    }
+                });
+                
+                this.updateUI();
+                this.logCombat('⚔️ Battalion deployment complete - 4 armies ready for war');
+                this.audioEngine.playRadioChatter('deploy');
+            }
+
+            getRandomUnitType() {
+                const types = ['🤖', '🚁', '🚀', '⚡', '🎯', '🛡️', '💥', '🔫'];
+                return types[Math.floor(Math.random() * types.length)];
+            }
+
+            deployUnit(x, y, playerId, unitType) {
+                const cell = this.battleGrid[y][x];
+                const unit = document.createElement('div');
+                unit.className = `bot-unit unit-p${playerId}`;
+                unit.textContent = unitType;
+                cell.element.appendChild(unit);
+                
+                cell.unit = {
+                    player: playerId,
+                    type: unitType,
+                    health: 100,
+                    ammo: 30,
+                    element: unit
+                };
+                
+                this.units.push(cell.unit);
+                this.updateMinimap();
+            }
+
+            cellClicked(x, y) {
+                if (!this.gameActive) return;
+                
+                const cell = this.battleGrid[y][x];
+                const player = this.players[this.currentPlayer];
+                
+                if (player.ammo < 5) {
+                    this.logCombat(`${player.name}: Insufficient ammunition for engagement`);
+                    return;
+                }
+                
+                if (cell.unit && cell.unit.player !== this.currentPlayer) {
+                    // Attack enemy unit
+                    this.engageTarget(x, y);
+                } else if (!cell.unit) {
+                    // Move unit or call support
+                    this.callSupport(x, y);
+                }
+                
+                player.ammo = Math.max(0, player.ammo - 5);
+                this.updateUI();
+            }
+
+            engageTarget(x, y) {
+                const cell = this.battleGrid[y][x];
+                const target = cell.unit;
+                const attacker = this.players[this.currentPlayer];
+                
+                // Calculate hit probability
+                const hitChance = 70 + attacker.morale * 0.2;
+                const hit = Math.random() * 100 < hitChance;
+                
+                this.createMuzzleFlash(x, y);
+                this.createTracerRound(x, y);
+                
+                if (hit) {
+                    const damage = 25 + Math.random() * 25;
+                    target.health -= damage;
+                    
+                    this.audioEngine.playRifleShot();
+                    
+                    if (target.health <= 0) {
+                        // Unit eliminated
+                        this.eliminateUnit(x, y);
+                        this.players[target.player].units--;
+                        this.players[target.player].morale = Math.max(0, this.players[target.player].morale - 5);
+                        attacker.morale = Math.min(100, attacker.morale + 3);
+                        
+                        this.createExplosion(x, y);
+                        this.audioEngine.playExplosion();
+                        
+                        this.logCombat(`${attacker.name} eliminated ${this.players[target.player].name} unit at (${x},${y})`);
+                    } else {
+                        this.logCombat(`${attacker.name} hit ${this.players[target.player].name} unit for ${damage.toFixed(0)} damage`);
+                    }
+                } else {
+                    this.audioEngine.playRifleShot();
+                    this.logCombat(`${attacker.name} missed target at (${x},${y})`);
+                }
+                
+                this.battleIntensity = Math.min(100, this.battleIntensity + 10);
+            }
+
+            eliminateUnit(x, y) {
+                const cell = this.battleGrid[y][x];
+                if (cell.unit && cell.unit.element) {
+                    cell.unit.element.remove();
+                    this.units = this.units.filter(unit => unit !== cell.unit);
+                    cell.unit = null;
+                }
+                this.updateMinimap();
+            }
+
+            callSupport(x, y) {
+                const player = this.players[this.currentPlayer];
+                const supportTypes = ['artillery', 'airstrike', 'reinforcement', 'medical'];
+                const support = supportTypes[Math.floor(Math.random() * supportTypes.length)];
+                
+                switch (support) {
+                    case 'artillery':
+                        this.createAirstrikeMarker(x, y);
+                        this.audioEngine.playArtilleryBarrage();
+                        this.logCombat(`${player.name} called artillery strike at (${x},${y})`);
+                        break;
+                    case 'airstrike':
+                        this.audioEngine.playHelicopterApproach();
+                        this.logCombat(`${player.name} requested air support at (${x},${y})`);
+                        break;
+                    case 'reinforcement':
+                        if (!this.battleGrid[y][x].unit) {
+                            this.deployUnit(x, y, this.currentPlayer, this.getRandomUnitType());
+                            player.units++;
+                        }
+                        this.logCombat(`${player.name} deployed reinforcement at (${x},${y})`);
+                        break;
+                    case 'medical':
+                        this.healNearbyUnits(x, y, this.currentPlayer);
+                        this.logCombat(`${player.name} called medical support at (${x},${y})`);
+                        break;
+                }
+            }
+
+            healNearbyUnits(centerX, centerY, playerId) {
+                const directions = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,0], [0,1], [1,-1], [1,0], [1,1]];
+                
+                directions.forEach(([dx, dy]) => {
+                    const x = centerX + dx;
+                    const y = centerY + dy;
+                    
+                    if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
+                        const cell = this.battleGrid[y][x];
+                        if (cell.unit && cell.unit.player === playerId) {
+                            cell.unit.health = Math.min(100, cell.unit.health + 30);
+                        }
+                    }
+                });
+            }
+
+            createMuzzleFlash(x, y) {
+                const flash = document.createElement('div');
+                flash.className = 'muzzle-flash';
+                flash.style.left = (x * 100 / this.gridWidth) + '%';
+                flash.style.top = (y * 100 / this.gridHeight) + '%';
+                
+                document.querySelector('.battlefield').appendChild(flash);
+                
+                setTimeout(() => {
+                    if (flash.parentNode) {
+                        flash.remove();
+                    }
+                }, 200);
+            }
+
+            createTracerRound(x, y) {
+                const tracer = document.createElement('div');
+                tracer.className = 'tracer-round';
+                tracer.style.left = (x * 100 / this.gridWidth) + '%';
+                tracer.style.top = (y * 100 / this.gridHeight) + '%';
+                
+                document.querySelector('.battlefield').appendChild(tracer);
+                
+                setTimeout(() => {
+                    if (tracer.parentNode) {
+                        tracer.remove();
+                    }
+                }, 500);
+            }
+
+            createExplosion(x, y) {
+                const explosion = document.createElement('div');
+                explosion.className = 'explosion';
+                explosion.style.left = (x * 100 / this.gridWidth) + '%';
+                explosion.style.top = (y * 100 / this.gridHeight) + '%';
+                
+                document.querySelector('.battlefield').appendChild(explosion);
+                
+                setTimeout(() => {
+                    if (explosion.parentNode) {
+                        explosion.remove();
+                    }
+                }, 800);
+            }
+
+            createAirstrikeMarker(x, y) {
+                const marker = document.createElement('div');
+                marker.className = 'airstrike-marker';
+                marker.style.left = (x * 100 / this.gridWidth) + '%';
+                marker.style.top = (y * 100 / this.gridHeight) + '%';
+                
+                document.querySelector('.battlefield').appendChild(marker);
+                
+                setTimeout(() => {
+                    // Execute airstrike
+                    this.executeAirstrike(x, y);
+                    if (marker.parentNode) {
+                        marker.remove();
+                    }
+                }, 3000);
+            }
+
+            executeAirstrike(centerX, centerY) {
+                const radius = 2;
+                
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        const x = centerX + dx;
+                        const y = centerY + dy;
+                        
+                        if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            if (distance <= radius) {
+                                setTimeout(() => {
+                                    const cell = this.battleGrid[y][x];
+                                    if (cell.unit) {
+                                        this.eliminateUnit(x, y);
+                                        this.players[cell.unit.player].units--;
+                                    }
+                                    this.createExplosion(x, y);
+                                    this.audioEngine.playExplosion();
+                                }, Math.random() * 1000);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Special battalion abilities
+            deployReinforcements() {
+                const player = this.players[this.currentPlayer];
+                if (player.ammo < 50) return;
+                
+                let deployed = 0;
+                for (let attempts = 0; attempts < 20 && deployed < 3; attempts++) {
+                    const x = Math.floor(Math.random() * this.gridWidth);
+                    const y = Math.floor(Math.random() * this.gridHeight);
+                    
+                    if (!this.battleGrid[y][x].unit) {
+                        this.deployUnit(x, y, this.currentPlayer, '🚁');
+                        deployed++;
+                    }
+                }
+                
+                player.ammo -= 50;
+                player.units += deployed;
+                this.logCombat(`${player.name} deployed ${deployed} reinforcements`);
+                this.audioEngine.playHelicopterApproach();
+            }
+
+            callAirstrike() {
+                const player = this.players[this.currentPlayer];
+                if (player.ammo < 75) return;
+                
+                // Random airstrike locations
+                for (let i = 0; i < 3; i++) {
+                    const x = Math.floor(Math.random() * this.gridWidth);
+                    const y = Math.floor(Math.random() * this.gridHeight);
+                    
+                    setTimeout(() => {
+                        this.createAirstrikeMarker(x, y);
+                    }, i * 1000);
+                }
+                
+                player.ammo -= 75;
+                this.logCombat(`${player.name} called in devastating airstrike`);
+                this.audioEngine.playArtilleryBarrage();
+            }
+
+            smokeBombs() {
+                const player = this.players[this.currentPlayer];
+                if (player.ammo < 30) return;
+                
+                // Create smoke screen
+                for (let i = 0; i < 8; i++) {
+                    const x = Math.floor(Math.random() * this.gridWidth);
+                    const y = Math.floor(Math.random() * this.gridHeight);
+                    
+                    setTimeout(() => {
+                        const smoke = document.createElement('div');
+                        smoke.className = 'smoke-cloud';
+                        smoke.style.left = (x * 100 / this.gridWidth) + '%';
+                        smoke.style.top = (y * 100 / this.gridHeight) + '%';
+                        
+                        document.querySelector('.battlefield').appendChild(smoke);
+                        
+                        setTimeout(() => {
+                            if (smoke.parentNode) {
+                                smoke.remove();
+                            }
+                        }, 3000);
+                    }, i * 200);
+                }
+                
+                player.ammo -= 30;
+                player.morale = Math.min(100, player.morale + 10);
+                this.logCombat(`${player.name} deployed smoke screen for tactical cover`);
+            }
+
+            startCombatCycle() {
+                // Automated combat between AI units
+                setInterval(() => {
+                    if (this.gameActive && this.currentPlayer > 1) {
+                        this.executeAICombat();
+                    }
+                }, 2000 + Math.random() * 3000);
+                
+                // Battle intensity decay
+                setInterval(() => {
+                    this.battleIntensity = Math.max(0, this.battleIntensity - 2);
+                }, 1000);
+                
+                // Random ambient combat
+                setInterval(() => {
+                    if (Math.random() < 0.3) {
+                        const x = Math.floor(Math.random() * this.gridWidth);
+                        const y = Math.floor(Math.random() * this.gridHeight);
+                        this.createMuzzleFlash(x, y);
+                        
+                        if (Math.random() < 0.7) {
+                            this.audioEngine.playRifleShot();
+                        } else {
+                            this.audioEngine.playMachineGunBurst();
+                        }
+                    }
+                }, 3000 + Math.random() * 5000);
+            }
+
+            executeAICombat() {
+                // Find enemy targets for AI
+                const aiTargets = [];
+                const aiUnits = [];
+                
+                this.units.forEach(unit => {
+                    if (unit.player === this.currentPlayer) {
+                        aiUnits.push(unit);
+                    } else {
+                        aiTargets.push(unit);
+                    }
+                });
+                
+                if (aiUnits.length > 0 && aiTargets.length > 0) {
+                    const target = aiTargets[Math.floor(Math.random() * aiTargets.length)];
+                    
+                    // Find target position
+                    for (let y = 0; y < this.gridHeight; y++) {
+                        for (let x = 0; x < this.gridWidth; x++) {
+                            if (this.battleGrid[y][x].unit === target) {
+                                this.engageTarget(x, y);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            nextBattle() {
+                // Advance to next player turn
+                this.currentPlayer = (this.currentPlayer % this.maxPlayers) + 1;
+                
+                if (this.currentPlayer === 1) {
+                    this.currentRound++;
+                    this.logCombat(`🔄 Battle Round ${this.currentRound} - escalating conflict`);
+                }
+                
+                // Resupply
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    player.ammo = Math.min(500, player.ammo + 50);
+                    player.health = Math.min(100, player.health + 10);
+                });
+                
+                this.updateUI();
+                
+                if (this.currentRound > this.maxRounds) {
+                    this.endWarfare();
+                } else {
+                    this.checkVictoryCondition();
+                }
+                
+                this.audioEngine.playRadioChatter('attack');
+            }
+
+            updateMinimap() {
+                const minimap = document.getElementById('minimap');
+                minimap.innerHTML = '';
+                
+                this.units.forEach(unit => {
+                    // Find unit position
+                    for (let y = 0; y < this.gridHeight; y++) {
+                        for (let x = 0; x < this.gridWidth; x++) {
+                            if (this.battleGrid[y][x].unit === unit) {
+                                const dot = document.createElement('div');
+                                dot.className = 'minimap-unit';
+                                dot.style.backgroundColor = this.players[unit.player].color;
+                                dot.style.left = (x / this.gridWidth * 100) + '%';
+                                dot.style.top = (y / this.gridHeight * 100) + '%';
+                                minimap.appendChild(dot);
+                                return;
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateUI() {
+                // Update player stats
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    document.getElementById(`p${playerId}Units`).textContent = player.units;
+                    document.getElementById(`p${playerId}Health`).textContent = player.health;
+                    document.getElementById(`p${playerId}Ammo`).textContent = player.ammo;
+                    document.getElementById(`p${playerId}Morale`).textContent = player.morale;
+                });
+                
+                // Update battle status
+                const battleStatus = document.getElementById('battleStatus');
+                const playerColors = ['🔴', '🔵', '🟢', '🟣'];
+                battleStatus.textContent = `${playerColors[this.currentPlayer - 1]} ${this.players[this.currentPlayer].name} COMMANDING`;
+                
+                // Update timer
+                document.getElementById('battleTimer').textContent = `Round ${this.currentRound} / ${this.maxRounds}`;
+                
+                this.updateMinimap();
+            }
+
+            checkVictoryCondition() {
+                // Check for elimination victory
+                const survivingPlayers = Object.keys(this.players).filter(playerId => 
+                    this.players[playerId].units > 0
+                );
+                
+                if (survivingPlayers.length === 1) {
+                    this.endWarfare(survivingPlayers[0]);
+                }
+            }
+
+            endWarfare(winnerId = null) {
+                this.gameActive = false;
+                
+                if (!winnerId) {
+                    // Calculate winner based on remaining units and morale
+                    const winner = Object.entries(this.players)
+                        .map(([id, player]) => ({ 
+                            id, 
+                            score: player.units * 10 + player.morale + player.health,
+                            ...player
+                        }))
+                        .sort((a, b) => b.score - a.score)[0];
+                    winnerId = winner.id;
+                }
+                
+                const winner = this.players[winnerId];
+                this.logCombat(`🏆 VICTORY ACHIEVED! ${winner.name} dominates the battlefield with ${winner.units} units remaining`);
+                this.audioEngine.playVictoryFanfare();
+                
+                setTimeout(() => {
+                    alert(`${winner.name} ACHIEVES BATTLEFIELD SUPREMACY!\nSurviving Units: ${winner.units}\nMorale: ${winner.morale}%\nHealth: ${winner.health}%\nAmmo: ${winner.ammo}`);
+                }, 2000);
+            }
+
+            logCombat(message) {
+                const log = document.getElementById('battlefieldLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-combat`;
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+                
+                // Keep last 15 entries
+                if (log.children.length > 15) {
+                    log.removeChild(log.firstChild);
+                }
+            }
+
+            pauseCombat() {
+                this.gameActive = !this.gameActive;
+                if (this.gameActive) {
+                    this.audioEngine.startBattleAmbience();
+                } else {
+                    this.audioEngine.stopAll();
+                }
+            }
+
+            newWarfare() {
+                location.reload();
+            }
+
+            showTacticalHelp() {
+                alert(`CYBER BATTALION COMMAND - TACTICAL MANUAL
+
+🎯 OBJECTIVE: Eliminate enemy battalions or survive 10 rounds
+
+⚔️ COMBAT SYSTEM:
+• Click enemy units to engage with small arms fire
+• Click empty areas to call support (artillery, air, medical, reinforcement)
+• Each action costs ammunition - manage resources carefully
+• Morale affects hit chance and unit effectiveness
+
+🎵 TACTICAL AUDIO:
+• Realistic weapon fire sounds (rifles, machine guns)
+• Explosion effects with debris simulation  
+• Helicopter and vehicle engine sounds
+• Radio chatter for command acknowledgment
+• Battle ambience with distant artillery rumble
+
+🏆 VICTORY CONDITIONS:
+• Eliminate all enemy units (instant victory)
+• Most surviving units after 10 rounds
+• Score = Units×10 + Morale + Health
+
+⚡ SPECIAL ABILITIES:
+• Deploy Reinforcements (50) - Helicopter insertion
+• Call Airstrike (75) - Devastating area attack
+• Smoke Screen (30) - Tactical concealment
+• Various support options per battalion`);
+            }
+        }
+
+        // Initialize game
+        let game;
+        document.addEventListener('DOMContentLoaded', () => {
+            game = new CyberBattalionCommand();
+        });
+    </script>
+</body>
+</html>

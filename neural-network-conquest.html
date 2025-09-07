@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Conquest - 4 Player AI Evolution | BotInc Games</title>
+    <meta name="description" content="Turn-based neural network building with advanced synaptic audio feedback">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0033, #2d1b69, #4a148c, #1a0033);
+            color: #e91e63;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        .neural-interface {
+            display: grid;
+            grid-template-areas: 
+                "header header header header"
+                "player1 network-canvas player2 neural-monitor"
+                "player3 network-canvas player4 audio-neural"
+                "controls controls controls controls";
+            grid-template-columns: 220px 1fr 220px 220px;
+            grid-template-rows: 70px 1fr 200px 60px;
+            height: 100vh;
+            gap: 3px;
+            background: #0a0020;
+        }
+
+        .neural-header {
+            grid-area: header;
+            background: linear-gradient(45deg, #4a148c, #7b1fa2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            border-bottom: 3px solid #e91e63;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            color: #e91e63;
+            text-shadow: 0 0 25px #e91e63;
+            font-weight: bold;
+            animation: neural-pulse 3s infinite alternate;
+        }
+
+        @keyframes neural-pulse {
+            0% { text-shadow: 0 0 25px #e91e63; }
+            100% { text-shadow: 0 0 40px #e91e63, 0 0 60px #ad1457; }
+        }
+
+        .turn-display {
+            background: rgba(233, 30, 99, 0.15);
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 2px solid #e91e63;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .network-canvas {
+            grid-area: network-canvas;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(233, 30, 99, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(156, 39, 176, 0.1) 0%, transparent 40%),
+                linear-gradient(135deg, #0a0020, #1a0040);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #e91e63;
+            border-radius: 10px;
+        }
+
+        .neural-network {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 8px;
+        }
+
+        .neuron {
+            background: rgba(233, 30, 99, 0.2);
+            border: 2px solid rgba(233, 30, 99, 0.4);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .neuron:hover {
+            background: rgba(233, 30, 99, 0.4);
+            box-shadow: 0 0 20px rgba(233, 30, 99, 0.6);
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .neuron.active {
+            animation: neuron-fire 0.6s ease-out;
+        }
+
+        @keyframes neuron-fire {
+            0% { 
+                background: rgba(233, 30, 99, 0.2);
+                box-shadow: 0 0 10px rgba(233, 30, 99, 0.4);
+            }
+            50% { 
+                background: rgba(255, 193, 7, 0.8);
+                box-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
+                transform: scale(1.3);
+            }
+            100% { 
+                background: rgba(233, 30, 99, 0.6);
+                box-shadow: 0 0 15px rgba(233, 30, 99, 0.6);
+            }
+        }
+
+        .neuron.player1 {
+            background: rgba(244, 67, 54, 0.6);
+            border-color: #f44336;
+            color: #fff;
+        }
+
+        .neuron.player2 {
+            background: rgba(33, 150, 243, 0.6);
+            border-color: #2196f3;
+            color: #fff;
+        }
+
+        .neuron.player3 {
+            background: rgba(76, 175, 80, 0.6);
+            border-color: #4caf50;
+            color: #fff;
+        }
+
+        .neuron.player4 {
+            background: rgba(255, 152, 0, 0.6);
+            border-color: #ff9800;
+            color: #fff;
+        }
+
+        .synapse {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #e91e63, transparent);
+            border-radius: 2px;
+            animation: synapse-pulse 1.5s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes synapse-pulse {
+            0% { 
+                opacity: 0;
+                transform: scaleX(0);
+            }
+            50% { 
+                opacity: 1;
+                transform: scaleX(1);
+            }
+            100% { 
+                opacity: 0;
+                transform: scaleX(0);
+            }
+        }
+
+        .neural-spark {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #ffeb3b, #ff9800);
+            border-radius: 50%;
+            animation: spark-travel 2s linear infinite;
+            z-index: 6;
+        }
+
+        @keyframes spark-travel {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .player-brain {
+            background: rgba(0, 0, 40, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player1 { 
+            grid-area: player1; 
+            border: 2px solid #f44336;
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.05));
+        }
+        .player2 { 
+            grid-area: player2; 
+            border: 2px solid #2196f3;
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05));
+        }
+        .player3 { 
+            grid-area: player3; 
+            border: 2px solid #4caf50;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+        }
+        .player4 { 
+            grid-area: player4; 
+            border: 2px solid #ff9800;
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.05));
+        }
+
+        .brain-header {
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .player1 .brain-header { background: rgba(244, 67, 54, 0.2); color: #f44336; }
+        .player2 .brain-header { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+        .player3 .brain-header { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .player4 .brain-header { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
+
+        .brain-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .brain-stat {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #e91e63;
+        }
+
+        .neural-abilities {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .neural-btn {
+            padding: 8px 10px;
+            background: linear-gradient(45deg, #4a148c, #7b1fa2);
+            border: 1px solid #e91e63;
+            border-radius: 6px;
+            color: #e91e63;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .neural-btn:hover {
+            background: linear-gradient(45deg, #7b1fa2, #ad1457);
+            box-shadow: 0 0 20px rgba(233, 30, 99, 0.4);
+            transform: scale(1.05);
+        }
+
+        .neural-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .neural-monitor {
+            grid-area: neural-monitor;
+            background: rgba(0, 0, 40, 0.9);
+            border: 2px solid #e91e63;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .monitor-title {
+            color: #e91e63;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .brain-activity {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-y: auto;
+            max-height: 300px;
+            border: 1px solid rgba(233, 30, 99, 0.3);
+        }
+
+        .activity-entry {
+            margin: 3px 0;
+            padding: 3px 6px;
+            border-left: 3px solid;
+            animation: brain-flash 0.5s ease-out;
+        }
+
+        @keyframes brain-flash {
+            0% { background: rgba(233, 30, 99, 0.3); }
+            100% { background: transparent; }
+        }
+
+        .activity-p1 { border-left-color: #f44336; color: #ffaaaa; }
+        .activity-p2 { border-left-color: #2196f3; color: #aaccff; }
+        .activity-p3 { border-left-color: #4caf50; color: #aaffaa; }
+        .activity-p4 { border-left-color: #ff9800; color: #ffccaa; }
+        .activity-system { border-left-color: #e91e63; color: #ffaacc; }
+
+        .learning-progress {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(233, 30, 99, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e91e63, #ad1457);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .audio-neural {
+            grid-area: audio-neural;
+            background: rgba(0, 0, 40, 0.9);
+            border: 2px solid #e91e63;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .neural-audio-title {
+            color: #e91e63;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .frequency-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .freq-slider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .freq-slider input {
+            width: 80px;
+            accent-color: #e91e63;
+        }
+
+        .waveform-viz {
+            height: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+            border: 1px solid rgba(233, 30, 99, 0.3);
+        }
+
+        .wave-line {
+            position: absolute;
+            bottom: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #e91e63;
+            transform-origin: left center;
+            animation: wave-oscillate 2s ease-in-out infinite;
+        }
+
+        @keyframes wave-oscillate {
+            0% { transform: scaleY(1); }
+            25% { transform: scaleY(3); }
+            50% { transform: scaleY(1); }
+            75% { transform: scaleY(2); }
+            100% { transform: scaleY(1); }
+        }
+
+        .neural-controls {
+            grid-area: controls;
+            background: linear-gradient(45deg, #4a148c, #7b1fa2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            border-top: 3px solid #e91e63;
+            padding: 0 25px;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #4a148c, #7b1fa2);
+            border: 2px solid #e91e63;
+            border-radius: 25px;
+            color: #e91e63;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #7b1fa2, #ad1457);
+            box-shadow: 0 0 25px rgba(233, 30, 99, 0.4);
+            transform: scale(1.1);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 10px 20px;
+            background: rgba(233, 30, 99, 0.1);
+            border: 2px solid #e91e63;
+            border-radius: 25px;
+            color: #e91e63;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(233, 30, 99, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.3);
+        }
+
+        @media (max-width: 1200px) {
+            .neural-interface {
+                grid-template-areas: 
+                    "header"
+                    "network-canvas"
+                    "controls";
+                grid-template-columns: 1fr;
+                grid-template-rows: 70px 1fr 60px;
+            }
+            
+            .player-brain, .neural-monitor, .audio-neural {
+                display: none;
+            }
+        }
+
+        /* Connection lines between neurons */
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e91e63, transparent);
+            border-radius: 1px;
+            animation: connection-pulse 2s linear infinite;
+            z-index: 3;
+        }
+
+        @keyframes connection-pulse {
+            0% { 
+                opacity: 0;
+                transform: scaleX(0);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: scaleX(1);
+            }
+            100% { 
+                opacity: 0;
+                transform: scaleX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+
+    <div class="neural-interface">
+        <div class="neural-header">
+            <div class="game-title">🧠 NEURAL NETWORK CONQUEST</div>
+            <div class="turn-display" id="turnDisplay">🔴 PLAYER 1 THINKING...</div>
+            <div id="gameTimer">Turn 1 / 20</div>
+        </div>
+
+        <div class="player-brain player1">
+            <div class="brain-header">🔴 NEURAL CORE 1</div>
+            <div class="brain-stats">
+                <div class="brain-stat">
+                    <div>Neurons</div>
+                    <div class="stat-value" id="p1Neurons">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Connections</div>
+                    <div class="stat-value" id="p1Connections">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Learning</div>
+                    <div class="stat-value" id="p1Learning">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Intelligence</div>
+                    <div class="stat-value" id="p1Intelligence">100</div>
+                </div>
+            </div>
+            <div class="neural-abilities">
+                <button class="neural-btn" onclick="game.growNeuron()">🧠 Grow Neuron (25 IQ)</button>
+                <button class="neural-btn" onclick="game.formConnection()">🔗 Form Connection (15 IQ)</button>
+                <button class="neural-btn" onclick="game.deepLearning()">📚 Deep Learning (40 IQ)</button>
+                <button class="neural-btn" onclick="game.neuralBoost()">⚡ Neural Boost (30 IQ)</button>
+            </div>
+        </div>
+
+        <div class="network-canvas">
+            <div class="neural-network" id="neuralNetwork"></div>
+        </div>
+
+        <div class="player-brain player2">
+            <div class="brain-header">🔵 NEURAL CORE 2</div>
+            <div class="brain-stats">
+                <div class="brain-stat">
+                    <div>Neurons</div>
+                    <div class="stat-value" id="p2Neurons">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Connections</div>
+                    <div class="stat-value" id="p2Connections">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Learning</div>
+                    <div class="stat-value" id="p2Learning">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Intelligence</div>
+                    <div class="stat-value" id="p2Intelligence">100</div>
+                </div>
+            </div>
+            <div class="neural-abilities">
+                <button class="neural-btn" onclick="game.synapticPruning()">✂️ Synaptic Pruning (20 IQ)</button>
+                <button class="neural-btn" onclick="game.memoryBank()">💾 Memory Bank (35 IQ)</button>
+                <button class="neural-btn" onclick="game.neuralFire()">🔥 Neural Fire (25 IQ)</button>
+                <button class="neural-btn" onclick="game.cognitiveLeap()">🚀 Cognitive Leap (50 IQ)</button>
+            </div>
+        </div>
+
+        <div class="neural-monitor">
+            <h3 class="monitor-title">🧠 Brain Activity Monitor</h3>
+            <div class="brain-activity" id="brainActivity">
+                <div class="activity-entry activity-system">🚀 Neural network initialization complete</div>
+                <div class="activity-entry activity-system">🧠 4 AI cores detected and initialized</div>
+                <div class="activity-entry activity-system">⚡ Synaptic communication channels active</div>
+            </div>
+            <div class="learning-progress">
+                <div>Global Learning Progress</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="learningProgress" style="width: 0%"></div>
+                </div>
+                <div style="text-align: center; font-size: 0.8rem; margin-top: 5px;">
+                    <span id="learningPercent">0</span>% Neural Development
+                </div>
+            </div>
+        </div>
+
+        <div class="player-brain player3">
+            <div class="brain-header">🟢 NEURAL CORE 3</div>
+            <div class="brain-stats">
+                <div class="brain-stat">
+                    <div>Neurons</div>
+                    <div class="stat-value" id="p3Neurons">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Connections</div>
+                    <div class="stat-value" id="p3Connections">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Learning</div>
+                    <div class="stat-value" id="p3Learning">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Intelligence</div>
+                    <div class="stat-value" id="p3Intelligence">100</div>
+                </div>
+            </div>
+            <div class="neural-abilities">
+                <button class="neural-btn" onclick="game.backpropagation()">↩️ Backpropagation (30 IQ)</button>
+                <button class="neural-btn" onclick="game.neuralPlasticity()">🔄 Neural Plasticity (40 IQ)</button>
+                <button class="neural-btn" onclick="game.emergentBehavior()">🌟 Emergent Behavior (45 IQ)</button>
+                <button class="neural-btn" onclick="game.consciousnessSpike()">🧘 Consciousness (60 IQ)</button>
+            </div>
+        </div>
+
+        <div class="player-brain player4">
+            <div class="brain-header">🟡 NEURAL CORE 4</div>
+            <div class="brain-stats">
+                <div class="brain-stat">
+                    <div>Neurons</div>
+                    <div class="stat-value" id="p4Neurons">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Connections</div>
+                    <div class="stat-value" id="p4Connections">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Learning</div>
+                    <div class="stat-value" id="p4Learning">0</div>
+                </div>
+                <div class="brain-stat">
+                    <div>Intelligence</div>
+                    <div class="stat-value" id="p4Intelligence">100</div>
+                </div>
+            </div>
+            <div class="neural-abilities">
+                <button class="neural-btn" onclick="game.quantumEntanglement()">🔬 Quantum Entanglement (55 IQ)</button>
+                <button class="neural-btn" onclick="game.hiveMinds()">🐝 Hive Mind (50 IQ)</button>
+                <button class="neural-btn" onclick="game.singularityEvent()">💫 Singularity Event (80 IQ)</button>
+                <button class="neural-btn" onclick="game.transcendence()">👑 Transcendence (100 IQ)</button>
+            </div>
+        </div>
+
+        <div class="audio-neural">
+            <h3 class="neural-audio-title">🎵 Neural Harmonics</h3>
+            <div class="frequency-controls">
+                <div class="freq-slider">
+                    <label>Brain Waves</label>
+                    <input type="range" min="0" max="100" value="75" id="brainwaveFreq" 
+                           onchange="game.audioEngine.setBrainwaveFreq(this.value/100)">
+                </div>
+                <div class="freq-slider">
+                    <label>Synapses</label>
+                    <input type="range" min="0" max="100" value="80" id="synapseVol" 
+                           onchange="game.audioEngine.setSynapseVolume(this.value/100)">
+                </div>
+            </div>
+            <div class="waveform-viz" id="waveformViz">
+                <div class="wave-line"></div>
+            </div>
+        </div>
+
+        <div class="neural-controls">
+            <button class="control-btn" onclick="game.endTurn()">⏭️ End Turn</button>
+            <button class="control-btn" onclick="game.pauseThinking()">⏸️ Pause</button>
+            <button class="control-btn" onclick="game.newEvolution()">🔄 New Evolution</button>
+            <button class="control-btn" onclick="game.showNeuralHelp()">❓ Neural Help</button>
+        </div>
+    </div>
+
+    <script>
+        class NeuralAudioEngine {
+            constructor() {
+                this.context = null;
+                this.masterGain = null;
+                this.brainwaveOsc = null;
+                this.synapseGain = null;
+                this.musicGain = null;
+                this.analyser = null;
+                this.compressor = null;
+                this.isInitialized = false;
+                this.brainwaveFreq = 0.75;
+                this.synapseVolume = 0.8;
+                
+                this.initializeAudio();
+            }
+
+            async initializeAudio() {
+                try {
+                    this.context = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create audio nodes
+                    this.masterGain = this.context.createGain();
+                    this.musicGain = this.context.createGain();
+                    this.synapseGain = this.context.createGain();
+                    this.compressor = this.context.createDynamicsCompressor();
+                    this.analyser = this.context.createAnalyser();
+                    
+                    // Connect audio graph
+                    this.musicGain.connect(this.masterGain);
+                    this.synapseGain.connect(this.masterGain);
+                    this.masterGain.connect(this.compressor);
+                    this.compressor.connect(this.context.destination);
+                    this.masterGain.connect(this.analyser);
+                    
+                    // Configure for neural audio
+                    this.compressor.threshold.value = -20;
+                    this.compressor.knee.value = 25;
+                    this.compressor.ratio.value = 10;
+                    this.compressor.attack.value = 0.002;
+                    this.compressor.release.value = 0.2;
+                    
+                    this.analyser.fftSize = 128;
+                    
+                    // Set initial volumes
+                    this.masterGain.gain.value = 0.7;
+                    this.musicGain.gain.value = 0.5;
+                    this.synapseGain.gain.value = 0.8;
+                    
+                    this.isInitialized = true;
+                    this.startBrainwaveBackground();
+                    
+                } catch (error) {
+                    console.log('Neural audio initialization failed:', error);
+                }
+            }
+
+            ensureContext() {
+                if (this.context && this.context.state === 'suspended') {
+                    this.context.resume();
+                }
+            }
+
+            // Neural firing - frequency modulated burst
+            playNeuronFire() {
+                if (!this.isInitialized) return;
+                
+                this.ensureContext();
+                
+                const osc = this.context.createOscillator();
+                const gain = this.context.createGain();
+                const filter = this.context.createBiquadFilter();
+                
+                // Neural spike characteristics
+                filter.type = 'bandpass';
+                filter.frequency.value = 800;
+                filter.Q.value = 5;
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.synapseGain);
+                
+                // Sharp neural spike pattern
+                osc.frequency.value = 200;
+                osc.type = 'square';
+                
+                const now = this.context.currentTime;
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.4, now + 0.002);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                
+                // Frequency sweep for realistic neural spike
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.01);
+                osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+                
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+
+            // Synaptic connection - soft harmonic connection
+            playSynapticConnection() {
+                if (!this.isInitialized) return;
+                
+                const frequencies = [220, 330, 440]; // Harmonic series
+                frequencies.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = this.context.createOscillator();
+                        const gain = this.context.createGain();
+                        const filter = this.context.createBiquadFilter();
+                        
+                        filter.type = 'lowpass';
+                        filter.frequency.value = 1000;
+                        filter.Q.value = 2;
+                        
+                        osc.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(this.synapseGain);
+                        
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        
+                        const now = this.context.currentTime;
+                        gain.gain.setValueAtTime(0, now);
+                        gain.gain.linearRampToValueAtTime(0.2, now + 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                        
+                        osc.start(now);
+                        osc.stop(now + 0.8);
+                    }, i * 100);
+                });
+            }
+
+            // Deep learning - cascading harmonic progression
+            playDeepLearning() {
+                if (!this.isInitialized) return;
+                
+                const progression = [
+                    [262, 330, 392], // C major
+                    [294, 370, 440], // D major  
+                    [330, 415, 494], // E major
+                    [349, 440, 523]  // F major
+                ];
+                
+                progression.forEach((chord, chordIndex) => {
+                    setTimeout(() => {
+                        chord.forEach((freq, noteIndex) => {
+                            setTimeout(() => {
+                                this.createLearningTone(freq, 1.0);
+                            }, noteIndex * 50);
+                        });
+                    }, chordIndex * 200);
+                });
+            }
+
+            createLearningTone(frequency, duration) {
+                const osc = this.context.createOscillator();
+                const gain = this.context.createGain();
+                const filter = this.context.createBiquadFilter();
+                
+                filter.type = 'lowpass';
+                filter.frequency.value = frequency * 3;
+                filter.Q.value = 3;
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.musicGain);
+                
+                osc.frequency.value = frequency;
+                osc.type = 'triangle';
+                
+                const now = this.context.currentTime;
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.15, now + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                
+                osc.start(now);
+                osc.stop(now + duration);
+            }
+
+            // Neural network expansion - complex polyrhythmic pattern
+            playNetworkExpansion() {
+                if (!this.isInitialized) return;
+                
+                const baseFreq = 440;
+                const patterns = [
+                    [1, 1.25, 1.5, 2],     // Perfect fifth progression
+                    [1, 1.125, 1.33, 1.875], // Complex harmony
+                    [1, 1.2, 1.4, 1.8]     // Augmented progression
+                ];
+                
+                patterns.forEach((pattern, patternIndex) => {
+                    setTimeout(() => {
+                        pattern.forEach((mult, noteIndex) => {
+                            setTimeout(() => {
+                                this.createNetworkTone(baseFreq * mult, 0.6);
+                            }, noteIndex * 150);
+                        });
+                    }, patternIndex * 300);
+                });
+            }
+
+            createNetworkTone(frequency, duration) {
+                const osc = this.context.createOscillator();
+                const gain = this.context.createGain();
+                const lfo = this.context.createOscillator();
+                const lfoGain = this.context.createGain();
+                
+                // LFO for neural modulation
+                lfo.frequency.value = 4;
+                lfo.connect(lfoGain);
+                lfoGain.gain.value = 20;
+                lfoGain.connect(osc.frequency);
+                
+                osc.connect(gain);
+                gain.connect(this.synapseGain);
+                
+                osc.frequency.value = frequency;
+                osc.type = 'sawtooth';
+                
+                const now = this.context.currentTime;
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                
+                lfo.start(now);
+                osc.start(now);
+                lfo.stop(now + duration);
+                osc.stop(now + duration);
+            }
+
+            // Consciousness emergence - ethereal, transcendent harmony
+            playConsciousnessEmergence() {
+                if (!this.isInitialized) return;
+                
+                const celestialFreq = [528, 594, 666, 741, 852]; // Solfeggio frequencies
+                celestialFreq.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = this.context.createOscillator();
+                        const gain = this.context.createGain();
+                        const reverb = this.context.createConvolver();
+                        
+                        osc.connect(gain);
+                        gain.connect(this.musicGain);
+                        
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        
+                        const now = this.context.currentTime;
+                        gain.gain.setValueAtTime(0, now);
+                        gain.gain.linearRampToValueAtTime(0.12, now + 0.5);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 3);
+                        
+                        // Subtle frequency modulation for organic feel
+                        osc.frequency.setValueAtTime(freq, now);
+                        osc.frequency.linearRampToValueAtTime(freq * 1.01, now + 1.5);
+                        osc.frequency.linearRampToValueAtTime(freq, now + 3);
+                        
+                        osc.start(now);
+                        osc.stop(now + 3);
+                    }, i * 200);
+                });
+            }
+
+            // Competitive tension music - driving, intelligent rhythm
+            startBrainwaveBackground() {
+                if (!this.isInitialized) return;
+                
+                this.ensureContext();
+                
+                const playBrainwaveLoop = () => {
+                    // Create intelligent, competitive background music
+                    const bassPattern = [110, 138, 123, 146]; // Complex bass progression
+                    const melodyPattern = [440, 523, 466, 554]; // Intelligent melody
+                    
+                    bassPattern.forEach((freq, i) => {
+                        setTimeout(() => {
+                            // Pulsing bass representing brain activity
+                            const bassOsc = this.context.createOscillator();
+                            const bassGain = this.context.createGain();
+                            const bassFilter = this.context.createBiquadFilter();
+                            
+                            bassFilter.type = 'lowpass';
+                            bassFilter.frequency.value = 250;
+                            bassFilter.Q.value = 3;
+                            
+                            bassOsc.connect(bassFilter);
+                            bassFilter.connect(bassGain);
+                            bassGain.connect(this.musicGain);
+                            
+                            bassOsc.frequency.value = freq;
+                            bassOsc.type = 'sawtooth';
+                            
+                            const now = this.context.currentTime;
+                            bassGain.gain.setValueAtTime(0, now);
+                            bassGain.gain.linearRampToValueAtTime(0.1, now + 0.1);
+                            bassGain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+                            
+                            bassOsc.start(now);
+                            bassOsc.stop(now + 2);
+                            
+                            // Intelligent melody overlay
+                            setTimeout(() => {
+                                const melOsc = this.context.createOscillator();
+                                const melGain = this.context.createGain();
+                                const melFilter = this.context.createBiquadFilter();
+                                
+                                melFilter.type = 'highpass';
+                                melFilter.frequency.value = 800;
+                                melFilter.Q.value = 2;
+                                
+                                melOsc.connect(melFilter);
+                                melFilter.connect(melGain);
+                                melGain.connect(this.musicGain);
+                                
+                                melOsc.frequency.value = melodyPattern[i];
+                                melOsc.type = 'triangle';
+                                
+                                const melNow = this.context.currentTime;
+                                melGain.gain.setValueAtTime(0, melNow);
+                                melGain.gain.linearRampToValueAtTime(0.06, melNow + 0.1);
+                                melGain.gain.exponentialRampToValueAtTime(0.01, melNow + 1.2);
+                                
+                                melOsc.start(melNow);
+                                melOsc.stop(melNow + 1.5);
+                            }, 300);
+                            
+                        }, i * 1800);
+                    });
+                };
+                
+                // Start and repeat
+                playBrainwaveLoop();
+                this.musicLoop = setInterval(playBrainwaveLoop, 7200);
+            }
+
+            // Victory sequence - triumphant neural symphony
+            playNeuralVictory() {
+                if (!this.isInitialized) return;
+                
+                // Grand finale with complex harmonies
+                const victoryChords = [
+                    [262, 330, 392, 523], // C major 7
+                    [294, 370, 440, 587], // D major 7
+                    [330, 415, 494, 659], // E major 7
+                    [349, 440, 523, 698]  // F major 7
+                ];
+                
+                victoryChords.forEach((chord, chordIndex) => {
+                    setTimeout(() => {
+                        chord.forEach((freq, noteIndex) => {
+                            setTimeout(() => {
+                                const osc = this.context.createOscillator();
+                                const gain = this.context.createGain();
+                                
+                                osc.connect(gain);
+                                gain.connect(this.musicGain);
+                                
+                                osc.frequency.value = freq;
+                                osc.type = 'triangle';
+                                
+                                const now = this.context.currentTime;
+                                gain.gain.setValueAtTime(0, now);
+                                gain.gain.linearRampToValueAtTime(0.2, now + 0.2);
+                                gain.gain.exponentialRampToValueAtTime(0.01, now + 2);
+                                
+                                osc.start(now);
+                                osc.stop(now + 2);
+                            }, noteIndex * 30);
+                        });
+                    }, chordIndex * 500);
+                });
+            }
+
+            setBrainwaveFreq(value) {
+                this.brainwaveFreq = value;
+            }
+
+            setSynapseVolume(value) {
+                if (this.synapseGain) {
+                    this.synapseGain.gain.value = value;
+                }
+            }
+
+            stopAll() {
+                if (this.musicLoop) {
+                    clearInterval(this.musicLoop);
+                }
+                if (this.brainwaveOsc) {
+                    this.brainwaveOsc.stop();
+                }
+            }
+        }
+
+        class NeuralNetworkConquest {
+            constructor() {
+                this.gridWidth = 12;
+                this.gridHeight = 8;
+                this.currentPlayer = 1;
+                this.maxPlayers = 4;
+                this.currentTurn = 1;
+                this.maxTurns = 20;
+                this.gameActive = true;
+                
+                this.players = {
+                    1: { name: 'NEURAL CORE 1', neurons: 0, connections: 0, learning: 0, intelligence: 100, color: '#f44336' },
+                    2: { name: 'NEURAL CORE 2', neurons: 0, connections: 0, learning: 0, intelligence: 100, color: '#2196f3' },
+                    3: { name: 'NEURAL CORE 3', neurons: 0, connections: 0, learning: 0, intelligence: 100, color: '#4caf50' },
+                    4: { name: 'NEURAL CORE 4', neurons: 0, connections: 0, learning: 0, intelligence: 100, color: '#ff9800' }
+                };
+                
+                this.neuralGrid = [];
+                this.connections = [];
+                this.learningProgress = 0;
+                
+                // Initialize audio engine
+                this.audioEngine = new NeuralAudioEngine();
+                
+                this.initializeNetwork();
+                this.setupInitialNeurons();
+                
+                // User interaction for audio context
+                document.addEventListener('click', () => {
+                    this.audioEngine.ensureContext();
+                }, { once: true });
+            }
+
+            initializeNetwork() {
+                const networkElement = document.getElementById('neuralNetwork');
+                networkElement.innerHTML = '';
+                
+                this.neuralGrid = [];
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    this.neuralGrid[y] = [];
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const neuron = document.createElement('div');
+                        neuron.className = 'neuron';
+                        neuron.dataset.x = x;
+                        neuron.dataset.y = y;
+                        neuron.addEventListener('click', () => this.neuronClicked(x, y));
+                        networkElement.appendChild(neuron);
+                        
+                        this.neuralGrid[y][x] = {
+                            element: neuron,
+                            owner: 0,
+                            strength: 0,
+                            connections: [],
+                            firing: false
+                        };
+                    }
+                }
+            }
+
+            setupInitialNeurons() {
+                // Give each player starting neurons
+                const startPositions = [
+                    { x: 2, y: 2 },   // Player 1
+                    { x: 9, y: 2 },   // Player 2
+                    { x: 2, y: 5 },   // Player 3
+                    { x: 9, y: 5 }    // Player 4
+                ];
+                
+                startPositions.forEach((pos, index) => {
+                    const playerId = index + 1;
+                    this.growNeuronAt(pos.x, pos.y, playerId, true);
+                });
+                
+                this.updateUI();
+                this.logBrainActivity('🧠 Neural network cores initialized - consciousness emerging');
+                this.audioEngine.playNetworkExpansion();
+            }
+
+            neuronClicked(x, y) {
+                if (!this.gameActive) return;
+                
+                const neuron = this.neuralGrid[y][x];
+                const player = this.players[this.currentPlayer];
+                
+                if (player.intelligence < 15) {
+                    this.logBrainActivity(`${player.name}: Insufficient intelligence for neural action`);
+                    return;
+                }
+                
+                if (neuron.owner === 0) {
+                    // Grow new neuron
+                    if (this.attemptNeuronGrowth(x, y, this.currentPlayer)) {
+                        this.audioEngine.playNeuronFire();
+                        this.createNeuralSpark(x, y);
+                    }
+                } else if (neuron.owner === this.currentPlayer) {
+                    // Strengthen neuron
+                    this.strengthenNeuron(x, y);
+                    this.audioEngine.playSynapticConnection();
+                } else {
+                    // Compete for neuron
+                    this.neuralCompetition(x, y);
+                }
+                
+                player.intelligence = Math.max(0, player.intelligence - 15);
+                this.updateUI();
+            }
+
+            attemptNeuronGrowth(x, y, playerId) {
+                const player = this.players[playerId];
+                const growthChance = Math.min(0.9, (player.learning + 50) / 100);
+                
+                if (Math.random() < growthChance) {
+                    this.growNeuronAt(x, y, playerId);
+                    this.logBrainActivity(`${player.name} grew neuron at (${x},${y})`);
+                    return true;
+                } else {
+                    this.logBrainActivity(`${player.name} failed neural growth - insufficient learning`);
+                    return false;
+                }
+            }
+
+            growNeuronAt(x, y, playerId, initial = false) {
+                const neuron = this.neuralGrid[y][x];
+                neuron.owner = playerId;
+                neuron.strength = 10;
+                neuron.element.className = `neuron player${playerId}`;
+                neuron.element.textContent = '🧠';
+                
+                this.players[playerId].neurons++;
+                
+                if (!initial) {
+                    this.formNeuralConnections(x, y, playerId);
+                    this.triggerNeuralFiring(x, y);
+                }
+            }
+
+            formNeuralConnections(centerX, centerY, playerId) {
+                // Form connections to nearby neurons
+                const directions = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]];
+                
+                directions.forEach(([dx, dy]) => {
+                    const newX = centerX + dx;
+                    const newY = centerY + dy;
+                    
+                    if (newX >= 0 && newX < this.gridWidth && newY >= 0 && newY < this.gridHeight) {
+                        const targetNeuron = this.neuralGrid[newY][newX];
+                        if (targetNeuron.owner === playerId && Math.random() < 0.3) {
+                            this.createConnection(centerX, centerY, newX, newY);
+                            this.players[playerId].connections++;
+                            
+                            setTimeout(() => {
+                                this.audioEngine.playSynapticConnection();
+                            }, Math.random() * 500);
+                        }
+                    }
+                });
+            }
+
+            createConnection(x1, y1, x2, y2) {
+                const line = document.createElement('div');
+                line.className = 'connection-line';
+                
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                line.style.width = (length * 100 / this.gridWidth) + '%';
+                line.style.left = (x1 * 100 / this.gridWidth) + '%';
+                line.style.top = (y1 * 100 / this.gridHeight) + '%';
+                line.style.transform = `rotate(${angle}deg)`;
+                line.style.transformOrigin = '0 center';
+                
+                document.querySelector('.network-canvas').appendChild(line);
+                
+                this.connections.push(line);
+                
+                // Remove after animation cycle
+                setTimeout(() => {
+                    if (line.parentNode) {
+                        line.remove();
+                    }
+                }, 4000);
+            }
+
+            triggerNeuralFiring(x, y) {
+                const neuron = this.neuralGrid[y][x];
+                neuron.element.classList.add('active');
+                neuron.firing = true;
+                
+                setTimeout(() => {
+                    neuron.element.classList.remove('active');
+                    neuron.firing = false;
+                }, 600);
+            }
+
+            createNeuralSpark(x, y) {
+                const spark = document.createElement('div');
+                spark.className = 'neural-spark';
+                spark.style.left = (x * 100 / this.gridWidth) + '%';
+                spark.style.top = (y * 100 / this.gridHeight) + '%';
+                
+                document.querySelector('.network-canvas').appendChild(spark);
+                
+                setTimeout(() => {
+                    if (spark.parentNode) {
+                        spark.remove();
+                    }
+                }, 2000);
+            }
+
+            // Special abilities
+            growNeuron() {
+                const player = this.players[this.currentPlayer];
+                if (player.intelligence < 25) return;
+                
+                // Find optimal location for new neuron
+                let bestSpot = null;
+                let maxConnections = -1;
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const neuron = this.neuralGrid[y][x];
+                        if (neuron.owner === 0) {
+                            const connections = this.countAdjacentNeurons(x, y, this.currentPlayer);
+                            if (connections > maxConnections) {
+                                maxConnections = connections;
+                                bestSpot = { x, y };
+                            }
+                        }
+                    }
+                }
+                
+                if (bestSpot) {
+                    this.growNeuronAt(bestSpot.x, bestSpot.y, this.currentPlayer);
+                    player.intelligence -= 25;
+                    this.logBrainActivity(`${player.name} strategically grew neuron`);
+                    this.audioEngine.playNeuronFire();
+                }
+            }
+
+            formConnection() {
+                const player = this.players[this.currentPlayer];
+                if (player.intelligence < 15) return;
+                
+                let formed = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const neuron = this.neuralGrid[y][x];
+                        if (neuron.owner === this.currentPlayer && formed < 3) {
+                            this.formNeuralConnections(x, y, this.currentPlayer);
+                            formed++;
+                        }
+                    }
+                }
+                
+                player.intelligence -= 15;
+                this.logBrainActivity(`${player.name} formed ${formed} new neural connections`);
+                this.audioEngine.playSynapticConnection();
+            }
+
+            deepLearning() {
+                const player = this.players[this.currentPlayer];
+                if (player.intelligence < 40) return;
+                
+                player.learning += 30;
+                player.intelligence -= 40;
+                
+                // Strengthen all owned neurons
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const neuron = this.neuralGrid[y][x];
+                        if (neuron.owner === this.currentPlayer) {
+                            neuron.strength += 10;
+                            this.triggerNeuralFiring(x, y);
+                        }
+                    }
+                }
+                
+                this.learningProgress += 10;
+                this.logBrainActivity(`${player.name} activated deep learning protocols`);
+                this.audioEngine.playDeepLearning();
+            }
+
+            neuralBoost() {
+                const player = this.players[this.currentPlayer];
+                if (player.intelligence < 30) return;
+                
+                // Boost all neural activity
+                player.intelligence += 20;
+                player.learning += 15;
+                player.intelligence -= 30;
+                
+                // Trigger firing cascade
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const neuron = this.neuralGrid[y][x];
+                        if (neuron.owner === this.currentPlayer && Math.random() < 0.4) {
+                            setTimeout(() => {
+                                this.triggerNeuralFiring(x, y);
+                                this.audioEngine.playNeuronFire();
+                            }, Math.random() * 1000);
+                        }
+                    }
+                }
+                
+                this.logBrainActivity(`${player.name} initiated neural cascade boost`);
+            }
+
+            consciousnessSpike() {
+                const player = this.players[this.currentPlayer];
+                if (player.intelligence < 60) return;
+                
+                // Transcendent ability - affects global network
+                this.learningProgress += 25;
+                player.learning += 50;
+                player.intelligence -= 60;
+                
+                // Create consciousness field effect
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const neuron = this.neuralGrid[y][x];
+                        if (Math.random() < 0.2) {
+                            setTimeout(() => {
+                                this.triggerNeuralFiring(x, y);
+                            }, Math.random() * 2000);
+                        }
+                    }
+                }
+                
+                this.logBrainActivity(`${player.name} achieved consciousness spike - reality altered`);
+                this.audioEngine.playConsciousnessEmergence();
+            }
+
+            countAdjacentNeurons(x, y, playerId) {
+                let count = 0;
+                const directions = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]];
+                
+                directions.forEach(([dx, dy]) => {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < this.gridWidth && ny >= 0 && ny < this.gridHeight) {
+                        if (this.neuralGrid[ny][nx].owner === playerId) {
+                            count++;
+                        }
+                    }
+                });
+                
+                return count;
+            }
+
+            endTurn() {
+                // Regenerate intelligence for all players
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    const baseRegen = 20;
+                    const neuronBonus = player.neurons * 3;
+                    const learningBonus = Math.floor(player.learning / 10);
+                    
+                    player.intelligence = Math.min(200, player.intelligence + baseRegen + neuronBonus + learningBonus);
+                });
+                
+                this.currentPlayer = (this.currentPlayer % this.maxPlayers) + 1;
+                
+                // Check for turn advancement
+                if (this.currentPlayer === 1) {
+                    this.currentTurn++;
+                    this.logBrainActivity(`🔄 Evolution Turn ${this.currentTurn} - neural networks adapting`);
+                }
+                
+                this.updateUI();
+                
+                // AI turn for non-human players
+                if (this.currentPlayer > 1) {
+                    setTimeout(() => {
+                        this.executeAINeuralTurn();
+                    }, 1000 + Math.random() * 2000);
+                }
+                
+                this.checkEvolutionComplete();
+            }
+
+            executeAINeuralTurn() {
+                const abilities = ['grow', 'connect', 'learn', 'boost'];
+                const ability = abilities[Math.floor(Math.random() * abilities.length)];
+                
+                const player = this.players[this.currentPlayer];
+                
+                switch (ability) {
+                    case 'grow':
+                        if (player.intelligence >= 25) this.growNeuron();
+                        break;
+                    case 'connect':
+                        if (player.intelligence >= 15) this.formConnection();
+                        break;
+                    case 'learn':
+                        if (player.intelligence >= 40) this.deepLearning();
+                        break;
+                    case 'boost':
+                        if (player.intelligence >= 30) this.neuralBoost();
+                        break;
+                }
+                
+                // AI also clicks random neurons
+                const x = Math.floor(Math.random() * this.gridWidth);
+                const y = Math.floor(Math.random() * this.gridHeight);
+                this.neuronClicked(x, y);
+                
+                setTimeout(() => {
+                    this.endTurn();
+                }, 1000);
+            }
+
+            calculateNeuralDominance() {
+                // Calculate overall neural network strength
+                let totalStrength = 0;
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    player.dominance = player.neurons * 10 + player.connections * 5 + player.learning;
+                    totalStrength += player.dominance;
+                });
+                
+                return totalStrength;
+            }
+
+            updateUI() {
+                // Update player stats
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    document.getElementById(`p${playerId}Neurons`).textContent = player.neurons;
+                    document.getElementById(`p${playerId}Connections`).textContent = player.connections;
+                    document.getElementById(`p${playerId}Learning`).textContent = player.learning;
+                    document.getElementById(`p${playerId}Intelligence`).textContent = player.intelligence;
+                });
+                
+                // Update turn display
+                const turnDisplay = document.getElementById('turnDisplay');
+                const playerColors = ['🔴', '🔵', '🟢', '🟡'];
+                turnDisplay.textContent = `${playerColors[this.currentPlayer - 1]} ${this.players[this.currentPlayer].name} THINKING...`;
+                
+                // Update timer
+                document.getElementById('gameTimer').textContent = `Turn ${this.currentTurn} / ${this.maxTurns}`;
+                
+                // Update learning progress
+                const progress = Math.min(100, this.learningProgress);
+                document.getElementById('learningProgress').style.width = progress + '%';
+                document.getElementById('learningPercent').textContent = progress;
+            }
+
+            checkEvolutionComplete() {
+                if (this.currentTurn > this.maxTurns || this.learningProgress >= 100) {
+                    this.endEvolution();
+                }
+            }
+
+            endEvolution() {
+                this.gameActive = false;
+                
+                // Calculate winner based on neural development
+                const winner = Object.entries(this.players)
+                    .map(([id, player]) => ({ 
+                        id, 
+                        score: player.neurons * 10 + player.connections * 5 + player.learning,
+                        ...player
+                    }))
+                    .sort((a, b) => b.score - a.score)[0];
+                
+                this.logBrainActivity(`🏆 EVOLUTION COMPLETE! ${winner.name} achieved neural supremacy with ${winner.score} intelligence points`);
+                this.audioEngine.playNeuralVictory();
+                
+                setTimeout(() => {
+                    alert(`${winner.name} ACHIEVES CONSCIOUSNESS!\nNeural Score: ${winner.score}\nNeurons: ${winner.neurons}\nConnections: ${winner.connections}\nLearning: ${winner.learning}`);
+                }, 1500);
+            }
+
+            logBrainActivity(message) {
+                const activity = document.getElementById('brainActivity');
+                const entry = document.createElement('div');
+                entry.className = `activity-entry activity-p${this.currentPlayer}`;
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                activity.appendChild(entry);
+                activity.scrollTop = activity.scrollHeight;
+                
+                // Keep last 15 entries
+                if (activity.children.length > 15) {
+                    activity.removeChild(activity.firstChild);
+                }
+            }
+
+            pauseThinking() {
+                this.gameActive = !this.gameActive;
+                if (this.gameActive) {
+                    this.audioEngine.startBrainwaveBackground();
+                } else {
+                    this.audioEngine.stopAll();
+                }
+            }
+
+            newEvolution() {
+                location.reload();
+            }
+
+            showNeuralHelp() {
+                alert(`NEURAL NETWORK CONQUEST - HELP
+
+🎯 OBJECTIVE: Build the most advanced neural network in 20 turns
+
+🧠 HOW TO PLAY:
+• Click empty spaces to grow neurons (costs Intelligence)
+• Click your neurons to strengthen them
+• Use special abilities to enhance your network
+• Intelligence regenerates each turn based on network size
+
+⚡ SPECIAL ABILITIES:
+• Grow Neuron (25) - Strategically place new neuron
+• Form Connection (15) - Create synaptic links
+• Deep Learning (40) - Boost learning and strengthen network
+• Neural Boost (30) - Intelligence cascade and firing
+
+🎵 NEURAL AUDIO:
+• Realistic neural firing sounds
+• Synaptic connection harmonies
+• Consciousness emergence music
+• Learning progression feedback
+
+🏆 VICTORY CONDITIONS:
+• Highest neural development score after 20 turns
+• Score = Neurons×10 + Connections×5 + Learning
+• Achieving consciousness (100% learning) wins instantly`);
+            }
+        }
+
+        // Initialize game
+        let game;
+        document.addEventListener('DOMContentLoaded', () => {
+            game = new NeuralNetworkConquest();
+        });
+    </script>
+</body>
+</html>

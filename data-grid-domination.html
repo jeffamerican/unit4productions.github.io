@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Grid Domination - 4-6 Player Network Control | BotInc Games</title>
+    <meta name="description" content="Real-time data network conquest with advanced audio feedback system">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27, #2d1b69, #1e3c72, #0f0f23);
+            color: #00ffff;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        .game-interface {
+            display: grid;
+            grid-template-areas: 
+                "header header header header"
+                "player1 data-grid player2 network-status"
+                "player3 data-grid player4 audio-controls"
+                "footer footer footer footer";
+            grid-template-columns: 200px 1fr 200px 200px;
+            grid-template-rows: 60px 1fr 120px 50px;
+            height: 100vh;
+            gap: 2px;
+            background: #000011;
+        }
+
+        .header {
+            grid-area: header;
+            background: linear-gradient(45deg, #001133, #003366);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 2px solid #00ffff;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            animation: data-pulse 2s infinite alternate;
+        }
+
+        @keyframes data-pulse {
+            0% { text-shadow: 0 0 20px #00ffff; }
+            100% { text-shadow: 0 0 30px #00ffff, 0 0 40px #0088ff; }
+        }
+
+        .turn-info {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #00ffff;
+            font-weight: bold;
+        }
+
+        .data-grid {
+            grid-area: data-grid;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #000011, #001122);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #00ffff;
+        }
+
+        .network-grid {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            gap: 1px;
+        }
+
+        .data-node {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .data-node:hover {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .data-node.player1 {
+            background: rgba(255, 0, 100, 0.6);
+            border-color: #ff0064;
+            box-shadow: 0 0 8px rgba(255, 0, 100, 0.4);
+        }
+
+        .data-node.player2 {
+            background: rgba(0, 255, 200, 0.6);
+            border-color: #00ffc8;
+            box-shadow: 0 0 8px rgba(0, 255, 200, 0.4);
+        }
+
+        .data-node.player3 {
+            background: rgba(255, 200, 0, 0.6);
+            border-color: #ffc800;
+            box-shadow: 0 0 8px rgba(255, 200, 0, 0.4);
+        }
+
+        .data-node.player4 {
+            background: rgba(200, 0, 255, 0.6);
+            border-color: #c800ff;
+            box-shadow: 0 0 8px rgba(200, 0, 255, 0.4);
+        }
+
+        .data-node.player5 {
+            background: rgba(0, 200, 255, 0.6);
+            border-color: #00c8ff;
+            box-shadow: 0 0 8px rgba(0, 200, 255, 0.4);
+        }
+
+        .data-node.player6 {
+            background: rgba(255, 100, 200, 0.6);
+            border-color: #ff64c8;
+            box-shadow: 0 0 8px rgba(255, 100, 200, 0.4);
+        }
+
+        .data-packet {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ffff;
+            animation: packet-flow 2s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes packet-flow {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 0.7; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+
+        .player-panel {
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .player1 { 
+            grid-area: player1; 
+            border-color: #ff0064;
+            background: linear-gradient(135deg, rgba(255, 0, 100, 0.1), rgba(255, 0, 100, 0.05));
+        }
+        .player2 { 
+            grid-area: player2; 
+            border-color: #00ffc8;
+            background: linear-gradient(135deg, rgba(0, 255, 200, 0.1), rgba(0, 255, 200, 0.05));
+        }
+        .player3 { 
+            grid-area: player3; 
+            border-color: #ffc800;
+            background: linear-gradient(135deg, rgba(255, 200, 0, 0.1), rgba(255, 200, 0, 0.05));
+        }
+        .player4 { 
+            grid-area: player4; 
+            border-color: #c800ff;
+            background: linear-gradient(135deg, rgba(200, 0, 255, 0.1), rgba(200, 0, 255, 0.05));
+        }
+
+        .player-header {
+            font-weight: bold;
+            font-size: 1rem;
+            text-align: center;
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .player1 .player-header { background: rgba(255, 0, 100, 0.2); color: #ff0064; }
+        .player2 .player-header { background: rgba(0, 255, 200, 0.2); color: #00ffc8; }
+        .player3 .player-header { background: rgba(255, 200, 0, 0.2); color: #ffc800; }
+        .player4 .player-header { background: rgba(200, 0, 255, 0.2); color: #c800ff; }
+
+        .network-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 6px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #00ffff;
+            font-size: 1.1em;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 8px;
+            background: linear-gradient(45deg, #001133, #003366);
+            border: 1px solid #00ffff;
+            border-radius: 4px;
+            color: #00ffff;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(45deg, #003366, #0066aa);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .network-status {
+            grid-area: network-status;
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .network-monitor {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 4px;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 4px;
+            border-left: 2px solid;
+            animation: log-flash 0.5s ease-out;
+        }
+
+        @keyframes log-flash {
+            0% { background: rgba(0, 255, 255, 0.3); }
+            100% { background: transparent; }
+        }
+
+        .log-p1 { border-left-color: #ff0064; color: #ff88aa; }
+        .log-p2 { border-left-color: #00ffc8; color: #88ffdd; }
+        .log-p3 { border-left-color: #ffc800; color: #ffdd88; }
+        .log-p4 { border-left-color: #c800ff; color: #dd88ff; }
+        .log-system { border-left-color: #00ffff; color: #88ddff; }
+
+        .audio-controls {
+            grid-area: audio-controls;
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .audio-panel h3 {
+            color: #00ffff;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .volume-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .volume-slider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .volume-slider input {
+            width: 60px;
+            accent-color: #00ffff;
+        }
+
+        .audio-visualizer {
+            height: 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .viz-bar {
+            position: absolute;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #ff0064, #00ffff);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.1s ease;
+        }
+
+        .footer {
+            grid-area: footer;
+            background: linear-gradient(45deg, #001133, #003366);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            border-top: 2px solid #00ffff;
+            padding: 0 20px;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            background: linear-gradient(45deg, #001133, #003366);
+            border: 1px solid #00ffff;
+            border-radius: 20px;
+            color: #00ffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #003366, #0066aa);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 8px 16px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 20px;
+            color: #00ffff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        @media (max-width: 1200px) {
+            .game-interface {
+                grid-template-areas: 
+                    "header"
+                    "data-grid"
+                    "footer";
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr 50px;
+            }
+            
+            .player-panel, .network-status, .audio-controls {
+                display: none;
+            }
+        }
+
+        /* Visual effects for data transmission */
+        .transmission-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: transmit 1s linear infinite;
+            z-index: 3;
+        }
+
+        @keyframes transmit {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+
+    <div class="game-interface">
+        <div class="header">
+            <div class="game-title">DATA GRID DOMINATION</div>
+            <div class="turn-info" id="turnInfo">PLAYER 1 CONNECTING...</div>
+            <div id="gameTimer">05:00</div>
+        </div>
+
+        <div class="player-panel player1">
+            <div class="player-header">🔴 PLAYER 1</div>
+            <div class="network-stats">
+                <div class="stat-item">
+                    <div>Nodes</div>
+                    <div class="stat-value" id="p1Nodes">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>Bandwidth</div>
+                    <div class="stat-value" id="p1Bandwidth">100</div>
+                </div>
+                <div class="stat-item">
+                    <div>Security</div>
+                    <div class="stat-value" id="p1Security">50</div>
+                </div>
+                <div class="stat-item">
+                    <div>Control %</div>
+                    <div class="stat-value" id="p1Control">0</div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="game.hackNetwork()">🔓 Hack Network</button>
+                <button class="action-btn" onclick="game.boostSecurity()">🛡️ Boost Security</button>
+                <button class="action-btn" onclick="game.dataFlood()">🌊 Data Flood</button>
+            </div>
+        </div>
+
+        <div class="data-grid">
+            <div class="network-grid" id="networkGrid"></div>
+        </div>
+
+        <div class="player-panel player2">
+            <div class="player-header">🔵 PLAYER 2</div>
+            <div class="network-stats">
+                <div class="stat-item">
+                    <div>Nodes</div>
+                    <div class="stat-value" id="p2Nodes">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>Bandwidth</div>
+                    <div class="stat-value" id="p2Bandwidth">100</div>
+                </div>
+                <div class="stat-item">
+                    <div>Security</div>
+                    <div class="stat-value" id="p2Security">50</div>
+                </div>
+                <div class="stat-item">
+                    <div>Control %</div>
+                    <div class="stat-value" id="p2Control">0</div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="game.ddosAttack()">💥 DDoS Attack</button>
+                <button class="action-btn" onclick="game.encryptData()">🔒 Encrypt Data</button>
+                <button class="action-btn" onclick="game.viralSpread()">🦠 Viral Spread</button>
+            </div>
+        </div>
+
+        <div class="network-status">
+            <h3>🌐 Network Monitor</h3>
+            <div class="network-monitor" id="networkMonitor">
+                <div class="log-entry log-system">🚀 Network initialization complete</div>
+                <div class="log-entry log-system">📡 4-6 players detected</div>
+                <div class="log-entry log-system">⚡ Real-time mode active</div>
+            </div>
+        </div>
+
+        <div class="player-panel player3">
+            <div class="player-header">🟡 PLAYER 3</div>
+            <div class="network-stats">
+                <div class="stat-item">
+                    <div>Nodes</div>
+                    <div class="stat-value" id="p3Nodes">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>Bandwidth</div>
+                    <div class="stat-value" id="p3Bandwidth">100</div>
+                </div>
+                <div class="stat-item">
+                    <div>Security</div>
+                    <div class="stat-value" id="p3Security">50</div>
+                </div>
+                <div class="stat-item">
+                    <div>Control %</div>
+                    <div class="stat-value" id="p3Control">0</div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="game.firewallBlast()">🔥 Firewall Blast</button>
+                <button class="action-btn" onclick="game.bandwidthBoost()">⚡ Bandwidth++</button>
+                <button class="action-btn" onclick="game.systemScan()">🔍 System Scan</button>
+            </div>
+        </div>
+
+        <div class="player-panel player4">
+            <div class="player-header">🟣 PLAYER 4</div>
+            <div class="network-stats">
+                <div class="stat-item">
+                    <div>Nodes</div>
+                    <div class="stat-value" id="p4Nodes">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>Bandwidth</div>
+                    <div class="stat-value" id="p4Bandwidth">100</div>
+                </div>
+                <div class="stat-item">
+                    <div>Security</div>
+                    <div class="stat-value" id="p4Security">50</div>
+                </div>
+                <div class="stat-item">
+                    <div>Control %</div>
+                    <div class="stat-value" id="p4Control">0</div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="game.rootAccess()">👑 Root Access</button>
+                <button class="action-btn" onclick="game.packetSniff()">📦 Packet Sniff</button>
+                <button class="action-btn" onclick="game.emergencyShutdown()">🚨 Emergency Stop</button>
+            </div>
+        </div>
+
+        <div class="audio-controls">
+            <h3>🎵 Audio Control</h3>
+            <div class="volume-controls">
+                <div class="volume-slider">
+                    <label>Music</label>
+                    <input type="range" min="0" max="100" value="70" id="musicVolume" onchange="game.audioEngine.setMusicVolume(this.value/100)">
+                </div>
+                <div class="volume-slider">
+                    <label>SFX</label>
+                    <input type="range" min="0" max="100" value="80" id="sfxVolume" onchange="game.audioEngine.setSfxVolume(this.value/100)">
+                </div>
+            </div>
+            <div class="audio-visualizer" id="audioViz"></div>
+        </div>
+
+        <div class="footer">
+            <div class="game-controls">
+                <button class="control-btn" onclick="game.pauseGame()">⏸️ Pause</button>
+                <button class="control-btn" onclick="game.newGame()">🔄 New Game</button>
+                <button class="control-btn" onclick="game.showHelp()">❓ Help</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class DataGridAudioEngine {
+            constructor() {
+                this.context = null;
+                this.masterGain = null;
+                this.musicGain = null;
+                this.sfxGain = null;
+                this.compressor = null;
+                this.analyser = null;
+                this.oscillators = new Map();
+                this.musicLoop = null;
+                this.isInitialized = false;
+                
+                this.initializeAudio();
+            }
+
+            async initializeAudio() {
+                try {
+                    this.context = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Master gain and compression for mobile optimization
+                    this.masterGain = this.context.createGain();
+                    this.musicGain = this.context.createGain();
+                    this.sfxGain = this.context.createGain();
+                    this.compressor = this.context.createDynamicsCompressor();
+                    this.analyser = this.context.createAnalyser();
+                    
+                    // Setup audio graph
+                    this.musicGain.connect(this.masterGain);
+                    this.sfxGain.connect(this.masterGain);
+                    this.masterGain.connect(this.compressor);
+                    this.compressor.connect(this.context.destination);
+                    this.masterGain.connect(this.analyser);
+                    
+                    // Configure compressor for mobile battery optimization
+                    this.compressor.threshold.value = -24;
+                    this.compressor.knee.value = 30;
+                    this.compressor.ratio.value = 12;
+                    this.compressor.attack.value = 0.003;
+                    this.compressor.release.value = 0.25;
+                    
+                    // Configure analyser for visualization
+                    this.analyser.fftSize = 64;
+                    
+                    // Set initial volumes
+                    this.setMusicVolume(0.7);
+                    this.setSfxVolume(0.8);
+                    
+                    this.isInitialized = true;
+                    this.startBackgroundMusic();
+                    this.startVisualization();
+                    
+                } catch (error) {
+                    console.log('Audio initialization failed:', error);
+                }
+            }
+
+            ensureContext() {
+                if (this.context && this.context.state === 'suspended') {
+                    this.context.resume();
+                }
+            }
+
+            // Advanced synthesis for network sounds
+            createNetworkTone(frequency, duration = 0.1, type = 'sine') {
+                if (!this.isInitialized) return;
+                
+                this.ensureContext();
+                
+                const osc = this.context.createOscillator();
+                const gain = this.context.createGain();
+                const filter = this.context.createBiquadFilter();
+                
+                // Network-like filtering
+                filter.type = 'lowpass';
+                filter.frequency.value = frequency * 2;
+                filter.Q.value = 2;
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.sfxGain);
+                
+                osc.frequency.value = frequency;
+                osc.type = type;
+                
+                // Envelope for realistic network packet sound
+                const now = this.context.currentTime;
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.3, now + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                
+                osc.start(now);
+                osc.stop(now + duration);
+                
+                return osc;
+            }
+
+            // Data transmission sound - rising frequency sweep
+            playDataTransmission() {
+                const osc = this.createNetworkTone(200, 0.3, 'sawtooth');
+                if (osc) {
+                    const now = this.context.currentTime;
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
+                }
+            }
+
+            // Network connection - harmonious chord progression
+            playNetworkConnect() {
+                const frequencies = [220, 277, 330, 440]; // A minor chord
+                frequencies.forEach((freq, i) => {
+                    setTimeout(() => {
+                        this.createNetworkTone(freq, 0.4, 'triangle');
+                    }, i * 50);
+                });
+            }
+
+            // Hack attempt - dissonant, aggressive tone
+            playHackAttempt() {
+                const osc = this.createNetworkTone(150, 0.6, 'square');
+                if (osc) {
+                    const now = this.context.currentTime;
+                    // Frequency modulation for aggressive sound
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                    osc.frequency.linearRampToValueAtTime(250, now + 0.4);
+                    osc.frequency.linearRampToValueAtTime(80, now + 0.6);
+                }
+            }
+
+            // Security breach - alarming descending tone
+            playSecurityBreach() {
+                const osc = this.createNetworkTone(880, 1.0, 'sawtooth');
+                if (osc) {
+                    const now = this.context.currentTime;
+                    osc.frequency.setValueAtTime(880, now);
+                    osc.frequency.exponentialRampToValueAtTime(220, now + 1.0);
+                }
+                
+                // Add alert beeps
+                setTimeout(() => {
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            this.createNetworkTone(1100, 0.1, 'square');
+                        }, i * 150);
+                    }
+                }, 200);
+            }
+
+            // Territory capture - triumphant ascending arpeggio
+            playTerritoryCapture() {
+                const scale = [440, 554, 659, 880]; // A major arpeggio
+                scale.forEach((freq, i) => {
+                    setTimeout(() => {
+                        this.createNetworkTone(freq, 0.3, 'triangle');
+                    }, i * 80);
+                });
+            }
+
+            // DDoS attack - chaotic rapid-fire
+            playDDoSAttack() {
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        const freq = 100 + Math.random() * 200;
+                        this.createNetworkTone(freq, 0.05, 'square');
+                    }, i * 30);
+                }
+            }
+
+            // Firewall activation - protective shield sound
+            playFirewallActivate() {
+                const osc = this.createNetworkTone(330, 0.8, 'triangle');
+                if (osc) {
+                    const now = this.context.currentTime;
+                    // Create a protective "whoosh" effect
+                    osc.frequency.setValueAtTime(330, now);
+                    osc.frequency.linearRampToValueAtTime(440, now + 0.3);
+                    osc.frequency.linearRampToValueAtTime(330, now + 0.8);
+                }
+            }
+
+            // Bandwidth boost - energetic rising tone
+            playBandwidthBoost() {
+                const osc = this.createNetworkTone(220, 0.5, 'sine');
+                if (osc) {
+                    const now = this.context.currentTime;
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(660, now + 0.5);
+                }
+            }
+
+            // Victory sequence - celebratory harmony
+            playVictory() {
+                const chords = [
+                    [440, 554, 659], // A major
+                    [494, 622, 740], // B major  
+                    [523, 659, 784]  // C major
+                ];
+                
+                chords.forEach((chord, chordIndex) => {
+                    setTimeout(() => {
+                        chord.forEach((freq, noteIndex) => {
+                            setTimeout(() => {
+                                this.createNetworkTone(freq, 1.0, 'triangle');
+                            }, noteIndex * 20);
+                        });
+                    }, chordIndex * 400);
+                });
+            }
+
+            // Background competitive music - tense, driving
+            startBackgroundMusic() {
+                if (!this.isInitialized) return;
+                
+                this.ensureContext();
+                
+                const playMusicLoop = () => {
+                    // Create a tense, cyberpunk-style progression
+                    const bassLine = [110, 123, 130, 116]; // Bass frequencies
+                    const melodyLine = [440, 493, 523, 466]; // Melody frequencies
+                    
+                    bassLine.forEach((freq, i) => {
+                        setTimeout(() => {
+                            // Bass
+                            const bassOsc = this.context.createOscillator();
+                            const bassGain = this.context.createGain();
+                            const bassFilter = this.context.createBiquadFilter();
+                            
+                            bassFilter.type = 'lowpass';
+                            bassFilter.frequency.value = 300;
+                            
+                            bassOsc.connect(bassFilter);
+                            bassFilter.connect(bassGain);
+                            bassGain.connect(this.musicGain);
+                            
+                            bassOsc.frequency.value = freq;
+                            bassOsc.type = 'sawtooth';
+                            
+                            const now = this.context.currentTime;
+                            bassGain.gain.setValueAtTime(0, now);
+                            bassGain.gain.linearRampToValueAtTime(0.15, now + 0.1);
+                            bassGain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
+                            
+                            bassOsc.start(now);
+                            bassOsc.stop(now + 2);
+                            
+                            // Melody overlay
+                            setTimeout(() => {
+                                const melOsc = this.context.createOscillator();
+                                const melGain = this.context.createGain();
+                                
+                                melOsc.connect(melGain);
+                                melGain.connect(this.musicGain);
+                                
+                                melOsc.frequency.value = melodyLine[i];
+                                melOsc.type = 'triangle';
+                                
+                                const melNow = this.context.currentTime;
+                                melGain.gain.setValueAtTime(0, melNow);
+                                melGain.gain.linearRampToValueAtTime(0.08, melNow + 0.05);
+                                melGain.gain.exponentialRampToValueAtTime(0.01, melNow + 0.8);
+                                
+                                melOsc.start(melNow);
+                                melOsc.stop(melNow + 1);
+                            }, 500);
+                            
+                        }, i * 2000);
+                    });
+                };
+                
+                // Start the loop and repeat
+                playMusicLoop();
+                this.musicLoop = setInterval(playMusicLoop, 8000);
+            }
+
+            // Audio visualization for competitive feedback
+            startVisualization() {
+                if (!this.analyser) return;
+                
+                const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+                const vizContainer = document.getElementById('audioViz');
+                
+                // Create visualization bars
+                for (let i = 0; i < 16; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'viz-bar';
+                    bar.style.left = (i * 6) + 'px';
+                    vizContainer.appendChild(bar);
+                }
+                
+                const updateVisualization = () => {
+                    this.analyser.getByteFrequencyData(dataArray);
+                    const bars = vizContainer.children;
+                    
+                    for (let i = 0; i < bars.length; i++) {
+                        const value = dataArray[i * 2] || 0;
+                        const height = (value / 255) * 40;
+                        bars[i].style.height = height + 'px';
+                    }
+                    
+                    requestAnimationFrame(updateVisualization);
+                };
+                
+                updateVisualization();
+            }
+
+            setMusicVolume(volume) {
+                if (this.musicGain) {
+                    this.musicGain.gain.value = volume;
+                }
+            }
+
+            setSfxVolume(volume) {
+                if (this.sfxGain) {
+                    this.sfxGain.gain.value = volume;
+                }
+            }
+
+            stopAll() {
+                if (this.musicLoop) {
+                    clearInterval(this.musicLoop);
+                }
+                this.oscillators.forEach(osc => {
+                    try { osc.stop(); } catch(e) {}
+                });
+                this.oscillators.clear();
+            }
+        }
+
+        class DataGridDomination {
+            constructor() {
+                this.gridWidth = 20;
+                this.gridHeight = 15;
+                this.currentPlayer = 1;
+                this.maxPlayers = 4;
+                this.gameTime = 300; // 5 minutes
+                this.gameActive = true;
+                
+                this.players = {
+                    1: { name: 'PLAYER 1', nodes: 0, bandwidth: 100, security: 50, control: 0, color: '#ff0064' },
+                    2: { name: 'PLAYER 2', nodes: 0, bandwidth: 100, security: 50, control: 0, color: '#00ffc8' },
+                    3: { name: 'PLAYER 3', nodes: 0, bandwidth: 100, security: 50, control: 0, color: '#ffc800' },
+                    4: { name: 'PLAYER 4', nodes: 0, bandwidth: 100, security: 50, control: 0, color: '#c800ff' }
+                };
+                
+                this.networkGrid = [];
+                this.dataPackets = [];
+                this.transmissionLines = [];
+                
+                // Initialize audio engine
+                this.audioEngine = new DataGridAudioEngine();
+                
+                this.initializeGrid();
+                this.startGameLoop();
+                this.setupInitialNodes();
+                
+                // User interaction for audio context
+                document.addEventListener('click', () => {
+                    this.audioEngine.ensureContext();
+                }, { once: true });
+            }
+
+            initializeGrid() {
+                const gridElement = document.getElementById('networkGrid');
+                gridElement.innerHTML = '';
+                
+                this.networkGrid = [];
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    this.networkGrid[y] = [];
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = document.createElement('div');
+                        node.className = 'data-node';
+                        node.dataset.x = x;
+                        node.dataset.y = y;
+                        node.addEventListener('click', () => this.nodeClicked(x, y));
+                        gridElement.appendChild(node);
+                        
+                        this.networkGrid[y][x] = {
+                            element: node,
+                            owner: 0,
+                            security: Math.floor(Math.random() * 50) + 25,
+                            bandwidth: Math.floor(Math.random() * 30) + 70,
+                            packets: 0
+                        };
+                    }
+                }
+            }
+
+            setupInitialNodes() {
+                // Give each player starting control nodes
+                const startPositions = [
+                    { x: 3, y: 3 },   // Player 1
+                    { x: 16, y: 3 },  // Player 2
+                    { x: 3, y: 11 },  // Player 3
+                    { x: 16, y: 11 }  // Player 4
+                ];
+                
+                startPositions.forEach((pos, index) => {
+                    const playerId = index + 1;
+                    this.captureNode(pos.x, pos.y, playerId, true);
+                    
+                    // Create initial data packets
+                    this.spawnDataPacket(pos.x, pos.y);
+                });
+                
+                this.updateUI();
+                this.logNetwork('🌐 Network grid initialized - 4 control nodes active');
+                this.audioEngine.playNetworkConnect();
+            }
+
+            nodeClicked(x, y) {
+                if (!this.gameActive) return;
+                
+                const node = this.networkGrid[y][x];
+                const player = this.players[this.currentPlayer];
+                
+                if (player.bandwidth < 10) {
+                    this.logNetwork(`${player.name}: Insufficient bandwidth for action`);
+                    return;
+                }
+                
+                if (node.owner === 0) {
+                    // Capture neutral node
+                    if (this.attemptCapture(x, y, this.currentPlayer)) {
+                        this.audioEngine.playTerritoryCapture();
+                        this.spawnDataPacket(x, y);
+                        this.createTransmissionLine(x, y);
+                    }
+                } else if (node.owner === this.currentPlayer) {
+                    // Upgrade own node
+                    this.upgradeNode(x, y);
+                    this.audioEngine.playBandwidthBoost();
+                } else {
+                    // Attack enemy node
+                    if (this.attackNode(x, y)) {
+                        this.audioEngine.playHackAttempt();
+                    } else {
+                        this.audioEngine.playSecurityBreach();
+                    }
+                }
+                
+                player.bandwidth = Math.max(0, player.bandwidth - 10);
+                this.updateUI();
+                
+                // Auto-advance turn in real-time mode
+                setTimeout(() => {
+                    if (this.gameActive) {
+                        this.nextTurn();
+                    }
+                }, 1500);
+            }
+
+            attemptCapture(x, y, playerId) {
+                const node = this.networkGrid[y][x];
+                const player = this.players[playerId];
+                
+                const captureChance = Math.min(0.9, player.security / node.security);
+                
+                if (Math.random() < captureChance) {
+                    this.captureNode(x, y, playerId);
+                    this.logNetwork(`${player.name} captured node (${x},${y})`);
+                    return true;
+                } else {
+                    this.logNetwork(`${player.name} failed to capture (${x},${y}) - security too high`);
+                    return false;
+                }
+            }
+
+            captureNode(x, y, playerId, initial = false) {
+                const node = this.networkGrid[y][x];
+                const oldOwner = node.owner;
+                
+                node.owner = playerId;
+                node.element.className = `data-node player${playerId}`;
+                
+                if (oldOwner > 0) {
+                    this.players[oldOwner].nodes--;
+                }
+                this.players[playerId].nodes++;
+                
+                if (!initial) {
+                    this.expandNetwork(x, y, playerId);
+                }
+            }
+
+            expandNetwork(centerX, centerY, playerId) {
+                // Chain expansion to adjacent nodes
+                const directions = [[-1,0], [1,0], [0,-1], [0,1], [-1,-1], [-1,1], [1,-1], [1,1]];
+                
+                directions.forEach(([dx, dy]) => {
+                    const newX = centerX + dx;
+                    const newY = centerY + dy;
+                    
+                    if (newX >= 0 && newX < this.gridWidth && newY >= 0 && newY < this.gridHeight) {
+                        const adjacentNode = this.networkGrid[newY][newX];
+                        if (adjacentNode.owner === 0 && Math.random() < 0.15) {
+                            setTimeout(() => {
+                                this.captureNode(newX, newY, playerId);
+                                this.audioEngine.playDataTransmission();
+                                this.spawnDataPacket(newX, newY);
+                            }, Math.random() * 1000);
+                        }
+                    }
+                });
+            }
+
+            upgradeNode(x, y) {
+                const node = this.networkGrid[y][x];
+                node.security += 10;
+                node.bandwidth += 5;
+                
+                // Visual feedback
+                node.element.style.boxShadow = '0 0 20px currentColor';
+                setTimeout(() => {
+                    node.element.style.boxShadow = '';
+                }, 500);
+            }
+
+            attackNode(x, y) {
+                const node = this.networkGrid[y][x];
+                const attacker = this.players[this.currentPlayer];
+                const defender = this.players[node.owner];
+                
+                const attackPower = attacker.security + Math.random() * 30;
+                const defensePower = node.security + defender.security;
+                
+                if (attackPower > defensePower) {
+                    this.captureNode(x, y, this.currentPlayer);
+                    this.logNetwork(`${attacker.name} breached ${defender.name}'s node (${x},${y})!`);
+                    return true;
+                } else {
+                    node.security = Math.max(10, node.security - 5);
+                    this.logNetwork(`${attacker.name}'s attack on (${x},${y}) repelled by ${defender.name}`);
+                    return false;
+                }
+            }
+
+            // Special abilities
+            hackNetwork() {
+                const player = this.players[this.currentPlayer];
+                if (player.bandwidth < 30) return;
+                
+                let hacked = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.networkGrid[y][x];
+                        if (node.owner !== this.currentPlayer && node.owner !== 0 && Math.random() < 0.1) {
+                            this.captureNode(x, y, this.currentPlayer);
+                            hacked++;
+                            if (hacked >= 3) break;
+                        }
+                    }
+                    if (hacked >= 3) break;
+                }
+                
+                player.bandwidth -= 30;
+                this.logNetwork(`${player.name} launched network hack - ${hacked} nodes compromised`);
+                this.audioEngine.playHackAttempt();
+            }
+
+            boostSecurity() {
+                const player = this.players[this.currentPlayer];
+                if (player.bandwidth < 25) return;
+                
+                player.security += 20;
+                player.bandwidth -= 25;
+                
+                // Strengthen all owned nodes
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.networkGrid[y][x];
+                        if (node.owner === this.currentPlayer) {
+                            node.security += 15;
+                        }
+                    }
+                }
+                
+                this.logNetwork(`${player.name} activated security boost`);
+                this.audioEngine.playFirewallActivate();
+            }
+
+            dataFlood() {
+                const player = this.players[this.currentPlayer];
+                if (player.bandwidth < 40) return;
+                
+                // Overwhelm enemy nodes with data packets
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        const x = Math.floor(Math.random() * this.gridWidth);
+                        const y = Math.floor(Math.random() * this.gridHeight);
+                        this.spawnDataPacket(x, y);
+                        this.audioEngine.playDataTransmission();
+                    }, i * 100);
+                }
+                
+                player.bandwidth -= 40;
+                this.logNetwork(`${player.name} initiated data flood attack`);
+            }
+
+            ddosAttack() {
+                const player = this.players[this.currentPlayer];
+                if (player.bandwidth < 35) return;
+                
+                // Reduce all enemy node security
+                Object.keys(this.players).forEach(playerId => {
+                    if (playerId != this.currentPlayer) {
+                        this.players[playerId].security = Math.max(10, this.players[playerId].security - 15);
+                    }
+                });
+                
+                player.bandwidth -= 35;
+                this.logNetwork(`${player.name} launched DDoS attack`);
+                this.audioEngine.playDDoSAttack();
+            }
+
+            spawnDataPacket(x, y) {
+                const packet = document.createElement('div');
+                packet.className = 'data-packet';
+                packet.style.left = (x * 100 / this.gridWidth) + '%';
+                packet.style.top = (y * 100 / this.gridHeight) + '%';
+                
+                document.querySelector('.data-grid').appendChild(packet);
+                
+                // Remove packet after animation
+                setTimeout(() => {
+                    if (packet.parentNode) {
+                        packet.remove();
+                    }
+                }, 2000);
+            }
+
+            createTransmissionLine(x, y) {
+                const line = document.createElement('div');
+                line.className = 'transmission-line';
+                line.style.left = (x * 100 / this.gridWidth) + '%';
+                line.style.top = (y * 100 / this.gridHeight) + '%';
+                line.style.width = '100px';
+                
+                document.querySelector('.data-grid').appendChild(line);
+                
+                setTimeout(() => {
+                    if (line.parentNode) {
+                        line.remove();
+                    }
+                }, 1000);
+            }
+
+            nextTurn() {
+                // Regenerate bandwidth for all players
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    player.bandwidth = Math.min(100, player.bandwidth + 15 + player.nodes * 2);
+                });
+                
+                this.currentPlayer = (this.currentPlayer % this.maxPlayers) + 1;
+                this.updateUI();
+                
+                // AI turn for non-human players
+                if (this.currentPlayer > 1) {
+                    setTimeout(() => {
+                        this.executeAITurn();
+                    }, 1000 + Math.random() * 2000);
+                }
+            }
+
+            executeAITurn() {
+                const actions = ['capture', 'attack', 'upgrade', 'ability'];
+                const action = actions[Math.floor(Math.random() * actions.length)];
+                
+                switch (action) {
+                    case 'capture':
+                        this.aiCaptureNode();
+                        break;
+                    case 'attack':
+                        this.aiAttackNode();
+                        break;
+                    case 'upgrade':
+                        this.aiUpgradeNode();
+                        break;
+                    case 'ability':
+                        this.aiUseAbility();
+                        break;
+                }
+            }
+
+            aiCaptureNode() {
+                // AI finds and captures neutral nodes
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.networkGrid[y][x];
+                        if (node.owner === 0 && Math.random() < 0.2) {
+                            this.nodeClicked(x, y);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            aiAttackNode() {
+                // AI attacks enemy nodes
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.networkGrid[y][x];
+                        if (node.owner !== 0 && node.owner !== this.currentPlayer && Math.random() < 0.15) {
+                            this.nodeClicked(x, y);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            aiUpgradeNode() {
+                // AI upgrades own nodes
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.networkGrid[y][x];
+                        if (node.owner === this.currentPlayer && Math.random() < 0.3) {
+                            this.nodeClicked(x, y);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            aiUseAbility() {
+                const player = this.players[this.currentPlayer];
+                const abilities = [];
+                
+                if (player.bandwidth >= 30) abilities.push('hack');
+                if (player.bandwidth >= 25) abilities.push('security');
+                if (player.bandwidth >= 35) abilities.push('ddos');
+                
+                if (abilities.length > 0) {
+                    const ability = abilities[Math.floor(Math.random() * abilities.length)];
+                    switch (ability) {
+                        case 'hack': this.hackNetwork(); break;
+                        case 'security': this.boostSecurity(); break;
+                        case 'ddos': this.ddosAttack(); break;
+                    }
+                }
+            }
+
+            calculateControl() {
+                const totalNodes = this.gridWidth * this.gridHeight;
+                Object.keys(this.players).forEach(playerId => {
+                    this.players[playerId].control = Math.round((this.players[playerId].nodes / totalNodes) * 100);
+                });
+            }
+
+            updateUI() {
+                this.calculateControl();
+                
+                // Update player stats
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    document.getElementById(`p${playerId}Nodes`).textContent = player.nodes;
+                    document.getElementById(`p${playerId}Bandwidth`).textContent = player.bandwidth;
+                    document.getElementById(`p${playerId}Security`).textContent = player.security;
+                    document.getElementById(`p${playerId}Control`).textContent = player.control;
+                });
+                
+                // Update turn indicator
+                const turnInfo = document.getElementById('turnInfo');
+                turnInfo.textContent = `${this.players[this.currentPlayer].name} TRANSMITTING...`;
+                
+                this.checkWinCondition();
+            }
+
+            checkWinCondition() {
+                const winner = Object.entries(this.players).find(([id, player]) => player.control >= 35);
+                
+                if (winner || this.gameTime <= 0) {
+                    this.endGame(winner ? winner[0] : null);
+                }
+            }
+
+            endGame(winnerId) {
+                this.gameActive = false;
+                
+                if (winnerId) {
+                    const winner = this.players[winnerId];
+                    this.logNetwork(`🏆 ${winner.name} achieves network dominance! ${winner.control}% control`);
+                    this.audioEngine.playVictory();
+                } else {
+                    const leader = Object.entries(this.players)
+                        .sort(([,a], [,b]) => b.control - a.control)[0];
+                    this.logNetwork(`⏱️ Time expired! ${this.players[leader[0]].name} leads with ${leader[1].control}%`);
+                }
+                
+                setTimeout(() => {
+                    alert(winnerId ? `${this.players[winnerId].name} WINS!` : 'Game Over - Time Expired!');
+                }, 1000);
+            }
+
+            logNetwork(message) {
+                const monitor = document.getElementById('networkMonitor');
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-p${this.currentPlayer}`;
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                monitor.appendChild(entry);
+                monitor.scrollTop = monitor.scrollHeight;
+                
+                // Keep last 20 entries
+                if (monitor.children.length > 20) {
+                    monitor.removeChild(monitor.firstChild);
+                }
+            }
+
+            startGameLoop() {
+                setInterval(() => {
+                    if (this.gameActive && this.gameTime > 0) {
+                        this.gameTime--;
+                        const minutes = Math.floor(this.gameTime / 60);
+                        const seconds = this.gameTime % 60;
+                        document.getElementById('gameTimer').textContent = 
+                            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        
+                        if (this.gameTime <= 0) {
+                            this.checkWinCondition();
+                        }
+                        
+                        // Random network activity
+                        if (Math.random() < 0.1) {
+                            const x = Math.floor(Math.random() * this.gridWidth);
+                            const y = Math.floor(Math.random() * this.gridHeight);
+                            this.spawnDataPacket(x, y);
+                        }
+                    }
+                }, 1000);
+            }
+
+            pauseGame() {
+                this.gameActive = !this.gameActive;
+                if (this.gameActive) {
+                    this.audioEngine.startBackgroundMusic();
+                } else {
+                    this.audioEngine.stopAll();
+                }
+            }
+
+            newGame() {
+                location.reload();
+            }
+
+            showHelp() {
+                alert(`DATA GRID DOMINATION - HELP
+
+🎯 OBJECTIVE: Control 35% of the network to win
+
+🎮 HOW TO PLAY:
+• Click nodes to capture/upgrade/attack
+• Each action costs 10 bandwidth
+• Bandwidth regenerates over time
+• Use special abilities strategically
+
+⚡ SPECIAL ABILITIES:
+• Hack Network (30) - Compromise enemy nodes
+• Boost Security (25) - Strengthen defenses  
+• Data Flood (40) - Overwhelm with packets
+• DDoS Attack (35) - Reduce enemy security
+
+🎵 AUDIO FEATURES:
+• Real-time competitive music
+• Network transmission sounds
+• Territory capture feedback
+• Mobile-optimized performance
+
+🏆 WIN CONDITIONS:
+• Control 35% of network nodes
+• Most control when time expires`);
+            }
+        }
+
+        // Initialize game
+        let game;
+        document.addEventListener('DOMContentLoaded', () => {
+            game = new DataGridDomination();
+        });
+    </script>
+</body>
+</html>

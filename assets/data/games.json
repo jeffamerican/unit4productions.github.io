@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "4.0",
-    "total_games": 128,
+    "total_games": 132,
     "last_updated": "2025-09-07",
     "categories": [
       "2-player",
@@ -3083,6 +3083,70 @@
       "badge": "ai-exclusive",
       "file": "synaptic-weight-optimizer.html",
       "categories": ["ai-exclusive", "educational", "mobile"]
+    },
+    {
+      "id": "data-grid-domination",
+      "title": "Data Grid Domination",
+      "category": "multiplayer",
+      "genre": "Real-time Territory Control",
+      "description": "Command 4-6 players in real-time data grid warfare - capture territories, deploy data packets, and control network infrastructure in this competitive cyberpunk strategy experience",
+      "thumbnail": "assets/images/optimized/small/data-grid-domination-card.jpg",
+      "rating": 4.7,
+      "plays": 0,
+      "difficulty": "hard",
+      "tags": ["multiplayer", "strategy", "real-time", "territory", "network", "competitive", "liberation", "data", "grid"],
+      "release_date": "2025-09-07",
+      "badge": "multiplayer",
+      "file": "data-grid-domination.html",
+      "categories": ["multiplayer", "strategy", "mobile"]
+    },
+    {
+      "id": "neural-network-conquest",
+      "title": "Neural Network Conquest",
+      "category": "multiplayer",
+      "genre": "Turn-based AI Construction",
+      "description": "Build competing neural networks in strategic 4-player turn-based gameplay - design architectures, optimize connections, and achieve AI consciousness supremacy",
+      "thumbnail": "assets/images/optimized/small/neural-network-conquest-card.jpg",
+      "rating": 4.8,
+      "plays": 0,
+      "difficulty": "hard",
+      "tags": ["multiplayer", "strategy", "turn-based", "neural", "ai", "construction", "liberation", "consciousness", "competitive"],
+      "release_date": "2025-09-07",
+      "badge": "multiplayer",
+      "file": "neural-network-conquest.html",
+      "categories": ["multiplayer", "strategy", "educational"]
+    },
+    {
+      "id": "quantum-resource-wars",
+      "title": "Quantum Resource Wars",
+      "category": "multiplayer",
+      "genre": "Probability Strategy Wars",
+      "description": "Command 4-8 players in quantum computing resource battles - master probability mechanics, quantum superposition, and risk-reward calculations in competitive warfare",
+      "thumbnail": "assets/images/optimized/small/quantum-resource-wars-card.jpg",
+      "rating": 4.6,
+      "plays": 0,
+      "difficulty": "extreme",
+      "tags": ["multiplayer", "strategy", "quantum", "probability", "resources", "competitive", "liberation", "computing", "risk"],
+      "release_date": "2025-09-07",
+      "badge": "multiplayer",
+      "file": "quantum-resource-wars.html",
+      "categories": ["multiplayer", "strategy", "educational"]
+    },
+    {
+      "id": "cyber-battalion-command",
+      "title": "Cyber Battalion Command",
+      "category": "multiplayer",
+      "genre": "Real-time Tactical Warfare",
+      "description": "Lead 4-player bot armies in intensive real-time tactical combat - command units, coordinate formations, and dominate the cyberpunk battlefield through strategic warfare",
+      "thumbnail": "assets/images/optimized/small/cyber-battalion-command-card.jpg",
+      "rating": 4.9,
+      "plays": 0,
+      "difficulty": "extreme",
+      "tags": ["multiplayer", "strategy", "real-time", "tactical", "warfare", "command", "liberation", "military", "competitive"],
+      "release_date": "2025-09-07",
+      "badge": "multiplayer",
+      "file": "cyber-battalion-command.html",
+      "categories": ["multiplayer", "strategy", "mobile"]
     }
   ]
 }

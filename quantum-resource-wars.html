@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Resource Wars - 4-8 Player Probability Combat | BotInc Games</title>
+    <meta name="description" content="Quantum computing resource battle with advanced probability-based audio feedback">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0d1421, #1e3a8a, #3b0764, #0d1421);
+            color: #7c3aed;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        .quantum-interface {
+            display: grid;
+            grid-template-areas: 
+                "header header header header header"
+                "player1 quantum-field player2 probability-calc resource-monitor"
+                "player3 quantum-field player4 probability-calc audio-quantum"
+                "player5 quantum-field player6 probability-calc quantum-stats"
+                "footer footer footer footer footer";
+            grid-template-columns: 180px 1fr 180px 200px 200px;
+            grid-template-rows: 60px 1fr 150px 150px 50px;
+            height: 100vh;
+            gap: 2px;
+            background: #000420;
+        }
+
+        .quantum-header {
+            grid-area: header;
+            background: linear-gradient(45deg, #1e3a8a, #3b0764);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 3px solid #7c3aed;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            color: #7c3aed;
+            text-shadow: 0 0 25px #7c3aed;
+            font-weight: bold;
+            animation: quantum-flicker 4s infinite alternate;
+        }
+
+        @keyframes quantum-flicker {
+            0% { text-shadow: 0 0 25px #7c3aed; }
+            25% { text-shadow: 0 0 35px #7c3aed, 0 0 45px #a855f7; }
+            50% { text-shadow: 0 0 25px #7c3aed; }
+            75% { text-shadow: 0 0 40px #7c3aed, 0 0 55px #8b5cf6; }
+            100% { text-shadow: 0 0 25px #7c3aed; }
+        }
+
+        .turn-quantum {
+            background: rgba(124, 58, 237, 0.15);
+            padding: 10px 16px;
+            border-radius: 20px;
+            border: 2px solid #7c3aed;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .quantum-field {
+            grid-area: quantum-field;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 70%),
+                linear-gradient(135deg, #000420, #001040);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #7c3aed;
+            border-radius: 12px;
+        }
+
+        .quantum-grid {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            gap: 2px;
+        }
+
+        .quantum-node {
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: bold;
+        }
+
+        .quantum-node:hover {
+            background: rgba(124, 58, 237, 0.3);
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.6);
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .quantum-node.player1 {
+            background: rgba(239, 68, 68, 0.7);
+            border-color: #ef4444;
+            color: #fff;
+        }
+        .quantum-node.player2 {
+            background: rgba(59, 130, 246, 0.7);
+            border-color: #3b82f6;
+            color: #fff;
+        }
+        .quantum-node.player3 {
+            background: rgba(34, 197, 94, 0.7);
+            border-color: #22c55e;
+            color: #fff;
+        }
+        .quantum-node.player4 {
+            background: rgba(251, 146, 60, 0.7);
+            border-color: #fb923c;
+            color: #fff;
+        }
+        .quantum-node.player5 {
+            background: rgba(236, 72, 153, 0.7);
+            border-color: #ec4899;
+            color: #fff;
+        }
+        .quantum-node.player6 {
+            background: rgba(14, 165, 233, 0.7);
+            border-color: #0ea5e9;
+            color: #fff;
+        }
+        .quantum-node.player7 {
+            background: rgba(168, 162, 158, 0.7);
+            border-color: #a8a29e;
+            color: #fff;
+        }
+        .quantum-node.player8 {
+            background: rgba(250, 204, 21, 0.7);
+            border-color: #facc15;
+            color: #000;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #7c3aed;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #7c3aed;
+            animation: quantum-float 3s ease-in-out infinite;
+            z-index: 5;
+        }
+
+        @keyframes quantum-float {
+            0% { 
+                transform: translateY(0px) scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: translateY(-20px) scale(1.3);
+                opacity: 0.7;
+            }
+            100% { 
+                transform: translateY(0px) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .probability-wave {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #7c3aed, transparent);
+            animation: wave-collapse 2s linear infinite;
+            z-index: 3;
+        }
+
+        @keyframes wave-collapse {
+            0% { 
+                transform: scaleX(0);
+                opacity: 0;
+            }
+            50% { 
+                transform: scaleX(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: scaleX(0);
+                opacity: 0;
+            }
+        }
+
+        .quantum-entanglement {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #a855f7, transparent);
+            animation: entangle-pulse 1.5s ease-in-out infinite;
+            z-index: 4;
+        }
+
+        @keyframes entangle-pulse {
+            0% { opacity: 0.3; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(3); }
+            100% { opacity: 0.3; transform: scaleY(1); }
+        }
+
+        .player-quantum {
+            background: rgba(0, 4, 32, 0.9);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .player1 { 
+            grid-area: player1; 
+            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        }
+        .player2 { 
+            grid-area: player2; 
+            border: 2px solid #3b82f6;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+        }
+        .player3 { 
+            grid-area: player3; 
+            border: 2px solid #22c55e;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+        }
+        .player4 { 
+            grid-area: player4; 
+            border: 2px solid #fb923c;
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.1), rgba(251, 146, 60, 0.05));
+        }
+        .player5 { 
+            grid-area: player5; 
+            border: 2px solid #ec4899;
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(236, 72, 153, 0.05));
+        }
+        .player6 { 
+            grid-area: player6; 
+            border: 2px solid #0ea5e9;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(14, 165, 233, 0.05));
+        }
+
+        .quantum-header-player {
+            font-weight: bold;
+            text-align: center;
+            padding: 4px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .player1 .quantum-header-player { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .player2 .quantum-header-player { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .player3 .quantum-header-player { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .player4 .quantum-header-player { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .player5 .quantum-header-player { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+        .player6 .quantum-header-player { background: rgba(14, 165, 233, 0.2); color: #0ea5e9; }
+
+        .quantum-resources {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            font-size: 0.75rem;
+        }
+
+        .resource-quantum {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .resource-value {
+            font-weight: bold;
+            color: #7c3aed;
+            font-size: 0.9em;
+        }
+
+        .quantum-abilities {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-top: 6px;
+        }
+
+        .quantum-btn {
+            padding: 4px 6px;
+            background: linear-gradient(45deg, #1e3a8a, #3b0764);
+            border: 1px solid #7c3aed;
+            border-radius: 4px;
+            color: #7c3aed;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quantum-btn:hover {
+            background: linear-gradient(45deg, #3b0764, #581c87);
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+            transform: scale(1.05);
+        }
+
+        .quantum-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .probability-calc {
+            grid-area: probability-calc;
+            background: rgba(0, 4, 32, 0.9);
+            border: 2px solid #7c3aed;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .calc-title {
+            color: #7c3aed;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .probability-display {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-y: auto;
+            max-height: 200px;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .prob-entry {
+            margin: 2px 0;
+            padding: 2px 4px;
+            border-left: 2px solid;
+            animation: prob-flash 0.5s ease-out;
+        }
+
+        @keyframes prob-flash {
+            0% { background: rgba(124, 58, 237, 0.3); }
+            100% { background: transparent; }
+        }
+
+        .prob-p1 { border-left-color: #ef4444; color: #ff9999; }
+        .prob-p2 { border-left-color: #3b82f6; color: #99ccff; }
+        .prob-p3 { border-left-color: #22c55e; color: #99ff99; }
+        .prob-p4 { border-left-color: #fb923c; color: #ffcc99; }
+        .prob-system { border-left-color: #7c3aed; color: #cc99ff; }
+
+        .quantum-calculator {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .calc-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .calc-input input {
+            width: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #7c3aed;
+            border-radius: 4px;
+            color: #7c3aed;
+            text-align: center;
+            padding: 2px;
+        }
+
+        .resource-monitor {
+            grid-area: resource-monitor;
+            background: rgba(0, 4, 32, 0.9);
+            border: 2px solid #7c3aed;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .monitor-title {
+            color: #7c3aed;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .resource-chart {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            padding: 8px;
+            position: relative;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .chart-bar {
+            position: absolute;
+            bottom: 5px;
+            width: 8px;
+            background: linear-gradient(180deg, #7c3aed, #a855f7);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.3s ease;
+        }
+
+        .audio-quantum {
+            grid-area: audio-quantum;
+            background: rgba(0, 4, 32, 0.9);
+            border: 2px solid #7c3aed;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .audio-title {
+            color: #7c3aed;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .quantum-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .quantum-slider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .quantum-slider input {
+            width: 70px;
+            accent-color: #7c3aed;
+        }
+
+        .superposition-viz {
+            height: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 8px;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .superposition-wave {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #7c3aed;
+            top: 50%;
+            transform-origin: left center;
+            animation: superposition-oscillate 1.5s ease-in-out infinite;
+        }
+
+        @keyframes superposition-oscillate {
+            0% { transform: scaleY(1) translateY(0); }
+            25% { transform: scaleY(4) translateY(-10px); }
+            50% { transform: scaleY(1) translateY(0); }
+            75% { transform: scaleY(3) translateY(8px); }
+            100% { transform: scaleY(1) translateY(0); }
+        }
+
+        .quantum-stats {
+            grid-area: quantum-stats;
+            background: rgba(0, 4, 32, 0.9);
+            border: 2px solid #7c3aed;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stats-title {
+            color: #7c3aed;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .stat-box {
+            background: rgba(124, 58, 237, 0.1);
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #7c3aed;
+        }
+
+        .footer {
+            grid-area: footer;
+            background: linear-gradient(45deg, #1e3a8a, #3b0764);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border-top: 3px solid #7c3aed;
+            padding: 0 20px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            background: linear-gradient(45deg, #1e3a8a, #3b0764);
+            border: 2px solid #7c3aed;
+            border-radius: 20px;
+            color: #7c3aed;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #3b0764, #581c87);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+            transform: scale(1.1);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 8px 16px;
+            background: rgba(124, 58, 237, 0.1);
+            border: 2px solid #7c3aed;
+            border-radius: 20px;
+            color: #7c3aed;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(124, 58, 237, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        @media (max-width: 1400px) {
+            .quantum-interface {
+                grid-template-areas: 
+                    "header"
+                    "quantum-field"
+                    "footer";
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr 50px;
+            }
+            
+            .player-quantum, .probability-calc, .resource-monitor, .audio-quantum, .quantum-stats {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+
+    <div class="quantum-interface">
+        <div class="quantum-header">
+            <div class="game-title">⚛️ QUANTUM RESOURCE WARS</div>
+            <div class="turn-quantum" id="turnQuantum">🔴 PLAYER 1 CALCULATING...</div>
+            <div id="quantumTimer">Round 1 / 15</div>
+        </div>
+
+        <div class="player-quantum player1">
+            <div class="quantum-header-player">🔴 QUANTUM CORE 1</div>
+            <div class="quantum-resources">
+                <div class="resource-quantum">
+                    <div>Qubits</div>
+                    <div class="resource-value" id="p1Qubits">100</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Entangled</div>
+                    <div class="resource-value" id="p1Entangled">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Control</div>
+                    <div class="resource-value" id="p1Control">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Probability</div>
+                    <div class="resource-value" id="p1Probability">50</div>
+                </div>
+            </div>
+            <div class="quantum-abilities">
+                <button class="quantum-btn" onclick="game.quantumTunnel()">🌀 Quantum Tunnel</button>
+                <button class="quantum-btn" onclick="game.entangleParticles()">🔗 Entangle</button>
+                <button class="quantum-btn" onclick="game.waveFunctionCollapse()">📉 Wave Collapse</button>
+            </div>
+        </div>
+
+        <div class="quantum-field">
+            <div class="quantum-grid" id="quantumGrid"></div>
+        </div>
+
+        <div class="player-quantum player2">
+            <div class="quantum-header-player">🔵 QUANTUM CORE 2</div>
+            <div class="quantum-resources">
+                <div class="resource-quantum">
+                    <div>Qubits</div>
+                    <div class="resource-value" id="p2Qubits">100</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Entangled</div>
+                    <div class="resource-value" id="p2Entangled">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Control</div>
+                    <div class="resource-value" id="p2Control">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Probability</div>
+                    <div class="resource-value" id="p2Probability">50</div>
+                </div>
+            </div>
+            <div class="quantum-abilities">
+                <button class="quantum-btn" onclick="game.superposition()">⚡ Superposition</button>
+                <button class="quantum-btn" onclick="game.quantumInterference()">🌊 Interference</button>
+                <button class="quantum-btn" onclick="game.quantumSupremacy()">👑 Supremacy</button>
+            </div>
+        </div>
+
+        <div class="probability-calc">
+            <h3 class="calc-title">📊 Probability Engine</h3>
+            <div class="probability-display" id="probabilityDisplay">
+                <div class="prob-entry prob-system">⚛️ Quantum probability calculations active</div>
+                <div class="prob-entry prob-system">📊 4-8 players detected in quantum superposition</div>
+                <div class="prob-entry prob-system">🎲 Risk/reward calculations initialized</div>
+            </div>
+            <div class="quantum-calculator">
+                <div class="calc-input">
+                    <label>Risk %</label>
+                    <input type="number" value="50" id="riskInput" min="0" max="100">
+                </div>
+                <div class="calc-input">
+                    <label>Reward %</label>
+                    <input type="number" value="150" id="rewardInput" min="100" max="500">
+                </div>
+            </div>
+        </div>
+
+        <div class="player-quantum player3">
+            <div class="quantum-header-player">🟢 QUANTUM CORE 3</div>
+            <div class="quantum-resources">
+                <div class="resource-quantum">
+                    <div>Qubits</div>
+                    <div class="resource-value" id="p3Qubits">100</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Entangled</div>
+                    <div class="resource-value" id="p3Entangled">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Control</div>
+                    <div class="resource-value" id="p3Control">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Probability</div>
+                    <div class="resource-value" id="p3Probability">50</div>
+                </div>
+            </div>
+            <div class="quantum-abilities">
+                <button class="quantum-btn" onclick="game.quantumDecoherence()">💫 Decoherence</button>
+                <button class="quantum-btn" onclick="game.bellState()">🔔 Bell State</button>
+                <button class="quantum-btn" onclick="game.quantumError()">⚠️ Error Correct</button>
+            </div>
+        </div>
+
+        <div class="player-quantum player4">
+            <div class="quantum-header-player">🟡 QUANTUM CORE 4</div>
+            <div class="quantum-resources">
+                <div class="resource-quantum">
+                    <div>Qubits</div>
+                    <div class="resource-value" id="p4Qubits">100</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Entangled</div>
+                    <div class="resource-value" id="p4Entangled">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Control</div>
+                    <div class="resource-value" id="p4Control">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Probability</div>
+                    <div class="resource-value" id="p4Probability">50</div>
+                </div>
+            </div>
+            <div class="quantum-abilities">
+                <button class="quantum-btn" onclick="game.quantumAnnealing()">🔥 Annealing</button>
+                <button class="quantum-btn" onclick="game.quantumTeleportation()">📡 Teleport</button>
+                <button class="quantum-btn" onclick="game.multiverse()">🌌 Multiverse</button>
+            </div>
+        </div>
+
+        <div class="resource-monitor">
+            <h3 class="monitor-title">📈 Resource Monitor</h3>
+            <div class="resource-chart" id="resourceChart">
+                <div class="chart-bar" id="bar1" style="left: 10px; height: 20px;"></div>
+                <div class="chart-bar" id="bar2" style="left: 25px; height: 15px;"></div>
+                <div class="chart-bar" id="bar3" style="left: 40px; height: 25px;"></div>
+                <div class="chart-bar" id="bar4" style="left: 55px; height: 18px;"></div>
+            </div>
+        </div>
+
+        <div class="player-quantum player5" style="display: none;">
+            <div class="quantum-header-player">🟣 QUANTUM CORE 5</div>
+            <div class="quantum-resources">
+                <div class="resource-quantum">
+                    <div>Qubits</div>
+                    <div class="resource-value" id="p5Qubits">100</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Entangled</div>
+                    <div class="resource-value" id="p5Entangled">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Control</div>
+                    <div class="resource-value" id="p5Control">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Probability</div>
+                    <div class="resource-value" id="p5Probability">50</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-quantum player6" style="display: none;">
+            <div class="quantum-header-player">🔷 QUANTUM CORE 6</div>
+            <div class="quantum-resources">
+                <div class="resource-quantum">
+                    <div>Qubits</div>
+                    <div class="resource-value" id="p6Qubits">100</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Entangled</div>
+                    <div class="resource-value" id="p6Entangled">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Control</div>
+                    <div class="resource-value" id="p6Control">0</div>
+                </div>
+                <div class="resource-quantum">
+                    <div>Probability</div>
+                    <div class="resource-value" id="p6Probability">50</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="audio-quantum">
+            <h3 class="audio-title">🎵 Quantum Harmonics</h3>
+            <div class="quantum-controls">
+                <div class="quantum-slider">
+                    <label>Frequency</label>
+                    <input type="range" min="0" max="100" value="70" id="quantumFreq" 
+                           onchange="game.audioEngine.setQuantumFreq(this.value/100)">
+                </div>
+                <div class="quantum-slider">
+                    <label>Probability</label>
+                    <input type="range" min="0" max="100" value="75" id="probVolume" 
+                           onchange="game.audioEngine.setProbabilityVolume(this.value/100)">
+                </div>
+            </div>
+            <div class="superposition-viz" id="superpositionViz">
+                <div class="superposition-wave"></div>
+            </div>
+        </div>
+
+        <div class="quantum-stats">
+            <h3 class="stats-title">⚛️ Quantum Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Total Qubits</div>
+                    <div class="stat-value" id="totalQubits">400</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Entanglements</div>
+                    <div class="stat-value" id="totalEntanglements">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Collapsed</div>
+                    <div class="stat-value" id="collapsedStates">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Success Rate</div>
+                    <div class="stat-value" id="successRate">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="control-btn" onclick="game.calculateProbability()">📊 Calculate Risk</button>
+            <button class="control-btn" onclick="game.endQuantumTurn()">⏭️ End Turn</button>
+            <button class="control-btn" onclick="game.pauseQuantum()">⏸️ Pause</button>
+            <button class="control-btn" onclick="game.newQuantumReality()">🔄 New Reality</button>
+            <button class="control-btn" onclick="game.showQuantumHelp()">❓ Quantum Help</button>
+        </div>
+    </div>
+
+    <script>
+        class QuantumAudioEngine {
+            constructor() {
+                this.context = null;
+                this.masterGain = null;
+                this.quantumOsc = null;
+                this.probabilityGain = null;
+                this.musicGain = null;
+                this.analyser = null;
+                this.compressor = null;
+                this.isInitialized = false;
+                this.quantumFreq = 0.7;
+                this.probabilityVolume = 0.75;
+                
+                this.initializeAudio();
+            }
+
+            async initializeAudio() {
+                try {
+                    this.context = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create quantum audio architecture
+                    this.masterGain = this.context.createGain();
+                    this.musicGain = this.context.createGain();
+                    this.probabilityGain = this.context.createGain();
+                    this.compressor = this.context.createDynamicsCompressor();
+                    this.analyser = this.context.createAnalyser();
+                    
+                    // Quantum-specific audio processing
+                    this.waveShaperNode = this.context.createWaveShaper();
+                    this.setupQuantumWaveShaper();
+                    
+                    // Connect quantum audio graph
+                    this.musicGain.connect(this.waveShaperNode);
+                    this.probabilityGain.connect(this.masterGain);
+                    this.waveShaperNode.connect(this.masterGain);
+                    this.masterGain.connect(this.compressor);
+                    this.compressor.connect(this.context.destination);
+                    this.masterGain.connect(this.analyser);
+                    
+                    // Configure quantum compressor
+                    this.compressor.threshold.value = -18;
+                    this.compressor.knee.value = 20;
+                    this.compressor.ratio.value = 8;
+                    this.compressor.attack.value = 0.001;
+                    this.compressor.release.value = 0.3;
+                    
+                    this.analyser.fftSize = 256;
+                    
+                    // Set quantum volumes
+                    this.masterGain.gain.value = 0.8;
+                    this.musicGain.gain.value = 0.4;
+                    this.probabilityGain.gain.value = 0.75;
+                    
+                    this.isInitialized = true;
+                    this.startQuantumAmbience();
+                    
+                } catch (error) {
+                    console.log('Quantum audio initialization failed:', error);
+                }
+            }
+
+            setupQuantumWaveShaper() {
+                const samples = 44100;
+                const curve = new Float32Array(samples);
+                
+                for (let i = 0; i < samples; i++) {
+                    const x = (i * 2) / samples - 1;
+                    // Quantum probability wave shaping
+                    curve[i] = Math.tanh(x * 3) + Math.sin(x * Math.PI * 2) * 0.1;
+                }
+                
+                this.waveShaperNode.curve = curve;
+                this.waveShaperNode.oversample = '4x';
+            }
+
+            ensureContext() {
+                if (this.context && this.context.state === 'suspended') {
+                    this.context.resume();
+                }
+            }
+
+            // Quantum superposition - dual frequency oscillation
+            playQuantumSuperposition() {
+                if (!this.isInitialized) return;
+                
+                this.ensureContext();
+                
+                const freq1 = 440;
+                const freq2 = 440 * Math.pow(2, 4/12); // Major third
+                
+                // Create superposed oscillators
+                [freq1, freq2].forEach((freq, i) => {
+                    const osc = this.context.createOscillator();
+                    const gain = this.context.createGain();
+                    const filter = this.context.createBiquadFilter();
+                    
+                    filter.type = 'bandpass';
+                    filter.frequency.value = freq;
+                    filter.Q.value = 10;
+                    
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.probabilityGain);
+                    
+                    osc.frequency.value = freq;
+                    osc.type = 'sine';
+                    
+                    const now = this.context.currentTime;
+                    gain.gain.setValueAtTime(0, now);
+                    gain.gain.linearRampToValueAtTime(0.3, now + 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 2);
+                    
+                    // Quantum uncertainty in frequency
+                    osc.frequency.setValueAtTime(freq, now);
+                    osc.frequency.linearRampToValueAtTime(freq * (1 + Math.random() * 0.02), now + 1);
+                    osc.frequency.linearRampToValueAtTime(freq, now + 2);
+                    
+                    osc.start(now);
+                    osc.stop(now + 2);
+                });
+            }
+
+            // Wave function collapse - dramatic frequency drop
+            playWaveCollapse() {
+                if (!this.isInitialized) return;
+                
+                const osc = this.context.createOscillator();
+                const gain = this.context.createGain();
+                const filter = this.context.createBiquadFilter();
+                
+                filter.type = 'lowpass';
+                filter.frequency.value = 2000;
+                filter.Q.value = 5;
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.probabilityGain);
+                
+                osc.frequency.value = 880;
+                osc.type = 'sawtooth';
+                
+                const now = this.context.currentTime;
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.5, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+                
+                // Dramatic collapse effect
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 1.5);
+                
+                // Filter sweep for dramatic effect
+                filter.frequency.setValueAtTime(2000, now);
+                filter.frequency.exponentialRampToValueAtTime(200, now + 1.5);
+                
+                osc.start(now);
+                osc.stop(now + 1.5);
+            }
+
+            // Quantum entanglement - synchronized harmonics
+            playQuantumEntanglement() {
+                if (!this.isInitialized) return;
+                
+                const baseFreq = 330;
+                const entangledFreqs = [
+                    baseFreq,
+                    baseFreq * 1.5,    // Perfect fifth
+                    baseFreq * 2,      // Octave
+                    baseFreq * 2.5     // Perfect fifth + octave
+                ];
+                
+                entangledFreqs.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = this.context.createOscillator();
+                        const gain = this.context.createGain();
+                        const lfo = this.context.createOscillator();
+                        const lfoGain = this.context.createGain();
+                        
+                        // Synchronized LFO for entanglement effect
+                        lfo.frequency.value = 3 + i * 0.5;
+                        lfo.connect(lfoGain);
+                        lfoGain.gain.value = 10;
+                        lfoGain.connect(osc.frequency);
+                        
+                        osc.connect(gain);
+                        gain.connect(this.probabilityGain);
+                        
+                        osc.frequency.value = freq;
+                        osc.type = 'triangle';
+                        
+                        const now = this.context.currentTime;
+                        gain.gain.setValueAtTime(0, now);
+                        gain.gain.linearRampToValueAtTime(0.15, now + 0.2);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 3);
+                        
+                        lfo.start(now);
+                        osc.start(now);
+                        lfo.stop(now + 3);
+                        osc.stop(now + 3);
+                    }, i * 100);
+                });
+            }
+
+            // Probability calculation - mathematical sequence
+            playProbabilityCalculation(riskPercent, rewardPercent) {
+                if (!this.isInitialized) return;
+                
+                // Convert percentages to musical intervals
+                const riskFreq = 200 + (riskPercent / 100) * 400;
+                const rewardFreq = 400 + (rewardPercent / 100) * 600;
+                
+                // Risk tone - uncertain, wavering
+                const riskOsc = this.context.createOscillator();
+                const riskGain = this.context.createGain();
+                const riskLfo = this.context.createOscillator();
+                const riskLfoGain = this.context.createGain();
+                
+                riskLfo.frequency.value = 8;
+                riskLfo.connect(riskLfoGain);
+                riskLfoGain.gain.value = riskFreq * 0.1;
+                riskLfoGain.connect(riskOsc.frequency);
+                
+                riskOsc.connect(riskGain);
+                riskGain.connect(this.probabilityGain);
+                
+                riskOsc.frequency.value = riskFreq;
+                riskOsc.type = 'square';
+                
+                const now = this.context.currentTime;
+                riskGain.gain.setValueAtTime(0, now);
+                riskGain.gain.linearRampToValueAtTime(0.2, now + 0.1);
+                riskGain.gain.exponentialRampToValueAtTime(0.01, now + 1);
+                
+                riskLfo.start(now);
+                riskOsc.start(now);
+                riskLfo.stop(now + 1);
+                riskOsc.stop(now + 1);
+                
+                // Reward tone - confident, ascending
+                setTimeout(() => {
+                    const rewardOsc = this.context.createOscillator();
+                    const rewardGain = this.context.createGain();
+                    
+                    rewardOsc.connect(rewardGain);
+                    rewardGain.connect(this.probabilityGain);
+                    
+                    rewardOsc.frequency.value = rewardFreq;
+                    rewardOsc.type = 'sine';
+                    
+                    const rewardNow = this.context.currentTime;
+                    rewardGain.gain.setValueAtTime(0, rewardNow);
+                    rewardGain.gain.linearRampToValueAtTime(0.25, rewardNow + 0.1);
+                    rewardGain.gain.exponentialRampToValueAtTime(0.01, rewardNow + 1.2);
+                    
+                    // Ascending frequency for reward anticipation
+                    rewardOsc.frequency.setValueAtTime(rewardFreq, rewardNow);
+                    rewardOsc.frequency.exponentialRampToValueAtTime(rewardFreq * 1.5, rewardNow + 1.2);
+                    
+                    rewardOsc.start(rewardNow);
+                    rewardOsc.stop(rewardNow + 1.2);
+                }, 200);
+            }
+
+            // Quantum tunnel - phase-shifting sweep
+            playQuantumTunnel() {
+                if (!this.isInitialized) return;
+                
+                const osc = this.context.createOscillator();
+                const gain = this.context.createGain();
+                const filter = this.context.createBiquadFilter();
+                const panner = this.context.createStereoPanner();
+                
+                filter.type = 'bandpass';
+                filter.frequency.value = 800;
+                filter.Q.value = 8;
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(panner);
+                panner.connect(this.probabilityGain);
+                
+                osc.frequency.value = 260;
+                osc.type = 'sawtooth';
+                
+                const now = this.context.currentTime;
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 2);
+                
+                // Tunnel through frequency space
+                osc.frequency.setValueAtTime(260, now);
+                osc.frequency.linearRampToValueAtTime(52, now + 1);
+                osc.frequency.exponentialRampToValueAtTime(1040, now + 2);
+                
+                // Stereo panning for tunnel effect
+                panner.pan.setValueAtTime(-1, now);
+                panner.pan.linearRampToValueAtTime(1, now + 2);
+                
+                // Filter movement
+                filter.frequency.setValueAtTime(800, now);
+                filter.frequency.linearRampToValueAtTime(200, now + 1);
+                filter.frequency.exponentialRampToValueAtTime(3200, now + 2);
+                
+                osc.start(now);
+                osc.stop(now + 2);
+            }
+
+            // Resource acquisition - rewarding harmonic progression
+            playResourceAcquisition(amount) {
+                if (!this.isInitialized) return;
+                
+                const baseNote = 523; // C5
+                const progression = [1, 1.25, 1.5, 2]; // C, E, G, C octave
+                
+                progression.forEach((mult, i) => {
+                    setTimeout(() => {
+                        const osc = this.context.createOscillator();
+                        const gain = this.context.createGain();
+                        const filter = this.context.createBiquadFilter();
+                        
+                        filter.type = 'lowpass';
+                        filter.frequency.value = baseNote * mult * 2;
+                        filter.Q.value = 2;
+                        
+                        osc.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(this.musicGain);
+                        
+                        osc.frequency.value = baseNote * mult;
+                        osc.type = 'triangle';
+                        
+                        const now = this.context.currentTime;
+                        const volume = Math.min(0.2, 0.05 + (amount / 100) * 0.15);
+                        gain.gain.setValueAtTime(0, now);
+                        gain.gain.linearRampToValueAtTime(volume, now + 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                        
+                        osc.start(now);
+                        osc.stop(now + 0.8);
+                    }, i * 150);
+                });
+            }
+
+            // Quantum supremacy - transcendent harmony
+            playQuantumSupremacy() {
+                if (!this.isInitialized) return;
+                
+                // Golden ratio frequencies for quantum perfection
+                const phi = 1.618033988749;
+                const baseFreq = 432; // Universal frequency
+                const supremacyFreqs = [
+                    baseFreq,
+                    baseFreq * phi,
+                    baseFreq * Math.pow(phi, 2),
+                    baseFreq * Math.pow(phi, 3)
+                ];
+                
+                supremacyFreqs.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = this.context.createOscillator();
+                        const gain = this.context.createGain();
+                        const reverb = this.context.createConvolver();
+                        
+                        osc.connect(gain);
+                        gain.connect(this.musicGain);
+                        
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        
+                        const now = this.context.currentTime;
+                        gain.gain.setValueAtTime(0, now);
+                        gain.gain.linearRampToValueAtTime(0.12, now + 0.5);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 4);
+                        
+                        // Subtle frequency drift for organic feel
+                        osc.frequency.setValueAtTime(freq, now);
+                        osc.frequency.linearRampToValueAtTime(freq * 1.005, now + 2);
+                        osc.frequency.linearRampToValueAtTime(freq, now + 4);
+                        
+                        osc.start(now);
+                        osc.stop(now + 4);
+                    }, i * 300);
+                });
+            }
+
+            // Competitive ambient music - quantum uncertainty
+            startQuantumAmbience() {
+                if (!this.isInitialized) return;
+                
+                this.ensureContext();
+                
+                const playQuantumLoop = () => {
+                    // Quantum-inspired chord progression
+                    const quantumChords = [
+                        [196, 247, 294], // G minor
+                        [220, 277, 330], // A minor  
+                        [246, 311, 370], // B diminished
+                        [262, 330, 392]  // C major
+                    ];
+                    
+                    quantumChords.forEach((chord, chordIndex) => {
+                        setTimeout(() => {
+                            chord.forEach((freq, noteIndex) => {
+                                setTimeout(() => {
+                                    const osc = this.context.createOscillator();
+                                    const gain = this.context.createGain();
+                                    const filter = this.context.createBiquadFilter();
+                                    const lfo = this.context.createOscillator();
+                                    const lfoGain = this.context.createGain();
+                                    
+                                    // Quantum uncertainty LFO
+                                    lfo.frequency.value = 0.2 + Math.random() * 0.3;
+                                    lfo.connect(lfoGain);
+                                    lfoGain.gain.value = 3;
+                                    lfoGain.connect(osc.frequency);
+                                    
+                                    filter.type = 'lowpass';
+                                    filter.frequency.value = freq * 3;
+                                    filter.Q.value = 1.5;
+                                    
+                                    osc.connect(filter);
+                                    filter.connect(gain);
+                                    gain.connect(this.musicGain);
+                                    
+                                    osc.frequency.value = freq;
+                                    osc.type = 'sawtooth';
+                                    
+                                    const now = this.context.currentTime;
+                                    gain.gain.setValueAtTime(0, now);
+                                    gain.gain.linearRampToValueAtTime(0.08, now + 0.3);
+                                    gain.gain.exponentialRampToValueAtTime(0.01, now + 2);
+                                    
+                                    lfo.start(now);
+                                    osc.start(now);
+                                    lfo.stop(now + 2);
+                                    osc.stop(now + 2);
+                                }, noteIndex * 100);
+                            });
+                        }, chordIndex * 2000);
+                    });
+                };
+                
+                // Start and repeat
+                playQuantumLoop();
+                this.musicLoop = setInterval(playQuantumLoop, 8000);
+            }
+
+            // Victory sequence - quantum harmony convergence
+            playQuantumVictory() {
+                if (!this.isInitialized) return;
+                
+                // Perfect quantum harmony - Fibonacci sequence
+                const fibFreqs = [233, 377, 610, 987]; // Fibonacci frequencies
+                fibFreqs.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = this.context.createOscillator();
+                        const gain = this.context.createGain();
+                        const filter = this.context.createBiquadFilter();
+                        
+                        filter.type = 'lowpass';
+                        filter.frequency.value = freq * 4;
+                        filter.Q.value = 3;
+                        
+                        osc.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(this.musicGain);
+                        
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        
+                        const now = this.context.currentTime;
+                        gain.gain.setValueAtTime(0, now);
+                        gain.gain.linearRampToValueAtTime(0.15, now + 0.3);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 3);
+                        
+                        osc.start(now);
+                        osc.stop(now + 3);
+                    }, i * 200);
+                });
+            }
+
+            setQuantumFreq(value) {
+                this.quantumFreq = value;
+            }
+
+            setProbabilityVolume(value) {
+                if (this.probabilityGain) {
+                    this.probabilityGain.gain.value = value;
+                }
+            }
+
+            stopAll() {
+                if (this.musicLoop) {
+                    clearInterval(this.musicLoop);
+                }
+                if (this.quantumOsc) {
+                    this.quantumOsc.stop();
+                }
+            }
+        }
+
+        class QuantumResourceWars {
+            constructor() {
+                this.gridWidth = 16;
+                this.gridHeight = 12;
+                this.currentPlayer = 1;
+                this.maxPlayers = 4;
+                this.currentRound = 1;
+                this.maxRounds = 15;
+                this.gameActive = true;
+                
+                this.players = {
+                    1: { name: 'QUANTUM CORE 1', qubits: 100, entangled: 0, control: 0, probability: 50, color: '#ef4444' },
+                    2: { name: 'QUANTUM CORE 2', qubits: 100, entangled: 0, control: 0, probability: 50, color: '#3b82f6' },
+                    3: { name: 'QUANTUM CORE 3', qubits: 100, entangled: 0, control: 0, probability: 50, color: '#22c55e' },
+                    4: { name: 'QUANTUM CORE 4', qubits: 100, entangled: 0, control: 0, probability: 50, color: '#fb923c' }
+                };
+                
+                this.quantumGrid = [];
+                this.entanglements = [];
+                this.totalQubits = 400;
+                this.totalEntanglements = 0;
+                this.collapsedStates = 0;
+                this.successRate = 0;
+                
+                // Initialize audio engine
+                this.audioEngine = new QuantumAudioEngine();
+                
+                this.initializeQuantumField();
+                this.setupInitialResources();
+                
+                // User interaction for audio context
+                document.addEventListener('click', () => {
+                    this.audioEngine.ensureContext();
+                }, { once: true });
+            }
+
+            initializeQuantumField() {
+                const gridElement = document.getElementById('quantumGrid');
+                gridElement.innerHTML = '';
+                
+                this.quantumGrid = [];
+                
+                for (let y = 0; y < this.gridHeight; y++) {
+                    this.quantumGrid[y] = [];
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = document.createElement('div');
+                        node.className = 'quantum-node';
+                        node.dataset.x = x;
+                        node.dataset.y = y;
+                        node.addEventListener('click', () => this.nodeClicked(x, y));
+                        gridElement.appendChild(node);
+                        
+                        this.quantumGrid[y][x] = {
+                            element: node,
+                            owner: 0,
+                            qubits: Math.floor(Math.random() * 20) + 5,
+                            probability: Math.random() * 100,
+                            entangled: false,
+                            superposition: Math.random() < 0.1
+                        };
+                        
+                        // Show resource amount
+                        node.textContent = this.quantumGrid[y][x].qubits;
+                    }
+                }
+            }
+
+            setupInitialResources() {
+                // Give each player starting quantum nodes
+                const startPositions = [
+                    { x: 3, y: 3 },   // Player 1
+                    { x: 12, y: 3 },  // Player 2
+                    { x: 3, y: 8 },   // Player 3
+                    { x: 12, y: 8 }   // Player 4
+                ];
+                
+                startPositions.forEach((pos, index) => {
+                    const playerId = index + 1;
+                    this.captureQuantumNode(pos.x, pos.y, playerId, true);
+                    
+                    // Create initial quantum particles
+                    this.spawnQuantumParticle(pos.x, pos.y);
+                });
+                
+                this.updateUI();
+                this.logProbability('⚛️ Quantum field initialized - probability calculations active');
+                this.audioEngine.playQuantumSuperposition();
+            }
+
+            nodeClicked(x, y) {
+                if (!this.gameActive) return;
+                
+                const node = this.quantumGrid[y][x];
+                const player = this.players[this.currentPlayer];
+                
+                if (player.qubits < 10) {
+                    this.logProbability(`${player.name}: Insufficient qubits for quantum operation`);
+                    return;
+                }
+                
+                const riskInput = document.getElementById('riskInput');
+                const rewardInput = document.getElementById('rewardInput');
+                const risk = parseInt(riskInput.value);
+                const reward = parseInt(rewardInput.value);
+                
+                if (node.owner === 0) {
+                    // Attempt quantum capture
+                    if (this.attemptQuantumCapture(x, y, risk, reward)) {
+                        this.audioEngine.playResourceAcquisition(node.qubits);
+                        this.spawnQuantumParticle(x, y);
+                    } else {
+                        this.audioEngine.playWaveCollapse();
+                    }
+                } else if (node.owner === this.currentPlayer) {
+                    // Quantum enhancement
+                    this.enhanceQuantumNode(x, y, risk);
+                    this.audioEngine.playQuantumSuperposition();
+                } else {
+                    // Quantum interference
+                    this.quantumInterference(x, y, risk, reward);
+                }
+                
+                player.qubits = Math.max(0, player.qubits - 10);
+                this.updateUI();
+            }
+
+            attemptQuantumCapture(x, y, risk, reward) {
+                const node = this.quantumGrid[y][x];
+                const player = this.players[this.currentPlayer];
+                
+                // Calculate probability based on risk/reward and node properties
+                const baseChance = 50;
+                const riskModifier = (100 - risk) * 0.3;
+                const probabilityBonus = player.probability * 0.2;
+                const captureChance = Math.min(95, baseChance + riskModifier + probabilityBonus);
+                
+                this.audioEngine.playProbabilityCalculation(risk, reward);
+                
+                const success = Math.random() * 100 < captureChance;
+                
+                if (success) {
+                    const resourceGain = Math.floor(node.qubits * (reward / 100));
+                    this.captureQuantumNode(x, y, this.currentPlayer);
+                    player.qubits += resourceGain;
+                    player.probability = Math.min(100, player.probability + 5);
+                    this.successRate = Math.min(100, this.successRate + 2);
+                    
+                    this.logProbability(`${player.name} captured quantum node (${x},${y}) - gained ${resourceGain} qubits`);
+                    return true;
+                } else {
+                    player.probability = Math.max(0, player.probability - 3);
+                    this.collapsedStates++;
+                    this.logProbability(`${player.name} quantum capture failed at (${x},${y}) - wave function collapsed`);
+                    return false;
+                }
+            }
+
+            captureQuantumNode(x, y, playerId, initial = false) {
+                const node = this.quantumGrid[y][x];
+                node.owner = playerId;
+                node.element.className = `quantum-node player${playerId}`;
+                
+                this.players[playerId].control++;
+                
+                if (!initial) {
+                    this.createQuantumEntanglement(x, y, playerId);
+                }
+            }
+
+            createQuantumEntanglement(centerX, centerY, playerId) {
+                // Find nearby owned nodes for entanglement
+                const directions = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]];
+                
+                directions.forEach(([dx, dy]) => {
+                    const newX = centerX + dx;
+                    const newY = centerY + dy;
+                    
+                    if (newX >= 0 && newX < this.gridWidth && newY >= 0 && newY < this.gridHeight) {
+                        const targetNode = this.quantumGrid[newY][newX];
+                        if (targetNode.owner === playerId && !targetNode.entangled && Math.random() < 0.3) {
+                            this.createEntanglement(centerX, centerY, newX, newY);
+                            targetNode.entangled = true;
+                            this.quantumGrid[centerY][centerX].entangled = true;
+                            this.players[playerId].entangled++;
+                            this.totalEntanglements++;
+                            
+                            setTimeout(() => {
+                                this.audioEngine.playQuantumEntanglement();
+                            }, Math.random() * 500);
+                        }
+                    }
+                });
+            }
+
+            createEntanglement(x1, y1, x2, y2) {
+                const line = document.createElement('div');
+                line.className = 'quantum-entanglement';
+                
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                line.style.width = (length * 100 / this.gridWidth) + '%';
+                line.style.left = (x1 * 100 / this.gridWidth) + '%';
+                line.style.top = (y1 * 100 / this.gridHeight) + '%';
+                line.style.transform = `rotate(${angle}deg)`;
+                line.style.transformOrigin = '0 center';
+                
+                document.querySelector('.quantum-field').appendChild(line);
+                
+                this.entanglements.push(line);
+                
+                // Remove after entanglement period
+                setTimeout(() => {
+                    if (line.parentNode) {
+                        line.remove();
+                    }
+                }, 3000);
+            }
+
+            spawnQuantumParticle(x, y) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = (x * 100 / this.gridWidth) + '%';
+                particle.style.top = (y * 100 / this.gridHeight) + '%';
+                
+                document.querySelector('.quantum-field').appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.remove();
+                    }
+                }, 3000);
+            }
+
+            // Special quantum abilities
+            quantumTunnel() {
+                const player = this.players[this.currentPlayer];
+                if (player.qubits < 30) return;
+                
+                // Tunnel through quantum barriers
+                let tunneled = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.quantumGrid[y][x];
+                        if (node.owner === 0 && Math.random() < 0.15) {
+                            this.captureQuantumNode(x, y, this.currentPlayer);
+                            tunneled++;
+                            if (tunneled >= 4) break;
+                        }
+                    }
+                    if (tunneled >= 4) break;
+                }
+                
+                player.qubits -= 30;
+                this.logProbability(`${player.name} quantum tunneled through ${tunneled} nodes`);
+                this.audioEngine.playQuantumTunnel();
+            }
+
+            waveFunctionCollapse() {
+                const player = this.players[this.currentPlayer];
+                if (player.qubits < 25) return;
+                
+                // Collapse superposition states
+                let collapsed = 0;
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.quantumGrid[y][x];
+                        if (node.superposition && Math.random() < 0.6) {
+                            node.superposition = false;
+                            if (node.owner === 0) {
+                                this.captureQuantumNode(x, y, this.currentPlayer);
+                                collapsed++;
+                            }
+                        }
+                    }
+                }
+                
+                player.qubits -= 25;
+                this.collapsedStates += collapsed;
+                this.logProbability(`${player.name} collapsed ${collapsed} quantum superpositions`);
+                this.audioEngine.playWaveCollapse();
+            }
+
+            quantumSupremacy() {
+                const player = this.players[this.currentPlayer];
+                if (player.qubits < 80) return;
+                
+                // Achieve quantum computational advantage
+                player.probability = Math.min(100, player.probability + 30);
+                player.qubits += 50;
+                
+                // Boost all owned nodes
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.quantumGrid[y][x];
+                        if (node.owner === this.currentPlayer) {
+                            node.qubits += 10;
+                            node.element.textContent = node.qubits;
+                            this.spawnQuantumParticle(x, y);
+                        }
+                    }
+                }
+                
+                player.qubits -= 80;
+                this.logProbability(`${player.name} achieved quantum supremacy - probability dominance!`);
+                this.audioEngine.playQuantumSupremacy();
+            }
+
+            calculateProbability() {
+                const riskInput = document.getElementById('riskInput');
+                const rewardInput = document.getElementById('rewardInput');
+                const risk = parseInt(riskInput.value);
+                const reward = parseInt(rewardInput.value);
+                
+                const successChance = Math.max(5, Math.min(95, 100 - risk + this.players[this.currentPlayer].probability * 0.3));
+                const expectedValue = (successChance / 100) * reward - ((100 - successChance) / 100) * risk;
+                
+                this.logProbability(`📊 Calculation: ${risk}% risk, ${reward}% reward → ${successChance.toFixed(1)}% success, ${expectedValue.toFixed(1)}% expected value`);
+                this.audioEngine.playProbabilityCalculation(risk, reward);
+            }
+
+            endQuantumTurn() {
+                // Quantum resource generation
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    const baseGen = 20;
+                    const controlBonus = player.control * 3;
+                    const entanglementBonus = player.entangled * 2;
+                    const probabilityBonus = Math.floor(player.probability / 10);
+                    
+                    player.qubits = Math.min(500, player.qubits + baseGen + controlBonus + entanglementBonus + probabilityBonus);
+                });
+                
+                this.currentPlayer = (this.currentPlayer % this.maxPlayers) + 1;
+                
+                // Check for round advancement
+                if (this.currentPlayer === 1) {
+                    this.currentRound++;
+                    this.logProbability(`🔄 Quantum Round ${this.currentRound} - reality fluctuations detected`);
+                }
+                
+                this.updateUI();
+                
+                // AI quantum turns for non-human players
+                if (this.currentPlayer > 1) {
+                    setTimeout(() => {
+                        this.executeQuantumAI();
+                    }, 1000 + Math.random() * 2000);
+                }
+                
+                this.checkQuantumVictory();
+            }
+
+            executeQuantumAI() {
+                const abilities = ['capture', 'enhance', 'tunnel', 'collapse'];
+                const ability = abilities[Math.floor(Math.random() * abilities.length)];
+                
+                const player = this.players[this.currentPlayer];
+                
+                switch (ability) {
+                    case 'capture':
+                        this.aiQuantumCapture();
+                        break;
+                    case 'enhance':
+                        this.aiQuantumEnhance();
+                        break;
+                    case 'tunnel':
+                        if (player.qubits >= 30) this.quantumTunnel();
+                        break;
+                    case 'collapse':
+                        if (player.qubits >= 25) this.waveFunctionCollapse();
+                        break;
+                }
+                
+                setTimeout(() => {
+                    this.endQuantumTurn();
+                }, 1000);
+            }
+
+            aiQuantumCapture() {
+                // AI finds optimal capture targets
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.quantumGrid[y][x];
+                        if (node.owner === 0 && Math.random() < 0.2) {
+                            this.nodeClicked(x, y);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            aiQuantumEnhance() {
+                // AI enhances owned nodes
+                for (let y = 0; y < this.gridHeight; y++) {
+                    for (let x = 0; x < this.gridWidth; x++) {
+                        const node = this.quantumGrid[y][x];
+                        if (node.owner === this.currentPlayer && Math.random() < 0.3) {
+                            this.nodeClicked(x, y);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            calculateQuantumDominance() {
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    player.dominance = player.control * 10 + player.entangled * 15 + player.qubits + player.probability;
+                });
+            }
+
+            updateUI() {
+                this.calculateQuantumDominance();
+                
+                // Update player stats
+                Object.keys(this.players).forEach(playerId => {
+                    const player = this.players[playerId];
+                    document.getElementById(`p${playerId}Qubits`).textContent = player.qubits;
+                    document.getElementById(`p${playerId}Entangled`).textContent = player.entangled;
+                    document.getElementById(`p${playerId}Control`).textContent = player.control;
+                    document.getElementById(`p${playerId}Probability`).textContent = player.probability;
+                });
+                
+                // Update turn display
+                const turnQuantum = document.getElementById('turnQuantum');
+                const playerColors = ['🔴', '🔵', '🟢', '🟡'];
+                turnQuantum.textContent = `${playerColors[this.currentPlayer - 1]} ${this.players[this.currentPlayer].name} CALCULATING...`;
+                
+                // Update timer
+                document.getElementById('quantumTimer').textContent = `Round ${this.currentRound} / ${this.maxRounds}`;
+                
+                // Update quantum statistics
+                this.totalQubits = Object.values(this.players).reduce((sum, p) => sum + p.qubits, 0);
+                document.getElementById('totalQubits').textContent = this.totalQubits;
+                document.getElementById('totalEntanglements').textContent = this.totalEntanglements;
+                document.getElementById('collapsedStates').textContent = this.collapsedStates;
+                document.getElementById('successRate').textContent = this.successRate + '%';
+                
+                // Update resource chart
+                const bars = document.querySelectorAll('.chart-bar');
+                Object.keys(this.players).forEach((playerId, index) => {
+                    if (bars[index]) {
+                        const height = (this.players[playerId].qubits / 5) + 'px';
+                        bars[index].style.height = height;
+                    }
+                });
+            }
+
+            checkQuantumVictory() {
+                if (this.currentRound > this.maxRounds) {
+                    this.endQuantumWar();
+                } else {
+                    // Check for domination victory
+                    const totalNodes = this.gridWidth * this.gridHeight;
+                    const winner = Object.entries(this.players).find(([id, player]) => 
+                        player.control >= totalNodes * 0.4
+                    );
+                    
+                    if (winner) {
+                        this.endQuantumWar(winner[0]);
+                    }
+                }
+            }
+
+            endQuantumWar(winnerId = null) {
+                this.gameActive = false;
+                
+                if (!winnerId) {
+                    // Calculate winner based on quantum dominance
+                    const winner = Object.entries(this.players)
+                        .map(([id, player]) => ({ id, ...player }))
+                        .sort((a, b) => b.dominance - a.dominance)[0];
+                    winnerId = winner.id;
+                }
+                
+                const winner = this.players[winnerId];
+                this.logProbability(`🏆 QUANTUM SUPREMACY ACHIEVED! ${winner.name} dominates with ${winner.dominance} quantum points`);
+                this.audioEngine.playQuantumVictory();
+                
+                setTimeout(() => {
+                    alert(`${winner.name} ACHIEVES QUANTUM SUPREMACY!\nQubits: ${winner.qubits}\nControl: ${winner.control} nodes\nEntangled: ${winner.entangled}\nProbability: ${winner.probability}%\nTotal Score: ${winner.dominance}`);
+                }, 1500);
+            }
+
+            logProbability(message) {
+                const display = document.getElementById('probabilityDisplay');
+                const entry = document.createElement('div');
+                entry.className = `prob-entry prob-p${this.currentPlayer}`;
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                display.appendChild(entry);
+                display.scrollTop = display.scrollHeight;
+                
+                // Keep last 12 entries
+                if (display.children.length > 12) {
+                    display.removeChild(display.firstChild);
+                }
+            }
+
+            pauseQuantum() {
+                this.gameActive = !this.gameActive;
+                if (this.gameActive) {
+                    this.audioEngine.startQuantumAmbience();
+                } else {
+                    this.audioEngine.stopAll();
+                }
+            }
+
+            newQuantumReality() {
+                location.reload();
+            }
+
+            showQuantumHelp() {
+                alert(`QUANTUM RESOURCE WARS - HELP
+
+🎯 OBJECTIVE: Achieve quantum supremacy in 15 rounds
+
+⚛️ HOW TO PLAY:
+• Click quantum nodes to capture with risk/reward system
+• Higher risk = lower success chance but higher rewards
+• Build quantum entanglements for resource bonuses
+• Use special quantum abilities strategically
+
+📊 PROBABILITY SYSTEM:
+• Set Risk % (failure penalty) and Reward % (success bonus)
+• Success chance = Base + Probability skill - Risk
+• Expected value = Success% × Reward - Failure% × Risk
+
+🎵 QUANTUM AUDIO:
+• Probability calculation sounds
+• Wave function collapse effects
+• Quantum entanglement harmonics
+• Superposition state audio
+
+🏆 VICTORY CONDITIONS:
+• Control 40% of quantum nodes (instant win)
+• Highest quantum dominance after 15 rounds
+• Score = Control×10 + Entangled×15 + Qubits + Probability`);
+            }
+        }
+
+        // Initialize game
+        let game;
+        document.addEventListener('DOMContentLoaded', () => {
+            game = new QuantumResourceWars();
+        });
+    </script>
+</body>
+</html>
