@@ -199,7 +199,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/bot-air-hockey-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/bot-air-hockey-card.jpg",
       "categories": [
-        "adventure"
+        "adventure",
+        "mobile"
       ]
     },
     {
@@ -378,7 +379,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/bot-match-three-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/bot-match-three-card.jpg",
       "categories": [
-        "puzzle"
+        "puzzle",
+        "mobile"
       ]
     },
     {
@@ -588,7 +590,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/bot-simon-memory-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/bot-simon-memory-card.jpg",
       "categories": [
-        "puzzle"
+        "puzzle",
+        "mobile"
       ]
     },
     {
@@ -713,7 +716,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/bubble-pop-zen-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/bubble-pop-zen-card.jpg",
       "categories": [
-        "simulation"
+        "simulation",
+        "mobile"
       ]
     },
     {
@@ -814,7 +818,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/color-cascade-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/color-cascade-card.jpg",
       "categories": [
-        "arcade"
+        "arcade",
+        "mobile"
       ]
     },
     {
@@ -1356,7 +1361,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/match-blast-pro-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/match-blast-pro-card.jpg",
       "categories": [
-        "puzzle"
+        "puzzle",
+        "mobile"
       ]
     },
     {
@@ -1459,7 +1465,8 @@
       "thumbnail_large": "assets/images/optimized/large/memory-matrix-card.jpg",
       "categories": [
         "puzzle",
-        "strategy"
+        "strategy",
+        "mobile"
       ]
     },
     {
@@ -1484,7 +1491,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/neon-bubble-pop-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/neon-bubble-pop-card.jpg",
       "categories": [
-        "adventure"
+        "adventure",
+        "mobile"
       ]
     },
     {
@@ -1586,7 +1594,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/neon-snake-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/neon-snake-card.jpg",
       "categories": [
-        "classic"
+        "classic",
+        "mobile"
       ]
     },
     {
@@ -1821,7 +1830,8 @@
       "thumbnail_medium": "assets/images/optimized/medium/pixel-painter-card.jpg",
       "thumbnail_large": "assets/images/optimized/large/pixel-painter-card.jpg",
       "categories": [
-        "simulation"
+        "simulation",
+        "mobile"
       ]
     },
     {
@@ -2338,7 +2348,8 @@
       "categories": [
         "2-player",
         "classic",
-        "puzzle"
+        "puzzle",
+        "mobile"
       ]
     },
     {
