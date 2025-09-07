@@ -283,6 +283,12 @@ class BugReporter {
                 if (response && response.json) {
                     const result = await response.json();
                     githubIssueUrl = result.issue_url;
+                    
+                    // Auto-open GitHub issue creation page
+                    if (githubIssueUrl) {
+                        console.log('🚀 Opening GitHub issue creation page...');
+                        window.open(githubIssueUrl, '_blank', 'noopener,noreferrer');
+                    }
                 }
             } catch (e) {
                 console.log('Could not parse GitHub response for URL');
@@ -295,7 +301,7 @@ class BugReporter {
             this.showSuccess(githubIssueUrl);
             setTimeout(() => {
                 BugReporter.close();
-            }, 3000); // Extra time to see the GitHub link
+            }, 5000); // Extra time to interact with GitHub
 
         } catch (error) {
             console.error('Bug report submission failed:', error);
@@ -412,10 +418,11 @@ class BugReporter {
         
         if (githubIssueUrl) {
             successHTML += `
-                <p><strong>🎯 GitHub Issue Created:</strong><br>
+                <p><strong>🚀 GitHub Issue Page Opened!</strong><br>
                 <a href="${githubIssueUrl}" target="_blank" rel="noopener noreferrer" style="color: #00ff88; text-decoration: underline;">
-                    View Issue on GitHub →
+                    Click here if it didn't open automatically →
                 </a></p>
+                <p><em>Simply click "Submit new issue" on the GitHub page to complete your bug report!</em></p>
             `;
         }
         

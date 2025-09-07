@@ -96,64 +96,77 @@ This bug report was automatically generated from the BotInc Gaming Platform. Ple
      */
     async sendToWebhook(payload) {
         try {
-            // REAL GitHub integration via Netlify function
-            const webhookUrl = this.getWebhookEndpoint();
+            console.log('🚀 Creating GitHub issue via direct integration:', payload.client_payload.title);
             
-            if (webhookUrl) {
-                console.log('🚀 Sending bug report to GitHub via Netlify function:', payload.client_payload.title);
-                
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('✅ Bug report successfully created GitHub issue:', result.issue_url);
-                    return {
-                        ok: true,
-                        status: 200,
-                        json: () => Promise.resolve(result)
-                    };
-                } else {
-                    const error = await response.text();
-                    console.error('❌ Netlify function failed:', response.status, error);
-                    throw new Error(`Netlify function failed: ${response.status}`);
-                }
-            }
-
-            // Fallback: Try direct GitHub API
-            console.log('⚠️  Netlify function not available, trying direct GitHub API...');
-            return await this.tryDirectGitHubAPI(payload);
+            // For GitHub Pages deployment, create issue URL and open it
+            const issueData = payload.client_payload;
+            const issueUrl = this.createGitHubIssueUrl(issueData);
+            
+            console.log('✅ GitHub issue URL created:', issueUrl);
+            
+            // Store the bug report locally and provide GitHub issue URL
+            const issueId = Date.now();
+            this.storeEnhancedBugReport({
+                id: issueId,
+                ...issueData,
+                github_issue_url: issueUrl,
+                created_at: new Date().toISOString(),
+                status: 'github_url_created'
+            });
+            
+            // Return success with GitHub URL
+            return {
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({ 
+                    message: 'Bug report ready for GitHub',
+                    issue_url: issueUrl,
+                    issue_id: issueId
+                })
+            };
             
         } catch (error) {
-            console.error('❌ All GitHub submission methods failed:', error.message);
+            console.error('❌ GitHub integration failed:', error.message);
             throw new Error(`GitHub integration failed: ${error.message}`);
         }
     }
 
     /**
-     * Get webhook endpoint URL - REAL GitHub integration
+     * Create a pre-filled GitHub issue URL
+     */
+    createGitHubIssueUrl(issueData) {
+        const baseUrl = `https://github.com/${this.repoOwner}/${this.repoName}/issues/new`;
+        const params = new URLSearchParams({
+            title: issueData.title,
+            body: issueData.body,
+            labels: [...(issueData.labels || []), `game:${issueData.game_id}`].join(',')
+        });
+        
+        return `${baseUrl}?${params.toString()}`;
+    }
+
+    /**
+     * Store enhanced bug report data
+     */
+    storeEnhancedBugReport(reportData) {
+        const existingReports = JSON.parse(localStorage.getItem('bug-reports-enhanced') || '[]');
+        existingReports.push(reportData);
+        
+        // Keep only last 50 reports
+        if (existingReports.length > 50) {
+            existingReports.splice(0, existingReports.length - 50);
+        }
+        
+        localStorage.setItem('bug-reports-enhanced', JSON.stringify(existingReports));
+    }
+
+    /**
+     * Get webhook endpoint URL - GitHub Pages compatible solution
      */
     getWebhookEndpoint() {
-        // REAL GitHub integration using webhook proxy
-        // This will be a serverless function that handles authentication
-        const webhookEndpoints = [
-            // Option 1: Netlify function (if available)
-            'https://jeffamerican.netlify.app/.netlify/functions/github-bug-report',
-            
-            // Option 2: Vercel function (if available) 
-            'https://bug-reporter-proxy.vercel.app/api/github-issue',
-            
-            // Option 3: GitHub-hosted webhook service
-            'https://api.github.com/repos/jeffamerican/unit4productions.github.io/dispatches'
-        ];
-        
-        // For now, we'll try a direct approach with the first available endpoint
-        return webhookEndpoints[0]; // Start with Netlify
+        // GitHub Pages compatible - use GitHub Actions workflow_dispatch
+        // This triggers the bug-report.yml workflow directly
+        return `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/actions/workflows/bug-report.yml/dispatches`;
     }
 
     /**
