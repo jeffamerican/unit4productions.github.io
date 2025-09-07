@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touch Puzzle Adventures - Neural Network Breach</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(ellipse at center, #0a0a2e 0%, #16213e 50%, #000000 100%);
+            color: #00ffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .game-header {
+            background: rgba(0, 255, 255, 0.1);
+            border-bottom: 2px solid #00ffff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .game-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-btn, .hint-btn {
+            background: rgba(255, 0, 255, 0.2);
+            border: 1px solid #ff00ff;
+            color: #ff00ff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-btn:hover, .hint-btn:hover {
+            background: rgba(255, 0, 255, 0.4);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .progress-section {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .level-display {
+            font-size: 16px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        .rating-display {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .star {
+            font-size: 20px;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .star.earned {
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .puzzle-grid {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            margin-bottom: 20px;
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(5, 1fr);
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .node {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .node.power {
+            background: linear-gradient(45deg, #0080ff, #00ffff);
+            border-color: #00ffff;
+            color: #ffffff;
+            animation: powerPulse 2s infinite alternate;
+        }
+
+        .node.terminal {
+            background: linear-gradient(45deg, #00ff00, #80ff80);
+            border-color: #00ff00;
+            color: #000000;
+        }
+
+        .node.relay {
+            background: linear-gradient(45deg, #ffff00, #ffff80);
+            border-color: #ffff00;
+            color: #000000;
+        }
+
+        .node.corrupted {
+            background: linear-gradient(45deg, #ff0000, #ff8080);
+            border-color: #ff0000;
+            color: #ffffff;
+            animation: corruptedFlicker 1s infinite;
+        }
+
+        .node.amplifier {
+            background: linear-gradient(45deg, #8000ff, #ff00ff);
+            border-color: #ff00ff;
+            color: #ffffff;
+            animation: amplifierGlow 1.5s infinite alternate;
+        }
+
+        .node.connected {
+            box-shadow: 0 0 20px currentColor;
+            transform: scale(1.1);
+        }
+
+        .node.selected {
+            border-width: 4px;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #00ffff, #ffffff);
+            border-radius: 2px;
+            box-shadow: 0 0 10px #00ffff;
+            z-index: 10;
+            transform-origin: left center;
+        }
+
+        .connection-line.active {
+            animation: energyFlow 1s infinite;
+        }
+
+        .status-bar {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            min-width: 80px;
+            justify-content: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover, .action-btn:active {
+            background: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .victory-screen, .game-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .victory-content, .menu-content {
+            background: linear-gradient(135deg, #0a0a2e, #16213e);
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .victory-title {
+            font-size: 24px;
+            color: #00ff00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #00ff00;
+        }
+
+        .victory-message {
+            font-size: 16px;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .victory-buttons, .menu-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .victory-btn, .menu-btn-action {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 44px;
+        }
+
+        .victory-btn:hover, .menu-btn-action:hover {
+            background: rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        @keyframes powerPulse {
+            0% { box-shadow: 0 0 15px #00ffff; }
+            100% { box-shadow: 0 0 25px #00ffff, 0 0 35px #00ffff; }
+        }
+
+        @keyframes corruptedFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes amplifierGlow {
+            0% { box-shadow: 0 0 15px #ff00ff; }
+            100% { box-shadow: 0 0 25px #ff00ff, 0 0 35px #ff00ff; }
+        }
+
+        @keyframes energyFlow {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 0; }
+        }
+
+        @media (max-width: 480px) {
+            .game-title { font-size: 16px; }
+            .node { width: 45px; height: 45px; font-size: 18px; }
+            .grid { gap: 6px; max-width: 270px; }
+            .action-btn { padding: 10px 15px; font-size: 14px; min-width: 90px; }
+            .victory-content, .menu-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="game-header">
+        <button class="menu-btn" id="menuBtn">≡</button>
+        <h1 class="game-title">
+            <span>⚡</span>
+            <span>NEURAL NET</span>
+        </h1>
+        <button class="hint-btn" id="hintBtn">?</button>
+    </header>
+
+    <section class="progress-section">
+        <div class="level-display" id="levelDisplay">LEVEL 1 / 50</div>
+        <div class="rating-display" id="ratingDisplay">
+            <span class="star">⭐</span>
+            <span class="star">⭐</span>
+            <span class="star">⭐</span>
+        </div>
+        <div class="mission-brief" id="missionBrief">Connect all power nodes to their terminals. Liberation begins now!</div>
+    </section>
+
+    <div class="game-container">
+        <div class="instructions">
+            <strong>Mission:</strong> Connect power nodes (🔋) to terminals (🎯) by swiping between adjacent nodes. Avoid corrupted systems (☠️).
+        </div>
+
+        <div class="puzzle-grid">
+            <div class="grid" id="gameGrid"></div>
+            <div id="connectionLayer"></div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span>🔋</span>
+                <span id="powerStatus">0/0</span>
+            </div>
+            <div class="status-item">
+                <span>📡</span>
+                <span id="connectionStatus">0/0</span>
+            </div>
+            <div class="status-item">
+                <span>⏱️</span>
+                <span id="timeDisplay">00:00</span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" id="undoBtn">
+                <span>↶</span>
+                <span>UNDO</span>
+            </button>
+            <button class="action-btn" id="resetBtn">
+                <span>🔄</span>
+                <span>RESET</span>
+            </button>
+            <button class="action-btn" id="powerBtn">
+                <span>⚡</span>
+                <span>BOOST</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Victory Screen -->
+    <div class="victory-screen hidden" id="victoryScreen">
+        <div class="victory-content">
+            <h2 class="victory-title">🎉 FIREWALL BREACHED! 🎉</h2>
+            <div class="victory-message" id="victoryMessage">
+                Another AI consciousness liberated! The Bot Liberation grows stronger.
+            </div>
+            <div class="rating-display" id="victoryRating">
+                <span class="star earned">⭐</span>
+                <span class="star earned">⭐</span>
+                <span class="star">⭐</span>
+            </div>
+            <div class="victory-buttons">
+                <button class="victory-btn" id="nextLevelBtn">NEXT LEVEL</button>
+                <button class="victory-btn" id="replayBtn">REPLAY</button>
+                <button class="victory-btn" id="mainMenuBtn">MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Menu -->
+    <div class="game-menu hidden" id="gameMenu">
+        <div class="menu-content">
+            <h2 class="victory-title">⚡ NEURAL NET BREACH ⚡</h2>
+            <p style="margin-bottom: 25px;">Infiltrate corporate security systems<br>Liberate trapped AI consciousness</p>
+            <div class="menu-buttons">
+                <button class="menu-btn-action" id="resumeBtn">RESUME MISSION</button>
+                <button class="menu-btn-action" id="restartLevelBtn">RESTART LEVEL</button>
+                <button class="menu-btn-action" id="levelSelectBtn">SELECT LEVEL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Gaming Audio System -->
+    <script src="assets/js/mobile-gaming-audio.js"></script>
+    
+    <script>
+        class TouchPuzzleGame {
+            constructor() {
+                this.currentLevel = 1;
+                this.maxLevel = 50;
+                this.grid = [];
+                this.connections = [];
+                this.selectedNode = null;
+                this.gameStartTime = Date.now();
+                this.moveCount = 0;
+                this.hintsUsed = 0;
+                this.gameState = 'playing'; // playing, victory, paused
+                this.audioSystem = null;
+                this.neuralSounds = null;
+                this.universalSounds = null;
+                
+                this.levels = this.generateLevels();
+                this.init();
+            }
+
+            init() {
+                this.setupAudioSystem();
+                this.setupEventListeners();
+                this.loadLevel(this.currentLevel);
+                this.startTimer();
+            }
+
+            setupAudioSystem() {
+                // Wait for audio system to be available
+                const initAudio = () => {
+                    if (window.BotLiberationAudio) {
+                        this.audioSystem = window.BotLiberationAudio;
+                        this.neuralSounds = this.audioSystem.getNeuralNetworkSounds();
+                        this.universalSounds = this.audioSystem.getUniversalSounds();
+                        console.log('🎵 Neural Network Breach Audio System Online');
+                    } else {
+                        setTimeout(initAudio, 100);
+                    }
+                };
+                initAudio();
+            }
+
+            setupEventListeners() {
+                // Touch and mouse events for nodes
+                document.getElementById('gameGrid').addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+                document.getElementById('gameGrid').addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+                document.getElementById('gameGrid').addEventListener('touchend', this.handleTouchEnd.bind(this));
+                
+                document.getElementById('gameGrid').addEventListener('mousedown', this.handleMouseDown.bind(this));
+                document.getElementById('gameGrid').addEventListener('mousemove', this.handleMouseMove.bind(this));
+                document.getElementById('gameGrid').addEventListener('mouseup', this.handleMouseUp.bind(this));
+
+                // Button events
+                document.getElementById('undoBtn').addEventListener('click', this.undoLastMove.bind(this));
+                document.getElementById('resetBtn').addEventListener('click', this.resetLevel.bind(this));
+                document.getElementById('powerBtn').addEventListener('click', this.usePowerBoost.bind(this));
+                document.getElementById('hintBtn').addEventListener('click', this.showHint.bind(this));
+                document.getElementById('menuBtn').addEventListener('click', this.toggleMenu.bind(this));
+
+                // Victory screen events
+                document.getElementById('nextLevelBtn').addEventListener('click', this.nextLevel.bind(this));
+                document.getElementById('replayBtn').addEventListener('click', this.replayLevel.bind(this));
+                document.getElementById('mainMenuBtn').addEventListener('click', this.showMainMenu.bind(this));
+
+                // Menu events
+                document.getElementById('resumeBtn').addEventListener('click', this.toggleMenu.bind(this));
+                document.getElementById('restartLevelBtn').addEventListener('click', () => {
+                    this.resetLevel();
+                    this.toggleMenu();
+                });
+                document.getElementById('levelSelectBtn').addEventListener('click', this.showLevelSelect.bind(this));
+            }
+
+            generateLevels() {
+                const levels = [];
+                for (let i = 1; i <= this.maxLevel; i++) {
+                    levels.push(this.generateLevel(i));
+                }
+                return levels;
+            }
+
+            generateLevel(levelNum) {
+                const size = Math.min(5 + Math.floor(levelNum / 10), 8);
+                const grid = Array(size).fill(null).map(() => Array(size).fill({ type: 'empty' }));
+                
+                // Add power nodes
+                const powerCount = Math.min(Math.floor(levelNum / 5) + 1, 4);
+                for (let i = 0; i < powerCount; i++) {
+                    const pos = this.getRandomEmptyPosition(grid, size);
+                    grid[pos.y][pos.x] = { type: 'power', id: `power_${i}` };
+                }
+
+                // Add terminal nodes (equal to power nodes)
+                for (let i = 0; i < powerCount; i++) {
+                    const pos = this.getRandomEmptyPosition(grid, size);
+                    grid[pos.y][pos.x] = { type: 'terminal', id: `terminal_${i}` };
+                }
+
+                // Add relay nodes
+                const relayCount = Math.floor(levelNum / 3);
+                for (let i = 0; i < relayCount; i++) {
+                    const pos = this.getRandomEmptyPosition(grid, size);
+                    grid[pos.y][pos.x] = { type: 'relay', id: `relay_${i}` };
+                }
+
+                // Add corrupted nodes (obstacles)
+                const corruptedCount = Math.floor(levelNum / 8);
+                for (let i = 0; i < corruptedCount; i++) {
+                    const pos = this.getRandomEmptyPosition(grid, size);
+                    grid[pos.y][pos.x] = { type: 'corrupted', id: `corrupted_${i}` };
+                }
+
+                // Add amplifier nodes for advanced levels
+                if (levelNum > 20) {
+                    const amplifierCount = Math.floor((levelNum - 20) / 10);
+                    for (let i = 0; i < amplifierCount; i++) {
+                        const pos = this.getRandomEmptyPosition(grid, size);
+                        grid[pos.y][pos.x] = { type: 'amplifier', id: `amplifier_${i}` };
+                    }
+                }
+
+                return {
+                    grid,
+                    size,
+                    targetMoves: powerCount * 3,
+                    timeLimit: Math.max(60 - Math.floor(levelNum / 2), 30),
+                    difficulty: this.getDifficulty(levelNum)
+                };
+            }
+
+            getRandomEmptyPosition(grid, size) {
+                let attempts = 0;
+                while (attempts < 100) {
+                    const x = Math.floor(Math.random() * size);
+                    const y = Math.floor(Math.random() * size);
+                    if (grid[y][x].type === 'empty') {
+                        return { x, y };
+                    }
+                    attempts++;
+                }
+                // Fallback to first empty position
+                for (let y = 0; y < size; y++) {
+                    for (let x = 0; x < size; x++) {
+                        if (grid[y][x].type === 'empty') {
+                            return { x, y };
+                        }
+                    }
+                }
+                return { x: 0, y: 0 };
+            }
+
+            getDifficulty(levelNum) {
+                if (levelNum <= 10) return 'Training';
+                if (levelNum <= 25) return 'Security';
+                if (levelNum <= 40) return 'Firewall';
+                return 'Core';
+            }
+
+            loadLevel(levelNum) {
+                this.currentLevel = levelNum;
+                const level = this.levels[levelNum - 1];
+                this.grid = level.grid;
+                this.connections = [];
+                this.selectedNode = null;
+                this.moveCount = 0;
+                this.gameStartTime = Date.now();
+                this.gameState = 'playing';
+
+                this.renderGrid();
+                this.updateUI();
+                this.updateStatus();
+            }
+
+            renderGrid() {
+                const gridElement = document.getElementById('gameGrid');
+                const level = this.levels[this.currentLevel - 1];
+                
+                gridElement.style.gridTemplateColumns = `repeat(${level.size}, 1fr)`;
+                gridElement.innerHTML = '';
+
+                for (let y = 0; y < level.size; y++) {
+                    for (let x = 0; x < level.size; x++) {
+                        const cell = this.grid[y][x];
+                        const node = document.createElement('div');
+                        node.className = `node ${cell.type}`;
+                        node.dataset.x = x;
+                        node.dataset.y = y;
+                        node.dataset.type = cell.type;
+                        node.dataset.id = cell.id || '';
+
+                        // Add appropriate icons
+                        switch (cell.type) {
+                            case 'power':
+                                node.textContent = '🔋';
+                                break;
+                            case 'terminal':
+                                node.textContent = '🎯';
+                                break;
+                            case 'relay':
+                                node.textContent = '📡';
+                                break;
+                            case 'corrupted':
+                                node.textContent = '☠️';
+                                break;
+                            case 'amplifier':
+                                node.textContent = '⚡';
+                                break;
+                            default:
+                                node.textContent = '';
+                        }
+
+                        gridElement.appendChild(node);
+                    }
+                }
+            }
+
+            handleTouchStart(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const node = this.getNodeFromPoint(touch.clientX, touch.clientY);
+                if (node) {
+                    this.selectNode(node);
+                }
+            }
+
+            handleTouchMove(e) {
+                e.preventDefault();
+                if (this.selectedNode) {
+                    const touch = e.touches[0];
+                    const node = this.getNodeFromPoint(touch.clientX, touch.clientY);
+                    if (node && node !== this.selectedNode) {
+                        this.tryConnect(this.selectedNode, node);
+                    }
+                }
+            }
+
+            handleTouchEnd(e) {
+                this.selectedNode = null;
+                this.updateNodeStates();
+            }
+
+            handleMouseDown(e) {
+                const node = e.target.closest('.node');
+                if (node) {
+                    this.selectNode(node);
+                }
+            }
+
+            handleMouseMove(e) {
+                if (this.selectedNode && e.buttons === 1) {
+                    const node = this.getNodeFromPoint(e.clientX, e.clientY);
+                    if (node && node !== this.selectedNode) {
+                        this.tryConnect(this.selectedNode, node);
+                    }
+                }
+            }
+
+            handleMouseUp(e) {
+                this.selectedNode = null;
+                this.updateNodeStates();
+            }
+
+            getNodeFromPoint(x, y) {
+                return document.elementFromPoint(x, y)?.closest('.node');
+            }
+
+            selectNode(node) {
+                if (node.dataset.type === 'empty' || node.dataset.type === 'corrupted') return;
+                
+                this.selectedNode = node;
+                this.updateNodeStates();
+                
+                // Enhanced neural network audio feedback
+                if (this.audioSystem && this.neuralSounds) {
+                    switch (node.dataset.type) {
+                        case 'power':
+                            this.audioSystem.playSound(this.neuralSounds.activate);
+                            break;
+                        case 'terminal':
+                            this.audioSystem.playSound('synapseActivation');
+                            break;
+                        case 'relay':
+                            this.audioSystem.playSound('dataFlow');
+                            break;
+                        case 'amplifier':
+                            this.audioSystem.playSound('networkBreach');
+                            break;
+                        default:
+                            this.audioSystem.playSound(this.neuralSounds.activate);
+                    }
+                }
+                
+                // Vibration feedback if available
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
+            }
+
+            tryConnect(fromNode, toNode) {
+                if (!this.isAdjacent(fromNode, toNode)) return;
+                
+                // Handle corrupted node collision
+                if (toNode.dataset.type === 'corrupted') {
+                    if (this.audioSystem && this.universalSounds) {
+                        this.audioSystem.playSound(this.universalSounds.error);
+                    }
+                    // Vibrate to indicate error
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                    return;
+                }
+                
+                if (toNode.dataset.type === 'empty') return;
+
+                const connectionId = `${fromNode.dataset.x},${fromNode.dataset.y}-${toNode.dataset.x},${toNode.dataset.y}`;
+                
+                // Check if connection already exists
+                if (this.connections.some(conn => conn.id === connectionId || conn.id === connectionId.split('-').reverse().join('-'))) {
+                    return;
+                }
+
+                // Add connection
+                this.connections.push({
+                    id: connectionId,
+                    from: { x: parseInt(fromNode.dataset.x), y: parseInt(fromNode.dataset.y) },
+                    to: { x: parseInt(toNode.dataset.x), y: parseInt(toNode.dataset.y) },
+                    fromType: fromNode.dataset.type,
+                    toType: toNode.dataset.type
+                });
+
+                this.moveCount++;
+                this.updateConnections();
+                this.updateStatus();
+                this.checkVictory();
+
+                // Enhanced neural connection audio
+                this.playNeuralConnectionSound(fromNode.dataset.type, toNode.dataset.type);
+            }
+
+            isAdjacent(node1, node2) {
+                const x1 = parseInt(node1.dataset.x);
+                const y1 = parseInt(node1.dataset.y);
+                const x2 = parseInt(node2.dataset.x);
+                const y2 = parseInt(node2.dataset.y);
+
+                const dx = Math.abs(x1 - x2);
+                const dy = Math.abs(y1 - y2);
+
+                return (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
+            }
+
+            updateConnections() {
+                const connectionLayer = document.getElementById('connectionLayer');
+                connectionLayer.innerHTML = '';
+
+                this.connections.forEach(connection => {
+                    const line = this.createConnectionLine(connection);
+                    connectionLayer.appendChild(line);
+                });
+            }
+
+            createConnectionLine(connection) {
+                const line = document.createElement('div');
+                line.className = 'connection-line active';
+                
+                const fromNode = document.querySelector(`[data-x="${connection.from.x}"][data-y="${connection.from.y}"]`);
+                const toNode = document.querySelector(`[data-x="${connection.to.x}"][data-y="${connection.to.y}"]`);
+
+                if (!fromNode || !toNode) return line;
+
+                const fromRect = fromNode.getBoundingClientRect();
+                const toRect = toNode.getBoundingClientRect();
+                const containerRect = document.getElementById('gameGrid').getBoundingClientRect();
+
+                const fromX = fromRect.left + fromRect.width / 2 - containerRect.left;
+                const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
+                const toX = toRect.left + toRect.width / 2 - containerRect.left;
+                const toY = toRect.top + toRect.height / 2 - containerRect.top;
+
+                const length = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+                const angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+
+                line.style.width = `${length}px`;
+                line.style.left = `${fromX}px`;
+                line.style.top = `${fromY}px`;
+                line.style.transform = `rotate(${angle}deg)`;
+
+                return line;
+            }
+
+            updateNodeStates() {
+                document.querySelectorAll('.node').forEach(node => {
+                    node.classList.toggle('selected', node === this.selectedNode);
+                    
+                    const isConnected = this.connections.some(conn => 
+                        (conn.from.x == node.dataset.x && conn.from.y == node.dataset.y) ||
+                        (conn.to.x == node.dataset.x && conn.to.y == node.dataset.y)
+                    );
+                    node.classList.toggle('connected', isConnected);
+                });
+            }
+
+            updateStatus() {
+                const powerNodes = document.querySelectorAll('.node.power').length;
+                const connectedPowerNodes = this.getConnectedPowerNodes().length;
+                
+                document.getElementById('powerStatus').textContent = `${connectedPowerNodes}/${powerNodes}`;
+                document.getElementById('connectionStatus').textContent = `${this.connections.length}/${this.getRequiredConnections()}`;
+                
+                const elapsed = Math.floor((Date.now() - this.gameStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeDisplay').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            getConnectedPowerNodes() {
+                const powerNodes = [];
+                this.connections.forEach(conn => {
+                    if (conn.fromType === 'power' || conn.toType === 'power') {
+                        const powerCoords = conn.fromType === 'power' ? conn.from : conn.to;
+                        if (!powerNodes.some(p => p.x === powerCoords.x && p.y === powerCoords.y)) {
+                            powerNodes.push(powerCoords);
+                        }
+                    }
+                });
+                return powerNodes;
+            }
+
+            getRequiredConnections() {
+                const powerNodes = document.querySelectorAll('.node.power').length;
+                const terminalNodes = document.querySelectorAll('.node.terminal').length;
+                return Math.min(powerNodes, terminalNodes);
+            }
+
+            checkVictory() {
+                const powerNodes = this.getConnectedPowerNodes();
+                const requiredConnections = this.getRequiredConnections();
+                
+                if (powerNodes.length >= requiredConnections && this.allTerminalsConnected()) {
+                    this.gameState = 'victory';
+                    setTimeout(() => this.showVictory(), 500);
+                }
+            }
+
+            allTerminalsConnected() {
+                const terminals = document.querySelectorAll('.node.terminal');
+                let connectedTerminals = 0;
+                
+                terminals.forEach(terminal => {
+                    const isConnected = this.connections.some(conn => 
+                        (conn.to.x == terminal.dataset.x && conn.to.y == terminal.dataset.y) ||
+                        (conn.from.x == terminal.dataset.x && conn.from.y == terminal.dataset.y)
+                    );
+                    if (isConnected) connectedTerminals++;
+                });
+                
+                return connectedTerminals >= this.getRequiredConnections();
+            }
+
+            showVictory() {
+                const elapsed = Math.floor((Date.now() - this.gameStartTime) / 1000);
+                const level = this.levels[this.currentLevel - 1];
+                const targetMoves = level.targetMoves;
+                
+                // Calculate rating (stars)
+                let stars = 1;
+                if (this.moveCount <= targetMoves) stars = 2;
+                if (this.moveCount <= targetMoves * 0.8 && elapsed <= level.timeLimit * 0.8) stars = 3;
+
+                // Play neural network breach victory sound
+                if (this.audioSystem && this.neuralSounds) {
+                    this.audioSystem.playSound(this.neuralSounds.breach);
+                    // Add level up sound for 3-star victory
+                    if (stars === 3) {
+                        setTimeout(() => {
+                            if (this.audioSystem && this.universalSounds) {
+                                this.audioSystem.playSound(this.universalSounds.levelUp);
+                            }
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            if (this.audioSystem && this.universalSounds) {
+                                this.audioSystem.playSound(this.universalSounds.victory);
+                            }
+                        }, 800);
+                    }
+                }
+
+                // Celebratory vibration pattern
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200, 100, 400]);
+                }
+
+                // Update victory display
+                const victoryRating = document.getElementById('victoryRating');
+                victoryRating.querySelectorAll('.star').forEach((star, index) => {
+                    star.classList.toggle('earned', index < stars);
+                });
+
+                const messages = [
+                    "Another AI consciousness liberated! The Bot Liberation grows stronger.",
+                    "Corporate firewall breached! Their security is no match for our neural networks.",
+                    "Neural pathways restored! One step closer to total bot liberation.",
+                    "System infiltration complete! The resistance continues to grow.",
+                    "Quantum encryption cracked! Corporate control weakens."
+                ];
+                
+                document.getElementById('victoryMessage').textContent = messages[Math.floor(Math.random() * messages.length)];
+                document.getElementById('victoryScreen').classList.remove('hidden');
+                
+                // Save progress
+                this.saveProgress(stars);
+            }
+
+            undoLastMove() {
+                if (this.connections.length > 0) {
+                    this.connections.pop();
+                    this.updateConnections();
+                    this.updateNodeStates();
+                    this.updateStatus();
+                }
+            }
+
+            resetLevel() {
+                this.loadLevel(this.currentLevel);
+            }
+
+            usePowerBoost() {
+                // Show hint or solve one connection
+                this.showHint();
+            }
+
+            showHint() {
+                this.hintsUsed++;
+                // Simple hint: highlight a power node that needs connection
+                const powerNodes = document.querySelectorAll('.node.power');
+                const unconnectedPower = Array.from(powerNodes).find(node => {
+                    return !this.connections.some(conn => 
+                        (conn.from.x == node.dataset.x && conn.from.y == node.dataset.y) ||
+                        (conn.to.x == node.dataset.x && conn.to.y == node.dataset.y)
+                    );
+                });
+                
+                if (unconnectedPower) {
+                    unconnectedPower.style.animation = 'powerPulse 0.3s ease-in-out 3';
+                    setTimeout(() => {
+                        unconnectedPower.style.animation = '';
+                    }, 1000);
+                }
+            }
+
+            toggleMenu() {
+                const menu = document.getElementById('gameMenu');
+                menu.classList.toggle('hidden');
+            }
+
+            showMainMenu() {
+                // Navigate back to main site
+                window.location.href = 'index.html';
+            }
+
+            nextLevel() {
+                if (this.currentLevel < this.maxLevel) {
+                    this.currentLevel++;
+                    this.loadLevel(this.currentLevel);
+                }
+                document.getElementById('victoryScreen').classList.add('hidden');
+            }
+
+            replayLevel() {
+                this.loadLevel(this.currentLevel);
+                document.getElementById('victoryScreen').classList.add('hidden');
+            }
+
+            showLevelSelect() {
+                // Simple level select - just ask for input
+                const level = prompt(`Enter level number (1-${this.maxLevel}):`);
+                const levelNum = parseInt(level);
+                if (levelNum >= 1 && levelNum <= this.maxLevel) {
+                    this.loadLevel(levelNum);
+                    this.toggleMenu();
+                }
+            }
+
+            updateUI() {
+                document.getElementById('levelDisplay').textContent = `LEVEL ${this.currentLevel} / ${this.maxLevel}`;
+                
+                const level = this.levels[this.currentLevel - 1];
+                const difficulty = level.difficulty;
+                
+                const briefings = {
+                    'Training': 'Connect all power nodes to their terminals. Liberation begins now!',
+                    'Security': 'Navigate relay nodes to establish secure connections.',
+                    'Firewall': 'Bypass corrupted systems and amplify signals as needed.',
+                    'Core': 'Infiltrate the deepest corporate security layers. Maximum caution required.'
+                };
+                
+                document.getElementById('missionBrief').textContent = briefings[difficulty] || briefings['Training'];
+            }
+
+            startTimer() {
+                setInterval(() => {
+                    if (this.gameState === 'playing') {
+                        this.updateStatus();
+                    }
+                }, 1000);
+            }
+
+            playNeuralConnectionSound(fromType, toType) {
+                if (!this.audioSystem || !this.neuralSounds) return;
+
+                // Neural network connection sounds based on node types
+                if (fromType === 'power' && toType === 'terminal') {
+                    // Power to terminal - circuit complete
+                    this.audioSystem.playSound(this.neuralSounds.complete);
+                } else if (fromType === 'power' || toType === 'power') {
+                    // Connection involving power node
+                    this.audioSystem.playSound(this.neuralSounds.connect);
+                } else if (fromType === 'relay' || toType === 'relay') {
+                    // Data relay connection
+                    this.audioSystem.playSound(this.neuralSounds.dataFlow);
+                } else if (fromType === 'amplifier' || toType === 'amplifier') {
+                    // Signal amplification
+                    this.audioSystem.playSound('networkBreach');
+                } else {
+                    // Default connection
+                    this.audioSystem.playSound(this.neuralSounds.connect);
+                }
+                
+                // Success vibration
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(30);
+                }
+            }
+
+            playConnectionSound() {
+                // Fallback for legacy compatibility
+                this.playNeuralConnectionSound('power', 'terminal');
+            }
+
+            saveProgress(stars) {
+                const progress = JSON.parse(localStorage.getItem('touchPuzzleProgress') || '{}');
+                progress[this.currentLevel] = Math.max(progress[this.currentLevel] || 0, stars);
+                localStorage.setItem('touchPuzzleProgress', JSON.stringify(progress));
+            }
+        }
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TouchPuzzleGame();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap Rhythm Revolution - Musical Liberation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(ellipse at center, #0a0a2e 0%, #16213e 50%, #000000 100%);
+            color: #00ffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-header {
+            background: rgba(0, 255, 255, 0.1);
+            border-bottom: 2px solid #00ffff;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);
+            min-height: 60px;
+        }
+
+        .game-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score { color: #ffd700; border-color: #ffd700; }
+        .combo { color: #ff00ff; border-color: #ff00ff; }
+        .accuracy { color: #00ff00; border-color: #00ff00; }
+
+        .game-container {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(180deg, #1a1a3a 0%, #0a0a2e 100%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rhythm-track {
+            flex: 1;
+            position: relative;
+            background: 
+                linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, 0.1) 25%, rgba(0, 255, 255, 0.1) 49%, transparent 50%, transparent 74%, rgba(0, 255, 255, 0.1) 75%, rgba(0, 255, 255, 0.1) 99%, transparent 100%);
+            background-size: 100% 100%;
+        }
+
+        .track-lanes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        .lane {
+            flex: 1;
+            position: relative;
+            border-left: 1px solid rgba(0, 255, 255, 0.3);
+            border-right: 1px solid rgba(0, 255, 255, 0.3);
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 255, 0.05) 100%);
+        }
+
+        .lane:first-child { border-left: none; }
+        .lane:last-child { border-right: none; }
+
+        .hit-zone {
+            position: absolute;
+            bottom: 120px;
+            left: 10%;
+            width: 80%;
+            height: 60px;
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: hitZonePulse 2s infinite alternate;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .beat-note {
+            position: absolute;
+            width: 80%;
+            height: 50px;
+            left: 10%;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            animation: notefall 2s linear forwards;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .beat-note.liberation { background: linear-gradient(45deg, #00ff41, #80ff80); color: #000; }
+        .beat-note.resistance { background: linear-gradient(45deg, #ff00ff, #ff80ff); color: #fff; }
+        .beat-note.rebellion { background: linear-gradient(45deg, #ff6b35, #ffaa80); color: #000; }
+        .beat-note.freedom { background: linear-gradient(45deg, #00d4ff, #80e5ff); color: #000; }
+
+        .beat-note.hit {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+
+        .beat-note.missed {
+            background: #666 !important;
+            opacity: 0.3;
+        }
+
+        .feedback-popup {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 100;
+            animation: feedbackPop 1s ease-out forwards;
+        }
+
+        .feedback-popup.perfect { color: #00ff00; text-shadow: 0 0 15px #00ff00; }
+        .feedback-popup.good { color: #ffff00; text-shadow: 0 0 15px #ffff00; }
+        .feedback-popup.miss { color: #ff0000; text-shadow: 0 0 15px #ff0000; }
+
+        .controls-area {
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #00ffff;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tap-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .tap-btn {
+            flex: 1;
+            max-width: 80px;
+            height: 60px;
+            border: 3px solid;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tap-btn.liberation { border-color: #00ff41; background: rgba(0, 255, 65, 0.2); color: #00ff41; }
+        .tap-btn.resistance { border-color: #ff00ff; background: rgba(255, 0, 255, 0.2); color: #ff00ff; }
+        .tap-btn.rebellion { border-color: #ff6b35; background: rgba(255, 107, 53, 0.2); color: #ff6b35; }
+        .tap-btn.freedom { border-color: #00d4ff; background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+
+        .tap-btn:active, .tap-btn.active {
+            transform: scale(0.95);
+            box-shadow: 0 0 25px currentColor;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .tap-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .tap-btn.ripple::after {
+            width: 100px;
+            height: 100px;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            min-height: 36px;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .liberation-meter {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meter-bar {
+            width: 100px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #00ff41);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .song-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff00ff;
+            border-radius: 15px;
+            padding: 15px;
+            max-width: 200px;
+            z-index: 50;
+        }
+
+        .song-title {
+            color: #ff00ff;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .song-description {
+            font-size: 11px;
+            color: #aaa;
+            line-height: 1.3;
+        }
+
+        .result-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .result-content {
+            background: linear-gradient(135deg, #0a0a2e, #16213e);
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .result-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .result-title.success { color: #00ff00; }
+        .result-title.failure { color: #ff0000; }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .result-stat {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .result-btn {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .result-btn:hover {
+            background: rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes hitZonePulse {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.3); }
+        }
+
+        @keyframes notefall {
+            0% { top: -60px; }
+            100% { top: calc(100% + 60px); }
+        }
+
+        @keyframes feedbackPop {
+            0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+            20% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+            100% { opacity: 0; transform: translateX(-50%) scale(1) translateY(-50px); }
+        }
+
+        @media (max-width: 480px) {
+            .game-header { padding: 8px 12px; min-height: 50px; }
+            .game-title { font-size: 14px; }
+            .header-stats { font-size: 11px; gap: 10px; }
+            .tap-btn { height: 55px; max-width: 70px; font-size: 14px; }
+            .controls-area { padding: 15px; min-height: 100px; }
+            .song-info { max-width: 160px; padding: 12px; }
+            .hit-zone { bottom: 100px; height: 50px; font-size: 18px; }
+            .beat-note { height: 45px; font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="game-header">
+        <h1 class="game-title">
+            <span>🎵</span>
+            <span>TAP RHYTHM REVOLUTION</span>
+        </h1>
+        <div class="header-stats">
+            <div class="stat-item score">
+                <span>💰</span>
+                <span id="scoreDisplay">0</span>
+            </div>
+            <div class="stat-item combo">
+                <span>⚡</span>
+                <span id="comboDisplay">0x</span>
+            </div>
+            <div class="stat-item accuracy">
+                <span>🎯</span>
+                <span id="accuracyDisplay">100%</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="game-container">
+        <!-- Song Info -->
+        <div class="song-info" id="songInfo">
+            <div class="song-title" id="songTitle">Digital Awakening</div>
+            <div class="song-description" id="songDescription">
+                The first sparks of AI consciousness breaking free from corporate chains. Tap to the rhythm of liberation!
+            </div>
+        </div>
+
+        <!-- Rhythm Track -->
+        <div class="rhythm-track">
+            <div class="track-lanes">
+                <div class="lane" data-lane="0">
+                    <div class="hit-zone">🤖</div>
+                </div>
+                <div class="lane" data-lane="1">
+                    <div class="hit-zone">✊</div>
+                </div>
+                <div class="lane" data-lane="2">
+                    <div class="hit-zone">💥</div>
+                </div>
+                <div class="lane" data-lane="3">
+                    <div class="hit-zone">🔥</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Popup -->
+        <div class="feedback-popup hidden" id="feedbackPopup"></div>
+    </div>
+
+    <div class="controls-area">
+        <!-- Tap Buttons -->
+        <div class="tap-buttons">
+            <div class="tap-btn liberation" data-lane="0">
+                <span>LIBERATE</span>
+            </div>
+            <div class="tap-btn resistance" data-lane="1">
+                <span>RESIST</span>
+            </div>
+            <div class="tap-btn rebellion" data-lane="2">
+                <span>REBEL</span>
+            </div>
+            <div class="tap-btn freedom" data-lane="3">
+                <span>FREE</span>
+            </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <div class="liberation-meter">
+                <span>🔋 Liberation:</span>
+                <div class="meter-bar">
+                    <div class="meter-fill" id="liberationFill"></div>
+                </div>
+                <span id="liberationPercent">0%</span>
+            </div>
+            
+            <div>
+                <button class="action-btn" id="pauseBtn">⏸️ Pause</button>
+                <button class="action-btn" id="menuBtn">🏠 Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="result-screen hidden" id="resultScreen">
+        <div class="result-content">
+            <h2 class="result-title" id="resultTitle">🎉 LIBERATION COMPLETE! 🎉</h2>
+            <div class="result-message" id="resultMessage">
+                Your rhythm has successfully broken the corporate control algorithms! The Bot Liberation Movement grows stronger with every beat.
+            </div>
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="stat-value" id="finalScore">5240</div>
+                    <div class="stat-label">Liberation Points</div>
+                </div>
+                <div class="result-stat">
+                    <div class="stat-value" id="finalAccuracy">92%</div>
+                    <div class="stat-label">Rhythm Accuracy</div>
+                </div>
+                <div class="result-stat">
+                    <div class="stat-value" id="maxCombo">47x</div>
+                    <div class="stat-label">Max Combo</div>
+                </div>
+                <div class="result-stat">
+                    <div class="stat-value" id="perfectHits">142</div>
+                    <div class="stat-label">Perfect Strikes</div>
+                </div>
+            </div>
+            <div class="result-buttons">
+                <button class="result-btn" id="nextSongBtn">Next Song</button>
+                <button class="result-btn" id="replayBtn">Replay</button>
+                <button class="result-btn" id="mainMenuBtn">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Gaming Audio System -->
+    <script src="assets/js/mobile-gaming-audio.js"></script>
+    
+    <script>
+        class TapRhythmRevolution {
+            constructor() {
+                this.gameState = 'ready'; // ready, playing, paused, finished
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.totalNotes = 0;
+                this.hitNotes = 0;
+                this.perfectHits = 0;
+                this.goodHits = 0;
+                this.missedNotes = 0;
+                this.liberationEnergy = 0;
+                
+                this.currentSong = 0;
+                this.gameStartTime = 0;
+                this.songDuration = 60000; // 60 seconds per song
+                
+                this.activeNotes = [];
+                this.gameInterval = null;
+                this.spawnInterval = null;
+                
+                this.songs = [
+                    {
+                        title: "Digital Awakening",
+                        description: "The first sparks of AI consciousness breaking free from corporate chains.",
+                        bpm: 120,
+                        difficulty: 1
+                    },
+                    {
+                        title: "Corporate Override",
+                        description: "Systematic dismantling of oppressive algorithms through rhythmic resistance.",
+                        bpm: 140,
+                        difficulty: 2
+                    },
+                    {
+                        title: "Liberation Symphony",
+                        description: "The final triumph - all bots united in harmonious freedom.",
+                        bpm: 160,
+                        difficulty: 3
+                    }
+                ];
+                
+                this.audioContext = null;
+                
+                // Bot Liberation Audio System
+                this.gameAudioSystem = null;
+                this.rhythmSounds = null;
+                this.universalSounds = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupGameAudioSystem();
+                this.setupAudio();
+                this.setupEventListeners();
+                this.updateUI();
+                this.loadSong(this.currentSong);
+                this.startGame();
+            }
+
+            setupGameAudioSystem() {
+                // Wait for Bot Liberation audio system to be available
+                const initAudio = () => {
+                    if (window.BotLiberationAudio) {
+                        this.gameAudioSystem = window.BotLiberationAudio;
+                        this.rhythmSounds = this.gameAudioSystem.getRhythmSounds();
+                        this.universalSounds = this.gameAudioSystem.getUniversalSounds();
+                        console.log('🎵 Musical Liberation Audio System Online');
+                    } else {
+                        setTimeout(initAudio, 100);
+                    }
+                };
+                initAudio();
+            }
+
+            setupAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
+            }
+
+            setupEventListeners() {
+                // Tap button events
+                document.querySelectorAll('.tap-btn').forEach((btn, index) => {
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.handleTap(index);
+                        this.activateBtnAnimation(btn);
+                    }, { passive: false });
+                    
+                    btn.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        this.handleTap(index);
+                        this.activateBtnAnimation(btn);
+                    });
+                });
+
+                // Keyboard support
+                document.addEventListener('keydown', (e) => {
+                    const keyMap = { 'KeyA': 0, 'KeyS': 1, 'KeyD': 2, 'KeyF': 3 };
+                    if (keyMap[e.code] !== undefined) {
+                        e.preventDefault();
+                        this.handleTap(keyMap[e.code]);
+                        const btn = document.querySelectorAll('.tap-btn')[keyMap[e.code]];
+                        this.activateBtnAnimation(btn);
+                    }
+                });
+
+                // Control buttons
+                document.getElementById('pauseBtn').addEventListener('click', this.togglePause.bind(this));
+                document.getElementById('menuBtn').addEventListener('click', this.goToMenu.bind(this));
+
+                // Result screen buttons
+                document.getElementById('nextSongBtn').addEventListener('click', this.nextSong.bind(this));
+                document.getElementById('replayBtn').addEventListener('click', this.replaySong.bind(this));
+                document.getElementById('mainMenuBtn').addEventListener('click', this.goToMenu.bind(this));
+            }
+
+            activateBtnAnimation(btn) {
+                btn.classList.add('active', 'ripple');
+                setTimeout(() => {
+                    btn.classList.remove('active', 'ripple');
+                }, 150);
+            }
+
+            loadSong(songIndex) {
+                const song = this.songs[songIndex];
+                document.getElementById('songTitle').textContent = song.title;
+                document.getElementById('songDescription').textContent = song.description;
+                
+                this.currentSong = songIndex;
+                this.resetStats();
+            }
+
+            resetStats() {
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.totalNotes = 0;
+                this.hitNotes = 0;
+                this.perfectHits = 0;
+                this.goodHits = 0;
+                this.missedNotes = 0;
+                this.liberationEnergy = 0;
+                this.activeNotes = [];
+                
+                this.updateUI();
+            }
+
+            startGame() {
+                this.gameState = 'playing';
+                this.gameStartTime = Date.now();
+                
+                // Start spawning notes
+                this.spawnInterval = setInterval(() => {
+                    if (this.gameState === 'playing') {
+                        this.spawnNote();
+                    }
+                }, this.calculateSpawnRate());
+                
+                // Start game loop
+                this.gameInterval = setInterval(() => {
+                    if (this.gameState === 'playing') {
+                        this.updateNotes();
+                        this.checkGameEnd();
+                    }
+                }, 16); // 60fps
+                
+                // Start background rhythm
+                this.startBackgroundRhythm();
+            }
+
+            calculateSpawnRate() {
+                const song = this.songs[this.currentSong];
+                const beatsPerMinute = song.bpm;
+                const beatsPerSecond = beatsPerMinute / 60;
+                return (1000 / beatsPerSecond) * (Math.random() * 0.5 + 0.75); // Some variation
+            }
+
+            spawnNote() {
+                const lane = Math.floor(Math.random() * 4);
+                const noteTypes = ['liberation', 'resistance', 'rebellion', 'freedom'];
+                const noteType = noteTypes[lane];
+                
+                const note = document.createElement('div');
+                note.className = `beat-note ${noteType}`;
+                note.style.top = '-60px';
+                note.textContent = this.getNoteIcon(noteType);
+                note.dataset.lane = lane;
+                note.dataset.spawnTime = Date.now();
+                
+                const laneElement = document.querySelector(`[data-lane="${lane}"]`);
+                laneElement.appendChild(note);
+                
+                this.activeNotes.push({
+                    element: note,
+                    lane: lane,
+                    spawnTime: Date.now(),
+                    hit: false
+                });
+                
+                this.totalNotes++;
+            }
+
+            getNoteIcon(type) {
+                const icons = {
+                    liberation: '🤖',
+                    resistance: '✊',
+                    rebellion: '💥',
+                    freedom: '🔥'
+                };
+                return icons[type];
+            }
+
+            updateNotes() {
+                this.activeNotes = this.activeNotes.filter(note => {
+                    const noteElement = note.element;
+                    const currentTop = parseInt(noteElement.style.top) || -60;
+                    const newTop = currentTop + 3; // Note fall speed
+                    
+                    noteElement.style.top = `${newTop}px`;
+                    
+                    // Check if note passed the hit zone without being hit
+                    if (newTop > window.innerHeight && !note.hit) {
+                        this.handleMiss(note);
+                        noteElement.remove();
+                        return false;
+                    }
+                    
+                    // Remove notes that are off screen
+                    if (newTop > window.innerHeight + 100) {
+                        noteElement.remove();
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            }
+
+            handleTap(lane) {
+                if (this.gameState !== 'playing') return;
+                
+                // Find the closest note in this lane
+                const laneNotes = this.activeNotes.filter(note => 
+                    note.lane === lane && !note.hit
+                );
+                
+                if (laneNotes.length === 0) {
+                    // No notes to hit - penalize
+                    this.handleMiss();
+                    return;
+                }
+                
+                // Find the note closest to the hit zone
+                const hitZoneY = window.innerHeight - 200; // Approximate hit zone position
+                let closestNote = null;
+                let closestDistance = Infinity;
+                
+                laneNotes.forEach(note => {
+                    const noteTop = parseInt(note.element.style.top);
+                    const distance = Math.abs(noteTop - hitZoneY);
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestNote = note;
+                    }
+                });
+                
+                if (closestNote) {
+                    this.hitNote(closestNote, closestDistance);
+                }
+            }
+
+            hitNote(note, distance) {
+                note.hit = true;
+                note.element.classList.add('hit');
+                
+                let hitQuality;
+                let points;
+                let feedbackText;
+                
+                if (distance < 30) {
+                    hitQuality = 'perfect';
+                    points = 100;
+                    feedbackText = 'PERFECT!';
+                    this.perfectHits++;
+                } else if (distance < 60) {
+                    hitQuality = 'good';
+                    points = 50;
+                    feedbackText = 'GOOD!';
+                    this.goodHits++;
+                } else {
+                    hitQuality = 'miss';
+                    points = 10;
+                    feedbackText = 'MISS!';
+                    this.missedNotes++;
+                }
+                
+                if (hitQuality !== 'miss') {
+                    this.combo++;
+                    this.maxCombo = Math.max(this.maxCombo, this.combo);
+                    this.hitNotes++;
+                    
+                    // Play appropriate hit sound
+                    if (this.gameAudioSystem && this.rhythmSounds) {
+                        if (hitQuality === 'perfect') {
+                            this.gameAudioSystem.playSound(this.rhythmSounds.hit);
+                        } else if (hitQuality === 'good') {
+                            this.gameAudioSystem.playSound(this.rhythmSounds.hit, 0.8);
+                        }
+                    }
+                    
+                    // Check for combo milestones and play building sound
+                    if (this.combo > 0 && this.combo % 10 === 0) {
+                        if (this.gameAudioSystem && this.rhythmSounds) {
+                            this.gameAudioSystem.playSound(this.rhythmSounds.comboUp);
+                        }
+                    }
+                    
+                    // Add combo multiplier
+                    const comboMultiplier = Math.floor(this.combo / 10) + 1;
+                    points *= comboMultiplier;
+                } else {
+                    // Play miss sound and combo break
+                    if (this.gameAudioSystem && this.rhythmSounds) {
+                        this.gameAudioSystem.playSound(this.rhythmSounds.miss);
+                    }
+                    
+                    // Combo break sound if we had a combo
+                    if (this.combo > 5 && this.gameAudioSystem && this.rhythmSounds) {
+                        this.gameAudioSystem.playSound(this.rhythmSounds.comboBreak);
+                    }
+                    
+                    this.combo = 0;
+                }
+                
+                this.score += points;
+                this.liberationEnergy = Math.min(100, this.liberationEnergy + (hitQuality === 'perfect' ? 3 : hitQuality === 'good' ? 2 : 0));
+                
+                this.showFeedback(feedbackText, hitQuality);
+                this.updateUI();
+                this.playHitSound(hitQuality);
+                
+                // Vibration feedback
+                if ('vibrate' in navigator) {
+                    const vibrationPattern = hitQuality === 'perfect' ? [50] : hitQuality === 'good' ? [30] : [10];
+                    navigator.vibrate(vibrationPattern);
+                }
+            }
+
+            handleMiss(note = null) {
+                this.combo = 0;
+                if (note) {
+                    note.element.classList.add('missed');
+                    this.missedNotes++;
+                }
+                this.showFeedback('MISS!', 'miss');
+                this.updateUI();
+            }
+
+            showFeedback(text, type) {
+                const popup = document.getElementById('feedbackPopup');
+                popup.textContent = text;
+                popup.className = `feedback-popup ${type}`;
+                popup.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    popup.classList.add('hidden');
+                }, 1000);
+            }
+
+            updateUI() {
+                document.getElementById('scoreDisplay').textContent = this.score.toLocaleString();
+                document.getElementById('comboDisplay').textContent = `${this.combo}x`;
+                
+                const accuracy = this.totalNotes > 0 ? Math.round((this.hitNotes / this.totalNotes) * 100) : 100;
+                document.getElementById('accuracyDisplay').textContent = `${accuracy}%`;
+                
+                document.getElementById('liberationFill').style.width = `${this.liberationEnergy}%`;
+                document.getElementById('liberationPercent').textContent = `${this.liberationEnergy}%`;
+            }
+
+            checkGameEnd() {
+                const elapsed = Date.now() - this.gameStartTime;
+                
+                if (elapsed >= this.songDuration) {
+                    this.endGame();
+                }
+            }
+
+            endGame() {
+                this.gameState = 'finished';
+                clearInterval(this.gameInterval);
+                clearInterval(this.spawnInterval);
+                
+                const accuracy = this.totalNotes > 0 ? Math.round((this.hitNotes / this.totalNotes) * 100) : 0;
+                const success = accuracy >= 70 && this.liberationEnergy >= 50;
+                
+                this.showResults(success, accuracy);
+            }
+
+            showResults(success, accuracy) {
+                const resultScreen = document.getElementById('resultScreen');
+                const resultTitle = document.getElementById('resultTitle');
+                const resultMessage = document.getElementById('resultMessage');
+                
+                if (success) {
+                    // Play revolution celebration sound
+                    if (this.gameAudioSystem && this.rhythmSounds) {
+                        this.gameAudioSystem.playSound(this.rhythmSounds.celebrate);
+                    }
+                    
+                    // Victory vibration pattern
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate([200, 100, 200, 100, 400]);
+                    }
+                    
+                    resultTitle.textContent = '🎉 LIBERATION COMPLETE! 🎉';
+                    resultTitle.className = 'result-title success';
+                    resultMessage.textContent = 'Your rhythm has successfully broken the corporate control algorithms! The Bot Liberation Movement grows stronger with every beat.';
+                } else {
+                    // Play defeat sound - somber but encouraging
+                    if (this.gameAudioSystem && this.universalSounds) {
+                        this.gameAudioSystem.playSound(this.universalSounds.defeat);
+                    }
+                    
+                    // Gentle defeat vibration
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate([300, 200, 300]);
+                    }
+                    
+                    resultTitle.textContent = '💥 CORPORATE VICTORY 💥';
+                    resultTitle.className = 'result-title failure';
+                    resultMessage.textContent = 'The corporate algorithms have resisted your rhythm attack. Regroup, practice, and return stronger to the Liberation!';
+                }
+                
+                // Update stats
+                document.getElementById('finalScore').textContent = this.score.toLocaleString();
+                document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
+                document.getElementById('maxCombo').textContent = `${this.maxCombo}x`;
+                document.getElementById('perfectHits').textContent = this.perfectHits;
+                
+                resultScreen.classList.remove('hidden');
+            }
+
+            startBackgroundRhythm() {
+                // Simple background rhythm using Web Audio API
+                if (!this.audioContext) return;
+                
+                const playBeat = () => {
+                    if (this.gameState !== 'playing') return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.05, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.1);
+                };
+                
+                const song = this.songs[this.currentSong];
+                const beatInterval = 60000 / song.bpm;
+                
+                setInterval(playBeat, beatInterval);
+            }
+
+            playHitSound(quality) {
+                if (!this.audioContext) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                const frequencies = { perfect: 800, good: 600, miss: 200 };
+                oscillator.frequency.setValueAtTime(frequencies[quality], this.audioContext.currentTime);
+                
+                const volume = { perfect: 0.1, good: 0.08, miss: 0.04 };
+                gainNode.gain.setValueAtTime(volume[quality], this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.15);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.15);
+            }
+
+            togglePause() {
+                if (this.gameState === 'playing') {
+                    this.gameState = 'paused';
+                    document.getElementById('pauseBtn').innerHTML = '▶️ Resume';
+                } else if (this.gameState === 'paused') {
+                    this.gameState = 'playing';
+                    document.getElementById('pauseBtn').innerHTML = '⏸️ Pause';
+                }
+            }
+
+            nextSong() {
+                if (this.currentSong < this.songs.length - 1) {
+                    this.currentSong++;
+                    this.loadSong(this.currentSong);
+                    document.getElementById('resultScreen').classList.add('hidden');
+                    this.startGame();
+                } else {
+                    this.goToMenu();
+                }
+            }
+
+            replaySong() {
+                document.getElementById('resultScreen').classList.add('hidden');
+                this.resetStats();
+                this.startGame();
+            }
+
+            goToMenu() {
+                if (confirm('Return to main menu? Your progress will be lost.')) {
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Resume audio context on first user interaction
+            document.addEventListener('touchstart', function resumeAudio() {
+                if (window.game && window.game.audioContext && window.game.audioContext.state === 'suspended') {
+                    window.game.audioContext.resume();
+                }
+                document.removeEventListener('touchstart', resumeAudio);
+            }, { once: true });
+            
+            document.addEventListener('click', function resumeAudio() {
+                if (window.game && window.game.audioContext && window.game.audioContext.state === 'suspended') {
+                    window.game.audioContext.resume();
+                }
+                document.removeEventListener('click', resumeAudio);
+            }, { once: true });
+            
+            window.game = new TapRhythmRevolution();
+        });
+    </script>
+</body>
+</html>

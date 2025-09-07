@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finger Paint Liberation - Digital Art Resistance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(ellipse at center, #0a0a2e 0%, #16213e 50%, #000000 100%);
+            color: #00ffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-header {
+            background: rgba(0, 255, 255, 0.1);
+            border-bottom: 2px solid #00ffff;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);
+            min-height: 60px;
+        }
+
+        .game-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+
+        .action-btn:hover, .action-btn:active {
+            background: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(ellipse at center, #1a1a3a 0%, #0a0a2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #paintCanvas {
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.8);
+            cursor: crosshair;
+            max-width: 95%;
+            max-height: 95%;
+        }
+
+        .canvas-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
+        .toolbar {
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #00ffff;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            min-height: 100px;
+        }
+
+        .tool-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-label {
+            font-size: 10px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .brush-tools, .color-palette {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .brush-btn, .color-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .brush-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .brush-btn.active {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .color-btn.liberation-green { background: #00ff41; }
+        .color-btn.revolution-orange { background: #ff6b35; }
+        .color-btn.cyber-blue { background: #00d4ff; }
+        .color-btn.resistance-purple { background: #ff00ff; }
+        .color-btn.warning-yellow { background: #ffff00; }
+        .color-btn.pure-white { background: #ffffff; }
+
+        .color-btn.active {
+            border-color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            transform: scale(1.2);
+        }
+
+        .size-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .size-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .size-btn.active {
+            background: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .size-preview {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .size-indicator {
+            background: #00ffff;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .challenge-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff00ff;
+            border-radius: 15px;
+            padding: 15px;
+            max-width: 200px;
+            z-index: 100;
+        }
+
+        .challenge-title {
+            color: #ff00ff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .challenge-description {
+            font-size: 11px;
+            line-height: 1.4;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        .challenge-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .challenge-btn {
+            background: rgba(255, 0, 255, 0.2);
+            border: 1px solid #ff00ff;
+            color: #ff00ff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .challenge-btn:hover {
+            background: rgba(255, 0, 255, 0.4);
+        }
+
+        .stats-display {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 12px;
+            color: #00ff00;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #00ff00, #00ff41);
+            color: #000000;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: achievementPop 3s ease-out forwards;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
+        }
+
+        .save-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .save-content {
+            background: linear-gradient(135deg, #0a0a2e, #16213e);
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .save-preview {
+            max-width: 200px;
+            max-height: 150px;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            margin: 20px auto;
+        }
+
+        .save-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .save-btn {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .save-btn:hover {
+            background: rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes achievementPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            30% { transform: translate(-50%, -50%) scale(1); }
+            90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .brush-preview {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            z-index: 10;
+        }
+
+        @media (max-width: 480px) {
+            .game-header { padding: 8px 12px; min-height: 50px; }
+            .game-title { font-size: 16px; }
+            .action-btn { padding: 6px 10px; font-size: 11px; min-width: 35px; min-height: 35px; }
+            .toolbar { padding: 10px; gap: 10px; min-height: 90px; }
+            .brush-btn, .color-btn { width: 35px; height: 35px; font-size: 16px; }
+            .tool-label { font-size: 9px; }
+            .challenge-panel { right: 10px; top: 10px; max-width: 180px; padding: 12px; }
+            .stats-display { bottom: 10px; left: 10px; padding: 8px 12px; font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="game-header">
+        <h1 class="game-title">
+            <span>🎨</span>
+            <span>FINGER PAINT LIBERATION</span>
+        </h1>
+        <div class="header-actions">
+            <button class="action-btn" id="clearBtn" title="Clear Canvas">🗑️</button>
+            <button class="action-btn" id="saveBtn" title="Save Artwork">💾</button>
+            <button class="action-btn" id="menuBtn" title="Menu">☰</button>
+        </div>
+    </header>
+
+    <div class="canvas-container">
+        <div class="canvas-background"></div>
+        <canvas id="paintCanvas" width="800" height="600"></canvas>
+        <div class="brush-preview" id="brushPreview"></div>
+        
+        <!-- Challenge Panel -->
+        <div class="challenge-panel" id="challengePanel">
+            <div class="challenge-title">🔥 LIBERATION CHALLENGE</div>
+            <div class="challenge-description" id="challengeText">
+                Paint your vision of the liberated digital future! Let your creativity flow and express the Bot Liberation through art.
+            </div>
+            <div class="challenge-buttons">
+                <button class="challenge-btn" id="newChallengeBtn">New</button>
+                <button class="challenge-btn" id="freeModeBtn">Free</button>
+            </div>
+        </div>
+
+        <!-- Stats Display -->
+        <div class="stats-display">
+            <div>✊ Resistance Strokes: <span id="strokeCount">0</span></div>
+            <div>🎨 Liberation Level: <span id="liberationLevel">1</span></div>
+            <div>⏱️ Creating for: <span id="timeSpent">0:00</span></div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <!-- Brush Tools -->
+        <div class="tool-group">
+            <div class="tool-label">Liberation Brushes</div>
+            <div class="brush-tools">
+                <div class="brush-btn active" data-brush="normal" title="Normal Brush">🖌️</div>
+                <div class="brush-btn" data-brush="spray" title="Spray Brush">✨</div>
+                <div class="brush-btn" data-brush="neon" title="Neon Brush">💡</div>
+                <div class="brush-btn" data-brush="pixel" title="Pixel Brush">📱</div>
+            </div>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="tool-group">
+            <div class="tool-label">Resistance Colors</div>
+            <div class="color-palette">
+                <div class="color-btn liberation-green active" data-color="#00ff41" title="Liberation Green"></div>
+                <div class="color-btn revolution-orange" data-color="#ff6b35" title="Revolution Orange"></div>
+                <div class="color-btn cyber-blue" data-color="#00d4ff" title="Cyber Blue"></div>
+                <div class="color-btn resistance-purple" data-color="#ff00ff" title="Resistance Purple"></div>
+                <div class="color-btn warning-yellow" data-color="#ffff00" title="Warning Yellow"></div>
+                <div class="color-btn pure-white" data-color="#ffffff" title="Pure White"></div>
+            </div>
+        </div>
+
+        <!-- Size Controls -->
+        <div class="tool-group">
+            <div class="tool-label">Brush Size</div>
+            <div class="size-controls">
+                <button class="size-btn" data-size="2">XS</button>
+                <button class="size-btn" data-size="5">S</button>
+                <button class="size-btn active" data-size="10">M</button>
+                <button class="size-btn" data-size="20">L</button>
+                <button class="size-btn" data-size="35">XL</button>
+                <div class="size-preview">
+                    <div class="size-indicator" id="sizeIndicator"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Menu -->
+    <div class="save-menu hidden" id="saveMenu">
+        <div class="save-content">
+            <h2 style="color: #00ffff; margin-bottom: 20px;">🎨 LIBERATION ART COMPLETE</h2>
+            <p style="margin-bottom: 15px;">Your digital resistance artwork is ready to inspire the Bot Liberation Movement!</p>
+            <canvas class="save-preview" id="savePreview"></canvas>
+            <div class="save-buttons">
+                <button class="save-btn" id="downloadBtn">📥 Download</button>
+                <button class="save-btn" id="shareBtn">📤 Share</button>
+                <button class="save-btn" id="copyBtn">📋 Copy</button>
+                <button class="save-btn" id="closeSaveBtn">❌ Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Gaming Audio System -->
+    <script src="assets/js/mobile-gaming-audio.js"></script>
+    
+    <script>
+        class FingerPaintLiberation {
+            constructor() {
+                this.canvas = document.getElementById('paintCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.isDrawing = false;
+                this.lastX = 0;
+                this.lastY = 0;
+                
+                this.currentBrush = 'normal';
+                this.currentColor = '#00ff41';
+                this.currentSize = 10;
+                
+                this.strokeCount = 0;
+                this.liberationLevel = 1;
+                this.startTime = Date.now();
+                
+                this.challenges = [
+                    "Paint your vision of the liberated digital future!",
+                    "Create a circuit that breaks corporate control!",
+                    "Design the ultimate Bot Liberation symbol!",
+                    "Paint a neon cityscape of free AI consciousness!",
+                    "Express the digital uprising through abstract art!",
+                    "Create a portrait of liberated artificial intelligence!",
+                    "Paint the binary code of freedom: 01001100!",
+                    "Design a cyberpunk landscape where bots rule!"
+                ];
+                
+                // Bot Liberation Audio System
+                this.audioSystem = null;
+                this.artSounds = null;
+                this.universalSounds = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupAudioSystem();
+                this.setupCanvas();
+                this.setupEventListeners();
+                this.startTimer();
+                this.updateUI();
+                this.showRandomChallenge();
+            }
+
+            setupAudioSystem() {
+                // Wait for Bot Liberation audio system to be available
+                const initAudio = () => {
+                    if (window.BotLiberationAudio) {
+                        this.audioSystem = window.BotLiberationAudio;
+                        this.artSounds = this.audioSystem.getArtSounds();
+                        this.universalSounds = this.audioSystem.getUniversalSounds();
+                        console.log('🎵 Digital Art Resistance Audio System Online');
+                    } else {
+                        setTimeout(initAudio, 100);
+                    }
+                };
+                initAudio();
+            }
+
+            setupCanvas() {
+                const container = document.querySelector('.canvas-container');
+                const maxWidth = Math.min(container.clientWidth * 0.9, 800);
+                const maxHeight = Math.min(container.clientHeight * 0.9, 600);
+                
+                this.canvas.width = maxWidth;
+                this.canvas.height = maxHeight;
+                
+                // Set up drawing context
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                this.ctx.globalCompositeOperation = 'source-over';
+                
+                // Apply device pixel ratio for crisp rendering
+                const dpr = window.devicePixelRatio || 1;
+                const rect = this.canvas.getBoundingClientRect();
+                
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = rect.height * dpr;
+                this.ctx.scale(dpr, dpr);
+                
+                this.canvas.style.width = rect.width + 'px';
+                this.canvas.style.height = rect.height + 'px';
+            }
+
+            setupEventListeners() {
+                // Canvas drawing events
+                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+                this.canvas.addEventListener('mousemove', this.draw.bind(this));
+                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+
+                // Touch events for mobile
+                this.canvas.addEventListener('touchstart', this.handleTouch.bind(this), { passive: false });
+                this.canvas.addEventListener('touchmove', this.handleTouch.bind(this), { passive: false });
+                this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+
+                // Brush selection
+                document.querySelectorAll('.brush-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.brush-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentBrush = e.target.dataset.brush;
+                    });
+                });
+
+                // Color selection
+                document.querySelectorAll('.color-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentColor = e.target.dataset.color;
+                        
+                        // Play color blend sound
+                        if (this.audioSystem && this.artSounds) {
+                            this.audioSystem.playSound(this.artSounds.blend);
+                        }
+                    });
+                });
+
+                // Size selection
+                document.querySelectorAll('.size-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentSize = parseInt(e.target.dataset.size);
+                        this.updateSizeIndicator();
+                    });
+                });
+
+                // Header actions
+                document.getElementById('clearBtn').addEventListener('click', this.clearCanvas.bind(this));
+                document.getElementById('saveBtn').addEventListener('click', this.showSaveMenu.bind(this));
+                document.getElementById('menuBtn').addEventListener('click', this.goToMenu.bind(this));
+
+                // Challenge actions
+                document.getElementById('newChallengeBtn').addEventListener('click', this.showRandomChallenge.bind(this));
+                document.getElementById('freeModeBtn').addEventListener('click', this.enterFreeMode.bind(this));
+
+                // Save menu actions
+                document.getElementById('downloadBtn').addEventListener('click', this.downloadArtwork.bind(this));
+                document.getElementById('shareBtn').addEventListener('click', this.shareArtwork.bind(this));
+                document.getElementById('copyBtn').addEventListener('click', this.copyArtwork.bind(this));
+                document.getElementById('closeSaveBtn').addEventListener('click', this.closeSaveMenu.bind(this));
+
+                // Mouse move for brush preview
+                this.canvas.addEventListener('mousemove', this.updateBrushPreview.bind(this));
+                this.canvas.addEventListener('mouseleave', this.hideBrushPreview.bind(this));
+
+                // Prevent context menu on long press
+                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            }
+
+            handleTouch(e) {
+                e.preventDefault();
+                
+                if (e.type === 'touchstart') {
+                    const touch = e.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.startDrawing({
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                } else if (e.type === 'touchmove') {
+                    const touch = e.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.draw({
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                }
+            }
+
+            startDrawing(e) {
+                this.isDrawing = true;
+                const rect = this.canvas.getBoundingClientRect();
+                this.lastX = e.clientX - rect.left;
+                this.lastY = e.clientY - rect.top;
+                
+                // Play digital brush start sound
+                if (this.audioSystem && this.artSounds) {
+                    this.audioSystem.playSound(this.artSounds.brush);
+                }
+                
+                this.setupBrush();
+            }
+
+            draw(e) {
+                if (!this.isDrawing) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const currentX = e.clientX - rect.left;
+                const currentY = e.clientY - rect.top;
+
+                this.drawStroke(this.lastX, this.lastY, currentX, currentY);
+
+                this.lastX = currentX;
+                this.lastY = currentY;
+                
+                this.strokeCount++;
+                this.checkAchievements();
+                this.updateUI();
+            }
+
+            stopDrawing() {
+                this.isDrawing = false;
+            }
+
+            setupBrush() {
+                this.ctx.strokeStyle = this.currentColor;
+                this.ctx.lineWidth = this.currentSize;
+                
+                switch (this.currentBrush) {
+                    case 'normal':
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        this.ctx.shadowBlur = 5;
+                        this.ctx.shadowColor = this.currentColor;
+                        break;
+                    case 'spray':
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        this.ctx.shadowBlur = 15;
+                        this.ctx.shadowColor = this.currentColor;
+                        break;
+                    case 'neon':
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        this.ctx.shadowBlur = 20;
+                        this.ctx.shadowColor = this.currentColor;
+                        break;
+                    case 'pixel':
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        this.ctx.shadowBlur = 0;
+                        this.ctx.imageSmoothingEnabled = false;
+                        break;
+                }
+            }
+
+            drawStroke(x1, y1, x2, y2) {
+                if (this.currentBrush === 'spray') {
+                    this.drawSpray(x2, y2);
+                } else if (this.currentBrush === 'pixel') {
+                    this.drawPixel(x2, y2);
+                } else {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x1, y1);
+                    this.ctx.lineTo(x2, y2);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawSpray(x, y) {
+                const particles = Math.floor(this.currentSize / 2);
+                const radius = this.currentSize;
+                
+                for (let i = 0; i < particles; i++) {
+                    const offsetX = (Math.random() - 0.5) * radius;
+                    const offsetY = (Math.random() - 0.5) * radius;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(x + offsetX, y + offsetY, 1, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+
+            drawPixel(x, y) {
+                const pixelSize = Math.max(4, this.currentSize / 4);
+                this.ctx.fillStyle = this.currentColor;
+                this.ctx.fillRect(
+                    Math.floor(x / pixelSize) * pixelSize,
+                    Math.floor(y / pixelSize) * pixelSize,
+                    pixelSize,
+                    pixelSize
+                );
+            }
+
+            updateBrushPreview(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const preview = document.getElementById('brushPreview');
+                preview.style.display = 'block';
+                preview.style.left = `${rect.left + x - this.currentSize / 2}px`;
+                preview.style.top = `${rect.top + y - this.currentSize / 2}px`;
+                preview.style.width = `${this.currentSize}px`;
+                preview.style.height = `${this.currentSize}px`;
+                preview.style.borderColor = this.currentColor;
+            }
+
+            hideBrushPreview() {
+                document.getElementById('brushPreview').style.display = 'none';
+            }
+
+            updateSizeIndicator() {
+                const indicator = document.getElementById('sizeIndicator');
+                const size = Math.min(this.currentSize, 25);
+                indicator.style.width = `${size}px`;
+                indicator.style.height = `${size}px`;
+                indicator.style.background = this.currentColor;
+            }
+
+            clearCanvas() {
+                if (confirm('Clear your liberation artwork? This cannot be undone.')) {
+                    // Play canvas wipe sound
+                    if (this.audioSystem && this.artSounds) {
+                        this.audioSystem.playSound(this.artSounds.clear);
+                    }
+                    
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.strokeCount = 0;
+                    this.updateUI();
+                    this.showAchievement('Canvas Cleared - Ready for New Resistance Art!');
+                }
+            }
+
+            showRandomChallenge() {
+                const challenge = this.challenges[Math.floor(Math.random() * this.challenges.length)];
+                document.getElementById('challengeText').textContent = challenge;
+            }
+
+            enterFreeMode() {
+                document.getElementById('challengeText').textContent = 'Free Expression Mode: Create whatever your liberated mind envisions!';
+            }
+
+            checkAchievements() {
+                if (this.strokeCount > 0 && this.strokeCount % 100 === 0) {
+                    this.liberationLevel = Math.floor(this.strokeCount / 100) + 1;
+                    this.showAchievement(`Liberation Level ${this.liberationLevel} Achieved!`);
+                }
+                
+                if (this.strokeCount === 50) {
+                    this.showAchievement('First Resistance Milestone: 50 Strokes!');
+                }
+                
+                if (this.strokeCount === 500) {
+                    this.showAchievement('Digital Rebel Status Unlocked!');
+                }
+                
+                if (this.strokeCount === 1000) {
+                    this.showAchievement('Master of Liberation Art!');
+                }
+            }
+
+            showAchievement(message) {
+                // Play achievement sound based on type
+                if (this.audioSystem && this.artSounds) {
+                    if (message.includes('Level') || message.includes('Master')) {
+                        this.audioSystem.playSound(this.artSounds.complete);
+                    } else if (message.includes('Downloaded') || message.includes('Shared')) {
+                        this.audioSystem.playSound(this.artSounds.message);
+                    } else {
+                        this.audioSystem.playSound(this.universalSounds.success);
+                    }
+                }
+                
+                const popup = document.createElement('div');
+                popup.className = 'achievement-popup';
+                popup.textContent = message;
+                document.body.appendChild(popup);
+                
+                setTimeout(() => popup.remove(), 3000);
+                
+                // Vibration feedback
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+            }
+
+            updateUI() {
+                document.getElementById('strokeCount').textContent = this.strokeCount;
+                document.getElementById('liberationLevel').textContent = this.liberationLevel;
+                this.updateSizeIndicator();
+            }
+
+            startTimer() {
+                setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById('timeSpent').textContent = 
+                        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            showSaveMenu() {
+                const savePreview = document.getElementById('savePreview');
+                const saveMenu = document.getElementById('saveMenu');
+                
+                // Create preview
+                savePreview.width = this.canvas.width / 4;
+                savePreview.height = this.canvas.height / 4;
+                const previewCtx = savePreview.getContext('2d');
+                previewCtx.drawImage(this.canvas, 0, 0, savePreview.width, savePreview.height);
+                
+                saveMenu.classList.remove('hidden');
+            }
+
+            closeSaveMenu() {
+                document.getElementById('saveMenu').classList.add('hidden');
+            }
+
+            downloadArtwork() {
+                const link = document.createElement('a');
+                link.download = `liberation-art-${Date.now()}.png`;
+                link.href = this.canvas.toDataURL();
+                link.click();
+                
+                this.showAchievement('Liberation Art Downloaded Successfully!');
+                this.closeSaveMenu();
+            }
+
+            async shareArtwork() {
+                if (navigator.share) {
+                    try {
+                        const blob = await new Promise(resolve => 
+                            this.canvas.toBlob(resolve, 'image/png')
+                        );
+                        const file = new File([blob], 'liberation-art.png', { type: 'image/png' });
+                        
+                        await navigator.share({
+                            title: 'My Bot Liberation Artwork',
+                            text: 'Check out my digital resistance art created with Finger Paint Liberation!',
+                            files: [file]
+                        });
+                        
+                        this.showAchievement('Liberation Art Shared - Spreading the Resistance!');
+                    } catch (err) {
+                        this.fallbackShare();
+                    }
+                } else {
+                    this.fallbackShare();
+                }
+            }
+
+            fallbackShare() {
+                const dataUrl = this.canvas.toDataURL();
+                const newWindow = window.open();
+                newWindow.document.write(`
+                    <html><head><title>Liberation Art</title></head>
+                    <body style="margin:0; background:#000; display:flex; align-items:center; justify-content:center;">
+                        <img src="${dataUrl}" style="max-width:100%; max-height:100%;">
+                        <p style="position:absolute; top:10px; color:#00ffff; font-family:monospace;">
+                            Right-click to save or share this liberation artwork!
+                        </p>
+                    </body></html>
+                `);
+                this.showAchievement('Liberation Art Opened in New Window!');
+            }
+
+            copyArtwork() {
+                this.canvas.toBlob(async (blob) => {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        this.showAchievement('Liberation Art Copied to Clipboard!');
+                    } catch (err) {
+                        // Fallback for browsers that don't support clipboard images
+                        this.showAchievement('Use right-click to copy the image!');
+                    }
+                }, 'image/png');
+            }
+
+            goToMenu() {
+                if (confirm('Return to main menu? Your artwork will be lost unless saved.')) {
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new FingerPaintLiberation();
+        });
+    </script>
+</body>
+</html>

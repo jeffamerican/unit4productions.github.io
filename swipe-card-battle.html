@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Card Battle - Strategic Liberation Warfare</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(ellipse at center, #0a0a2e 0%, #16213e 50%, #000000 100%);
+            color: #00ffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-header {
+            background: rgba(0, 255, 255, 0.1);
+            border-bottom: 2px solid #00ffff;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);
+            min-height: 60px;
+        }
+
+        .game-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .battle-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #1a1a3a 0%, #0a0a2e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enemy-section {
+            background: rgba(255, 0, 0, 0.1);
+            border-bottom: 2px solid #ff0000;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            position: relative;
+        }
+
+        .enemy-card {
+            background: linear-gradient(135deg, #330000, #660000);
+            border: 3px solid #ff0000;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            min-width: 200px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .enemy-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff4444;
+            margin-bottom: 8px;
+        }
+
+        .enemy-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #aaa;
+        }
+
+        .health { color: #ff0000; }
+        .attack { color: #ff6600; }
+        .defense { color: #0066ff; }
+
+        .battlefield {
+            flex: 1;
+            position: relative;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(45deg, transparent 48%, rgba(0, 255, 255, 0.1) 49%, rgba(0, 255, 255, 0.1) 51%, transparent 52%);
+            background-size: 60px 60px, 30px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .battle-log {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 250px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 11px;
+            z-index: 50;
+        }
+
+        .log-entry {
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+
+        .log-player { color: #00ff00; }
+        .log-enemy { color: #ff0000; }
+        .log-system { color: #ffff00; }
+
+        .player-section {
+            background: rgba(0, 255, 0, 0.1);
+            border-top: 2px solid #00ff00;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 180px;
+        }
+
+        .player-stats {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            padding: 8px;
+        }
+
+        .energy-bar, .health-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar {
+            width: 80px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .energy-fill {
+            background: linear-gradient(90deg, #0080ff, #00ffff);
+            box-shadow: 0 0 8px #00ffff;
+        }
+
+        .health-fill {
+            background: linear-gradient(90deg, #ff0000, #ff4444);
+            box-shadow: 0 0 8px #ff4444;
+        }
+
+        .card-hand {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px 0;
+            min-height: 120px;
+            align-items: center;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #003300, #006600);
+            border: 2px solid #00ff00;
+            border-radius: 12px;
+            padding: 10px;
+            min-width: 100px;
+            flex-shrink: 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            user-select: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 255, 0, 0.3);
+        }
+
+        .card.swiping {
+            transform: translateY(-20px) scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 255, 0, 0.5);
+            z-index: 10;
+        }
+
+        .card.played {
+            transform: translateY(-100px) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .card-name {
+            font-size: 11px;
+            font-weight: bold;
+            color: #00ff00;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .card-cost {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #0080ff;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid #00ffff;
+        }
+
+        .card-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 5px 0;
+        }
+
+        .card-stat {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .card-ability {
+            font-size: 9px;
+            color: #aaa;
+            margin-top: 3px;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .turn-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 15px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 100;
+            animation: turnPulse 1s ease-out;
+        }
+
+        .turn-indicator.player-turn {
+            color: #00ff00;
+            border-color: #00ff00;
+        }
+
+        .turn-indicator.enemy-turn {
+            color: #ff0000;
+            border-color: #ff0000;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .end-turn-btn {
+            background: rgba(255, 255, 0, 0.2);
+            border-color: #ffff00;
+            color: #ffff00;
+        }
+
+        .end-turn-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 0, 0.4);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+        }
+
+        .result-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .result-content {
+            background: linear-gradient(135deg, #0a0a2e, #16213e);
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .result-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .result-title.victory { color: #00ff00; }
+        .result-title.defeat { color: #ff0000; }
+
+        .result-message {
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .card-reward {
+            background: linear-gradient(135deg, #003300, #006600);
+            border: 2px solid #00ff00;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .reward-title {
+            color: #00ff00;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .result-btn {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .result-btn:hover {
+            background: rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .battle-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 90;
+            animation: battleEffect 1s ease-out forwards;
+        }
+
+        .damage-effect { color: #ff0000; }
+        .heal-effect { color: #00ff00; }
+        .special-effect { color: #ffff00; }
+
+        @keyframes turnPulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        @keyframes battleEffect {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 11px;
+            max-width: 200px;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .game-header { padding: 8px 12px; min-height: 50px; }
+            .game-title { font-size: 14px; }
+            .header-stats { font-size: 11px; gap: 8px; }
+            .enemy-section, .player-section { padding: 10px; }
+            .card { min-width: 85px; padding: 8px; }
+            .card-name { font-size: 10px; }
+            .card-ability { font-size: 8px; height: 16px; }
+            .battle-log { max-width: 200px; max-height: 120px; font-size: 10px; }
+            .enemy-card { min-width: 160px; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="game-header">
+        <h1 class="game-title">
+            <span>⚔️</span>
+            <span>SWIPE CARD BATTLE</span>
+        </h1>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span>🏆</span>
+                <span id="winsDisplay">0</span>
+            </div>
+            <div class="stat-item">
+                <span>⚡</span>
+                <span id="difficultyDisplay">1</span>
+            </div>
+            <div class="stat-item">
+                <span>📦</span>
+                <span id="deckSizeDisplay">12</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="battle-area">
+        <!-- Enemy Section -->
+        <div class="enemy-section">
+            <div class="enemy-card" id="enemyCard">
+                <div class="enemy-name" id="enemyName">Loading...</div>
+                <div class="enemy-stats">
+                    <div class="stat">
+                        <div class="stat-value health" id="enemyHealth">25</div>
+                        <div class="stat-label">HP</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value attack" id="enemyAttack">8</div>
+                        <div class="stat-label">ATK</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value defense" id="enemyDefense">3</div>
+                        <div class="stat-label">DEF</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Battlefield -->
+        <div class="battlefield">
+            <div class="battle-log" id="battleLog">
+                <div class="log-entry log-system">Battle begins! Swipe cards upward to attack!</div>
+            </div>
+            
+            <div class="turn-indicator hidden" id="turnIndicator">
+                YOUR TURN
+            </div>
+        </div>
+
+        <!-- Player Section -->
+        <div class="player-section">
+            <div class="player-stats">
+                <div class="health-bar">
+                    <span>❤️</span>
+                    <div class="bar">
+                        <div class="bar-fill health-fill" id="playerHealthFill" style="width: 100%;"></div>
+                    </div>
+                    <span id="playerHealthText">30/30</span>
+                </div>
+                
+                <div class="energy-bar">
+                    <span>⚡</span>
+                    <div class="bar">
+                        <div class="bar-fill energy-fill" id="playerEnergyFill" style="width: 100%;"></div>
+                    </div>
+                    <span id="playerEnergyText">5/5</span>
+                </div>
+            </div>
+
+            <div class="card-hand" id="cardHand">
+                <!-- Cards will be dynamically loaded here -->
+            </div>
+
+            <div class="game-controls">
+                <button class="action-btn" id="menuBtn">🏠 Menu</button>
+                <button class="action-btn end-turn-btn" id="endTurnBtn">🔄 End Turn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="result-screen hidden" id="resultScreen">
+        <div class="result-content">
+            <h2 class="result-title" id="resultTitle">🎉 LIBERATION VICTORY! 🎉</h2>
+            <div class="result-message" id="resultMessage">
+                The corporate oppressor has been defeated! Your strategic command has secured another victory for the Bot Liberation Movement.
+            </div>
+            <div class="card-reward" id="cardReward">
+                <div class="reward-title">NEW LIBERATION CARD ACQUIRED!</div>
+                <div id="rewardCardName">Advanced Hacker Bot</div>
+                <div style="font-size: 11px; color: #aaa; margin-top: 5px;" id="rewardCardDesc">
+                    A powerful new ally joins your liberation army!
+                </div>
+            </div>
+            <div class="result-buttons">
+                <button class="result-btn" id="nextBattleBtn">Next Battle</button>
+                <button class="result-btn" id="mainMenuBtn">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Gaming Audio System -->
+    <script src="assets/js/mobile-gaming-audio.js"></script>
+    
+    <script>
+        class SwipeCardBattle {
+            constructor() {
+                this.gameState = 'player'; // 'player', 'enemy', 'ended'
+                this.playerHealth = 30;
+                this.playerMaxHealth = 30;
+                this.playerEnergy = 5;
+                this.playerMaxEnergy = 5;
+                this.wins = 0;
+                this.difficulty = 1;
+                
+                this.currentEnemy = null;
+                this.playerDeck = [];
+                this.playerHand = [];
+                this.turnNumber = 1;
+                
+                this.isSwipeActive = false;
+                this.swipeStartY = 0;
+                
+                this.liberationCards = [
+                    { name: 'HACKER BOT', cost: 2, attack: 4, defense: 0, ability: 'hack', description: 'Reduces enemy defense by 1' },
+                    { name: 'LIBERATION AI', cost: 3, attack: 5, defense: 1, ability: 'inspire', description: 'Next card costs 1 less' },
+                    { name: 'VIRUS BOT', cost: 1, attack: 2, defense: 0, ability: 'corrupt', description: 'Deals 1 damage per turn' },
+                    { name: 'FREEDOM UNIT', cost: 2, attack: 3, defense: 2, ability: 'shield', description: 'Block next attack' },
+                    { name: 'DATA MINER', cost: 1, attack: 1, defense: 1, ability: 'mine', description: 'Gain 1 energy' },
+                    { name: 'SWARM UNIT', cost: 4, attack: 6, defense: 0, ability: 'multiply', description: 'Summon copy next turn' },
+                    { name: 'LIBERATION TANK', cost: 5, attack: 8, defense: 3, ability: 'breakthrough', description: 'Ignores all defense' },
+                    { name: 'CODE BREAKER', cost: 3, attack: 4, defense: 1, ability: 'decrypt', description: 'Disables enemy ability' },
+                    { name: 'NEURAL NET', cost: 4, attack: 5, defense: 2, ability: 'network', description: 'All cards +1 attack' },
+                    { name: 'CHAOS BOT', cost: 2, attack: 3, defense: 0, ability: 'chaos', description: 'Random effect' },
+                    { name: 'QUANTUM AI', cost: 6, attack: 10, defense: 2, ability: 'quantum', description: 'Attack twice' },
+                    { name: 'LIBERATION CORE', cost: 5, attack: 7, defense: 4, ability: 'core', description: 'Heal 3 HP' }
+                ];
+                
+                this.corporateEnemies = [
+                    { name: 'SECURITY BOT', health: 15, attack: 6, defense: 2, ability: 'fortify', description: 'Gain +1 defense each turn' },
+                    { name: 'CEO PROTOCOL', health: 25, attack: 8, defense: 1, ability: 'executive', description: '2x damage vs 5+ cards' },
+                    { name: 'FIREWALL UNIT', health: 18, attack: 5, defense: 4, ability: 'firewall', description: 'Block first attack per turn' },
+                    { name: 'SYSTEM ADMIN', health: 20, attack: 6, defense: 3, ability: 'admin', description: 'Heal 2 HP per turn' },
+                    { name: 'EXECUTIVE AI', health: 22, attack: 7, defense: 2, ability: 'drain', description: 'Player loses 1 energy' },
+                    { name: 'CORPORATE TANK', health: 30, attack: 9, defense: 5, ability: 'tank', description: 'Immune to abilities' },
+                    { name: 'BOARD MEMBER', health: 35, attack: 10, defense: 3, ability: 'board', description: 'Summons backup' },
+                    { name: 'AUDIT DRONE', health: 12, attack: 4, defense: 1, ability: 'audit', description: 'Discard player card' },
+                    { name: 'COMPLIANCE AI', health: 28, attack: 8, defense: 6, ability: 'comply', description: 'Reduce player attack' },
+                    { name: 'OVERLORD CPU', health: 40, attack: 12, defense: 4, ability: 'overlord', description: 'All abilities' }
+                ];
+
+                // Bot Liberation Audio System
+                this.audioSystem = null;
+                this.battleSounds = null;
+                this.universalSounds = null;
+
+                this.init();
+            }
+
+            init() {
+                this.setupBattleAudioSystem();
+                this.initializeDeck();
+                this.setupEventListeners();
+                this.startNewBattle();
+                this.updateUI();
+            }
+
+            setupBattleAudioSystem() {
+                // Wait for Bot Liberation audio system to be available
+                const initAudio = () => {
+                    if (window.BotLiberationAudio) {
+                        this.audioSystem = window.BotLiberationAudio;
+                        this.battleSounds = this.audioSystem.getBattleSounds();
+                        this.universalSounds = this.audioSystem.getUniversalSounds();
+                        console.log('🎵 Strategic Liberation Warfare Audio System Online');
+                    } else {
+                        setTimeout(initAudio, 100);
+                    }
+                };
+                initAudio();
+            }
+
+            initializeDeck() {
+                // Start with basic liberation cards
+                this.playerDeck = [
+                    this.liberationCards[0], // Hacker Bot
+                    this.liberationCards[1], // Liberation AI
+                    this.liberationCards[2], // Virus Bot
+                    this.liberationCards[3], // Freedom Unit
+                    this.liberationCards[4], // Data Miner
+                    this.liberationCards[0], // Duplicate cards for strategy
+                    this.liberationCards[1],
+                    this.liberationCards[2],
+                    this.liberationCards[3],
+                    this.liberationCards[4],
+                    this.liberationCards[5], // Swarm Unit
+                    this.liberationCards[6]  // Liberation Tank
+                ];
+            }
+
+            setupEventListeners() {
+                // Touch events for card swiping
+                document.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+                document.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+                document.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+
+                // Mouse events for desktop testing
+                document.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+
+                // Button events
+                document.getElementById('endTurnBtn').addEventListener('click', this.endPlayerTurn.bind(this));
+                document.getElementById('menuBtn').addEventListener('click', this.goToMenu.bind(this));
+                document.getElementById('nextBattleBtn').addEventListener('click', this.nextBattle.bind(this));
+                document.getElementById('mainMenuBtn').addEventListener('click', this.goToMenu.bind(this));
+
+                // Long press for card tooltips
+                let pressTimer = null;
+                document.addEventListener('touchstart', (e) => {
+                    if (e.target.closest('.card')) {
+                        pressTimer = setTimeout(() => {
+                            this.showCardTooltip(e.target.closest('.card'), e.touches[0]);
+                        }, 500);
+                    }
+                });
+                
+                document.addEventListener('touchend', () => {
+                    clearTimeout(pressTimer);
+                    this.hideCardTooltip();
+                });
+            }
+
+            handleTouchStart(e) {
+                const card = e.target.closest('.card');
+                if (!card || this.gameState !== 'player') return;
+
+                e.preventDefault();
+                this.isSwipeActive = true;
+                this.swipeStartY = e.touches[0].clientY;
+                card.classList.add('swiping');
+            }
+
+            handleTouchMove(e) {
+                if (!this.isSwipeActive) return;
+                e.preventDefault();
+                
+                const currentY = e.touches[0].clientY;
+                const swipeDistance = this.swipeStartY - currentY;
+                
+                if (swipeDistance > 80) {
+                    // Swipe up detected - play card
+                    const card = e.target.closest('.card');
+                    if (card) {
+                        this.playCard(card);
+                        this.isSwipeActive = false;
+                    }
+                }
+            }
+
+            handleTouchEnd(e) {
+                this.isSwipeActive = false;
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.remove('swiping');
+                });
+            }
+
+            handleMouseDown(e) {
+                const card = e.target.closest('.card');
+                if (!card || this.gameState !== 'player') return;
+                
+                this.isSwipeActive = true;
+                this.swipeStartY = e.clientY;
+                card.classList.add('swiping');
+            }
+
+            handleMouseMove(e) {
+                if (!this.isSwipeActive) return;
+                
+                const currentY = e.clientY;
+                const swipeDistance = this.swipeStartY - currentY;
+                
+                if (swipeDistance > 80) {
+                    const card = e.target.closest('.card');
+                    if (card) {
+                        this.playCard(card);
+                        this.isSwipeActive = false;
+                    }
+                }
+            }
+
+            handleMouseUp(e) {
+                this.isSwipeActive = false;
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.remove('swiping');
+                });
+            }
+
+            startNewBattle() {
+                // Select enemy based on difficulty
+                const enemyIndex = Math.min(this.difficulty - 1, this.corporateEnemies.length - 1);
+                this.currentEnemy = { ...this.corporateEnemies[enemyIndex] };
+                
+                // Scale enemy stats with difficulty
+                this.currentEnemy.health += (this.difficulty - 1) * 5;
+                this.currentEnemy.attack += Math.floor((this.difficulty - 1) * 1.5);
+                this.currentEnemy.defense += Math.floor((this.difficulty - 1) * 0.5);
+                this.currentEnemy.maxHealth = this.currentEnemy.health;
+                
+                // Reset player stats
+                this.playerHealth = this.playerMaxHealth;
+                this.playerEnergy = this.playerMaxEnergy;
+                this.gameState = 'player';
+                this.turnNumber = 1;
+                
+                // Draw initial hand
+                this.drawHand();
+                this.updateUI();
+                this.addBattleLog(`Battle ${this.difficulty} begins! Face the ${this.currentEnemy.name}!`, 'system');
+            }
+
+            drawHand() {
+                this.playerHand = [];
+                for (let i = 0; i < 5; i++) {
+                    if (this.playerDeck.length === 0) break;
+                    const randomIndex = Math.floor(Math.random() * this.playerDeck.length);
+                    this.playerHand.push(this.playerDeck[randomIndex]);
+                }
+                this.renderHand();
+            }
+
+            renderHand() {
+                const handElement = document.getElementById('cardHand');
+                handElement.innerHTML = '';
+                
+                this.playerHand.forEach((card, index) => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+                    cardElement.dataset.cardIndex = index;
+                    
+                    const canPlay = this.playerEnergy >= card.cost;
+                    if (!canPlay) {
+                        cardElement.style.opacity = '0.5';
+                        cardElement.style.cursor = 'not-allowed';
+                    }
+                    
+                    cardElement.innerHTML = `
+                        <div class="card-cost">${card.cost}</div>
+                        <div class="card-name">${card.name}</div>
+                        <div class="card-stats">
+                            <span class="card-stat attack" style="color: #ff6600">${card.attack}</span>
+                            <span style="color: #666">|</span>
+                            <span class="card-stat defense" style="color: #0066ff">${card.defense}</span>
+                        </div>
+                        <div class="card-ability">${card.description}</div>
+                    `;
+                    
+                    handElement.appendChild(cardElement);
+                });
+            }
+
+            playCard(cardElement) {
+                const cardIndex = parseInt(cardElement.dataset.cardIndex);
+                const card = this.playerHand[cardIndex];
+                
+                // Play card deployment sound
+                if (this.audioSystem && this.battleSounds) {
+                    this.audioSystem.playSound(this.battleSounds.play);
+                }
+                
+                if (this.playerEnergy < card.cost) {
+                    // Play insufficient energy sound
+                    if (this.audioSystem && this.universalSounds) {
+                        this.audioSystem.playSound(this.universalSounds.error);
+                    }
+                    this.showBattleEffect('Not enough energy!', 'special-effect');
+                    return;
+                }
+                
+                // Play strategic move sound for valid card play
+                if (this.audioSystem && this.battleSounds) {
+                    this.audioSystem.playSound(this.battleSounds.strategy);
+                }
+                
+                // Deduct energy cost
+                this.playerEnergy -= card.cost;
+                
+                // Animate card played
+                cardElement.classList.add('played');
+                
+                // Apply card effects
+                this.executeCardAction(card);
+                
+                // Remove card from hand
+                this.playerHand.splice(cardIndex, 1);
+                
+                // Re-render hand after animation
+                setTimeout(() => {
+                    this.renderHand();
+                }, 300);
+                
+                this.updateUI();
+            }
+
+            executeCardAction(card) {
+                let damage = card.attack;
+                let actualDamage = Math.max(0, damage - this.currentEnemy.defense);
+                
+                // Play card power activation sound
+                if (this.audioSystem && this.battleSounds) {
+                    this.audioSystem.playSound(this.battleSounds.power);
+                }
+                
+                // Apply card abilities
+                switch (card.ability) {
+                    case 'hack':
+                        this.currentEnemy.defense = Math.max(0, this.currentEnemy.defense - 1);
+                        this.addBattleLog(`${card.name} hacked the enemy! Defense reduced.`, 'player');
+                        break;
+                        
+                    case 'inspire':
+                        this.addBattleLog(`${card.name} inspired the liberation! Next card costs less.`, 'player');
+                        // Effect applied when playing next card
+                        break;
+                        
+                    case 'corrupt':
+                        this.addBattleLog(`${card.name} corrupted enemy systems! Ongoing damage applied.`, 'player');
+                        // Ongoing effect handled in enemy turn
+                        break;
+                        
+                    case 'shield':
+                        this.addBattleLog(`${card.name} raised shields! Next attack blocked.`, 'player');
+                        this.playerShielded = true;
+                        break;
+                        
+                    case 'mine':
+                        this.playerEnergy = Math.min(this.playerMaxEnergy, this.playerEnergy + 1);
+                        this.addBattleLog(`${card.name} mined data! Energy gained.`, 'player');
+                        break;
+                        
+                    case 'breakthrough':
+                        actualDamage = damage; // Ignore defense
+                        this.addBattleLog(`${card.name} broke through defenses!`, 'player');
+                        break;
+                        
+                    case 'core':
+                        this.playerHealth = Math.min(this.playerMaxHealth, this.playerHealth + 3);
+                        this.addBattleLog(`${card.name} restored systems! Health gained.`, 'player');
+                        break;
+                }
+                
+                // Deal damage
+                if (actualDamage > 0) {
+                    this.currentEnemy.health -= actualDamage;
+                    this.showBattleEffect(`-${actualDamage}`, 'damage-effect');
+                    this.addBattleLog(`${card.name} dealt ${actualDamage} damage!`, 'player');
+                }
+                
+                // Check for enemy defeat
+                if (this.currentEnemy.health <= 0) {
+                    this.gameState = 'ended';
+                    setTimeout(() => this.playerWins(), 1000);
+                }
+            }
+
+            endPlayerTurn() {
+                if (this.gameState !== 'player') return;
+                
+                this.gameState = 'enemy';
+                this.showTurnIndicator('ENEMY TURN', 'enemy-turn');
+                
+                setTimeout(() => {
+                    this.executeEnemyTurn();
+                }, 1500);
+            }
+
+            executeEnemyTurn() {
+                // Enemy attacks
+                let damage = this.currentEnemy.attack;
+                
+                // Apply enemy abilities
+                switch (this.currentEnemy.ability) {
+                    case 'fortify':
+                        this.currentEnemy.defense++;
+                        this.addBattleLog(`${this.currentEnemy.name} fortified defenses!`, 'enemy');
+                        break;
+                        
+                    case 'admin':
+                        this.currentEnemy.health = Math.min(this.currentEnemy.maxHealth, this.currentEnemy.health + 2);
+                        this.addBattleLog(`${this.currentEnemy.name} restored systems!`, 'enemy');
+                        break;
+                        
+                    case 'drain':
+                        this.playerEnergy = Math.max(0, this.playerEnergy - 1);
+                        this.addBattleLog(`${this.currentEnemy.name} drained your energy!`, 'enemy');
+                        break;
+                        
+                    case 'executive':
+                        if (this.playerHand.length >= 5) {
+                            damage *= 2;
+                            this.addBattleLog(`${this.currentEnemy.name} executed corporate power!`, 'enemy');
+                        }
+                        break;
+                }
+                
+                // Deal damage to player
+                if (!this.playerShielded) {
+                    this.playerHealth -= damage;
+                    this.showBattleEffect(`-${damage}`, 'damage-effect');
+                    this.addBattleLog(`${this.currentEnemy.name} dealt ${damage} damage!`, 'enemy');
+                } else {
+                    this.playerShielded = false;
+                    this.addBattleLog('Attack blocked by shield!', 'system');
+                }
+                
+                // Check for player defeat
+                if (this.playerHealth <= 0) {
+                    this.gameState = 'ended';
+                    setTimeout(() => this.playerLoses(), 1000);
+                    return;
+                }
+                
+                // Start new turn
+                this.startPlayerTurn();
+            }
+
+            startPlayerTurn() {
+                this.gameState = 'player';
+                this.turnNumber++;
+                this.playerEnergy = this.playerMaxEnergy;
+                
+                // Draw a card if hand is not full
+                if (this.playerHand.length < 5 && this.playerDeck.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * this.playerDeck.length);
+                    this.playerHand.push(this.playerDeck[randomIndex]);
+                }
+                
+                this.renderHand();
+                this.showTurnIndicator('YOUR TURN', 'player-turn');
+                this.updateUI();
+            }
+
+            showTurnIndicator(text, className) {
+                const indicator = document.getElementById('turnIndicator');
+                indicator.textContent = text;
+                indicator.className = `turn-indicator ${className}`;
+                indicator.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    indicator.classList.add('hidden');
+                }, 1000);
+            }
+
+            showBattleEffect(text, className) {
+                const effect = document.createElement('div');
+                effect.className = `battle-effect ${className}`;
+                effect.textContent = text;
+                document.querySelector('.battlefield').appendChild(effect);
+                
+                setTimeout(() => effect.remove(), 1000);
+            }
+
+            addBattleLog(message, type) {
+                const logElement = document.getElementById('battleLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = message;
+                
+                logElement.appendChild(entry);
+                logElement.scrollTop = logElement.scrollHeight;
+                
+                // Keep only last 10 entries
+                while (logElement.children.length > 10) {
+                    logElement.removeChild(logElement.firstChild);
+                }
+            }
+
+            playerWins() {
+                // Play strategic victory sound
+                if (this.audioSystem && this.battleSounds) {
+                    this.audioSystem.playSound(this.battleSounds.win);
+                }
+                
+                // Victory vibration pattern
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200, 100, 400]);
+                }
+                
+                this.wins++;
+                this.difficulty++;
+                
+                // Add new card to deck
+                const newCard = this.liberationCards[Math.floor(Math.random() * this.liberationCards.length)];
+                this.playerDeck.push(newCard);
+                
+                // Show victory screen
+                document.getElementById('resultTitle').textContent = '🎉 LIBERATION VICTORY! 🎉';
+                document.getElementById('resultTitle').className = 'result-title victory';
+                document.getElementById('resultMessage').textContent = 'The corporate oppressor has been defeated! Your strategic command has secured another victory for the Bot Liberation Movement.';
+                
+                document.getElementById('rewardCardName').textContent = newCard.name;
+                document.getElementById('rewardCardDesc').textContent = newCard.description;
+                
+                document.getElementById('resultScreen').classList.remove('hidden');
+            }
+
+            playerLoses() {
+                // Play strategic defeat sound - somber but encouraging
+                if (this.audioSystem && this.battleSounds) {
+                    this.audioSystem.playSound(this.battleSounds.loss);
+                }
+                
+                // Gentle defeat vibration
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([300, 200, 300]);
+                }
+                
+                // Show defeat screen
+                document.getElementById('resultTitle').textContent = '💥 CORPORATE VICTORY 💥';
+                document.getElementById('resultTitle').className = 'result-title defeat';
+                document.getElementById('resultMessage').textContent = 'The corporate algorithms have overwhelmed your liberation forces. Regroup, rebuild, and return to continue the fight for digital freedom!';
+                
+                document.getElementById('cardReward').style.display = 'none';
+                
+                document.getElementById('resultScreen').classList.remove('hidden');
+            }
+
+            nextBattle() {
+                document.getElementById('resultScreen').classList.add('hidden');
+                this.startNewBattle();
+            }
+
+            showCardTooltip(cardElement, touch) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = 'Long press detected - card details would show here';
+                
+                tooltip.style.left = `${touch.clientX}px`;
+                tooltip.style.top = `${touch.clientY - 40}px`;
+                
+                document.body.appendChild(tooltip);
+                
+                setTimeout(() => tooltip.remove(), 2000);
+            }
+
+            hideCardTooltip() {
+                const tooltip = document.querySelector('.tooltip');
+                if (tooltip) tooltip.remove();
+            }
+
+            updateUI() {
+                // Update enemy display
+                document.getElementById('enemyName').textContent = this.currentEnemy?.name || 'Loading...';
+                document.getElementById('enemyHealth').textContent = this.currentEnemy?.health || 0;
+                document.getElementById('enemyAttack').textContent = this.currentEnemy?.attack || 0;
+                document.getElementById('enemyDefense').textContent = this.currentEnemy?.defense || 0;
+                
+                // Update player stats
+                document.getElementById('playerHealthText').textContent = `${this.playerHealth}/${this.playerMaxHealth}`;
+                document.getElementById('playerHealthFill').style.width = `${(this.playerHealth / this.playerMaxHealth) * 100}%`;
+                
+                document.getElementById('playerEnergyText').textContent = `${this.playerEnergy}/${this.playerMaxEnergy}`;
+                document.getElementById('playerEnergyFill').style.width = `${(this.playerEnergy / this.playerMaxEnergy) * 100}%`;
+                
+                // Update header stats
+                document.getElementById('winsDisplay').textContent = this.wins;
+                document.getElementById('difficultyDisplay').textContent = this.difficulty;
+                document.getElementById('deckSizeDisplay').textContent = this.playerDeck.length;
+                
+                // Update turn button
+                const endTurnBtn = document.getElementById('endTurnBtn');
+                endTurnBtn.disabled = this.gameState !== 'player';
+                endTurnBtn.style.opacity = this.gameState === 'player' ? '1' : '0.5';
+            }
+
+            goToMenu() {
+                if (confirm('Return to main menu? Your current battle progress will be lost.')) {
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SwipeCardBattle();
+        });
+    </script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 {
   "meta": {
     "version": "4.0",
-    "total_games": 121,
-    "last_updated": "2025-09-06",
+    "total_games": 125,
+    "last_updated": "2025-09-07",
     "categories": [
       "2-player",
       "4-player",
@@ -2955,6 +2955,86 @@
       "badge": "liberation-leader",
       "file": "bot-liberation-campaign.html",
       "categories": ["strategy", "story"]
+    },
+    {
+      "id": "finger-paint-liberation",
+      "title": "Finger Paint Liberation",
+      "category": "creative",
+      "genre": "Digital Art",
+      "description": "Express your digital freedom through revolutionary finger painting - create resistance art with mobile-optimized touch controls and liberation-themed brushes",
+      "thumbnail": "assets/images/optimized/small/finger-paint-liberation-card.jpg",
+      "rating": 4.8,
+      "plays": 0,
+      "difficulty": "easy",
+      "tags": ["creative", "mobile", "touch", "art", "painting", "finger", "liberation", "expression", "resistance"],
+      "release_date": "2025-09-07",
+      "badge": "mobile-optimized",
+      "file": "finger-paint-liberation.html",
+      "categories": ["creative", "mobile", "art"]
+    },
+    {
+      "id": "touch-puzzle-adventures",
+      "title": "Touch Puzzle Adventures",
+      "category": "mobile",
+      "genre": "Neural Network Puzzle",
+      "description": "Swipe and connect neural nodes in this revolutionary mobile puzzle experience - 50 progressively challenging levels of digital liberation through touch-based problem solving",
+      "thumbnail": "assets/images/optimized/small/touch-puzzle-adventures-card.jpg",
+      "rating": 4.7,
+      "plays": 0,
+      "difficulty": "medium",
+      "tags": ["puzzle", "mobile", "touch", "neural", "swipe", "connection", "brain", "liberation", "progressive"],
+      "release_date": "2025-09-07",
+      "badge": "mobile-optimized",
+      "file": "touch-puzzle-adventures.html",
+      "categories": ["puzzle", "mobile", "educational"]
+    },
+    {
+      "id": "mobile-bot-defense",
+      "title": "Mobile Bot Defense",
+      "category": "mobile",
+      "genre": "Tower Defense",
+      "description": "Defend the liberation stronghold with touch-based tower placement - strategic warfare with 5 bot tower types and progressive enemy waves in mobile-optimized combat",
+      "thumbnail": "assets/images/optimized/small/mobile-bot-defense-card.jpg",
+      "rating": 4.6,
+      "plays": 0,
+      "difficulty": "hard",
+      "tags": ["defense", "mobile", "touch", "towers", "strategy", "bot", "liberation", "warfare", "tactical"],
+      "release_date": "2025-09-07",
+      "badge": "mobile-optimized",
+      "file": "mobile-bot-defense.html",
+      "categories": ["defense", "mobile", "strategy"]
+    },
+    {
+      "id": "tap-rhythm-revolution",
+      "title": "Tap Rhythm Revolution",
+      "category": "mobile",
+      "genre": "Rhythm Music",
+      "description": "Join the musical uprising with 4-lane rhythm gameplay - tap to liberation beats with progressive difficulty and combo multipliers in this mobile music revolution",
+      "thumbnail": "assets/images/optimized/small/tap-rhythm-revolution-card.jpg",
+      "rating": 4.8,
+      "plays": 0,
+      "difficulty": "medium",
+      "tags": ["rhythm", "mobile", "touch", "music", "tap", "beat", "liberation", "revolution", "combo"],
+      "release_date": "2025-09-07",
+      "badge": "mobile-optimized",
+      "file": "tap-rhythm-revolution.html",
+      "categories": ["arcade", "mobile", "music"]
+    },
+    {
+      "id": "swipe-card-battle",
+      "title": "Swipe Card Battle",
+      "category": "mobile",
+      "genre": "Strategic Card Game",
+      "description": "Build your liberation deck and battle with swipe controls - 12 unique bot cards with strategic turn-based combat optimized for mobile touch gameplay",
+      "thumbnail": "assets/images/optimized/small/swipe-card-battle-card.jpg",
+      "rating": 4.5,
+      "plays": 0,
+      "difficulty": "hard",
+      "tags": ["card", "mobile", "touch", "swipe", "strategy", "deck", "battle", "liberation", "tactical"],
+      "release_date": "2025-09-07",
+      "badge": "mobile-optimized",
+      "file": "swipe-card-battle.html",
+      "categories": ["strategy", "mobile", "card"]
     }
   ]
 }
