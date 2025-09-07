@@ -214,6 +214,25 @@ class GamesLoader {
             });
         }
 
+        // Bug report button delegation (mobile-friendly)
+        document.addEventListener('click', (e) => {
+            const bugBtn = e.target.closest('.bug-report-btn');
+            if (bugBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const gameId = bugBtn.dataset.gameId;
+                const gameTitle = bugBtn.dataset.gameTitle;
+                const gameFile = bugBtn.dataset.gameFile;
+                
+                if (typeof BugReporter !== 'undefined') {
+                    BugReporter.open(gameId, gameTitle, gameFile);
+                } else {
+                    console.warn('BugReporter not available');
+                }
+            }
+        });
+
         // Infinite scroll (disabled in carousel mode and desktop mode)
         if (!this.isCarouselMode && !this.isDesktop) {
             this.setupInfiniteScroll();
@@ -748,22 +767,24 @@ class GamesLoader {
         element.dataset.gameId = game.id;
         element.innerHTML = this.createGameCard(game);
         
-        // Mobile-specific handling
+        // Mobile-specific touch feedback only (let <a> href handle navigation)
         if (this.isMobile()) {
-            element.addEventListener('click', (e) => {
-                // Ensure navigation happens on mobile
-                e.stopPropagation();
-                window.location.href = game.file;
-            });
-            
             element.addEventListener('touchstart', (e) => {
-                // Add visual feedback
+                // Add visual feedback without interfering with navigation
                 element.classList.add('touch-active');
             });
             
             element.addEventListener('touchend', (e) => {
                 // Remove visual feedback
                 element.classList.remove('touch-active');
+            });
+            
+            // Ensure proper mobile navigation - fallback only
+            element.addEventListener('click', (e) => {
+                // Only handle if href navigation fails
+                if (!e.defaultPrevented) {
+                    console.log(`🎮 Mobile click: ${game.title} - ${game.file}`);
+                }
             });
         }
         
@@ -811,7 +832,7 @@ class GamesLoader {
                     </div>
                     <div class="plays">New release</div>
                     <div class="difficulty">${difficultyIcon}</div>
-                    <div class="bug-report-btn" onclick="BugReporter.open('${game.id}', '${game.title}', '${game.file}'); event.preventDefault(); event.stopPropagation();" title="Report a bug">
+                    <div class="bug-report-btn" data-game-id="${game.id}" data-game-title="${game.title}" data-game-file="${game.file}" title="Report a bug">
                         🐛
                     </div>
                 </div>

@@ -1,9 +1,9 @@
 // Service Worker for BotInc Gaming Platform
-// Version: 1.0.0
+// Version: 2.0.0 - Mobile Cache Fix
 
-const CACHE_NAME = 'botinc-v1.0.0';
-const STATIC_CACHE = 'botinc-static-v1.0.0';
-const DYNAMIC_CACHE = 'botinc-dynamic-v1.0.0';
+const CACHE_NAME = 'botinc-v2.0.0';
+const STATIC_CACHE = 'botinc-static-v2.0.0';
+const DYNAMIC_CACHE = 'botinc-dynamic-v2.0.0';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
