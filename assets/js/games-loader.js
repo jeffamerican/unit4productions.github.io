@@ -29,6 +29,22 @@ class GamesLoader {
         try {
             await this.loadGamesData();
             this.detectDisplayMode();
+            
+            // Auto-filter to mobile games on mobile devices
+            if (this.isMobile()) {
+                this.filterByCategory('mobile');
+                // Update dropdown to reflect mobile selection
+                const categorySelect = document.getElementById('category-select');
+                if (categorySelect) {
+                    categorySelect.value = 'mobile';
+                }
+                console.log('📱 Mobile device detected - auto-filtered to mobile games');
+            } else {
+                // Apply initial shuffle for desktop (mobile filtering already includes shuffle)
+                this.sortGames(this.currentSort);
+                console.log('🖥️ Desktop device - applying initial shuffle to all games');
+            }
+            
             this.setupEventListeners();
             this.renderGames();
             this.initLiberationMessages();
