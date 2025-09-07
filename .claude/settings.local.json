@@ -14,7 +14,10 @@
       "mcp__browsermcp__browser_screenshot",
       "mcp__browsermcp__browser_type",
       "Bash(node:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "mcp__browsermcp__browser_click"
     ],
     "deny": [],
     "ask": []

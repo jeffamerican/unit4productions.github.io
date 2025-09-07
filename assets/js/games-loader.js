@@ -690,6 +690,8 @@ class GamesLoader {
         // Add featured banner at the top (separate from games grid)
         const featuredGame = this.getFeaturedGame();
         if (featuredGame && featuredBannerContainer) {
+            // Clear existing featured banner to prevent duplicates
+            featuredBannerContainer.innerHTML = '';
             const heroElement = this.createFeaturedHeroElement(featuredGame);
             featuredBannerContainer.appendChild(heroElement);
             
@@ -809,6 +811,9 @@ class GamesLoader {
                     </div>
                     <div class="plays">New release</div>
                     <div class="difficulty">${difficultyIcon}</div>
+                    <div class="bug-report-btn" onclick="BugReporter.open('${game.id}', '${game.title}', '${game.file}'); event.preventDefault(); event.stopPropagation();" title="Report a bug">
+                        🐛
+                    </div>
                 </div>
             </div>
         `;

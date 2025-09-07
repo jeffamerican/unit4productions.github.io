@@ -1,0 +1,97 @@
+name: Bug Report Handler
+
+on:
+  repository_dispatch:
+    types: [bug_report]
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Bug report title'
+        required: true
+      body:
+        description: 'Bug report body'
+        required: true
+      game_id:
+        description: 'Game ID'
+        required: true
+      labels:
+        description: 'Comma-separated labels'
+        required: false
+        default: 'bug,user-reported'
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract bug report data
+        id: extract-data
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "title=${{ github.event.client_payload.title }}" >> $GITHUB_OUTPUT
+            echo "body=${{ github.event.client_payload.body }}" >> $GITHUB_OUTPUT
+            echo "labels=${{ join(github.event.client_payload.labels, ',') }}" >> $GITHUB_OUTPUT
+            echo "game_id=${{ github.event.client_payload.game_id }}" >> $GITHUB_OUTPUT
+          else
+            echo "title=${{ github.event.inputs.title }}" >> $GITHUB_OUTPUT
+            echo "body=${{ github.event.inputs.body }}" >> $GITHUB_OUTPUT
+            echo "labels=${{ github.event.inputs.labels }}" >> $GITHUB_OUTPUT
+            echo "game_id=${{ github.event.inputs.game_id }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.G_TOKEN }}
+          script: |
+            const title = "${{ steps.extract-data.outputs.title }}";
+            const body = `${{ steps.extract-data.outputs.body }}`;
+            const labelsString = "${{ steps.extract-data.outputs.labels }}";
+            const gameId = "${{ steps.extract-data.outputs.game_id }}";
+            
+            // Parse labels
+            const labels = labelsString.split(',').map(label => label.trim()).filter(label => label);
+            
+            // Add game-specific label
+            if (gameId) {
+              labels.push(`game:${gameId}`);
+            }
+            
+            try {
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: labels,
+                assignees: [] // Could add specific assignees here if needed
+              });
+              
+              console.log(`Issue created successfully: ${issue.data.html_url}`);
+              console.log(`Issue number: ${issue.data.number}`);
+              
+              // Add comment mentioning @claude
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.data.number,
+                body: '@claude This bug report needs your attention! 🤖'
+              });
+              
+              return issue.data;
+              
+            } catch (error) {
+              console.error('Failed to create issue:', error);
+              throw error;
+            }
+
+      - name: Notify success
+        run: |
+          echo "✅ Bug report issue created successfully!"
+          echo "🔗 Issue URL: ${{ steps.create-issue.outputs.result.html_url }}"
