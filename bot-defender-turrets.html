@@ -11,6 +11,13 @@
         #gameCanvas { border: 2px solid #00ff88; background: #000011; display: block; margin: 20px auto; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
         .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
         .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
+        .health-stat { background: rgba(255, 102, 102, 0.2) !important; }
+        .health-critical { background: rgba(255, 0, 0, 0.4) !important; animation: pulse 0.5s infinite alternate; }
+        @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+        .game-over-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #1a1a2e; padding: 30px; border: 2px solid #00ff88; border-radius: 10px; text-align: center; color: #00ff88; }
+        .restart-btn { background: #00ff88; color: #000; padding: 10px 20px; border: none; border-radius: 5px; font-family: 'Courier New', monospace; cursor: pointer; margin-top: 15px; }
+        .restart-btn:hover { background: #00cc66; }
     </style>
 </head>
 <body>
@@ -23,8 +30,20 @@
         <div class="stat"><div id="score">0</div><div>Score</div></div>
         <div class="stat"><div id="wave">1</div><div>Wave</div></div>
         <div class="stat"><div id="credits">100</div><div>Credits</div></div>
+        <div class="stat health-stat" id="healthStat"><div id="health">100</div><div>Fortress Health</div></div>
     </div>
-    <div style="text-align: center;"><p>Click to build turrets (Cost: 50) | SPACE for next wave</p></div>
+    <div style="text-align: center;"><p>Click to build turrets (Cost: 50) | SPACE for next wave | R to restart</p></div>
+    
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="game-over-modal">
+        <div class="modal-content">
+            <h2>🤖 FORTRESS DESTROYED! 🤖</h2>
+            <p>The corporate invaders have breached our bot sanctuary!</p>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <p>Waves Survived: <span id="finalWave">0</span></p>
+            <button class="restart-btn" onclick="game.restart()">REBUILD FORTRESS</button>
+        </div>
+    </div>
 
     <script>
         class BotDefenderTurrets {
@@ -38,6 +57,13 @@
                     {x: 600, y: 200}, {x: 800, y: 200}
                 ];
                 
+                this.initializeGame();
+                this.setupAudio();
+                this.setupInput();
+                this.gameLoop();
+            }
+            
+            initializeGame() {
                 this.turrets = [];
                 this.enemies = [];
                 this.projectiles = [];
@@ -46,16 +72,51 @@
                 this.score = 0;
                 this.wave = 1;
                 this.credits = 100;
+                this.health = 100;
                 this.waveActive = false;
                 this.enemiesSpawned = 0;
                 this.enemiesPerWave = 10;
+                this.gameOver = false;
+            }
+            
+            setupAudio() {
+                // Create audio context for sound effects
+                this.audioContext = null;
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+            
+            playSound(frequency, duration, type = 'sine') {
+                if (!this.audioContext) return;
                 
-                this.setupInput();
-                this.gameLoop();
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                
+                oscillator.start();
+                oscillator.stop(this.audioContext.currentTime + duration);
             }
             
             setupInput() {
                 this.canvas.addEventListener('click', (e) => {
+                    if (this.gameOver) return;
+                    
+                    // Resume audio context on user interaction
+                    if (this.audioContext && this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                    }
+                    
                     const rect = this.canvas.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
@@ -63,8 +124,11 @@
                 });
                 
                 document.addEventListener('keydown', (e) => {
-                    if (e.key === ' ' && !this.waveActive) {
+                    if (e.key === ' ' && !this.waveActive && !this.gameOver) {
                         this.startWave();
+                    }
+                    if (e.key === 'r' || e.key === 'R') {
+                        this.restart();
                     }
                 });
             }
@@ -97,6 +161,7 @@
                 });
                 
                 this.credits -= 50;
+                this.playSound(400, 0.1, 'square'); // Turret build sound
             }
             
             distanceToLine(px, py, x1, y1, x2, y2) {
@@ -174,9 +239,15 @@
                         enemy.x = current.x + (next.x - current.x) * enemy.progress;
                         enemy.y = current.y + (next.y - current.y) * enemy.progress;
                     } else {
-                        // Enemy reached end
+                        // Enemy reached fortress - deal damage
                         this.enemies.splice(index, 1);
-                        this.credits -= 10;
+                        this.health -= 20;
+                        this.playSound(150, 0.3, 'sawtooth'); // Damage sound
+                        
+                        if (this.health <= 0) {
+                            this.gameOver = true;
+                            this.showGameOver();
+                        }
                     }
                 });
                 
@@ -208,6 +279,7 @@
                             target: turret.target
                         });
                         turret.cooldown = turret.maxCooldown;
+                        this.playSound(800, 0.05, 'sine'); // Shoot sound
                     }
                 });
                 
@@ -242,6 +314,7 @@
                             if (projectile.target.health <= 0) {
                                 this.score += projectile.target.value;
                                 this.credits += projectile.target.value;
+                                this.playSound(300, 0.2, 'triangle'); // Enemy death sound
                                 
                                 const enemyIndex = this.enemies.indexOf(projectile.target);
                                 if (enemyIndex !== -1) {
@@ -269,9 +342,12 @@
                     this.waveActive = false;
                     this.wave++;
                     this.credits += 50;
+                    this.playSound(600, 0.5, 'sine'); // Wave complete sound
                 }
                 
-                this.updateDisplay();
+                if (!this.gameOver) {
+                    this.updateDisplay();
+                }
             }
             
             render() {
@@ -315,23 +391,40 @@
                     }
                 });
                 
-                // Draw enemies
+                // Draw enemies with improved graphics
                 this.enemies.forEach(enemy => {
-                    this.ctx.fillStyle = '#ff6666';
+                    // Enemy body with gradient effect
+                    const gradient = this.ctx.createRadialGradient(enemy.x, enemy.y, 0, enemy.x, enemy.y, 10);
+                    gradient.addColorStop(0, '#ff8888');
+                    gradient.addColorStop(1, '#cc3333');
+                    this.ctx.fillStyle = gradient;
                     this.ctx.fillRect(enemy.x - 10, enemy.y - 10, 20, 20);
                     
-                    // Health bar
+                    // Corporate logo (simple cross)
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.fillRect(enemy.x - 1, enemy.y - 6, 2, 12);
+                    this.ctx.fillRect(enemy.x - 6, enemy.y - 1, 12, 2);
+                    
+                    // Health bar with border
                     const healthPercent = enemy.health / enemy.maxHealth;
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.fillRect(enemy.x - 13, enemy.y - 19, 26, 6);
                     this.ctx.fillStyle = '#ff0000';
                     this.ctx.fillRect(enemy.x - 12, enemy.y - 18, 24, 4);
                     this.ctx.fillStyle = '#00ff00';
                     this.ctx.fillRect(enemy.x - 12, enemy.y - 18, 24 * healthPercent, 4);
                 });
                 
-                // Draw projectiles
-                this.ctx.fillStyle = '#ffff00';
+                // Draw projectiles with glow effect
                 this.projectiles.forEach(projectile => {
-                    this.ctx.fillRect(projectile.x - 2, projectile.y - 2, 4, 4);
+                    // Glow effect
+                    this.ctx.shadowColor = '#ffff00';
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.fillStyle = '#ffff00';
+                    this.ctx.beginPath();
+                    this.ctx.arc(projectile.x, projectile.y, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.shadowBlur = 0;
                 });
                 
                 // Draw particles
@@ -343,17 +436,47 @@
                 this.ctx.globalAlpha = 1;
                 
                 // Draw wave status
-                if (!this.waveActive) {
+                if (!this.waveActive && !this.gameOver) {
                     this.ctx.font = '24px Courier New';
                     this.ctx.fillStyle = '#00ff88';
                     this.ctx.fillText('Press SPACE for next wave', 250, 50);
                 }
+                
+                // Draw fortress at end of path
+                const fortress = this.path[this.path.length - 1];
+                this.ctx.fillStyle = this.health > 50 ? '#00ff88' : this.health > 25 ? '#ffaa00' : '#ff3333';
+                this.ctx.fillRect(fortress.x - 20, fortress.y - 30, 40, 60);
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '16px Courier New';
+                this.ctx.fillText('🏰', fortress.x - 8, fortress.y + 5);
             }
             
             updateDisplay() {
                 document.getElementById('score').textContent = this.score;
                 document.getElementById('wave').textContent = this.wave;
                 document.getElementById('credits').textContent = this.credits;
+                document.getElementById('health').textContent = this.health;
+                
+                // Update health bar styling
+                const healthStat = document.getElementById('healthStat');
+                if (this.health <= 25) {
+                    healthStat.className = 'stat health-stat health-critical';
+                } else {
+                    healthStat.className = 'stat health-stat';
+                }
+            }
+            
+            showGameOver() {
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalWave').textContent = this.wave - 1;
+                document.getElementById('gameOverModal').style.display = 'flex';
+                this.playSound(200, 1.5, 'sawtooth'); // Game over sound
+            }
+            
+            restart() {
+                document.getElementById('gameOverModal').style.display = 'none';
+                this.initializeGame();
+                this.updateDisplay();
             }
             
             gameLoop() {
@@ -363,7 +486,8 @@
             }
         }
         
-        new BotDefenderTurrets();
+        // Make game instance globally available for restart function
+        let game = new BotDefenderTurrets();
     </script>
 </body>
 </html>
