@@ -1,0 +1,16 @@
+[build]
+  functions = ".netlify/functions"
+
+[functions]
+  # Configuration for Netlify Functions
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+
+# Environment variables (set in Netlify dashboard)
+# G_TOKEN = "your-github-personal-access-token"

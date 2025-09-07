@@ -17,7 +17,8 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(git commit:*)",
-      "mcp__browsermcp__browser_click"
+      "mcp__browsermcp__browser_click",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

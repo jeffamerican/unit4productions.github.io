@@ -275,16 +275,27 @@ class BugReporter {
             };
 
             // Submit to GitHub (via our integration)
-            await GitHubIntegration.createIssue(bugData);
+            const response = await GitHubIntegration.createIssue(bugData);
+            
+            // Get GitHub issue details from response
+            let githubIssueUrl = null;
+            try {
+                if (response && response.json) {
+                    const result = await response.json();
+                    githubIssueUrl = result.issue_url;
+                }
+            } catch (e) {
+                console.log('Could not parse GitHub response for URL');
+            }
             
             // Update rate limit
             this.updateRateLimit();
             
-            // Show success and close
-            this.showSuccess();
+            // Show success with GitHub issue link
+            this.showSuccess(githubIssueUrl);
             setTimeout(() => {
                 BugReporter.close();
-            }, 2000);
+            }, 3000); // Extra time to see the GitHub link
 
         } catch (error) {
             console.error('Bug report submission failed:', error);
@@ -388,17 +399,32 @@ class BugReporter {
     }
 
     /**
-     * Show success message
+     * Show success message with optional GitHub issue link
      */
-    showSuccess() {
+    showSuccess(githubIssueUrl = null) {
         const content = document.querySelector('.bug-report-content');
-        content.innerHTML = `
+        
+        let successHTML = `
             <div class="success-message">
                 <h3>✅ Bug Report Submitted Successfully!</h3>
                 <p>Thank you for helping improve ${this.currentGame.title}!</p>
+        `;
+        
+        if (githubIssueUrl) {
+            successHTML += `
+                <p><strong>🎯 GitHub Issue Created:</strong><br>
+                <a href="${githubIssueUrl}" target="_blank" rel="noopener noreferrer" style="color: #00ff88; text-decoration: underline;">
+                    View Issue on GitHub →
+                </a></p>
+            `;
+        }
+        
+        successHTML += `
                 <p>Our bot team (@claude) has been notified and will investigate this issue.</p>
             </div>
         `;
+        
+        content.innerHTML = successHTML;
     }
 
     /**

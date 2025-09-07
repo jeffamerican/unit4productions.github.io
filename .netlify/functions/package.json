@@ -1,0 +1,12 @@
+{
+  "name": "github-bug-reporter-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for BotInc Bug Reporter GitHub integration",
+  "main": "github-bug-report.js",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
