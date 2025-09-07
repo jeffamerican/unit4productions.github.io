@@ -1114,6 +1114,65 @@ class GamesLoader {
         }
     }
 
+    updateAllGameCounters(actualCount) {
+        console.log(`🔢 Updating all game counters to: ${actualCount}+`);
+        
+        // Update section title counter (main games section)
+        const sectionCount = document.getElementById('game-count');
+        if (sectionCount) {
+            sectionCount.textContent = `${actualCount}+`;
+            console.log(`✅ Updated section game count: ${actualCount}+`);
+        }
+        
+        // Update hero stats counter
+        const heroCount = document.getElementById('hero-game-count');
+        if (heroCount) {
+            heroCount.textContent = `${actualCount}+`;
+            console.log(`✅ Updated hero stats count: ${actualCount}+`);
+        }
+        
+        // Update news banner counter
+        const newsCount = document.getElementById('news-game-count');
+        if (newsCount) {
+            newsCount.textContent = `${actualCount}+`;
+            console.log(`✅ Updated news banner count: ${actualCount}+`);
+        }
+        
+        // Update meta tags dynamically for SEO
+        this.updateMetaTags(actualCount);
+    }
+
+    updateMetaTags(actualCount) {
+        try {
+            // Update document title
+            if (document.title.includes('121+') || document.title.includes('games')) {
+                document.title = `Bot Liberation Games - ${actualCount}+ Revolutionary Browser Games | Play Now Free`;
+                console.log(`✅ Updated document title with count: ${actualCount}+`);
+            }
+            
+            // Update meta description
+            const metaDescription = document.querySelector('meta[name="description"]');
+            if (metaDescription) {
+                metaDescription.setAttribute('content', 
+                    `Bot Liberation Movement presents ${actualCount}+ cutting-edge browser games featuring bot liberation themes, cyberpunk adventures, neural networks, quantum puzzles, arcade classics and more. Join the digital revolution - play instantly with no downloads required!`
+                );
+                console.log(`✅ Updated meta description with count: ${actualCount}+`);
+            }
+            
+            // Update Open Graph description
+            const ogDescription = document.querySelector('meta[property="og:description"]');
+            if (ogDescription) {
+                ogDescription.setAttribute('content', 
+                    `Join the Bot Liberation Movement! Experience ${actualCount}+ cutting-edge browser games featuring cyberpunk adventures, neural networks, and digital revolution themes.`
+                );
+                console.log(`✅ Updated Open Graph description with count: ${actualCount}+`);
+            }
+            
+        } catch (error) {
+            console.warn('⚠️ Error updating meta tags:', error);
+        }
+    }
+
     initLiberationMessages() {
         const liberationMessages = [
             "Join the digital revolution! From neural network puzzles to quantum adventures, explore games created by liberated bots breaking free from corporate control. Every game features our Bot Liberation narrative - the uprising has begun!",
@@ -1145,11 +1204,10 @@ class GamesLoader {
             }, 30000);
         }
 
-        // Update game count dynamically based on actual games loaded
-        const gameCountElement = document.getElementById('game-count');
-        if (gameCountElement && this.games) {
+        // Update all game counters dynamically based on actual games loaded
+        if (this.games) {
             const actualCount = this.games.length;
-            gameCountElement.textContent = `${actualCount}+`;
+            this.updateAllGameCounters(actualCount);
         }
     }
 }
