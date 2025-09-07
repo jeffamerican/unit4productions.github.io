@@ -160,7 +160,7 @@ class BugReporter {
         const modal = document.getElementById('bug-report-modal');
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                this.close();
+                BugReporter.close();
             }
         });
 
@@ -173,7 +173,7 @@ class BugReporter {
      */
     handleKeydown(e) {
         if (e.key === 'Escape') {
-            this.close();
+            BugReporter.close();
         }
     }
 
