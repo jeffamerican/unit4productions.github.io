@@ -63,7 +63,7 @@ class EasterEggManager {
             this.handleKonamiCode(e.code);
             
             // Handle typing
-            if (e.key.length === 1) {
+            if (e.key && e.key.length === 1) {
                 typedCommand += e.key.toLowerCase();
                 
                 // Clear typing after pause

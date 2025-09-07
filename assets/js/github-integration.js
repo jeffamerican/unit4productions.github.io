@@ -5,8 +5,8 @@
 
 class GitHubIntegration {
     constructor() {
-        this.repoOwner = 'Unit4Productions';
-        this.repoName = 'NEXUS';
+        this.repoOwner = 'jeffamerican';
+        this.repoName = 'unit4productions.github.io';
         this.workflowFile = 'bug-report.yml';
     }
 
