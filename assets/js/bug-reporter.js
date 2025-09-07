@@ -46,6 +46,12 @@ class BugReporter {
         
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         
+        // Store game data in the modal for access during submission
+        const modal = document.getElementById('bug-report-modal');
+        modal.dataset.gameId = this.currentGame.id;
+        modal.dataset.gameTitle = this.currentGame.title;
+        modal.dataset.gameFile = this.currentGame.file;
+        
         // Setup event listeners
         this.setupModalEvents();
         
@@ -191,7 +197,28 @@ class BugReporter {
      * Submit the bug report
      */
     static async submit() {
+        // Get the current game data from the modal
+        const modal = document.getElementById('bug-report-modal');
+        if (!modal) {
+            console.error('Bug report modal not found');
+            return;
+        }
+        
+        // Create reporter instance and set game data from stored dataset
         const reporter = new BugReporter();
+        reporter.currentGame = {
+            id: modal.dataset.gameId,
+            title: modal.dataset.gameTitle,
+            file: modal.dataset.gameFile
+        };
+        
+        console.log('Modal dataset:', {
+            gameId: modal.dataset.gameId,
+            gameTitle: modal.dataset.gameTitle,
+            gameFile: modal.dataset.gameFile
+        });
+        console.log('Reporter currentGame:', reporter.currentGame);
+        
         await reporter.handleSubmit();
     }
 
@@ -199,15 +226,35 @@ class BugReporter {
      * Handle form submission
      */
     async handleSubmit() {
-        if (this.isSubmitting) return;
+        console.log('Bug report submission started');
+        
+        if (this.isSubmitting) {
+            console.log('Already submitting, returning');
+            return;
+        }
 
         const form = document.getElementById('bug-report-form');
-        const formData = new FormData(form);
+        if (!form) {
+            console.error('Bug report form not found');
+            return;
+        }
+        
+        console.log('Current game:', this.currentGame);
+        
+        // Check if currentGame is set
+        if (!this.currentGame) {
+            console.error('No current game data available');
+            this.showError('Unable to identify the game. Please try again.');
+            return;
+        }
         
         // Validate form
         if (!this.validateForm()) {
+            console.log('Form validation failed');
             return;
         }
+        
+        console.log('Form validation passed');
 
         this.isSubmitting = true;
         this.showLoading(true);
