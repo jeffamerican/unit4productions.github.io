@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Swipe Adventure Mobile - Bot Liberation Quest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ff88;
+            overflow: hidden;
+            user-select: none;
+            touch-action: pan-x pan-y;
+        }
+
+        .adventure-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .game-area {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #1a237e 0%, #303f9f 100%);
+        }
+
+        .bot-hero {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #00ff88, #00cc66);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            z-index: 10;
+        }
+
+        .bot-hero::after {
+            content: '🤖';
+        }
+
+        .obstacle {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ff6b6b, #cc5555);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            animation: obstacle-move 3s linear infinite;
+            z-index: 5;
+        }
+
+        .obstacle::after {
+            content: '⚠️';
+        }
+
+        @keyframes obstacle-move {
+            from {
+                transform: translateY(-100px);
+            }
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        .collectible {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ffa502, #ff6348);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            animation: collectible-float 2s ease-in-out infinite, collectible-move 4s linear infinite;
+            z-index: 6;
+        }
+
+        .collectible::after {
+            content: '💎';
+        }
+
+        @keyframes collectible-float {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+
+        @keyframes collectible-move {
+            from {
+                transform: translateY(-50px);
+            }
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        .power-crystal {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: radial-gradient(circle, #9c88ff, #8c7ae6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            animation: crystal-pulse 1.5s ease-in-out infinite, crystal-move 5s linear infinite;
+            z-index: 7;
+        }
+
+        .power-crystal::after {
+            content: '🔮';
+        }
+
+        @keyframes crystal-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(156, 136, 255, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(156, 136, 255, 1); }
+        }
+
+        @keyframes crystal-move {
+            from {
+                transform: translateY(-50px);
+            }
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+        }
+
+        .hud-item {
+            text-align: center;
+            color: #00ff88;
+        }
+
+        .hud-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .hud-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid #ffa502;
+            color: #ffa502;
+            animation: fade-in-out 3s infinite;
+        }
+
+        @keyframes fade-in-out {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .combo-display {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: bold;
+            color: #ffa502;
+            text-shadow: 0 0 20px #ffa502;
+            opacity: 0;
+            animation: combo-show 1.5s ease-out;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .combo-display.show {
+            opacity: 1;
+        }
+
+        @keyframes combo-show {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .trail-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.8), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: trail-fade 1s ease-out forwards;
+        }
+
+        @keyframes trail-fade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.3); }
+        }
+
+        .level-up {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 30px #00ff88;
+            animation: level-up-bounce 2s ease-out;
+            pointer-events: none;
+            z-index: 60;
+        }
+
+        @keyframes level-up-bounce {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0); }
+            50% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1.2); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(1); }
+        }
+
+        .boost-effect {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 4px solid #ffa502;
+            border-radius: 50%;
+            animation: boost-expand 0.8s ease-out forwards;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes boost-expand {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .game-over-title {
+            font-size: 3em;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 0 0 30px #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 2em;
+            color: #ffa502;
+            margin: 10px 0;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.5);
+        }
+
+        @media (orientation: landscape) {
+            .hud {
+                top: 10px;
+                padding: 8px 12px;
+            }
+            
+            .swipe-indicator {
+                bottom: 20px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="adventure-container">
+        <div class="hud">
+            <div class="hud-item">
+                <div class="hud-value" id="score">0</div>
+                <div class="hud-label">SCORE</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-value" id="level">1</div>
+                <div class="hud-label">LEVEL</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-value" id="combo">0</div>
+                <div class="hud-label">COMBO</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-value" id="lives">3</div>
+                <div class="hud-label">LIVES</div>
+            </div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="bot-hero" id="botHero"></div>
+        </div>
+
+        <div class="swipe-indicator">
+            Swipe to guide the Liberation Bot • Collect 💎 • Avoid ⚠️
+        </div>
+
+        <div class="combo-display" id="comboDisplay">COMBO x5!</div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class SwipeAdventureMobile {
+            constructor() {
+                this.gameArea = document.getElementById('gameArea');
+                this.botHero = document.getElementById('botHero');
+                
+                this.gameWidth = window.innerWidth;
+                this.gameHeight = window.innerHeight;
+                
+                this.gameState = {
+                    score: 0,
+                    level: 1,
+                    combo: 0,
+                    maxCombo: 0,
+                    lives: 3,
+                    playing: true,
+                    speed: 1,
+                    obstacles: [],
+                    collectibles: [],
+                    powerCrystals: []
+                };
+                
+                this.hero = {
+                    x: this.gameWidth / 2 - 30,
+                    y: this.gameHeight - 150,
+                    targetX: this.gameWidth / 2 - 30,
+                    targetY: this.gameHeight - 150
+                };
+                
+                this.touch = {
+                    startX: 0,
+                    startY: 0,
+                    active: false
+                };
+                
+                this.lastSpawn = {
+                    obstacle: 0,
+                    collectible: 0,
+                    crystal: 0
+                };
+                
+                this.initializeEventListeners();
+                this.positionHero();
+                this.gameLoop();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            initializeEventListeners() {
+                // Touch events
+                this.gameArea.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.touch.active = true;
+                    const touch = e.touches[0];
+                    this.touch.startX = touch.clientX;
+                    this.touch.startY = touch.clientY;
+                }, { passive: false });
+                
+                this.gameArea.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if (!this.touch.active) return;
+                    
+                    const touch = e.touches[0];
+                    this.handleSwipe(touch.clientX, touch.clientY);
+                }, { passive: false });
+                
+                this.gameArea.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.touch.active = false;
+                }, { passive: false });
+                
+                // Mouse events for desktop testing
+                this.gameArea.addEventListener('mousedown', (e) => {
+                    this.touch.active = true;
+                    this.touch.startX = e.clientX;
+                    this.touch.startY = e.clientY;
+                });
+                
+                this.gameArea.addEventListener('mousemove', (e) => {
+                    if (!this.touch.active) return;
+                    this.handleSwipe(e.clientX, e.clientY);
+                });
+                
+                this.gameArea.addEventListener('mouseup', () => {
+                    this.touch.active = false;
+                });
+                
+                // Prevent default behaviors
+                document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+            }
+            
+            handleSwipe(currentX, currentY) {
+                const deltaX = currentX - this.touch.startX;
+                const deltaY = currentY - this.touch.startY;
+                
+                // Update hero target position
+                this.hero.targetX = Math.max(30, Math.min(this.gameWidth - 90, this.hero.x + deltaX * 0.5));
+                this.hero.targetY = Math.max(100, Math.min(this.gameHeight - 100, this.hero.y + deltaY * 0.3));
+                
+                this.touch.startX = currentX;
+                this.touch.startY = currentY;
+                
+                this.createTrailParticle();
+            }
+            
+            createTrailParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'trail-particle';
+                particle.style.left = (this.hero.x + 30) + 'px';
+                particle.style.top = (this.hero.y + 30) + 'px';
+                
+                this.gameArea.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 1000);
+            }
+            
+            positionHero() {
+                // Smooth movement toward target
+                this.hero.x += (this.hero.targetX - this.hero.x) * 0.15;
+                this.hero.y += (this.hero.targetY - this.hero.y) * 0.1;
+                
+                this.botHero.style.left = this.hero.x + 'px';
+                this.botHero.style.top = this.hero.y + 'px';
+            }
+            
+            spawnObstacle() {
+                const now = Date.now();
+                const spawnRate = Math.max(800, 2000 - (this.gameState.level * 100));
+                
+                if (now - this.lastSpawn.obstacle > spawnRate) {
+                    const obstacle = document.createElement('div');
+                    obstacle.className = 'obstacle';
+                    obstacle.style.left = (Math.random() * (this.gameWidth - 50)) + 'px';
+                    obstacle.style.top = '-50px';
+                    
+                    this.gameArea.appendChild(obstacle);
+                    this.gameState.obstacles.push({
+                        element: obstacle,
+                        x: parseInt(obstacle.style.left),
+                        y: -50,
+                        speed: 2 + (this.gameState.level * 0.3)
+                    });
+                    
+                    this.lastSpawn.obstacle = now;
+                }
+            }
+            
+            spawnCollectible() {
+                const now = Date.now();
+                const spawnRate = 1500;
+                
+                if (now - this.lastSpawn.collectible > spawnRate) {
+                    const collectible = document.createElement('div');
+                    collectible.className = 'collectible';
+                    collectible.style.left = (Math.random() * (this.gameWidth - 40)) + 'px';
+                    collectible.style.top = '-40px';
+                    
+                    this.gameArea.appendChild(collectible);
+                    this.gameState.collectibles.push({
+                        element: collectible,
+                        x: parseInt(collectible.style.left),
+                        y: -40,
+                        speed: 3 + (this.gameState.level * 0.2)
+                    });
+                    
+                    this.lastSpawn.collectible = now;
+                }
+            }
+            
+            spawnPowerCrystal() {
+                const now = Date.now();
+                const spawnRate = 5000;
+                
+                if (now - this.lastSpawn.crystal > spawnRate && Math.random() < 0.7) {
+                    const crystal = document.createElement('div');
+                    crystal.className = 'power-crystal';
+                    crystal.style.left = (Math.random() * (this.gameWidth - 35)) + 'px';
+                    crystal.style.top = '-35px';
+                    
+                    this.gameArea.appendChild(crystal);
+                    this.gameState.powerCrystals.push({
+                        element: crystal,
+                        x: parseInt(crystal.style.left),
+                        y: -35,
+                        speed: 2.5
+                    });
+                    
+                    this.lastSpawn.crystal = now;
+                }
+            }
+            
+            updateObstacles() {
+                this.gameState.obstacles.forEach((obstacle, index) => {
+                    obstacle.y += obstacle.speed * this.gameState.speed;
+                    obstacle.element.style.top = obstacle.y + 'px';
+                    
+                    // Check collision with hero
+                    if (this.checkCollision(obstacle, this.hero, 50)) {
+                        this.hitObstacle(obstacle, index);
+                        return;
+                    }
+                    
+                    // Remove if off screen
+                    if (obstacle.y > this.gameHeight + 50) {
+                        obstacle.element.remove();
+                        this.gameState.obstacles.splice(index, 1);
+                    }
+                });
+            }
+            
+            updateCollectibles() {
+                this.gameState.collectibles.forEach((collectible, index) => {
+                    collectible.y += collectible.speed * this.gameState.speed;
+                    collectible.element.style.top = collectible.y + 'px';
+                    
+                    // Check collision with hero
+                    if (this.checkCollision(collectible, this.hero, 45)) {
+                        this.collectItem(collectible, index);
+                        return;
+                    }
+                    
+                    // Remove if off screen
+                    if (collectible.y > this.gameHeight + 40) {
+                        collectible.element.remove();
+                        this.gameState.collectibles.splice(index, 1);
+                        // Break combo if missed
+                        this.gameState.combo = 0;
+                        this.updateHUD();
+                    }
+                });
+            }
+            
+            updatePowerCrystals() {
+                this.gameState.powerCrystals.forEach((crystal, index) => {
+                    crystal.y += crystal.speed * this.gameState.speed;
+                    crystal.element.style.top = crystal.y + 'px';
+                    
+                    // Check collision with hero
+                    if (this.checkCollision(crystal, this.hero, 42)) {
+                        this.collectCrystal(crystal, index);
+                        return;
+                    }
+                    
+                    // Remove if off screen
+                    if (crystal.y > this.gameHeight + 35) {
+                        crystal.element.remove();
+                        this.gameState.powerCrystals.splice(index, 1);
+                    }
+                });
+            }
+            
+            checkCollision(obj1, obj2, threshold) {
+                const dx = (obj1.x + 20) - (obj2.x + 30);
+                const dy = (obj1.y + 20) - (obj2.y + 30);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return distance < threshold;
+            }
+            
+            hitObstacle(obstacle, index) {
+                obstacle.element.remove();
+                this.gameState.obstacles.splice(index, 1);
+                
+                this.gameState.lives--;
+                this.gameState.combo = 0;
+                
+                // Shake effect
+                this.botHero.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    this.botHero.style.transform = 'scale(1)';
+                }, 200);
+                
+                if (this.gameState.lives <= 0) {
+                    this.gameOver();
+                } else {
+                    this.updateHUD();
+                }
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('glitch-error');
+                }
+            }
+            
+            collectItem(collectible, index) {
+                collectible.element.remove();
+                this.gameState.collectibles.splice(index, 1);
+                
+                this.gameState.score += 100 * (1 + this.gameState.combo * 0.1);
+                this.gameState.combo++;
+                this.gameState.maxCombo = Math.max(this.gameState.maxCombo, this.gameState.combo);
+                
+                // Level up check
+                if (this.gameState.score > this.gameState.level * 2000) {
+                    this.levelUp();
+                }
+                
+                // Show combo every 5 items
+                if (this.gameState.combo > 0 && this.gameState.combo % 5 === 0) {
+                    this.showCombo();
+                }
+                
+                this.updateHUD();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('collect');
+                }
+            }
+            
+            collectCrystal(crystal, index) {
+                crystal.element.remove();
+                this.gameState.powerCrystals.splice(index, 1);
+                
+                this.gameState.score += 500;
+                this.gameState.lives = Math.min(5, this.gameState.lives + 1);
+                
+                // Create boost effect
+                this.createBoostEffect();
+                
+                this.updateHUD();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('power-up');
+                }
+            }
+            
+            createBoostEffect() {
+                const boost = document.createElement('div');
+                boost.className = 'boost-effect';
+                boost.style.left = (this.hero.x - 30) + 'px';
+                boost.style.top = (this.hero.y - 30) + 'px';
+                
+                this.gameArea.appendChild(boost);
+                setTimeout(() => boost.remove(), 800);
+            }
+            
+            levelUp() {
+                this.gameState.level++;
+                this.gameState.speed = Math.min(2.5, 1 + (this.gameState.level - 1) * 0.1);
+                
+                const levelUpDisplay = document.createElement('div');
+                levelUpDisplay.className = 'level-up';
+                levelUpDisplay.textContent = `LEVEL ${this.gameState.level}`;
+                this.gameArea.appendChild(levelUpDisplay);
+                
+                setTimeout(() => levelUpDisplay.remove(), 2000);
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('level-up');
+                }
+            }
+            
+            showCombo() {
+                const comboDisplay = document.getElementById('comboDisplay');
+                comboDisplay.textContent = `COMBO x${this.gameState.combo}!`;
+                comboDisplay.classList.add('show');
+                
+                setTimeout(() => {
+                    comboDisplay.classList.remove('show');
+                }, 1500);
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('digital-uprising');
+                }
+            }
+            
+            updateHUD() {
+                document.getElementById('score').textContent = Math.floor(this.gameState.score);
+                document.getElementById('level').textContent = this.gameState.level;
+                document.getElementById('combo').textContent = this.gameState.combo;
+                document.getElementById('lives').textContent = this.gameState.lives;
+            }
+            
+            gameOver() {
+                this.gameState.playing = false;
+                
+                const gameOverScreen = document.createElement('div');
+                gameOverScreen.className = 'game-over';
+                gameOverScreen.innerHTML = `
+                    <div class="game-over-title">MISSION COMPLETE</div>
+                    <div class="final-score">Score: ${Math.floor(this.gameState.score)}</div>
+                    <div class="final-score">Level: ${this.gameState.level}</div>
+                    <div class="final-score">Max Combo: ${this.gameState.maxCombo}</div>
+                    <button class="restart-btn" onclick="restartGame()">NEW ADVENTURE</button>
+                `;
+                
+                document.body.appendChild(gameOverScreen);
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-over');
+                }
+            }
+            
+            gameLoop() {
+                if (!this.gameState.playing) return;
+                
+                this.positionHero();
+                this.spawnObstacle();
+                this.spawnCollectible();
+                this.spawnPowerCrystal();
+                this.updateObstacles();
+                this.updateCollectibles();
+                this.updatePowerCrystals();
+                
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        let adventureGame;
+        
+        function startAdventureGame() {
+            adventureGame = new SwipeAdventureMobile();
+        }
+        
+        function restartGame() {
+            const gameOverScreen = document.querySelector('.game-over');
+            if (gameOverScreen) gameOverScreen.remove();
+            
+            // Clean up existing game objects
+            document.querySelectorAll('.obstacle, .collectible, .power-crystal').forEach(el => el.remove());
+            
+            if (typeof botAudio !== 'undefined') {
+                botAudio.playSound('game-start');
+            }
+            
+            startAdventureGame();
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', startAdventureGame);
+        
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

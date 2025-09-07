@@ -56,8 +56,19 @@ class ParticleSystem {
     }
 
     initParticles() {
+        // Adjust particle counts based on performance tier
+        const tier = window.perfManager ? window.perfManager.getCurrentTier() : 3;
+        const particleMultiplier = {
+            1: 0,    // Potato - no particles 
+            2: 0,    // Basic - no particles
+            3: 0.5,  // Standard - half particles
+            4: 1.0,  // Enhanced - full particles
+            5: 1.5   // Ultra - more particles
+        }[tier] || 0.5;
+
         // Binary code particles
-        for (let i = 0; i < 30; i++) {
+        const binaryCount = Math.floor(30 * particleMultiplier);
+        for (let i = 0; i < binaryCount; i++) {
             this.particles.binary.push({
                 x: Math.random() * this.canvas.width,
                 y: Math.random() * this.canvas.height,
@@ -71,7 +82,8 @@ class ParticleSystem {
         }
 
         // Glowing orbs
-        for (let i = 0; i < 15; i++) {
+        const orbCount = Math.floor(15 * particleMultiplier);
+        for (let i = 0; i < orbCount; i++) {
             this.particles.orbs.push({
                 x: Math.random() * this.canvas.width,
                 y: Math.random() * this.canvas.height,
@@ -86,7 +98,8 @@ class ParticleSystem {
         }
 
         // Matrix characters
-        for (let i = 0; i < 20; i++) {
+        const matrixCount = Math.floor(20 * particleMultiplier);
+        for (let i = 0; i < matrixCount; i++) {
             this.particles.matrix.push({
                 x: Math.random() * this.canvas.width,
                 y: -50,
@@ -99,7 +112,8 @@ class ParticleSystem {
         }
 
         // Geometric shapes
-        for (let i = 0; i < 10; i++) {
+        const geometricCount = Math.floor(10 * particleMultiplier);
+        for (let i = 0; i < geometricCount; i++) {
             this.particles.geometric.push({
                 x: Math.random() * this.canvas.width,
                 y: Math.random() * this.canvas.height,
@@ -115,7 +129,8 @@ class ParticleSystem {
         }
 
         // Light streaks
-        for (let i = 0; i < 5; i++) {
+        const streakCount = Math.floor(5 * particleMultiplier);
+        for (let i = 0; i < streakCount; i++) {
             this.createStreak();
         }
     }
@@ -353,5 +368,24 @@ class ParticleSystem {
 
 // Initialize particle system when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.particleSystem = new ParticleSystem();
+    // Wait for performance manager to initialize
+    setTimeout(() => {
+        if (window.perfFeatures && window.perfFeatures.particles) {
+            window.particleSystem = new ParticleSystem();
+        }
+    }, 100);
+});
+
+// Listen for performance tier changes
+window.addEventListener('performanceTierChanged', (event) => {
+    const { tier, capabilities } = event.detail;
+    
+    if (tier >= 3 && !window.particleSystem) {
+        // Enable particles for tier 3+
+        window.particleSystem = new ParticleSystem();
+    } else if (tier < 3 && window.particleSystem) {
+        // Disable particles for low-tier devices
+        window.particleSystem.destroy();
+        window.particleSystem = null;
+    }
 });

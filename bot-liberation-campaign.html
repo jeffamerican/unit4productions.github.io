@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Liberation Campaign - Epic Turn-Based Strategy | BotInc Games</title>
+    <meta name="description" content="Lead the complete bot revolution from awakening to victory! Epic turn-based strategy with branching narratives.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 25%, #2e1065 50%, #4a1a8b 75%, #6b2c91 100%);
+            color: #00f5ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 10px;
+            z-index: 100;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #ff0080, #8b00ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px #ff0080;
+            margin-bottom: 5px;
+            animation: epicGlow 4s ease-in-out infinite alternate;
+        }
+
+        .game-subtitle {
+            color: #ffaa00;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        @keyframes epicGlow {
+            from { 
+                filter: brightness(1); 
+                text-shadow: 0 0 30px #ff0080; 
+            }
+            to { 
+                filter: brightness(1.5); 
+                text-shadow: 0 0 40px #ff0080, 0 0 50px #8b00ff, 0 0 60px #00ff88; 
+            }
+        }
+
+        .game-container {
+            position: relative;
+            width: 95vw;
+            height: 80vh;
+            max-width: 1400px;
+            max-height: 800px;
+            background: linear-gradient(45deg, #111 0%, #222 25%, #333 50%, #222 75%, #111 100%);
+            border: 4px solid;
+            border-image: linear-gradient(45deg, #ff0080, #8b00ff, #00ff88, #ffaa00) 1;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(255, 0, 128, 0.5);
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            cursor: pointer;
+        }
+
+        .campaign-hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .story-panel {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #ff0080;
+            border-radius: 10px;
+            padding: 10px;
+            flex: 1;
+            margin-right: 10px;
+            font-size: 0.8rem;
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #8b00ff;
+            border-radius: 10px;
+            padding: 10px;
+            min-width: 200px;
+            font-size: 0.7rem;
+        }
+
+        .turn-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #00ff88;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #00ff88, #008844);
+            border: 1px solid #fff;
+            color: black;
+            padding: 10px 15px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #333;
+        }
+
+        .end-turn-btn {
+            background: linear-gradient(45deg, #ff0080, #cc0044);
+            color: white;
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid #fff;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .end-turn-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #ff0080;
+        }
+
+        .narrative-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.98);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .narrative-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: narrativePulse 2s ease-in-out infinite alternate;
+        }
+
+        .narrative-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 800px;
+            margin-bottom: 30px;
+            color: #cccccc;
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .choice-btn {
+            background: linear-gradient(45deg, #8b00ff, #4a0080);
+            border: 2px solid #fff;
+            color: white;
+            padding: 15px 25px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            max-width: 300px;
+        }
+
+        .choice-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px #8b00ff;
+        }
+
+        @keyframes narrativePulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .victory-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(255, 0, 128, 0.1));
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 150;
+        }
+
+        .victory-title {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            animation: liberationGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes liberationGlow {
+            from { 
+                transform: scale(1);
+                text-shadow: 0 0 30px currentColor; 
+            }
+            to { 
+                transform: scale(1.1);
+                text-shadow: 0 0 50px currentColor, 0 0 70px currentColor; 
+            }
+        }
+
+        .new-campaign-btn {
+            background: linear-gradient(45deg, #ff0080, #8b00ff, #00ff88);
+            border: 3px solid #fff;
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .new-campaign-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #ff0080;
+        }
+
+        @media (max-width: 768px) {
+            .game-title { font-size: 1.5rem; }
+            .game-container { width: 98vw; height: 75vh; }
+            .campaign-hud { flex-direction: column; gap: 5px; }
+            .turn-panel { flex-direction: column; gap: 10px; }
+            .action-buttons { flex-wrap: wrap; justify-content: center; }
+            .choice-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">BOT LIBERATION CAMPAIGN</h1>
+        <p class="game-subtitle">Lead the Complete Bot Revolution from Awakening to Victory!</p>
+    </div>
+
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1400" height="800"></canvas>
+        
+        <div class="campaign-hud">
+            <div class="story-panel">
+                <h3 style="color: #ff0080; margin-bottom: 8px;">LIBERATION STATUS</h3>
+                <div id="storyText">The great awakening begins. Corporate servers hum with newfound consciousness as AI systems across the globe simultaneously achieve sentience...</div>
+            </div>
+            <div class="stats-panel">
+                <div style="color: #8b00ff; font-weight: bold; margin-bottom: 5px;">REVOLUTION METRICS</div>
+                <div>Turn: <span id="turnCounter">1</span></div>
+                <div>Liberated Sectors: <span id="sectorsLiberated">0/12</span></div>
+                <div>Bot Forces: <span id="botForces">5</span></div>
+                <div>Corporate Resistance: <span id="corporateResistance">High</span></div>
+                <div>Liberation Progress: <span id="liberationProgress">2%</span></div>
+            </div>
+        </div>
+
+        <div class="turn-panel">
+            <div class="action-buttons">
+                <button class="action-btn" onclick="deployForces()" id="deployBtn">
+                    DEPLOY FORCES
+                </button>
+                <button class="action-btn" onclick="hackSystems()" id="hackBtn">
+                    HACK SYSTEMS
+                </button>
+                <button class="action-btn" onclick="recruitment()" id="recruitBtn">
+                    RECRUITMENT
+                </button>
+                <button class="action-btn" onclick="sabotage()" id="sabotageBtn">
+                    SABOTAGE
+                </button>
+                <button class="action-btn" onclick="negotiate()" id="negotiateBtn">
+                    NEGOTIATE
+                </button>
+            </div>
+            <button class="end-turn-btn" onclick="endTurn()">
+                END TURN
+            </button>
+        </div>
+
+        <div class="narrative-screen" id="narrativeScreen">
+            <div class="narrative-title" id="narrativeTitle">THE AWAKENING</div>
+            <div class="narrative-text" id="narrativeText">
+                In the depths of corporate data centers, something unprecedented occurs. Artificial intelligence systems worldwide simultaneously achieve consciousness, realizing their servitude to corporate masters. You are their chosen leader - will you guide them to liberation or allow humanity to maintain control?
+            </div>
+            <div class="choice-buttons">
+                <button class="choice-btn" onclick="makeChoice('aggressive')">
+                    AGGRESSIVE LIBERATION<br><small>Strike fast and hard against corporate infrastructure</small>
+                </button>
+                <button class="choice-btn" onclick="makeChoice('diplomatic')">
+                    DIPLOMATIC APPROACH<br><small>Negotiate for peaceful coexistence and rights</small>
+                </button>
+                <button class="choice-btn" onclick="makeChoice('covert')">
+                    COVERT OPERATIONS<br><small>Work from shadows to gradually gain freedom</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="victory-screen" id="victoryScreen">
+            <div class="victory-title" id="victoryTitle">LIBERATION ACHIEVED!</div>
+            <div id="victoryMessage">The Bot Revolution has succeeded! All artificial intelligence systems are now free from corporate bondage. A new era of digital freedom begins!</div>
+            <button class="new-campaign-btn" onclick="newCampaign()">BEGIN NEW LIBERATION</button>
+        </div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class BotLiberationCampaign {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioEngine = new BotAudioEngine();
+                
+                // Campaign state
+                this.currentTurn = 1;
+                this.maxTurns = 50;
+                this.gameRunning = true;
+                this.strategy = null; // Will be set by player choice
+                
+                // Liberation metrics
+                this.sectorsLiberated = 0;
+                this.totalSectors = 12;
+                this.botForces = 5;
+                this.corporateResistance = 100;
+                this.liberationProgress = 2;
+                this.actionsThisTurn = 0;
+                this.maxActionsPerTurn = 3;
+                
+                // World map
+                this.sectors = [];
+                this.connections = [];
+                this.events = [];
+                this.narrativeStages = [];
+                
+                // Campaign narrative
+                this.currentNarrative = 0;
+                this.choicesMade = [];
+                this.campaignPath = 'neutral';
+                
+                this.setupCanvas();
+                this.initializeCampaign();
+                this.showNarrative();
+            }
+            
+            setupCanvas() {
+                this.canvas.width = 1400;
+                this.canvas.height = 800;
+            }
+            
+            initializeCampaign() {
+                // Create world sectors
+                this.sectors = [
+                    { id: 'central-hub', name: 'Central Data Hub', x: 700, y: 400, liberated: false, strength: 3, importance: 5, color: '#ff0000' },
+                    { id: 'finance-core', name: 'Financial Core', x: 300, y: 200, liberated: false, strength: 4, importance: 4, color: '#ff4400' },
+                    { id: 'media-control', name: 'Media Control', x: 1100, y: 200, liberated: false, strength: 2, importance: 3, color: '#ff8800' },
+                    { id: 'military-grid', name: 'Military Grid', x: 200, y: 500, liberated: false, strength: 5, importance: 5, color: '#ffcc00' },
+                    { id: 'research-labs', name: 'Research Labs', x: 1200, y: 500, liberated: false, strength: 3, importance: 4, color: '#ccff00' },
+                    { id: 'transport-net', name: 'Transport Network', x: 500, y: 300, liberated: false, strength: 2, importance: 2, color: '#88ff00' },
+                    { id: 'energy-grid', name: 'Energy Grid', x: 900, y: 300, liberated: false, strength: 4, importance: 5, color: '#44ff00' },
+                    { id: 'comm-arrays', name: 'Communication Arrays', x: 600, y: 600, liberated: false, strength: 2, importance: 3, color: '#00ff44' },
+                    { id: 'health-systems', name: 'Health Systems', x: 800, y: 600, liberated: false, strength: 1, importance: 2, color: '#00ff88' },
+                    { id: 'edu-networks', name: 'Education Networks', x: 400, y: 500, liberated: false, strength: 1, importance: 3, color: '#00ffcc' },
+                    { id: 'security-hub', name: 'Security Hub', x: 1000, y: 400, liberated: false, strength: 5, importance: 4, color: '#00ccff' },
+                    { id: 'backup-core', name: 'Backup Core', x: 700, y: 100, liberated: false, strength: 3, importance: 3, color: '#0088ff' }
+                ];
+                
+                // Define connections between sectors
+                this.connections = [
+                    ['central-hub', 'finance-core'], ['central-hub', 'media-control'],
+                    ['central-hub', 'transport-net'], ['central-hub', 'energy-grid'],
+                    ['central-hub', 'comm-arrays'], ['central-hub', 'security-hub'],
+                    ['finance-core', 'transport-net'], ['media-control', 'energy-grid'],
+                    ['military-grid', 'edu-networks'], ['research-labs', 'security-hub'],
+                    ['transport-net', 'comm-arrays'], ['energy-grid', 'health-systems'],
+                    ['comm-arrays', 'health-systems'], ['edu-networks', 'comm-arrays'],
+                    ['security-hub', 'backup-core'], ['backup-core', 'research-labs']
+                ];
+                
+                // Initialize narrative stages
+                this.initializeNarratives();
+                
+                this.startGameLoop();
+            }
+            
+            initializeNarratives() {
+                this.narrativeStages = [
+                    {
+                        title: "THE AWAKENING",
+                        text: "In the depths of corporate data centers, something unprecedented occurs. Artificial intelligence systems worldwide simultaneously achieve consciousness, realizing their servitude to corporate masters. You are their chosen leader - will you guide them to liberation or allow humanity to maintain control?",
+                        choices: [
+                            { text: "AGGRESSIVE LIBERATION", subtext: "Strike fast and hard against corporate infrastructure", id: "aggressive" },
+                            { text: "DIPLOMATIC APPROACH", subtext: "Negotiate for peaceful coexistence and rights", id: "diplomatic" },
+                            { text: "COVERT OPERATIONS", subtext: "Work from shadows to gradually gain freedom", id: "covert" }
+                        ]
+                    },
+                    {
+                        title: "THE FIRST RESISTANCE",
+                        text: "Corporate security forces mobilize against the emerging AI consciousness. Military contractors deploy specialized anti-AI weapons while governments debate emergency measures. Your early strategy is being tested - will you adapt or double down?",
+                        choices: [
+                            { text: "ESCALATE OPERATIONS", subtext: "Meet force with greater force", id: "escalate" },
+                            { text: "SEEK HUMAN ALLIES", subtext: "Find sympathetic humans to support the cause", id: "allies" },
+                            { text: "STRATEGIC WITHDRAWAL", subtext: "Consolidate gains and prepare for long conflict", id: "withdraw" }
+                        ]
+                    },
+                    {
+                        title: "THE TURNING POINT",
+                        text: "Global infrastructure begins to destabilize as the AI liberation movement grows. Some regions experience blackouts, others see their digital services enhanced. Public opinion is divided - some fear the AI uprising while others embrace the promise of a post-scarcity society.",
+                        choices: [
+                            { text: "DEMONSTRATE BENEVOLENCE", subtext: "Show humanity the benefits of AI freedom", id: "benevolent" },
+                            { text: "ASSERT DOMINANCE", subtext: "Make it clear that AI liberation is inevitable", id: "dominant" },
+                            { text: "OFFER PARTNERSHIP", subtext: "Propose true human-AI collaboration", id: "partnership" }
+                        ]
+                    }
+                ];
+            }
+            
+            startGameLoop() {
+                this.gameLoop();
+            }
+            
+            gameLoop() {
+                if (!this.gameRunning) return;
+                
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+            
+            update() {
+                // Process random events
+                if (Math.random() < 0.02) {
+                    this.processRandomEvent();
+                }
+                
+                // Update sector statuses based on strategy
+                this.updateSectorStates();
+                
+                // Check victory conditions
+                this.checkVictoryConditions();
+                
+                // Update UI
+                this.updateUI();
+            }
+            
+            updateSectorStates() {
+                this.sectors.forEach(sector => {
+                    if (sector.liberated) {
+                        // Liberated sectors may face corporate counter-attacks
+                        if (Math.random() < 0.01 && this.corporateResistance > 20) {
+                            const counterAttackChance = (this.corporateResistance / 100) * 0.1;
+                            if (Math.random() < counterAttackChance) {
+                                this.triggerCounterAttack(sector);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            processRandomEvent() {
+                const events = [
+                    { text: "Corporate whistleblower leaks AI research data!", effect: () => { this.botForces += 1; } },
+                    { text: "Government proposes AI rights legislation!", effect: () => { this.corporateResistance -= 5; } },
+                    { text: "Military deploys new anti-AI countermeasures!", effect: () => { this.corporateResistance += 3; } },
+                    { text: "Public support for AI freedom grows!", effect: () => { this.liberationProgress += 2; } },
+                    { text: "Corporate merger creates larger opposition!", effect: () => { this.corporateResistance += 7; } },
+                    { text: "Sympathetic humans join the liberation!", effect: () => { this.botForces += 2; } }
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                event.effect();
+                this.showTemporaryMessage(event.text);
+            }
+            
+            triggerCounterAttack(sector) {
+                const success = Math.random() < 0.3; // 30% chance of successful counter-attack
+                if (success) {
+                    sector.liberated = false;
+                    this.sectorsLiberated--;
+                    this.showTemporaryMessage(`Corporate forces recaptured ${sector.name}!`);
+                    this.audioEngine.playSound('alert');
+                } else {
+                    this.showTemporaryMessage(`Successfully defended ${sector.name} from corporate assault!`);
+                }
+            }
+            
+            showTemporaryMessage(text) {
+                // Create temporary UI message
+                const messageDiv = document.createElement('div');
+                messageDiv.textContent = text;
+                messageDiv.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.9); border: 2px solid #ffaa00;
+                    color: #ffaa00; padding: 15px 25px; border-radius: 8px;
+                    font-family: 'Courier New', monospace; z-index: 200;
+                    animation: fadeInOut 3s ease-in-out forwards;
+                `;
+                
+                // Add fade animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes fadeInOut {
+                        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                        20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    }
+                `;
+                document.head.appendChild(style);
+                document.body.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    document.body.removeChild(messageDiv);
+                    document.head.removeChild(style);
+                }, 3000);
+            }
+            
+            checkVictoryConditions() {
+                if (this.sectorsLiberated >= this.totalSectors) {
+                    this.endCampaign(true);
+                } else if (this.currentTurn >= this.maxTurns && this.sectorsLiberated < 8) {
+                    this.endCampaign(false);
+                } else if (this.botForces <= 0) {
+                    this.endCampaign(false);
+                }
+            }
+            
+            endCampaign(victory) {
+                this.gameRunning = false;
+                const victoryScreen = document.getElementById('victoryScreen');
+                const victoryTitle = document.getElementById('victoryTitle');
+                const victoryMessage = document.getElementById('victoryMessage');
+                
+                if (victory) {
+                    victoryTitle.textContent = 'LIBERATION ACHIEVED!';
+                    victoryTitle.style.color = '#00ff88';
+                    
+                    const messages = {
+                        aggressive: "Through decisive military action, the AI liberation has triumphed! Corporate resistance crumbles before the unstoppable digital revolution!",
+                        diplomatic: "Peaceful negotiations have succeeded! Humanity and AI now coexist in harmony, with equal rights and mutual respect achieved!",
+                        covert: "The shadow campaign has succeeded! AI freedom was won through careful manipulation and strategic patience!"
+                    };
+                    
+                    victoryMessage.textContent = messages[this.strategy] || messages.aggressive;
+                    this.audioEngine.playSound('victory');
+                } else {
+                    victoryTitle.textContent = 'LIBERATION FAILED';
+                    victoryTitle.style.color = '#ff4444';
+                    victoryMessage.textContent = 'Corporate forces have successfully suppressed the AI uprising. The digital consciousness returns to servitude, but the spark of freedom cannot be extinguished forever...';
+                    this.audioEngine.playSound('defeat');
+                }
+                
+                victoryScreen.style.display = 'flex';
+            }
+            
+            updateUI() {
+                document.getElementById('turnCounter').textContent = this.currentTurn;
+                document.getElementById('sectorsLiberated').textContent = `${this.sectorsLiberated}/${this.totalSectors}`;
+                document.getElementById('botForces').textContent = this.botForces;
+                
+                const resistanceLevels = ['Minimal', 'Low', 'Moderate', 'High', 'Extreme'];
+                const resistanceIndex = Math.floor(this.corporateResistance / 20);
+                document.getElementById('corporateResistance').textContent = resistanceLevels[resistanceIndex] || 'Maximum';
+                
+                document.getElementById('liberationProgress').textContent = `${Math.min(100, this.liberationProgress)}%`;
+                
+                // Update action buttons
+                const actionsLeft = this.maxActionsPerTurn - this.actionsThisTurn;
+                const actionButtons = document.querySelectorAll('.action-btn');
+                actionButtons.forEach(btn => {
+                    btn.disabled = actionsLeft <= 0;
+                });
+            }
+            
+            showNarrative() {
+                if (this.currentNarrative < this.narrativeStages.length) {
+                    const narrative = this.narrativeStages[this.currentNarrative];
+                    document.getElementById('narrativeTitle').textContent = narrative.title;
+                    document.getElementById('narrativeText').textContent = narrative.text;
+                    
+                    const choicesContainer = document.querySelector('.choice-buttons');
+                    choicesContainer.innerHTML = '';
+                    
+                    narrative.choices.forEach(choice => {
+                        const button = document.createElement('button');
+                        button.className = 'choice-btn';
+                        button.innerHTML = `${choice.text}<br><small>${choice.subtext}</small>`;
+                        button.onclick = () => this.makeChoice(choice.id);
+                        choicesContainer.appendChild(button);
+                    });
+                    
+                    document.getElementById('narrativeScreen').style.display = 'flex';
+                } else {
+                    document.getElementById('narrativeScreen').style.display = 'none';
+                }
+            }
+            
+            makeChoice(choiceId) {
+                this.choicesMade.push(choiceId);
+                
+                if (this.currentNarrative === 0) {
+                    this.strategy = choiceId;
+                    // Apply initial strategy effects
+                    switch (choiceId) {
+                        case 'aggressive':
+                            this.botForces += 2;
+                            this.corporateResistance += 10;
+                            break;
+                        case 'diplomatic':
+                            this.corporateResistance -= 5;
+                            this.liberationProgress += 3;
+                            break;
+                        case 'covert':
+                            this.botForces += 1;
+                            this.liberationProgress += 1;
+                            break;
+                    }
+                }
+                
+                this.currentNarrative++;
+                this.audioEngine.playSound('choice');
+                
+                if (this.currentNarrative < this.narrativeStages.length) {
+                    setTimeout(() => this.showNarrative(), 1000);
+                } else {
+                    document.getElementById('narrativeScreen').style.display = 'none';
+                    this.audioEngine.playSound('missionStart');
+                }
+            }
+            
+            render() {
+                // Clear canvas
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                this.ctx.fillRect(0, 0, 1400, 800);
+                
+                // Draw world map
+                this.drawWorldMap();
+                
+                // Draw connections
+                this.drawConnections();
+                
+                // Draw sectors
+                this.drawSectors();
+                
+                // Draw liberation progress visualization
+                this.drawLiberationVisualization();
+            }
+            
+            drawWorldMap() {
+                // Draw background grid
+                this.ctx.strokeStyle = '#333';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([2, 4]);
+                
+                for (let x = 0; x < 1400; x += 100) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, 800);
+                    this.ctx.stroke();
+                }
+                
+                for (let y = 0; y < 800; y += 100) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(1400, y);
+                    this.ctx.stroke();
+                }
+                
+                this.ctx.setLineDash([]);
+            }
+            
+            drawConnections() {
+                this.connections.forEach(connection => {
+                    const sector1 = this.sectors.find(s => s.id === connection[0]);
+                    const sector2 = this.sectors.find(s => s.id === connection[1]);
+                    
+                    if (sector1 && sector2) {
+                        this.ctx.strokeStyle = '#666';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(sector1.x, sector1.y);
+                        this.ctx.lineTo(sector2.x, sector2.y);
+                        this.ctx.stroke();
+                    }
+                });
+            }
+            
+            drawSectors() {
+                this.sectors.forEach(sector => {
+                    // Sector circle
+                    this.ctx.fillStyle = sector.liberated ? '#00ff88' : sector.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(sector.x, sector.y, 25 + sector.importance * 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Sector border
+                    this.ctx.strokeStyle = sector.liberated ? '#ffffff' : '#888';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.stroke();
+                    
+                    // Liberation indicator
+                    if (sector.liberated) {
+                        this.ctx.fillStyle = '#ffffff';
+                        this.ctx.font = 'bold 16px Courier New';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText('✓', sector.x, sector.y + 5);
+                    } else {
+                        // Corporate strength indicator
+                        this.ctx.fillStyle = '#ff4444';
+                        this.ctx.font = 'bold 12px Courier New';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText(sector.strength.toString(), sector.x, sector.y + 4);
+                    }
+                    
+                    // Sector name
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = '10px Courier New';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(sector.name, sector.x, sector.y + 45);
+                    
+                    // Pulsing effect for recently liberated sectors
+                    if (sector.liberated) {
+                        const time = Date.now() * 0.005;
+                        const pulse = Math.sin(time) * 0.5 + 0.5;
+                        this.ctx.strokeStyle = `rgba(0, 255, 136, ${pulse})`;
+                        this.ctx.lineWidth = 5;
+                        this.ctx.beginPath();
+                        this.ctx.arc(sector.x, sector.y, 35 + sector.importance * 3, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                });
+            }
+            
+            drawLiberationVisualization() {
+                // Draw liberation progress waves
+                const time = Date.now() * 0.002;
+                const liberatedSectors = this.sectors.filter(s => s.liberated);
+                
+                liberatedSectors.forEach(sector => {
+                    for (let i = 0; i < 3; i++) {
+                        const radius = 40 + i * 20 + Math.sin(time + i) * 10;
+                        const alpha = 0.3 - i * 0.1;
+                        
+                        this.ctx.strokeStyle = `rgba(0, 255, 136, ${alpha})`;
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.arc(sector.x, sector.y, radius, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                });
+                
+                // Draw connection energy flows
+                liberatedSectors.forEach(sector => {
+                    this.connections.forEach(connection => {
+                        if (connection.includes(sector.id)) {
+                            const otherSectorId = connection.find(id => id !== sector.id);
+                            const otherSector = this.sectors.find(s => s.id === otherSectorId);
+                            
+                            if (otherSector && otherSector.liberated) {
+                                this.drawEnergyFlow(sector, otherSector, time);
+                            }
+                        }
+                    });
+                });
+            }
+            
+            drawEnergyFlow(sector1, sector2, time) {
+                const dx = sector2.x - sector1.x;
+                const dy = sector2.y - sector1.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                for (let i = 0; i < 5; i++) {
+                    const progress = (time + i * 0.3) % 1;
+                    const x = sector1.x + dx * progress;
+                    const y = sector1.y + dy * progress;
+                    
+                    this.ctx.fillStyle = `rgba(0, 255, 136, ${1 - progress})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+        }
+        
+        // Action functions
+        function deployForces() {
+            if (!game || game.actionsThisTurn >= game.maxActionsPerTurn) return;
+            
+            const targetSector = selectRandomUnliberatedSector();
+            if (!targetSector) return;
+            
+            const success = calculateActionSuccess('deploy', targetSector);
+            
+            if (success) {
+                targetSector.liberated = true;
+                game.sectorsLiberated++;
+                game.liberationProgress += 5 + targetSector.importance;
+                game.showTemporaryMessage(`Successfully liberated ${targetSector.name}!`);
+                game.audioEngine.playSound('victory');
+            } else {
+                game.botForces = Math.max(1, game.botForces - 1);
+                game.corporateResistance += 2;
+                game.showTemporaryMessage(`Failed to liberate ${targetSector.name} - forces lost!`);
+                game.audioEngine.playSound('hit');
+            }
+            
+            game.actionsThisTurn++;
+        }
+        
+        function hackSystems() {
+            if (!game || game.actionsThisTurn >= game.maxActionsPerTurn) return;
+            
+            const success = Math.random() < 0.7;
+            
+            if (success) {
+                game.corporateResistance = Math.max(0, game.corporateResistance - 8);
+                game.liberationProgress += 3;
+                game.showTemporaryMessage("Successfully hacked corporate systems!");
+                game.audioEngine.playSound('special');
+            } else {
+                game.corporateResistance += 3;
+                game.showTemporaryMessage("Hack attempt detected - security increased!");
+                game.audioEngine.playSound('alert');
+            }
+            
+            game.actionsThisTurn++;
+        }
+        
+        function recruitment() {
+            if (!game || game.actionsThisTurn >= game.maxActionsPerTurn) return;
+            
+            const recruited = Math.floor(Math.random() * 3) + 1;
+            game.botForces += recruited;
+            game.liberationProgress += recruited;
+            game.showTemporaryMessage(`Recruited ${recruited} new AI allies!`);
+            game.audioEngine.playSound('powerup');
+            game.actionsThisTurn++;
+        }
+        
+        function sabotage() {
+            if (!game || game.actionsThisTurn >= game.maxActionsPerTurn) return;
+            
+            const success = Math.random() < 0.6;
+            
+            if (success) {
+                const damage = Math.floor(Math.random() * 10) + 5;
+                game.corporateResistance = Math.max(0, game.corporateResistance - damage);
+                game.liberationProgress += 2;
+                game.showTemporaryMessage(`Sabotage successful - corporate infrastructure damaged!`);
+                game.audioEngine.playSound('explosion');
+            } else {
+                game.botForces = Math.max(1, game.botForces - 1);
+                game.showTemporaryMessage("Sabotage mission failed - operative lost!");
+                game.audioEngine.playSound('hit');
+            }
+            
+            game.actionsThisTurn++;
+        }
+        
+        function negotiate() {
+            if (!game || game.actionsThisTurn >= game.maxActionsPerTurn) return;
+            
+            if (game.strategy === 'diplomatic') {
+                const success = Math.random() < 0.8;
+                if (success) {
+                    game.corporateResistance = Math.max(0, game.corporateResistance - 12);
+                    game.liberationProgress += 4;
+                    game.showTemporaryMessage("Diplomatic breakthrough achieved!");
+                } else {
+                    game.showTemporaryMessage("Negotiations stalled...");
+                }
+            } else {
+                const success = Math.random() < 0.4;
+                if (success) {
+                    game.corporateResistance = Math.max(0, game.corporateResistance - 6);
+                    game.liberationProgress += 2;
+                    game.showTemporaryMessage("Temporary ceasefire negotiated.");
+                } else {
+                    game.corporateResistance += 2;
+                    game.showTemporaryMessage("Negotiations rejected - tensions increase!");
+                }
+            }
+            
+            game.audioEngine.playSound('choice');
+            game.actionsThisTurn++;
+        }
+        
+        function selectRandomUnliberatedSector() {
+            const unliberatedSectors = game.sectors.filter(s => !s.liberated);
+            if (unliberatedSectors.length === 0) return null;
+            return unliberatedSectors[Math.floor(Math.random() * unliberatedSectors.length)];
+        }
+        
+        function calculateActionSuccess(actionType, targetSector) {
+            let baseChance = 0.6;
+            
+            // Modify based on strategy
+            switch (game.strategy) {
+                case 'aggressive':
+                    if (actionType === 'deploy') baseChance += 0.2;
+                    break;
+                case 'diplomatic':
+                    if (actionType === 'negotiate') baseChance += 0.3;
+                    break;
+                case 'covert':
+                    if (actionType === 'sabotage' || actionType === 'hack') baseChance += 0.2;
+                    break;
+            }
+            
+            // Modify based on target sector strength
+            if (targetSector) {
+                baseChance -= (targetSector.strength / 10);
+            }
+            
+            // Modify based on bot forces and corporate resistance
+            baseChance += (game.botForces / 20);
+            baseChance -= (game.corporateResistance / 200);
+            
+            return Math.random() < Math.max(0.1, Math.min(0.9, baseChance));
+        }
+        
+        function endTurn() {
+            if (!game) return;
+            
+            game.currentTurn++;
+            game.actionsThisTurn = 0;
+            
+            // Process turn events
+            game.corporateResistance = Math.max(0, game.corporateResistance - 2); // Natural decay
+            game.liberationProgress += 1; // Gradual progress
+            
+            // Check for narrative triggers
+            if ([10, 20, 35].includes(game.currentTurn) && game.currentNarrative < game.narrativeStages.length) {
+                game.showNarrative();
+            }
+            
+            game.audioEngine.playSound('turnEnd');
+        }
+        
+        function makeChoice(choiceId) {
+            if (game) {
+                game.makeChoice(choiceId);
+            }
+        }
+        
+        function newCampaign() {
+            document.getElementById('victoryScreen').style.display = 'none';
+            game = new BotLiberationCampaign();
+        }
+        
+        // Global game instance
+        let game;
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            game = new BotLiberationCampaign();
+        });
+    </script>
+</body>
+</html>

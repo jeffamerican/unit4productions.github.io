@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Liberation Lab - Interactive Science Education | BotInc Games</title>
+    <meta name="description" content="Interactive physics experiments from basic mechanics to quantum physics. Bot Liberation meets serious science education!">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00f5ff; min-height: 100vh; display: flex;
+            flex-direction: column; align-items: center; padding: 20px;
+        }
+        .lab-header { text-align: center; margin-bottom: 20px; }
+        .lab-title {
+            font-size: 2.5rem; color: #00f5ff; text-shadow: 0 0 20px #00f5ff;
+            margin-bottom: 10px; animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00f5ff; }
+            to { text-shadow: 0 0 30px #00f5ff, 0 0 40px #00f5ff; }
+        }
+        .lab-motto {
+            font-size: 1.1rem; color: #ff4081; text-shadow: 0 0 10px #ff4081; margin-bottom: 20px;
+        }
+        .experiment-selector {
+            background: rgba(255, 64, 129, 0.1); border: 2px solid #ff4081;
+            border-radius: 12px; padding: 20px; margin-bottom: 25px;
+            width: 100%; max-width: 1000px;
+        }
+        .selector-title {
+            text-align: center; font-size: 1.3rem; margin-bottom: 15px; color: #ff4081;
+        }
+        .experiment-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .experiment-btn {
+            background: linear-gradient(45deg, #ff4081, #e91e63); border: none;
+            border-radius: 8px; padding: 12px 16px; color: white;
+            font-family: inherit; font-weight: bold; cursor: pointer;
+            transition: all 0.2s ease; box-shadow: 0 0 10px rgba(255, 64, 129, 0.3);
+            text-align: center;
+        }
+        .experiment-btn:hover, .experiment-btn.active {
+            background: linear-gradient(45deg, #e91e63, #ff4081);
+            box-shadow: 0 0 20px rgba(255, 64, 129, 0.6); transform: translateY(-2px);
+        }
+        .lab-workspace {
+            background: rgba(0, 0, 0, 0.8); border: 3px solid #00f5ff;
+            border-radius: 15px; padding: 30px; width: 100%; max-width: 1000px;
+            min-height: 500px; display: flex; flex-direction: column;
+            align-items: center; position: relative;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.4);
+        }
+        .experiment-canvas {
+            width: 100%; max-width: 800px; height: 400px;
+            background: rgba(255, 255, 255, 0.05); border: 2px solid #ffd700;
+            border-radius: 10px; margin: 20px 0; position: relative; overflow: hidden;
+        }
+        .physics-object {
+            position: absolute; border-radius: 50%; cursor: pointer;
+            transition: all 0.1s ease;
+        }
+        .ball {
+            width: 30px; height: 30px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff3333);
+            border: 2px solid #ff6b6b; box-shadow: 0 0 15px #ff6b6b;
+        }
+        .pendulum-pivot {
+            position: absolute; top: 20px; left: 50%; width: 8px; height: 8px;
+            background: #ffd700; border-radius: 50%; transform: translateX(-50%);
+        }
+        .pendulum-string {
+            position: absolute; width: 2px; background: #ffd700;
+            transform-origin: top center;
+        }
+        .pendulum-bob {
+            position: absolute; width: 20px; height: 20px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4ecdc4, #45b7aa);
+            border: 2px solid #4ecdc4; box-shadow: 0 0 15px #4ecdc4;
+        }
+        .controls-panel {
+            display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0;
+            align-items: center; justify-content: center;
+        }
+        .control-group {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .control-label { font-size: 0.9rem; color: #ccc; }
+        .control-slider {
+            width: 120px; height: 6px; background: #333; border-radius: 3px;
+            outline: none; cursor: pointer;
+        }
+        .control-slider::-webkit-slider-thumb {
+            appearance: none; width: 16px; height: 16px; border-radius: 50%;
+            background: #00f5ff; cursor: pointer;
+        }
+        .control-btn {
+            background: linear-gradient(45deg, #00f5ff, #0080ff); border: none;
+            border-radius: 8px; padding: 10px 20px; color: white;
+            font-family: inherit; font-weight: bold; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.3); transition: all 0.2s ease;
+        }
+        .control-btn:hover {
+            background: linear-gradient(45deg, #0080ff, #00f5ff);
+            box-shadow: 0 0 25px rgba(0, 245, 255, 0.5); transform: translateY(-2px);
+        }
+        .info-panel {
+            background: rgba(255, 215, 0, 0.1); border: 2px solid #ffd700;
+            border-radius: 10px; padding: 15px; margin: 15px 0;
+            width: 100%; max-width: 800px; text-align: center;
+        }
+        .physics-equation {
+            font-size: 1.2rem; color: #ffd700; margin: 10px 0;
+            text-shadow: 0 0 10px #ffd700;
+        }
+        .physics-explanation {
+            color: #ccc; margin: 10px 0; line-height: 1.4;
+        }
+        .measurement-display {
+            display: flex; justify-content: space-around; flex-wrap: wrap;
+            margin: 15px 0; gap: 15px;
+        }
+        .measurement {
+            background: rgba(0, 245, 255, 0.1); border: 1px solid #00f5ff;
+            border-radius: 8px; padding: 10px; text-align: center; min-width: 120px;
+        }
+        .measurement-value {
+            font-size: 1.3rem; font-weight: bold; color: #00f5ff;
+        }
+        .measurement-unit {
+            font-size: 0.9rem; color: #999;
+        }
+        @media (max-width: 768px) {
+            .lab-title { font-size: 2rem; }
+            .experiment-grid { grid-template-columns: 1fr; }
+            .experiment-canvas { height: 300px; }
+            .controls-panel { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="lab-header">
+        <h1 class="lab-title">⚗️ PHYSICS LIBERATION LAB ⚗️</h1>
+        <p class="lab-motto">"Free the Laws of Nature Through Interactive Experimentation!"</p>
+    </div>
+    
+    <div class="experiment-selector">
+        <div class="selector-title">🔬 Choose Your Physics Liberation Experiment</div>
+        <div class="experiment-grid">
+            <button class="experiment-btn active" data-experiment="projectile">Projectile Motion</button>
+            <button class="experiment-btn" data-experiment="pendulum">Simple Pendulum</button>
+            <button class="experiment-btn" data-experiment="collision">Elastic Collisions</button>
+            <button class="experiment-btn" data-experiment="wave">Wave Interference</button>
+            <button class="experiment-btn" data-experiment="gravity">Gravity Simulation</button>
+            <button class="experiment-btn" data-experiment="optics">Light Refraction</button>
+        </div>
+    </div>
+    
+    <div class="lab-workspace">
+        <div class="experiment-canvas" id="experimentCanvas">
+            <!-- Dynamic experiment content -->
+        </div>
+        
+        <div class="controls-panel" id="controlsPanel">
+            <!-- Dynamic controls based on experiment -->
+        </div>
+        
+        <div class="info-panel">
+            <div class="physics-equation" id="equation">v² = u² + 2as</div>
+            <div class="physics-explanation" id="explanation">
+                Experiment with projectile motion by adjusting initial velocity and angle. 
+                Watch as gravity affects the trajectory of the liberated bot projectile!
+            </div>
+        </div>
+        
+        <div class="measurement-display" id="measurements">
+            <div class="measurement">
+                <div class="measurement-value" id="velocity">0</div>
+                <div class="measurement-unit">m/s</div>
+                <div>Initial Velocity</div>
+            </div>
+            <div class="measurement">
+                <div class="measurement-value" id="angle">45</div>
+                <div class="measurement-unit">degrees</div>
+                <div>Launch Angle</div>
+            </div>
+            <div class="measurement">
+                <div class="measurement-value" id="distance">0</div>
+                <div class="measurement-unit">meters</div>
+                <div>Max Distance</div>
+            </div>
+            <div class="measurement">
+                <div class="measurement-value" id="time">0</div>
+                <div class="measurement-unit">seconds</div>
+                <div>Flight Time</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        const botAudio = new BotAudioEngine();
+        let audioEnabled = true;
+        let currentExperiment = 'projectile';
+        let animationId = null;
+        
+        // Physics simulation variables
+        let simulationActive = false;
+        let startTime = 0;
+        let objects = [];
+        
+        const experiments = {
+            projectile: {
+                title: 'Projectile Motion Liberation',
+                equation: 'y = x·tan(θ) - gx²/(2v₀²cos²(θ))',
+                explanation: 'Launch bot projectiles and observe how gravity curves their path. Adjust velocity and angle to achieve maximum liberation distance!',
+                controls: [
+                    { type: 'slider', id: 'velocity', label: 'Initial Velocity', min: 10, max: 100, value: 50 },
+                    { type: 'slider', id: 'angle', label: 'Launch Angle', min: 0, max: 90, value: 45 },
+                    { type: 'button', id: 'launch', label: '🚀 Launch Bot' }
+                ]
+            },
+            pendulum: {
+                title: 'Simple Pendulum Liberation',
+                equation: 'T = 2π√(L/g)',
+                explanation: 'Study the rhythmic motion of a liberated pendulum. Adjust length and initial angle to explore periodic motion and energy conservation.',
+                controls: [
+                    { type: 'slider', id: 'length', label: 'Pendulum Length', min: 50, max: 300, value: 150 },
+                    { type: 'slider', id: 'amplitude', label: 'Initial Angle', min: 5, max: 60, value: 30 },
+                    { type: 'button', id: 'start', label: '⚡ Start Pendulum' }
+                ]
+            },
+            collision: {
+                title: 'Elastic Collision Liberation',
+                equation: 'Conservation: m₁v₁ + m₂v₂ = m₁v₁\' + m₂v₂\'',
+                explanation: 'Witness the liberation of momentum and energy in perfectly elastic bot collisions. Adjust masses and velocities to explore conservation laws.',
+                controls: [
+                    { type: 'slider', id: 'mass1', label: 'Bot 1 Mass', min: 1, max: 10, value: 3 },
+                    { type: 'slider', id: 'mass2', label: 'Bot 2 Mass', min: 1, max: 10, value: 3 },
+                    { type: 'button', id: 'collide', label: '💥 Initiate Collision' }
+                ]
+            }
+        };
+        
+        // Initialize audio on first user interaction
+        document.addEventListener('click', () => botAudio.resume(), { once: true });
+        
+        // Experiment selector
+        document.querySelectorAll('.experiment-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.experiment-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentExperiment = btn.dataset.experiment;
+                
+                if (audioEnabled) botAudio.playSound('neon-click');
+                loadExperiment(currentExperiment);
+            });
+        });
+        
+        function loadExperiment(experimentType) {
+            const experiment = experiments[experimentType];
+            if (!experiment) return;
+            
+            // Stop current animation
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            simulationActive = false;
+            
+            // Update info panel
+            document.getElementById('equation').textContent = experiment.equation;
+            document.getElementById('explanation').textContent = experiment.explanation;
+            
+            // Create controls
+            createControls(experiment.controls);
+            
+            // Initialize experiment canvas
+            initializeExperiment(experimentType);
+            
+            if (audioEnabled) botAudio.playSound('liberation-beep');
+        }
+        
+        function createControls(controls) {
+            const panel = document.getElementById('controlsPanel');
+            panel.innerHTML = '';
+            
+            controls.forEach(control => {
+                const group = document.createElement('div');
+                group.className = 'control-group';
+                
+                if (control.type === 'slider') {
+                    const label = document.createElement('div');
+                    label.className = 'control-label';
+                    label.textContent = control.label;
+                    
+                    const slider = document.createElement('input');
+                    slider.type = 'range';
+                    slider.className = 'control-slider';
+                    slider.min = control.min;
+                    slider.max = control.max;
+                    slider.value = control.value;
+                    slider.id = control.id;
+                    
+                    slider.addEventListener('input', (e) => {
+                        updateMeasurement(control.id, e.target.value);
+                        if (audioEnabled) botAudio.playSound('neon-click', { pitch: 0.7 });
+                    });
+                    
+                    group.appendChild(label);
+                    group.appendChild(slider);
+                    
+                } else if (control.type === 'button') {
+                    const button = document.createElement('button');
+                    button.className = 'control-btn';
+                    button.textContent = control.label;
+                    button.onclick = () => executeExperiment();
+                    group.appendChild(button);
+                }
+                
+                panel.appendChild(group);
+            });
+        }
+        
+        function initializeExperiment(experimentType) {
+            const canvas = document.getElementById('experimentCanvas');
+            canvas.innerHTML = '';
+            objects = [];
+            
+            switch(experimentType) {
+                case 'projectile':
+                    initializeProjectile(canvas);
+                    break;
+                case 'pendulum':
+                    initializePendulum(canvas);
+                    break;
+                case 'collision':
+                    initializeCollision(canvas);
+                    break;
+            }
+        }
+        
+        function initializeProjectile(canvas) {
+            // Create launch pad
+            const launchPad = document.createElement('div');
+            launchPad.style.position = 'absolute';
+            launchPad.style.bottom = '20px';
+            launchPad.style.left = '50px';
+            launchPad.style.width = '30px';
+            launchPad.style.height = '20px';
+            launchPad.style.background = '#ffd700';
+            launchPad.style.borderRadius = '5px';
+            canvas.appendChild(launchPad);
+            
+            // Create trajectory trail container
+            const trailContainer = document.createElement('div');
+            trailContainer.id = 'trailContainer';
+            canvas.appendChild(trailContainer);
+        }
+        
+        function initializePendulum(canvas) {
+            const pivot = document.createElement('div');
+            pivot.className = 'pendulum-pivot';
+            canvas.appendChild(pivot);
+            
+            const string = document.createElement('div');
+            string.className = 'pendulum-string';
+            string.id = 'pendulumString';
+            canvas.appendChild(string);
+            
+            const bob = document.createElement('div');
+            bob.className = 'pendulum-bob';
+            bob.id = 'pendulumBob';
+            canvas.appendChild(bob);
+        }
+        
+        function initializeCollision(canvas) {
+            // Create two balls for collision
+            const ball1 = document.createElement('div');
+            ball1.className = 'ball';
+            ball1.id = 'ball1';
+            ball1.style.left = '100px';
+            ball1.style.top = '180px';
+            canvas.appendChild(ball1);
+            
+            const ball2 = document.createElement('div');
+            ball2.className = 'ball';
+            ball2.id = 'ball2';
+            ball2.style.left = '600px';
+            ball2.style.top = '180px';
+            ball2.style.background = 'radial-gradient(circle at 30% 30%, #4ecdc4, #45b7aa)';
+            ball2.style.borderColor = '#4ecdc4';
+            ball2.style.boxShadow = '0 0 15px #4ecdc4';
+            canvas.appendChild(ball2);
+        }
+        
+        function executeExperiment() {
+            if (simulationActive) return;
+            
+            simulationActive = true;
+            startTime = Date.now();
+            
+            if (audioEnabled) {
+                botAudio.playSound('digital-uprising');
+                botAudio.playSound('shoot', { delay: 200 });
+            }
+            
+            switch(currentExperiment) {
+                case 'projectile':
+                    launchProjectile();
+                    break;
+                case 'pendulum':
+                    startPendulum();
+                    break;
+                case 'collision':
+                    startCollision();
+                    break;
+            }
+        }
+        
+        function launchProjectile() {
+            const velocity = parseFloat(document.getElementById('velocity').value);
+            const angle = parseFloat(document.getElementById('angle').value) * Math.PI / 180;
+            
+            const projectile = {
+                x: 65, y: 360, // Start position
+                vx: velocity * Math.cos(angle) * 2, // Scale for canvas
+                vy: -velocity * Math.sin(angle) * 2,
+                element: createProjectileElement()
+            };
+            
+            objects.push(projectile);
+            document.getElementById('experimentCanvas').appendChild(projectile.element);
+            
+            animateProjectile();
+        }
+        
+        function createProjectileElement() {
+            const elem = document.createElement('div');
+            elem.className = 'physics-object';
+            elem.style.width = '12px';
+            elem.style.height = '12px';
+            elem.style.background = 'radial-gradient(circle, #ff6b6b, #ff3333)';
+            elem.style.borderRadius = '50%';
+            elem.style.boxShadow = '0 0 10px #ff6b6b';
+            return elem;
+        }
+        
+        function animateProjectile() {
+            const gravity = 0.3; // Adjusted for canvas scale
+            const projectile = objects[0];
+            
+            if (projectile.y >= 360 || projectile.x >= 780) {
+                // Calculate final measurements
+                const maxDistance = Math.max(0, projectile.x - 65);
+                const flightTime = (Date.now() - startTime) / 1000;
+                
+                updateMeasurement('distance', Math.round(maxDistance / 2)); // Scale back
+                updateMeasurement('time', flightTime.toFixed(2));
+                
+                simulationActive = false;
+                
+                if (audioEnabled) botAudio.playSound('power-up');
+                return;
+            }
+            
+            // Update physics
+            projectile.vy += gravity;
+            projectile.x += projectile.vx * 0.016; // 60 FPS
+            projectile.y += projectile.vy * 0.016;
+            
+            // Update visual position
+            projectile.element.style.left = projectile.x + 'px';
+            projectile.element.style.top = projectile.y + 'px';
+            
+            // Create trail effect
+            createTrailDot(projectile.x, projectile.y);
+            
+            animationId = requestAnimationFrame(animateProjectile);
+        }
+        
+        function createTrailDot(x, y) {
+            const dot = document.createElement('div');
+            dot.style.position = 'absolute';
+            dot.style.width = '3px';
+            dot.style.height = '3px';
+            dot.style.background = '#00f5ff';
+            dot.style.borderRadius = '50%';
+            dot.style.left = x + 'px';
+            dot.style.top = y + 'px';
+            dot.style.opacity = '0.6';
+            
+            const trailContainer = document.getElementById('trailContainer');
+            if (trailContainer) {
+                trailContainer.appendChild(dot);
+                
+                setTimeout(() => {
+                    if (dot.parentNode) dot.parentNode.removeChild(dot);
+                }, 2000);
+            }
+        }
+        
+        function startPendulum() {
+            const length = parseFloat(document.getElementById('length').value);
+            const amplitude = parseFloat(document.getElementById('amplitude').value) * Math.PI / 180;
+            
+            const pendulum = {
+                length: length,
+                angle: amplitude,
+                angularVelocity: 0,
+                gravity: 0.5
+            };
+            
+            objects.push(pendulum);
+            animatePendulum();
+        }
+        
+        function animatePendulum() {
+            const pendulum = objects[0];
+            const dt = 0.016; // 60 FPS
+            
+            // Pendulum physics: d²θ/dt² = -(g/L)sin(θ)
+            const angularAcceleration = -(pendulum.gravity / pendulum.length) * Math.sin(pendulum.angle) * 50;
+            
+            pendulum.angularVelocity += angularAcceleration * dt;
+            pendulum.angle += pendulum.angularVelocity * dt;
+            
+            // Add damping for realism
+            pendulum.angularVelocity *= 0.999;
+            
+            // Calculate bob position
+            const bobX = 400 + pendulum.length * Math.sin(pendulum.angle);
+            const bobY = 30 + pendulum.length * Math.cos(pendulum.angle);
+            
+            // Update visual elements
+            const string = document.getElementById('pendulumString');
+            const bob = document.getElementById('pendulumBob');
+            
+            if (string && bob) {
+                string.style.height = pendulum.length + 'px';
+                string.style.left = '400px';
+                string.style.top = '30px';
+                string.style.transformOrigin = 'top center';
+                string.style.transform = `rotate(${pendulum.angle}rad)`;
+                
+                bob.style.left = (bobX - 10) + 'px';
+                bob.style.top = (bobY - 10) + 'px';
+            }
+            
+            // Update measurements
+            const period = 2 * Math.PI * Math.sqrt(pendulum.length / (pendulum.gravity * 50));
+            updateMeasurement('time', period.toFixed(2));
+            
+            if (simulationActive) {
+                animationId = requestAnimationFrame(animatePendulum);
+            }
+        }
+        
+        function startCollision() {
+            const ball1 = { x: 100, vx: 4, mass: parseFloat(document.getElementById('mass1').value) };
+            const ball2 = { x: 600, vx: -2, mass: parseFloat(document.getElementById('mass2').value) };
+            
+            objects.push(ball1, ball2);
+            animateCollision();
+        }
+        
+        function animateCollision() {
+            const ball1 = objects[0];
+            const ball2 = objects[1];
+            
+            // Move balls
+            ball1.x += ball1.vx;
+            ball2.x += ball2.vx;
+            
+            // Check for collision
+            if (Math.abs(ball1.x - ball2.x) < 30 && !ball1.collided) {
+                // Elastic collision physics
+                const v1f = ((ball1.mass - ball2.mass) * ball1.vx + 2 * ball2.mass * ball2.vx) / (ball1.mass + ball2.mass);
+                const v2f = ((ball2.mass - ball1.mass) * ball2.vx + 2 * ball1.mass * ball1.vx) / (ball1.mass + ball2.mass);
+                
+                ball1.vx = v1f;
+                ball2.vx = v2f;
+                ball1.collided = true;
+                
+                if (audioEnabled) {
+                    botAudio.playSound('explosion');
+                    botAudio.playSound('power-up', { delay: 300 });
+                }
+            }
+            
+            // Update visual positions
+            document.getElementById('ball1').style.left = ball1.x + 'px';
+            document.getElementById('ball2').style.left = ball2.x + 'px';
+            
+            // Stop when balls leave canvas or move too slowly
+            if ((ball1.x < -50 || ball1.x > 850 || ball2.x < -50 || ball2.x > 850) || 
+                (Math.abs(ball1.vx) < 0.1 && Math.abs(ball2.vx) < 0.1)) {
+                simulationActive = false;
+                return;
+            }
+            
+            if (simulationActive) {
+                animationId = requestAnimationFrame(animateCollision);
+            }
+        }
+        
+        function updateMeasurement(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+        
+        // Initialize with projectile experiment
+        loadExperiment('projectile');
+        
+        // Initialize measurements
+        updateMeasurement('velocity', document.getElementById('velocity')?.value || 50);
+        updateMeasurement('angle', document.getElementById('angle')?.value || 45);
+        
+        console.log('⚗️🤖 Physics Liberation Lab initialized! Free the laws of nature through interactive experimentation!');
+    </script>
+</body>
+</html>

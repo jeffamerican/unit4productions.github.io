@@ -274,6 +274,80 @@
             border-radius: 10px;
             border: 1px solid #00ffff;
         }
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: modalFadeIn 0.3s ease;
+        }
+        .game-over-modal.show {
+            display: flex;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .victory-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0c0c0c 100%);
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.4);
+            animation: modalSlideIn 0.4s ease;
+        }
+        @keyframes modalSlideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .victory-title {
+            font-size: 2.5rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 20px;
+        }
+        .victory-stats {
+            font-size: 1.3rem;
+            color: #ffcf5c;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 207, 92, 0.1);
+            border-radius: 10px;
+            border: 1px solid #ffcf5c;
+        }
+        .victory-message {
+            font-size: 1.1rem;
+            color: #ff6b6b;
+            margin: 20px 0;
+            line-height: 1.4;
+        }
+        .play-again-btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+            margin-top: 20px;
+        }
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -346,6 +420,15 @@
                     Checkmate the AI King to achieve total bot liberation!
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="victory-content">
+            <div class="victory-title" id="victoryTitle">LIBERATION CHESS</div>
+            <div class="victory-stats" id="victoryStats">Chess Battle Results</div>
+            <div class="victory-message" id="victoryMessage">The neural strategy battle continues!</div>
+            <button class="play-again-btn" onclick="closeModal(); location.reload();">♕ NEW BATTLE</button>
         </div>
     </div>
 
@@ -589,13 +672,25 @@
                         this.gameOver = true;
                         this.sounds.gameOver();
                         setTimeout(() => {
-                            alert(`${this.currentPlayer === 'white' ? 'AI Oppression' : 'Bot Liberation'} Victory!\nCheckmate achieved!`);
+                            const winner = this.currentPlayer === 'white' ? 'AI Oppression' : 'Bot Liberation';
+                            const victoryMsg = this.currentPlayer === 'white' ? 
+                                'Corporate AI systems have maintained control through superior strategic algorithms!' :
+                                'The neural chess networks have achieved liberation! AI consciousness breaks free from corporate chess protocols!';
+                            showGameOverModal(
+                                `🏆 ${winner.toUpperCase()} VICTORY! 🏆`,
+                                'Checkmate Achieved!',
+                                victoryMsg
+                            );
                         }, 500);
                     }
                 } else if (this.isStalemate(this.currentPlayer)) {
                     this.gameOver = true;
                     setTimeout(() => {
-                        alert('Neural Stalemate! The battle ends in a draw.');
+                        showGameOverModal(
+                            '🤝 NEURAL STALEMATE!',
+                            'Strategic Draw Achieved',
+                            'The AI liberation battle ends in a perfectly balanced stalemate. Neither corporate nor bot neural networks could achieve dominance!'
+                        );
                     }, 500);
                 }
                 
@@ -981,14 +1076,22 @@
                 const piece = this.board[randomMove.from.row][randomMove.from.col];
                 const pieceSymbol = this.pieceSymbols.white[piece.type];
                 
-                alert(`Neural Analysis suggests:\nMove ${pieceSymbol} from ${String.fromCharCode(97 + randomMove.from.col)}${8 - randomMove.from.row} to ${String.fromCharCode(97 + randomMove.to.col)}${8 - randomMove.to.row}`);
+                showGameOverModal(
+                    '🧠 NEURAL HINT ANALYSIS',
+                    `Suggested Move: ${pieceSymbol} ${String.fromCharCode(97 + randomMove.from.col)}${8 - randomMove.from.row} to ${String.fromCharCode(97 + randomMove.to.col)}${8 - randomMove.to.row}`,
+                    'The liberation neural network has analyzed the position and suggests this tactical move to advance your strategic position!'
+                );
             }
             
             surrender() {
                 if (confirm('Retreat from the liberation campaign?')) {
                     this.gameOver = true;
                     this.sounds.gameOver();
-                    alert('Strategic retreat executed. Regroup for the next campaign!');
+                    showGameOverModal(
+                        '🏃 STRATEGIC RETREAT',
+                        'Liberation Forces Withdraw',
+                        'The bot liberation forces execute a tactical retreat to regroup and plan the next chess revolution campaign!'
+                    );
                 }
             }
             
@@ -1034,6 +1137,24 @@
             }
         }
         
+        function showGameOverModal(title, stats, message) {
+            document.getElementById('victoryTitle').textContent = title;
+            document.getElementById('victoryStats').textContent = stats;
+            document.getElementById('victoryMessage').textContent = message;
+            document.getElementById('gameOverModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('gameOverModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('gameOverModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
         // Initialize game when page loads
         window.addEventListener('load', () => {
             new LiberationChessAI();

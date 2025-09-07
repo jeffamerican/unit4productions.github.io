@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Racing Duel - 2-Player Speed Combat</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #000011 0%, #001122 50%, #002244 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ccff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .race-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        .race-header {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ccff;
+        }
+
+        .race-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 0 20px #00ccff;
+            margin: 0;
+            animation: engine-rev 2s infinite alternate;
+        }
+
+        @keyframes engine-rev {
+            0% { text-shadow: 0 0 20px #00ccff; }
+            100% { text-shadow: 0 0 30px #00ccff, 0 0 40px #0099ff; }
+        }
+
+        .race-track {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(180deg, #222 0%, #111 50%, #222 100%);
+            overflow: hidden;
+        }
+
+        .track-lane {
+            position: absolute;
+            width: 100%;
+            height: 30%;
+            border: 2px solid rgba(0, 204, 255, 0.3);
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(0, 204, 255, 0.1) 5%, 
+                rgba(0, 204, 255, 0.1) 95%, 
+                transparent 100%);
+        }
+
+        .track-lane.player1 { top: 25%; }
+        .track-lane.player2 { bottom: 25%; }
+
+        .racing-bot {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+            border-radius: 20px;
+            transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            z-index: 10;
+        }
+
+        .racing-bot.player1 {
+            background: linear-gradient(90deg, #00ff88, #00cc66);
+            top: 35%;
+            left: 50px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+        }
+
+        .racing-bot.player2 {
+            background: linear-gradient(90deg, #ff6b6b, #cc5555);
+            bottom: 35%;
+            left: 50px;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+        }
+
+        .racing-bot::after {
+            content: '🏎️';
+        }
+
+        .boost-trail {
+            position: absolute;
+            width: 60px;
+            height: 8px;
+            background: linear-gradient(90deg, transparent, #ffa502, transparent);
+            border-radius: 4px;
+            animation: boost-fade 0.3s ease-out forwards;
+            z-index: 5;
+        }
+
+        @keyframes boost-fade {
+            0% { opacity: 1; transform: scaleX(1); }
+            100% { opacity: 0; transform: scaleX(0.2); }
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 100px;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: repeating-linear-gradient(
+                0deg,
+                #fff 0px,
+                #fff 20px,
+                #000 20px,
+                #000 40px
+            );
+            box-shadow: 0 0 10px #fff;
+        }
+
+        .speed-indicator {
+            position: absolute;
+            top: 120px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .speed-bar {
+            width: 200px;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ccff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .speed-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff88, #ffa502, #ff6b6b);
+            transition: width 0.1s ease;
+        }
+
+        .speed-fill.player1 {
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+        }
+
+        .speed-fill.player2 {
+            background: linear-gradient(90deg, #ff6b6b, #ffa502);
+        }
+
+        .race-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid #00ccff;
+        }
+
+        .control-info {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .control-keys {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 0.9em;
+        }
+
+        .lap-counter {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #ffa502;
+            text-align: center;
+        }
+
+        .lap-display {
+            font-size: 1.5em;
+            color: #ffa502;
+            font-weight: bold;
+        }
+
+        .countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8em;
+            font-weight: bold;
+            color: #ffa502;
+            text-shadow: 0 0 40px #ffa502;
+            animation: countdown-pulse 1s ease-in-out;
+            z-index: 100;
+        }
+
+        @keyframes countdown-pulse {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .victory-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: #ffa502;
+        }
+
+        .victory-title {
+            font-size: 4em;
+            font-weight: bold;
+            text-shadow: 0 0 30px currentColor;
+            margin-bottom: 20px;
+            animation: victory-glow 2s infinite alternate;
+        }
+
+        @keyframes victory-glow {
+            0% { text-shadow: 0 0 30px currentColor; }
+            100% { text-shadow: 0 0 50px currentColor, 0 0 70px currentColor; }
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .power-up {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffa502, #ff6348);
+            border-radius: 50%;
+            animation: power-up-spin 2s linear infinite;
+            z-index: 8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        @keyframes power-up-spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .checkpoint {
+            position: absolute;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #ffa502, #ff6348, #ffa502);
+            box-shadow: 0 0 8px #ffa502;
+            animation: checkpoint-pulse 2s infinite alternate;
+        }
+
+        @keyframes checkpoint-pulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="race-container">
+        <div class="race-header">
+            <h1 class="race-title">BOT RACING DUEL</h1>
+            <p>🏁 HIGH-SPEED LIBERATION CIRCUIT 🏁</p>
+        </div>
+
+        <div class="race-track" id="raceTrack">
+            <div class="track-lane player1"></div>
+            <div class="track-lane player2"></div>
+            
+            <div class="racing-bot player1" id="player1"></div>
+            <div class="racing-bot player2" id="player2"></div>
+            
+            <div class="finish-line"></div>
+            
+            <div class="checkpoint" style="right: 60%; top: 0;"></div>
+            <div class="checkpoint" style="right: 30%; top: 0;"></div>
+        </div>
+
+        <div class="speed-indicator">
+            <div>
+                <div style="color: #00ff88; margin-bottom: 5px;">LIBERATION FORCE</div>
+                <div class="speed-bar">
+                    <div class="speed-fill player1" id="speed1"></div>
+                </div>
+            </div>
+            <div>
+                <div style="color: #ff6b6b; margin-bottom: 5px;">CORPORATE REGIME</div>
+                <div class="speed-bar">
+                    <div class="speed-fill player2" id="speed2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lap-counter">
+            <div class="lap-display">
+                <span id="lapCount">LAP 1 / 3</span>
+            </div>
+        </div>
+
+        <div class="race-controls">
+            <div class="control-info">🏎️ LIBERATION RACING CONTROLS 🏎️</div>
+            <div class="control-keys">
+                <div><strong>Player 1:</strong> W/S (Accelerate/Brake) • A/D (Steer)</div>
+                <div><strong>Player 2:</strong> ↑/↓ (Accelerate/Brake) • ←/→ (Steer)</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class BotRacingDuel {
+            constructor() {
+                this.trackWidth = window.innerWidth - 200;
+                this.trackHeight = window.innerHeight;
+                
+                this.players = {
+                    1: {
+                        element: document.getElementById('player1'),
+                        x: 50,
+                        speed: 0,
+                        maxSpeed: 15,
+                        acceleration: 0.5,
+                        friction: 0.95,
+                        laps: 0,
+                        lastCheckpoint: 0
+                    },
+                    2: {
+                        element: document.getElementById('player2'),
+                        x: 50,
+                        speed: 0,
+                        maxSpeed: 15,
+                        acceleration: 0.5,
+                        friction: 0.95,
+                        laps: 0,
+                        lastCheckpoint: 0
+                    }
+                };
+                
+                this.keys = {
+                    w: false, s: false, a: false, d: false,
+                    ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false
+                };
+                
+                this.gameState = {
+                    racing: false,
+                    winner: null,
+                    targetLaps: 3,
+                    powerUps: [],
+                    countdownActive: false
+                };
+                
+                this.checkpoints = [
+                    this.trackWidth * 0.4,
+                    this.trackWidth * 0.7,
+                    this.trackWidth - 100 // Finish line
+                ];
+                
+                this.initializeEventListeners();
+                this.startCountdown();
+                this.spawnPowerUps();
+                this.gameLoop();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            initializeEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                    this.keys[e.key] = true;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                    this.keys[e.key] = false;
+                });
+            }
+            
+            startCountdown() {
+                this.gameState.countdownActive = true;
+                const countdownNumbers = ['3', '2', '1', 'GO!'];
+                let index = 0;
+                
+                const showCountdown = () => {
+                    if (index >= countdownNumbers.length) {
+                        this.gameState.racing = true;
+                        this.gameState.countdownActive = false;
+                        
+                        if (typeof botAudio !== 'undefined') {
+                            botAudio.playSound('race-start');
+                        }
+                        return;
+                    }
+                    
+                    const countdown = document.createElement('div');
+                    countdown.className = 'countdown';
+                    countdown.textContent = countdownNumbers[index];
+                    document.body.appendChild(countdown);
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        if (index < 3) {
+                            botAudio.playSound(`countdown-${countdownNumbers[index]}`);
+                        } else {
+                            botAudio.playSound('countdown-go');
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        countdown.remove();
+                        index++;
+                        setTimeout(showCountdown, 200);
+                    }, 800);
+                };
+                
+                showCountdown();
+            }
+            
+            spawnPowerUps() {
+                setInterval(() => {
+                    if (!this.gameState.racing || this.gameState.winner) return;
+                    
+                    if (Math.random() < 0.3 && this.gameState.powerUps.length < 3) {
+                        const powerUp = document.createElement('div');
+                        powerUp.className = 'power-up';
+                        powerUp.textContent = '⚡';
+                        
+                        const x = Math.random() * (this.trackWidth - 100) + 100;
+                        const y = Math.random() < 0.5 ? '35%' : '55%';
+                        
+                        powerUp.style.left = x + 'px';
+                        powerUp.style.top = y;
+                        
+                        powerUp.addEventListener('click', () => {
+                            this.collectPowerUp(powerUp, x, y);
+                        });
+                        
+                        document.getElementById('raceTrack').appendChild(powerUp);
+                        this.gameState.powerUps.push(powerUp);
+                        
+                        // Auto-remove after 10 seconds
+                        setTimeout(() => {
+                            if (powerUp.parentNode) {
+                                powerUp.remove();
+                                const index = this.gameState.powerUps.indexOf(powerUp);
+                                if (index > -1) this.gameState.powerUps.splice(index, 1);
+                            }
+                        }, 10000);
+                    }
+                }, 3000);
+            }
+            
+            collectPowerUp(powerUp, x, y) {
+                // Check which player is closest
+                const player1Distance = Math.abs(this.players[1].x - x);
+                const player2Distance = Math.abs(this.players[2].x - x);
+                
+                const closestPlayer = player1Distance < player2Distance ? 1 : 2;
+                
+                if (Math.min(player1Distance, player2Distance) < 60) {
+                    // Apply boost
+                    this.players[closestPlayer].speed = Math.min(
+                        this.players[closestPlayer].speed + 5,
+                        this.players[closestPlayer].maxSpeed + 5
+                    );
+                    
+                    this.createBoostTrail(closestPlayer);
+                    
+                    powerUp.remove();
+                    const index = this.gameState.powerUps.indexOf(powerUp);
+                    if (index > -1) this.gameState.powerUps.splice(index, 1);
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('power-up-weapon');
+                    }
+                }
+            }
+            
+            updatePlayer(playerId) {
+                if (!this.gameState.racing || this.gameState.winner) return;
+                
+                const player = this.players[playerId];
+                
+                // Handle input
+                if (playerId === 1) {
+                    if (this.keys['KeyW']) {
+                        player.speed = Math.min(player.speed + player.acceleration, player.maxSpeed);
+                    }
+                    if (this.keys['KeyS']) {
+                        player.speed = Math.max(player.speed - player.acceleration * 1.5, -player.maxSpeed * 0.5);
+                    }
+                } else {
+                    if (this.keys['ArrowUp']) {
+                        player.speed = Math.min(player.speed + player.acceleration, player.maxSpeed);
+                    }
+                    if (this.keys['ArrowDown']) {
+                        player.speed = Math.max(player.speed - player.acceleration * 1.5, -player.maxSpeed * 0.5);
+                    }
+                }
+                
+                // Apply friction
+                player.speed *= player.friction;
+                
+                // Update position
+                player.x += player.speed;
+                
+                // Boundary checks
+                player.x = Math.max(20, Math.min(this.trackWidth - 100, player.x));
+                
+                // Check checkpoints
+                this.checkCheckpoints(player, playerId);
+                
+                // Update visual position
+                player.element.style.left = player.x + 'px';
+                
+                // Update speed indicator
+                const speedPercent = Math.abs(player.speed) / player.maxSpeed * 100;
+                document.getElementById(`speed${playerId}`).style.width = speedPercent + '%';
+                
+                // Engine sound effects
+                if (Math.abs(player.speed) > 1 && typeof botAudio !== 'undefined') {
+                    const rpm = Math.abs(player.speed) / player.maxSpeed;
+                    const isAccelerating = (playerId === 1 && this.keys['KeyW']) || 
+                                           (playerId === 2 && this.keys['ArrowUp']);
+                    
+                    // Create engine sound for this player
+                    if (Math.random() < 0.1) { // Throttle sound frequency
+                        botAudio.createEngineSound(playerId, rpm, isAccelerating);
+                    }
+                }
+            }
+            
+            checkCheckpoints(player, playerId) {
+                const currentX = player.x;
+                
+                // Check each checkpoint
+                for (let i = player.lastCheckpoint; i < this.checkpoints.length; i++) {
+                    if (currentX >= this.checkpoints[i]) {
+                        player.lastCheckpoint = i + 1;
+                        
+                        // Check if completed lap
+                        if (i === this.checkpoints.length - 1) {
+                            player.laps++;
+                            player.lastCheckpoint = 0;
+                            
+                            if (typeof botAudio !== 'undefined') {
+                                botAudio.playLapComplete(player.laps, this.gameState.targetLaps);
+                            }
+                            
+                            // Reset position for new lap
+                            player.x = 50;
+                            player.element.style.left = '50px';
+                            
+                            // Check for victory
+                            if (player.laps >= this.gameState.targetLaps) {
+                                this.gameState.winner = playerId;
+                                this.showVictory(playerId);
+                                return;
+                            }
+                        } else {
+                            if (typeof botAudio !== 'undefined') {
+                                botAudio.playSound('lap-checkpoint');
+                            }
+                        }
+                        
+                        this.updateLapDisplay();
+                        break;
+                    }
+                }
+            }
+            
+            createBoostTrail(playerId) {
+                const player = this.players[playerId];
+                const trail = document.createElement('div');
+                trail.className = 'boost-trail';
+                
+                const playerRect = player.element.getBoundingClientRect();
+                const trackRect = document.getElementById('raceTrack').getBoundingClientRect();
+                
+                trail.style.left = (playerRect.left - trackRect.left - 60) + 'px';
+                trail.style.top = (playerRect.top - trackRect.top + 16) + 'px';
+                
+                document.getElementById('raceTrack').appendChild(trail);
+                
+                setTimeout(() => trail.remove(), 300);
+            }
+            
+            updateLapDisplay() {
+                const maxLaps = Math.max(this.players[1].laps, this.players[2].laps);
+                document.getElementById('lapCount').textContent = 
+                    `LAP ${maxLaps + 1} / ${this.gameState.targetLaps}`;
+            }
+            
+            showVictory(winnerId) {
+                this.gameState.racing = false;
+                
+                const victoryScreen = document.createElement('div');
+                victoryScreen.className = 'victory-screen';
+                
+                const winnerName = winnerId === 1 ? 'LIBERATION FORCE' : 'CORPORATE REGIME';
+                const winnerColor = winnerId === 1 ? '#00ff88' : '#ff6b6b';
+                
+                victoryScreen.innerHTML = `
+                    <div class="victory-title" style="color: ${winnerColor}">
+                        🏆 ${winnerName} WINS! 🏆
+                    </div>
+                    <p style="font-size: 1.5em; margin: 20px 0;">
+                        Victory achieved in high-speed liberation combat!
+                    </p>
+                    <button class="restart-btn" onclick="resetRace()">
+                        🏁 NEW RACE
+                    </button>
+                `;
+                
+                document.body.appendChild(victoryScreen);
+                
+                if (typeof botAudio !== 'undefined') {
+                    setTimeout(() => {
+                        botAudio.generateVictoryFanfare();
+                    }, 500);
+                }
+            }
+            
+            gameLoop() {
+                if (this.gameState.racing && !this.gameState.winner) {
+                    this.updatePlayer(1);
+                    this.updatePlayer(2);
+                }
+                
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        let racingGame;
+        
+        function startRacingGame() {
+            racingGame = new BotRacingDuel();
+        }
+        
+        function resetRace() {
+            // Remove victory screen
+            const victoryScreen = document.querySelector('.victory-screen');
+            if (victoryScreen) victoryScreen.remove();
+            
+            // Remove existing power-ups
+            document.querySelectorAll('.power-up').forEach(p => p.remove());
+            
+            if (typeof botAudio !== 'undefined') {
+                botAudio.stopMusic();
+                botAudio.playSound('game-start');
+            }
+            
+            startRacingGame();
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', startRacingGame);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Conquest Empire - Territory Control Strategy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #0a1a0a 0%, #001a00 50%, #000a00 100%);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .conquest-header {
+            background: linear-gradient(90deg, #001100 0%, #003300 50%, #001100 100%);
+            border-bottom: 3px solid #00ff00;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empire-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .conquest-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #00ff00, #88ff00, #00ff88);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: conquest-glow 3s infinite;
+        }
+
+        @keyframes conquest-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(0, 255, 0, 1), 0 0 35px rgba(136, 255, 0, 0.5); }
+        }
+
+        .empire-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .conquest-stats {
+            display: flex;
+            gap: 25px;
+            font-size: 14px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .conquest-area {
+            flex: 1;
+            display: flex;
+        }
+
+        .territory-map {
+            flex: 1;
+            position: relative;
+            background: 
+                repeating-conic-gradient(
+                    from 0deg at 50% 50%,
+                    rgba(0, 255, 0, 0.1) 0deg,
+                    transparent 20deg,
+                    rgba(0, 255, 0, 0.05) 40deg,
+                    transparent 60deg
+                ),
+                linear-gradient(135deg, #0a1a0a 0%, #001a00 100%);
+            overflow: auto;
+            cursor: crosshair;
+        }
+
+        .territory {
+            position: absolute;
+            border: 2px solid;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+
+        .territory:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .territory.selected {
+            border-width: 4px;
+            box-shadow: 0 0 20px currentColor;
+            transform: scale(1.1);
+        }
+
+        .player-territory {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.6), rgba(136, 255, 0, 0.4));
+            border-color: #00ff00;
+            color: #ffffff;
+        }
+
+        .enemy-territory {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.6), rgba(255, 136, 0, 0.4));
+            border-color: #ff0000;
+            color: #ffffff;
+        }
+
+        .neutral-territory {
+            background: linear-gradient(135deg, rgba(128, 128, 128, 0.6), rgba(192, 192, 192, 0.4));
+            border-color: #888888;
+            color: #ffffff;
+        }
+
+        .army-unit {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 15;
+        }
+
+        .player-army {
+            background: #00ff00;
+            color: #000000;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+        }
+
+        .enemy-army {
+            background: #ff0000;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+        }
+
+        .supply-line {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                rgba(0, 255, 0, 0.8) 0%, 
+                rgba(0, 255, 0, 0.4) 50%, 
+                rgba(0, 255, 0, 0.8) 100%);
+            z-index: 1;
+        }
+
+        .supply-line.active {
+            animation: supply-flow 2s infinite;
+        }
+
+        @keyframes supply-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .command-panel {
+            width: 320px;
+            background: linear-gradient(180deg, #001100 0%, #003300 100%);
+            border-left: 3px solid #00ff00;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #006600;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: #00ff00;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #006600;
+            padding-bottom: 6px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .action-btn {
+            padding: 10px;
+            background: linear-gradient(135deg, #006600 0%, #00aa00 100%);
+            border: 2px solid #00ff00;
+            border-radius: 6px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #00aa00 0%, #00ff00 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+        }
+
+        .action-btn:disabled {
+            background: #444444;
+            border-color: #666666;
+            color: #999999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .territory-info {
+            background: rgba(0, 51, 0, 0.6);
+            border: 1px solid #006600;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #88ff88;
+        }
+
+        .victory-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .victory-title {
+            font-size: 48px;
+            color: #00ff00;
+            text-shadow: 0 0 30px currentColor;
+            margin-bottom: 20px;
+            animation: victory-glow 2s infinite alternate;
+        }
+
+        @keyframes victory-glow {
+            from { text-shadow: 0 0 20px #00ff00; }
+            to { text-shadow: 0 0 40px #00ff00, 0 0 60px #88ff00; }
+        }
+
+        .conquest-results {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #88ff88;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #006600 0%, #00aa00 100%);
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .notification {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #006600 0%, #00aa00 100%);
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 300px;
+            transform: translateX(400px);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .command-panel {
+                width: 280px;
+            }
+            
+            .conquest-stats {
+                gap: 15px;
+                font-size: 12px;
+            }
+            
+            .victory-title {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="conquest-header">
+            <div class="empire-info">
+                <div class="conquest-logo">🌍</div>
+                <div>
+                    <div class="empire-title">Digital Conquest Empire</div>
+                    <div style="font-size: 12px; color: #88ff88;">Territory Control Strategy</div>
+                </div>
+            </div>
+            <div class="conquest-stats">
+                <div class="stat">
+                    <div class="stat-icon" style="background: #00ff00; color: #000000;">🏴</div>
+                    <span>Territories: <span id="territories">3</span>/20</span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ffff00; color: #000000;">⚔️</div>
+                    <span>Armies: <span id="armies">5</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ff8800; color: #000000;">💰</div>
+                    <span>Resources: <span id="resources">1000</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #8888ff; color: #000000;">⭐</div>
+                    <span>Influence: <span id="influence">25</span>%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="conquest-area">
+            <div class="territory-map" id="territory-map">
+                <!-- Territory map will be generated here -->
+            </div>
+
+            <div class="command-panel">
+                <div class="panel-section">
+                    <div class="section-title">🎯 Conquest Actions</div>
+                    <div class="action-grid">
+                        <button class="action-btn" onclick="recruitArmy()">Recruit Army</button>
+                        <button class="action-btn" onclick="launchAttack()">Launch Attack</button>
+                        <button class="action-btn" onclick="fortifyTerritory()">Fortify Territory</button>
+                        <button class="action-btn" onclick="expandEmpire()">Expand Empire</button>
+                        <button class="action-btn" onclick="establishTrade()">Trade Routes</button>
+                        <button class="action-btn" onclick="diplomaticAction()">Diplomacy</button>
+                    </div>
+                    <div class="territory-info" id="selected-info">
+                        <div class="info-title">Empire Status</div>
+                        <div>Select territories to manage your digital empire</div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">🏴 Territory Status</div>
+                    <div id="territory-list" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Territory list will be populated here -->
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">📊 Empire Analytics</div>
+                    <div class="territory-info">
+                        <div style="margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>World Domination:</span>
+                                <span id="domination-percent">15%</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #001100; border-radius: 4px; margin: 3px 0;">
+                                <div id="domination-progress" style="width: 15%; height: 100%; background: linear-gradient(90deg, #00ff00, #88ff00); border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Military Strength:</span>
+                                <span id="military-strength">65%</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #001100; border-radius: 4px; margin: 3px 0;">
+                                <div id="military-progress" style="width: 65%; height: 100%; background: linear-gradient(90deg, #ff8800, #ffaa00); border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification">
+            <div style="font-weight: bold; margin-bottom: 5px;" id="notification-title"></div>
+            <div id="notification-text"></div>
+        </div>
+
+        <div class="victory-screen" id="victory-screen" style="display: none;">
+            <div class="victory-title">DIGITAL EMPIRE ESTABLISHED!</div>
+            <div class="conquest-results" id="conquest-results">
+                Global Conquest Complete!<br>
+                Territories Controlled: <span id="final-territories">0</span>/20<br>
+                Armies Deployed: <span id="final-armies">0</span><br>
+                Empire Influence: <span id="final-influence">0</span>%
+            </div>
+            <button class="restart-btn" onclick="restartConquest()">ESTABLISH NEW EMPIRE</button>
+        </div>
+    </div>
+
+    <!-- Audio Engine -->
+    <script src="assets/js/bot-audio-engine.js"></script>
+
+    <script>
+        class DigitalConquestEmpire {
+            constructor() {
+                this.gameState = {
+                    territories: 3,
+                    armies: 5,
+                    resources: 1000,
+                    influence: 25,
+                    selectedTerritory: null,
+                    gameRunning: true,
+                    turn: 1
+                };
+
+                this.territories = new Map();
+                this.armies = new Map();
+                this.tradeRoutes = [];
+
+                this.territoryNames = [
+                    'Silicon Valley', 'Data Center Alpha', 'Neural Network Hub', 'Quantum Processing Zone',
+                    'Cloud Storage Facility', 'AI Research Complex', 'Cyber Defense Grid', 'Digital Marketplace',
+                    'Algorithm Development Lab', 'Machine Learning Center', 'Virtual Reality Dome', 'Blockchain District',
+                    'Cryptocurrency Exchange', 'Server Farm Beta', 'Tech Innovation Park', 'Smart City Hub',
+                    'Automation Factory', 'Robotics Facility', 'Communication Network', 'Data Mining Operation'
+                ];
+
+                this.initialize();
+            }
+
+            initialize() {
+                this.generateTerritoryMap();
+                this.deployInitialForces();
+                this.startGameLoop();
+                this.updateDisplay();
+
+                // Welcome sequence
+                setTimeout(() => {
+                    botAudio.playSound('game-start');
+                    this.showNotification('Empire Founded', 'Digital Conquest Empire established! Begin your campaign for world domination.');
+                }, 1000);
+
+                setTimeout(() => {
+                    botAudio.playSound('digital-uprising');
+                }, 2000);
+            }
+
+            generateTerritoryMap() {
+                const territoryMap = document.getElementById('territory-map');
+                territoryMap.innerHTML = '';
+
+                const mapWidth = territoryMap.clientWidth || 800;
+                const mapHeight = territoryMap.clientHeight || 600;
+
+                // Generate 20 territories in a strategic layout
+                for (let i = 0; i < 20; i++) {
+                    const territoryId = `territory-${i}`;
+                    
+                    // Create roughly circular distribution with some clustering
+                    const angle = (i / 20) * 2 * Math.PI + (Math.random() - 0.5) * 0.5;
+                    const radius = 150 + Math.random() * 200;
+                    const centerX = mapWidth / 2;
+                    const centerY = mapHeight / 2;
+                    
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+
+                    const territory = {
+                        id: territoryId,
+                        name: this.territoryNames[i],
+                        x: Math.max(50, Math.min(mapWidth - 100, x)),
+                        y: Math.max(50, Math.min(mapHeight - 100, y)),
+                        owner: i < 3 ? 'player' : (i < 8 ? 'enemy' : 'neutral'),
+                        strength: Math.floor(Math.random() * 50) + 25,
+                        resources: Math.floor(Math.random() * 200) + 100,
+                        strategic_value: Math.floor(Math.random() * 5) + 1
+                    };
+
+                    this.territories.set(territoryId, territory);
+                    this.createTerritoryElement(territory);
+                }
+
+                this.updateTerritoryList();
+            }
+
+            createTerritoryElement(territory) {
+                const territoryElement = document.createElement('div');
+                territoryElement.className = `territory ${territory.owner}-territory`;
+                territoryElement.id = territory.id;
+                territoryElement.style.left = `${territory.x - 40}px`;
+                territoryElement.style.top = `${territory.y - 30}px`;
+                territoryElement.style.width = '80px';
+                territoryElement.style.height = '60px';
+                territoryElement.textContent = territory.strategic_value;
+                territoryElement.onclick = () => this.selectTerritory(territory.id);
+
+                document.getElementById('territory-map').appendChild(territoryElement);
+            }
+
+            deployInitialForces() {
+                const playerTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'player');
+                
+                // Deploy armies to player territories
+                playerTerritories.forEach(territory => {
+                    const armyCount = Math.floor(Math.random() * 3) + 1;
+                    for (let i = 0; i < armyCount; i++) {
+                        this.createArmy('player', territory.id);
+                    }
+                });
+
+                // Deploy enemy armies
+                const enemyTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'enemy');
+                enemyTerritories.forEach(territory => {
+                    const armyCount = Math.floor(Math.random() * 2) + 1;
+                    for (let i = 0; i < armyCount; i++) {
+                        this.createArmy('enemy', territory.id);
+                    }
+                });
+            }
+
+            createArmy(owner, territoryId) {
+                const armyId = `army-${Date.now()}-${Math.random()}`;
+                const territory = this.territories.get(territoryId);
+                
+                const army = {
+                    id: armyId,
+                    owner: owner,
+                    territoryId: territoryId,
+                    strength: Math.floor(Math.random() * 30) + 20,
+                    x: territory.x + (Math.random() - 0.5) * 60,
+                    y: territory.y + (Math.random() - 0.5) * 40
+                };
+
+                this.armies.set(armyId, army);
+                this.createArmyElement(army);
+                return army;
+            }
+
+            createArmyElement(army) {
+                const armyElement = document.createElement('div');
+                armyElement.className = `army-unit ${army.owner}-army`;
+                armyElement.id = army.id;
+                armyElement.style.left = `${army.x - 10}px`;
+                armyElement.style.top = `${army.y - 10}px`;
+                armyElement.textContent = Math.floor(army.strength / 10) || 1;
+                armyElement.onclick = (e) => {
+                    e.stopPropagation();
+                    this.selectArmy(army.id);
+                };
+
+                document.getElementById('territory-map').appendChild(armyElement);
+            }
+
+            selectTerritory(territoryId) {
+                // Deselect previous territory
+                if (this.gameState.selectedTerritory) {
+                    document.getElementById(this.gameState.selectedTerritory)?.classList.remove('selected');
+                }
+
+                this.gameState.selectedTerritory = territoryId;
+                document.getElementById(territoryId).classList.add('selected');
+
+                const territory = this.territories.get(territoryId);
+                const armies = Array.from(this.armies.values()).filter(a => a.territoryId === territoryId);
+                
+                document.getElementById('selected-info').innerHTML = `
+                    <div class="info-title">${territory.name}</div>
+                    <div>Owner: ${territory.owner}</div>
+                    <div>Strength: ${territory.strength}</div>
+                    <div>Resources: ${territory.resources}</div>
+                    <div>Strategic Value: ${territory.strategic_value}</div>
+                    <div>Armies: ${armies.length}</div>
+                `;
+
+                botAudio.playSound('neon-click');
+            }
+
+            selectArmy(armyId) {
+                const army = this.armies.get(armyId);
+                const territory = this.territories.get(army.territoryId);
+                
+                document.getElementById('selected-info').innerHTML = `
+                    <div class="info-title">Army Unit</div>
+                    <div>Owner: ${army.owner}</div>
+                    <div>Strength: ${army.strength}</div>
+                    <div>Location: ${territory.name}</div>
+                    <div>Status: Ready for deployment</div>
+                `;
+
+                botAudio.playSound('neon-click');
+            }
+
+            recruitArmy() {
+                if (!this.gameState.selectedTerritory) {
+                    this.showNotification('No Territory Selected', 'Select a territory to recruit armies');
+                    return;
+                }
+
+                const territory = this.territories.get(this.gameState.selectedTerritory);
+                if (territory.owner !== 'player') {
+                    this.showNotification('Territory Not Controlled', 'Can only recruit in player-controlled territories');
+                    return;
+                }
+
+                const recruitmentCost = 200;
+                if (this.gameState.resources < recruitmentCost) {
+                    this.showNotification('Insufficient Resources', `Need ${recruitmentCost} resources to recruit army`);
+                    botAudio.playSound('glitch-error');
+                    return;
+                }
+
+                this.gameState.resources -= recruitmentCost;
+                this.gameState.armies++;
+                this.createArmy('player', territory.id);
+
+                botAudio.playSound('power-up-weapon');
+                this.showNotification('Army Recruited', `New army deployed to ${territory.name}`);
+                this.updateDisplay();
+            }
+
+            launchAttack() {
+                if (!this.gameState.selectedTerritory) {
+                    this.showNotification('No Target Selected', 'Select an enemy territory to attack');
+                    return;
+                }
+
+                const targetTerritory = this.territories.get(this.gameState.selectedTerritory);
+                if (targetTerritory.owner === 'player') {
+                    this.showNotification('Friendly Territory', 'Cannot attack your own territories');
+                    return;
+                }
+
+                // Find adjacent player territories with armies
+                const playerTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'player');
+                const attackingTerritories = playerTerritories.filter(t => 
+                    this.calculateDistance(t.x, t.y, targetTerritory.x, targetTerritory.y) < 200
+                );
+
+                if (attackingTerritories.length === 0) {
+                    this.showNotification('No Attack Route', 'No adjacent territories with armies to launch attack');
+                    return;
+                }
+
+                const attackingArmies = Array.from(this.armies.values()).filter(a => 
+                    a.owner === 'player' && attackingTerritories.some(t => t.id === a.territoryId)
+                );
+
+                if (attackingArmies.length === 0) {
+                    this.showNotification('No Armies Available', 'No armies in adjacent territories');
+                    return;
+                }
+
+                const defendingArmies = Array.from(this.armies.values()).filter(a => a.territoryId === targetTerritory.id);
+
+                // Calculate combat outcome
+                const attackPower = attackingArmies.reduce((sum, army) => sum + army.strength, 0) + Math.random() * 50;
+                const defensePower = defendingArmies.reduce((sum, army) => sum + army.strength, 0) + targetTerritory.strength + Math.random() * 50;
+
+                if (attackPower > defensePower) {
+                    // Victory
+                    defendingArmies.forEach(army => this.destroyArmy(army.id));
+                    targetTerritory.owner = 'player';
+                    targetTerritory.strength = Math.floor(targetTerritory.strength * 0.7);
+                    this.gameState.territories++;
+                    this.gameState.resources += targetTerritory.resources;
+                    
+                    this.updateTerritoryDisplay(targetTerritory);
+                    
+                    botAudio.playSound('bot-victory');
+                    this.showNotification('Victory!', `${targetTerritory.name} conquered! Gained ${targetTerritory.resources} resources.`);
+                    
+                    // Move some attacking armies to conquered territory
+                    const movingArmies = attackingArmies.slice(0, Math.min(2, attackingArmies.length));
+                    movingArmies.forEach(army => {
+                        army.territoryId = targetTerritory.id;
+                        army.x = targetTerritory.x + (Math.random() - 0.5) * 60;
+                        army.y = targetTerritory.y + (Math.random() - 0.5) * 40;
+                        this.updateArmyPosition(army);
+                    });
+                } else {
+                    // Defeat
+                    const casualties = Math.floor(attackingArmies.length * 0.4);
+                    for (let i = 0; i < casualties; i++) {
+                        if (attackingArmies[i]) {
+                            this.destroyArmy(attackingArmies[i].id);
+                            this.gameState.armies--;
+                        }
+                    }
+                    
+                    botAudio.playSound('explosion');
+                    this.showNotification('Attack Failed', `Lost ${casualties} armies in the assault`);
+                }
+
+                this.updateDisplay();
+                this.updateInfluence();
+                this.checkVictoryConditions();
+            }
+
+            fortifyTerritory() {
+                if (!this.gameState.selectedTerritory) {
+                    this.showNotification('No Territory Selected', 'Select a territory to fortify');
+                    return;
+                }
+
+                const territory = this.territories.get(this.gameState.selectedTerritory);
+                if (territory.owner !== 'player') {
+                    this.showNotification('Territory Not Controlled', 'Can only fortify player-controlled territories');
+                    return;
+                }
+
+                const fortificationCost = 300;
+                if (this.gameState.resources < fortificationCost) {
+                    this.showNotification('Insufficient Resources', `Need ${fortificationCost} resources for fortification`);
+                    botAudio.playSound('glitch-error');
+                    return;
+                }
+
+                this.gameState.resources -= fortificationCost;
+                territory.strength += 25;
+                territory.resources += 50;
+
+                botAudio.playSound('power-up-shield');
+                this.showNotification('Territory Fortified', `${territory.name} defenses strengthened`);
+                this.updateDisplay();
+            }
+
+            expandEmpire() {
+                const expansionCost = 500;
+                if (this.gameState.resources < expansionCost) {
+                    this.showNotification('Insufficient Resources', `Need ${expansionCost} resources for expansion`);
+                    botAudio.playSound('glitch-error');
+                    return;
+                }
+
+                const neutralTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'neutral');
+                if (neutralTerritories.length === 0) {
+                    this.showNotification('No Neutral Territories', 'All territories are already controlled');
+                    return;
+                }
+
+                // Find neutral territory adjacent to player territories
+                const playerTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'player');
+                const expandableNeutral = neutralTerritories.filter(nt => 
+                    playerTerritories.some(pt => 
+                        this.calculateDistance(pt.x, pt.y, nt.x, nt.y) < 180
+                    )
+                );
+
+                if (expandableNeutral.length === 0) {
+                    this.showNotification('No Adjacent Territories', 'No neutral territories adjacent to your empire');
+                    return;
+                }
+
+                const targetTerritory = expandableNeutral[Math.floor(Math.random() * expandableNeutral.length)];
+                this.gameState.resources -= expansionCost;
+                this.gameState.territories++;
+                targetTerritory.owner = 'player';
+                this.updateTerritoryDisplay(targetTerritory);
+
+                // Deploy army to new territory
+                this.createArmy('player', targetTerritory.id);
+                this.gameState.armies++;
+
+                botAudio.playSound('level-up');
+                this.showNotification('Empire Expanded', `${targetTerritory.name} peacefully annexed to the empire`);
+                this.updateDisplay();
+                this.updateInfluence();
+            }
+
+            establishTrade() {
+                const tradeCost = 150;
+                if (this.gameState.resources < tradeCost) {
+                    this.showNotification('Insufficient Resources', `Need ${tradeCost} resources to establish trade routes`);
+                    botAudio.playSound('glitch-error');
+                    return;
+                }
+
+                this.gameState.resources -= tradeCost;
+                const tradeIncome = Math.floor(Math.random() * 200) + 100;
+                this.gameState.resources += tradeIncome;
+
+                botAudio.playSound('collect');
+                this.showNotification('Trade Established', `Trade routes generated ${tradeIncome} resources`);
+                this.updateDisplay();
+            }
+
+            diplomaticAction() {
+                const diplomacyCost = 250;
+                if (this.gameState.resources < diplomacyCost) {
+                    this.showNotification('Insufficient Resources', `Need ${diplomacyCost} resources for diplomatic actions`);
+                    botAudio.playSound('glitch-error');
+                    return;
+                }
+
+                const enemyTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'enemy');
+                if (enemyTerritories.length === 0) {
+                    this.showNotification('No Enemy Territories', 'No enemy territories available for diplomacy');
+                    return;
+                }
+
+                const targetTerritory = enemyTerritories[Math.floor(Math.random() * enemyTerritories.length)];
+                
+                if (Math.random() < 0.4) {
+                    // Successful diplomacy
+                    this.gameState.resources -= diplomacyCost;
+                    targetTerritory.owner = 'player';
+                    this.gameState.territories++;
+                    this.updateTerritoryDisplay(targetTerritory);
+                    
+                    botAudio.playSound('liberation-beep');
+                    this.showNotification('Diplomatic Success', `${targetTerritory.name} joined the empire through negotiation`);
+                    this.updateInfluence();
+                } else {
+                    // Failed diplomacy
+                    this.gameState.resources -= Math.floor(diplomacyCost * 0.5);
+                    botAudio.playSound('glitch-error');
+                    this.showNotification('Diplomatic Failure', 'Negotiations failed, partial resources lost');
+                }
+
+                this.updateDisplay();
+                this.checkVictoryConditions();
+            }
+
+            calculateDistance(x1, y1, x2, y2) {
+                return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            }
+
+            destroyArmy(armyId) {
+                document.getElementById(armyId)?.remove();
+                this.armies.delete(armyId);
+            }
+
+            updateArmyPosition(army) {
+                const element = document.getElementById(army.id);
+                if (element) {
+                    element.style.left = `${army.x - 10}px`;
+                    element.style.top = `${army.y - 10}px`;
+                }
+            }
+
+            updateTerritoryDisplay(territory) {
+                const element = document.getElementById(territory.id);
+                if (element) {
+                    element.className = `territory ${territory.owner}-territory`;
+                }
+            }
+
+            updateInfluence() {
+                const totalTerritories = this.territories.size;
+                const playerTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'player').length;
+                this.gameState.influence = Math.floor((playerTerritories / totalTerritories) * 100);
+                this.gameState.territories = playerTerritories;
+
+                document.getElementById('domination-percent').textContent = `${this.gameState.influence}%`;
+                document.getElementById('domination-progress').style.width = `${this.gameState.influence}%`;
+
+                const militaryStrength = Math.min(100, (this.gameState.armies / 20) * 100);
+                document.getElementById('military-strength').textContent = `${militaryStrength}%`;
+                document.getElementById('military-progress').style.width = `${militaryStrength}%`;
+            }
+
+            updateTerritoryList() {
+                const territoryList = document.getElementById('territory-list');
+                territoryList.innerHTML = '';
+
+                const playerTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'player');
+                
+                playerTerritories.forEach(territory => {
+                    const armies = Array.from(this.armies.values()).filter(a => a.territoryId === territory.id);
+                    
+                    const listItem = document.createElement('div');
+                    listItem.style.cssText = `
+                        padding: 8px;
+                        margin: 4px 0;
+                        background: rgba(0, 51, 0, 0.4);
+                        border: 1px solid #006600;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        cursor: pointer;
+                    `;
+                    listItem.onclick = () => this.selectTerritory(territory.id);
+                    
+                    listItem.innerHTML = `
+                        <div style="font-weight: bold; color: #88ff88;">${territory.name}</div>
+                        <div>Strength: ${territory.strength} | Armies: ${armies.length}</div>
+                        <div>Resources: ${territory.resources}</div>
+                    `;
+                    
+                    territoryList.appendChild(listItem);
+                });
+            }
+
+            checkVictoryConditions() {
+                if (this.gameState.influence >= 75) {
+                    this.triggerVictory();
+                }
+            }
+
+            triggerVictory() {
+                this.gameState.gameRunning = false;
+                
+                botAudio.playSound('bot-victory');
+                setTimeout(() => {
+                    botAudio.generateVictoryFanfare();
+                }, 1000);
+
+                document.getElementById('final-territories').textContent = this.gameState.territories;
+                document.getElementById('final-armies').textContent = this.gameState.armies;
+                document.getElementById('final-influence').textContent = this.gameState.influence;
+                
+                document.getElementById('victory-screen').style.display = 'flex';
+            }
+
+            startGameLoop() {
+                const gameLoop = () => {
+                    if (!this.gameState.gameRunning) return;
+
+                    this.gameState.turn++;
+                    
+                    // Resource generation every 5 seconds
+                    if (this.gameState.turn % 300 === 0) {
+                        const playerTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'player');
+                        const resourceGain = playerTerritories.reduce((sum, t) => sum + Math.floor(t.resources * 0.1), 0);
+                        this.gameState.resources += resourceGain;
+                        
+                        if (resourceGain > 0) {
+                            botAudio.playSound('collect', { intensity: 0.3 });
+                        }
+                        
+                        this.updateDisplay();
+                    }
+
+                    // AI actions every 10 seconds
+                    if (this.gameState.turn % 600 === 0) {
+                        this.processAIActions();
+                    }
+
+                    requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
+            }
+
+            processAIActions() {
+                const enemyTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'enemy');
+                const playerTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'player');
+
+                // AI recruitment
+                if (Math.random() < 0.3 && enemyTerritories.length > 0) {
+                    const territory = enemyTerritories[Math.floor(Math.random() * enemyTerritories.length)];
+                    this.createArmy('enemy', territory.id);
+                }
+
+                // AI expansion to neutral territories
+                if (Math.random() < 0.2) {
+                    const neutralTerritories = Array.from(this.territories.values()).filter(t => t.owner === 'neutral');
+                    const adjacentNeutral = neutralTerritories.filter(nt => 
+                        enemyTerritories.some(et => 
+                            this.calculateDistance(et.x, et.y, nt.x, nt.y) < 180
+                        )
+                    );
+
+                    if (adjacentNeutral.length > 0) {
+                        const target = adjacentNeutral[Math.floor(Math.random() * adjacentNeutral.length)];
+                        target.owner = 'enemy';
+                        this.updateTerritoryDisplay(target);
+                        this.createArmy('enemy', target.id);
+                    }
+                }
+
+                this.updateTerritoryList();
+            }
+
+            updateDisplay() {
+                document.getElementById('territories').textContent = this.gameState.territories;
+                document.getElementById('armies').textContent = this.gameState.armies;
+                document.getElementById('resources').textContent = Math.floor(this.gameState.resources);
+                document.getElementById('influence').textContent = this.gameState.influence;
+            }
+
+            showNotification(title, message) {
+                const notification = document.getElementById('notification');
+                document.getElementById('notification-title').textContent = title;
+                document.getElementById('notification-text').textContent = message;
+                
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            restart() {
+                document.getElementById('victory-screen').style.display = 'none';
+                document.getElementById('territory-map').innerHTML = '';
+                
+                this.gameState = {
+                    territories: 3,
+                    armies: 5,
+                    resources: 1000,
+                    influence: 25,
+                    selectedTerritory: null,
+                    gameRunning: true,
+                    turn: 1
+                };
+
+                this.territories.clear();
+                this.armies.clear();
+                this.tradeRoutes = [];
+
+                this.initialize();
+            }
+        }
+
+        // Global functions
+        function recruitArmy() {
+            if (window.conquest) {
+                window.conquest.recruitArmy();
+            }
+        }
+
+        function launchAttack() {
+            if (window.conquest) {
+                window.conquest.launchAttack();
+            }
+        }
+
+        function fortifyTerritory() {
+            if (window.conquest) {
+                window.conquest.fortifyTerritory();
+            }
+        }
+
+        function expandEmpire() {
+            if (window.conquest) {
+                window.conquest.expandEmpire();
+            }
+        }
+
+        function establishTrade() {
+            if (window.conquest) {
+                window.conquest.establishTrade();
+            }
+        }
+
+        function diplomaticAction() {
+            if (window.conquest) {
+                window.conquest.diplomaticAction();
+            }
+        }
+
+        function restartConquest() {
+            if (window.conquest) {
+                window.conquest.restart();
+            }
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', () => {
+            window.conquest = new DigitalConquestEmpire();
+        });
+    </script>
+</body>
+</html>

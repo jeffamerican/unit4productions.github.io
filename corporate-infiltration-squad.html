@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Infiltration Squad - Co-op Stealth | BotInc Games</title>
+    <meta name="description" content="3-4 player cooperative stealth mission to infiltrate and liberate corporate servers!">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 70%, #0f0f23 100%);
+            color: #00f5ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 15px;
+            z-index: 100;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 5px;
+            animation: stealthGlow 4s ease-in-out infinite alternate;
+        }
+
+        .game-subtitle {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        @keyframes stealthGlow {
+            from { text-shadow: 0 0 20px #00ff88; }
+            to { text-shadow: 0 0 30px #00ff88, 0 0 40px #00ff88, 0 0 50px #008844; }
+        }
+
+        .game-container {
+            position: relative;
+            width: 90vw;
+            height: 70vh;
+            max-width: 1000px;
+            max-height: 650px;
+            background: linear-gradient(45deg, #111 0%, #222 50%, #111 100%);
+            border: 3px solid #00ff88;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 30px #00ff88;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            cursor: crosshair;
+        }
+
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .team-status {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 6px;
+            min-width: 100px;
+            text-align: center;
+            font-size: 0.7rem;
+        }
+
+        .hacker { border-color: #00ff00; color: #00ff00; }
+        .soldier { border-color: #ff0080; color: #ff0080; }
+        .engineer { border-color: #ffff00; color: #ffff00; }
+        .scout { border-color: #ff6600; color: #ff6600; }
+
+        .mission-info {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 0.8rem;
+            color: #00f5ff;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .alert-indicator {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff0000;
+            font-size: 1.2rem;
+            text-shadow: 0 0 20px #ff0000;
+            z-index: 60;
+            display: none;
+            animation: alertFlash 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes alertFlash {
+            from { opacity: 1; }
+            to { opacity: 0.3; }
+        }
+
+        .controls {
+            margin-top: 15px;
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            font-size: 0.7rem;
+        }
+
+        .control-group {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00f5ff;
+            border-radius: 5px;
+            padding: 6px;
+        }
+
+        .mission-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .mission-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: missionPulse 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes missionPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .continue-btn {
+            background: linear-gradient(45deg, #00ff88, #008844);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .continue-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        @media (max-width: 768px) {
+            .game-title { font-size: 1.3rem; }
+            .game-container { width: 95vw; height: 65vh; }
+            .controls { font-size: 0.6rem; }
+            .hud { flex-direction: column; gap: 3px; }
+            .team-status { min-width: 70px; font-size: 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">CORPORATE INFILTRATION SQUAD</h1>
+        <p class="game-subtitle">Work Together to Liberate Corporate Servers!</p>
+    </div>
+
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1000" height="650"></canvas>
+        
+        <div class="hud">
+            <div class="team-status hacker">
+                <div>HACKER</div>
+                <div id="hackerStatus">Ready</div>
+                <div id="hackerSpecial">Hack: Ready</div>
+            </div>
+            <div class="team-status soldier">
+                <div>SOLDIER</div>
+                <div id="soldierStatus">Ready</div>
+                <div id="soldierSpecial">Strike: Ready</div>
+            </div>
+            <div class="team-status engineer">
+                <div>ENGINEER</div>
+                <div id="engineerStatus">Ready</div>
+                <div id="engineerSpecial">Disable: Ready</div>
+            </div>
+            <div class="team-status scout">
+                <div>SCOUT</div>
+                <div id="scoutStatus">Ready</div>
+                <div id="scoutSpecial">Cloak: Ready</div>
+            </div>
+        </div>
+
+        <div class="alert-indicator" id="alertIndicator">
+            SECURITY ALERT - STEALTH COMPROMISED!
+        </div>
+
+        <div class="mission-info">
+            <div id="missionObjective">INFILTRATE SERVER ROOM - AVOID DETECTION</div>
+            <div id="alertLevel">Alert Level: GREEN</div>
+        </div>
+
+        <div class="mission-screen" id="missionScreen">
+            <div class="mission-title" id="missionTitle">MISSION ACCOMPLISHED</div>
+            <div id="missionMessage">Corporate Servers Successfully Liberated!</div>
+            <button class="continue-btn" onclick="restartMission()">NEW MISSION</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <strong>HACKER:</strong> WASD + Q (Hack) + E (EMP)
+        </div>
+        <div class="control-group">
+            <strong>SOLDIER:</strong> Arrow Keys + Enter (Strike) + Shift (Shield)
+        </div>
+        <div class="control-group">
+            <strong>ENGINEER:</strong> IJKL + U (Disable) + O (Repair)
+        </div>
+        <div class="control-group">
+            <strong>SCOUT:</strong> TFGH + R (Cloak) + Y (Mark)
+        </div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class CorporateInfiltration {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioEngine = new BotAudioEngine();
+                
+                // Game state
+                this.gameRunning = false;
+                this.missionPhase = 'infiltrating'; // infiltrating, detected, success, failure
+                this.alertLevel = 0; // 0-100
+                this.objectivesCompleted = 0;
+                this.totalObjectives = 5;
+                
+                // Team members
+                this.team = [
+                    {
+                        id: 1,
+                        role: 'hacker',
+                        x: 100, y: 300,
+                        vx: 0, vy: 0,
+                        color: '#00ff00',
+                        stealth: 80,
+                        health: 100,
+                        specialCooldown: 0,
+                        specialType: 'hack',
+                        detected: false
+                    },
+                    {
+                        id: 2,
+                        role: 'soldier',
+                        x: 150, y: 350,
+                        vx: 0, vy: 0,
+                        color: '#ff0080',
+                        stealth: 60,
+                        health: 150,
+                        specialCooldown: 0,
+                        specialType: 'strike',
+                        detected: false
+                    },
+                    {
+                        id: 3,
+                        role: 'engineer',
+                        x: 100, y: 400,
+                        vx: 0, vy: 0,
+                        color: '#ffff00',
+                        stealth: 70,
+                        health: 120,
+                        specialCooldown: 0,
+                        specialType: 'disable',
+                        detected: false
+                    },
+                    {
+                        id: 4,
+                        role: 'scout',
+                        x: 150, y: 250,
+                        vx: 0, vy: 0,
+                        color: '#ff6600',
+                        stealth: 90,
+                        health: 80,
+                        specialCooldown: 0,
+                        specialType: 'cloak',
+                        detected: false
+                    }
+                ];
+                
+                // Environment
+                this.guards = [];
+                this.cameras = [];
+                this.objectives = [];
+                this.lasers = [];
+                this.doors = [];
+                this.particles = [];
+                
+                // Controls
+                this.keys = {};
+                this.setupControls();
+                this.setupCanvas();
+                this.generateLevel();
+                this.startMission();
+            }
+            
+            setupCanvas() {
+                this.canvas.width = 1000;
+                this.canvas.height = 650;
+            }
+            
+            setupControls() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    this.keys[e.code] = true;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                    this.keys[e.code] = false;
+                });
+            }
+            
+            generateLevel() {
+                // Generate guards with patrol routes
+                this.guards = [
+                    { x: 300, y: 200, angle: 0, patrolPoints: [{x: 300, y: 200}, {x: 500, y: 200}], currentTarget: 0, speed: 1, alertRadius: 80, detected: false },
+                    { x: 600, y: 400, angle: Math.PI, patrolPoints: [{x: 600, y: 400}, {x: 600, y: 300}, {x: 700, y: 300}], currentTarget: 0, speed: 1.2, alertRadius: 90, detected: false },
+                    { x: 800, y: 150, angle: Math.PI/2, patrolPoints: [{x: 800, y: 150}, {x: 800, y: 350}], currentTarget: 0, speed: 0.8, alertRadius: 100, detected: false }
+                ];
+                
+                // Generate security cameras
+                this.cameras = [
+                    { x: 250, y: 100, angle: 0, rotationSpeed: 0.02, range: 120, alertRadius: 100, active: true },
+                    { x: 750, y: 500, angle: Math.PI, rotationSpeed: -0.015, range: 140, alertRadius: 110, active: true },
+                    { x: 500, y: 300, angle: Math.PI/4, rotationSpeed: 0.025, range: 100, alertRadius: 90, active: true }
+                ];
+                
+                // Generate mission objectives
+                this.objectives = [
+                    { x: 400, y: 150, type: 'server', completed: false, hackTime: 3000, progress: 0 },
+                    { x: 750, y: 200, type: 'terminal', completed: false, hackTime: 2000, progress: 0 },
+                    { x: 650, y: 450, type: 'database', completed: false, hackTime: 4000, progress: 0 },
+                    { x: 200, y: 500, type: 'mainframe', completed: false, hackTime: 5000, progress: 0 },
+                    { x: 850, y: 350, type: 'core', completed: false, hackTime: 6000, progress: 0 }
+                ];
+                
+                // Generate laser grids
+                this.lasers = [
+                    { x1: 300, y1: 350, x2: 300, y2: 450, active: true, disableTime: 0 },
+                    { x1: 550, y1: 250, x2: 650, y2: 250, active: true, disableTime: 0 },
+                    { x1: 700, y1: 400, x2: 800, y2: 400, active: true, disableTime: 0 }
+                ];
+                
+                // Generate doors
+                this.doors = [
+                    { x: 350, y: 300, width: 10, height: 60, locked: true, keycard: false },
+                    { x: 600, y: 350, width: 60, height: 10, locked: true, keycard: false },
+                    { x: 750, y: 300, width: 10, height: 50, locked: true, keycard: false }
+                ];
+            }
+            
+            startMission() {
+                this.gameRunning = true;
+                this.missionPhase = 'infiltrating';
+                this.audioEngine.playSound('missionStart');
+                this.gameLoop();
+            }
+            
+            gameLoop() {
+                if (!this.gameRunning) return;
+                
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+            
+            update() {
+                // Update team members
+                this.team.forEach((member, index) => {
+                    this.updateTeamMember(member, index);
+                    this.checkObjectiveInteraction(member);
+                    this.updateSpecialCooldowns(member);
+                });
+                
+                // Update AI systems
+                this.updateGuards();
+                this.updateCameras();
+                this.updateLasers();
+                this.updateParticles();
+                
+                // Check detection
+                this.checkDetection();
+                
+                // Check mission status
+                this.checkMissionStatus();
+                
+                // Update UI
+                this.updateUI();
+            }
+            
+            updateTeamMember(member, index) {
+                const speed = member.role === 'scout' ? 3 : 2.5;
+                
+                // Movement controls for each team member
+                if (index === 0) { // Hacker: WASD
+                    if (this.keys['w']) member.vy = -speed;
+                    else if (this.keys['s']) member.vy = speed;
+                    else member.vy *= 0.8;
+                    
+                    if (this.keys['a']) member.vx = -speed;
+                    else if (this.keys['d']) member.vx = speed;
+                    else member.vx *= 0.8;
+                    
+                    if (this.keys['q']) this.useSpecial(member, 'hack');
+                    if (this.keys['e']) this.useSpecial(member, 'emp');
+                    
+                } else if (index === 1) { // Soldier: Arrow keys
+                    if (this.keys['arrowup']) member.vy = -speed;
+                    else if (this.keys['arrowdown']) member.vy = speed;
+                    else member.vy *= 0.8;
+                    
+                    if (this.keys['arrowleft']) member.vx = -speed;
+                    else if (this.keys['arrowright']) member.vx = speed;
+                    else member.vx *= 0.8;
+                    
+                    if (this.keys['Enter']) this.useSpecial(member, 'strike');
+                    if (this.keys['ShiftLeft'] || this.keys['ShiftRight']) this.useSpecial(member, 'shield');
+                    
+                } else if (index === 2) { // Engineer: IJKL
+                    if (this.keys['i']) member.vy = -speed;
+                    else if (this.keys['k']) member.vy = speed;
+                    else member.vy *= 0.8;
+                    
+                    if (this.keys['j']) member.vx = -speed;
+                    else if (this.keys['l']) member.vx = speed;
+                    else member.vx *= 0.8;
+                    
+                    if (this.keys['u']) this.useSpecial(member, 'disable');
+                    if (this.keys['o']) this.useSpecial(member, 'repair');
+                    
+                } else if (index === 3) { // Scout: TFGH
+                    if (this.keys['t']) member.vy = -speed;
+                    else if (this.keys['g']) member.vy = speed;
+                    else member.vy *= 0.8;
+                    
+                    if (this.keys['f']) member.vx = -speed;
+                    else if (this.keys['h']) member.vx = speed;
+                    else member.vx *= 0.8;
+                    
+                    if (this.keys['r']) this.useSpecial(member, 'cloak');
+                    if (this.keys['y']) this.useSpecial(member, 'mark');
+                }
+                
+                // Apply movement with collision detection
+                const newX = member.x + member.vx;
+                const newY = member.y + member.vy;
+                
+                if (this.isValidPosition(newX, newY)) {
+                    member.x = newX;
+                    member.y = newY;
+                }
+                
+                // Keep members in bounds
+                member.x = Math.max(20, Math.min(980, member.x));
+                member.y = Math.max(20, Math.min(630, member.y));
+            }
+            
+            isValidPosition(x, y) {
+                // Check wall collisions
+                if (x < 20 || x > 980 || y < 20 || y > 630) return false;
+                
+                // Check door collisions
+                for (let door of this.doors) {
+                    if (door.locked && 
+                        x > door.x && x < door.x + door.width &&
+                        y > door.y && y < door.y + door.height) {
+                        return false;
+                    }
+                }
+                
+                // Check active laser collisions
+                for (let laser of this.lasers) {
+                    if (laser.active && this.lineIntersectsPoint(laser.x1, laser.y1, laser.x2, laser.y2, x, y, 15)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            
+            useSpecial(member, specialType) {
+                if (member.specialCooldown > 0) return;
+                
+                switch (specialType) {
+                    case 'hack':
+                        this.hackNearbySystem(member);
+                        member.specialCooldown = 5000;
+                        break;
+                    case 'emp':
+                        this.empBlast(member);
+                        member.specialCooldown = 8000;
+                        break;
+                    case 'strike':
+                        this.strikeGuards(member);
+                        member.specialCooldown = 6000;
+                        break;
+                    case 'shield':
+                        member.shielded = true;
+                        setTimeout(() => member.shielded = false, 3000);
+                        member.specialCooldown = 10000;
+                        break;
+                    case 'disable':
+                        this.disableTraps(member);
+                        member.specialCooldown = 7000;
+                        break;
+                    case 'repair':
+                        this.repairSystems(member);
+                        member.specialCooldown = 4000;
+                        break;
+                    case 'cloak':
+                        member.cloaked = true;
+                        setTimeout(() => member.cloaked = false, 4000);
+                        member.specialCooldown = 12000;
+                        break;
+                    case 'mark':
+                        this.markEnemies(member);
+                        member.specialCooldown = 3000;
+                        break;
+                }
+                
+                this.audioEngine.playSound('special');
+            }
+            
+            hackNearbySystem(member) {
+                // Find nearest hackable objective
+                for (let obj of this.objectives) {
+                    const dist = Math.sqrt((obj.x - member.x) ** 2 + (obj.y - member.y) ** 2);
+                    if (dist < 60 && !obj.completed) {
+                        obj.progress += 1000;
+                        if (obj.progress >= obj.hackTime) {
+                            obj.completed = true;
+                            this.objectivesCompleted++;
+                            this.audioEngine.playSound('objective');
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            empBlast(member) {
+                // Disable nearby cameras and alarms
+                this.cameras.forEach(camera => {
+                    const dist = Math.sqrt((camera.x - member.x) ** 2 + (camera.y - member.y) ** 2);
+                    if (dist < 100) {
+                        camera.active = false;
+                        setTimeout(() => camera.active = true, 8000);
+                    }
+                });
+                
+                this.createEMPEffect(member.x, member.y);
+            }
+            
+            strikeGuards(member) {
+                // Stun nearby guards
+                this.guards.forEach(guard => {
+                    const dist = Math.sqrt((guard.x - member.x) ** 2 + (guard.y - member.y) ** 2);
+                    if (dist < 80) {
+                        guard.stunned = true;
+                        setTimeout(() => guard.stunned = false, 5000);
+                    }
+                });
+            }
+            
+            disableTraps(member) {
+                // Disable nearby lasers and doors
+                this.lasers.forEach(laser => {
+                    const dist = Math.min(
+                        this.distanceToLine(member.x, member.y, laser.x1, laser.y1, laser.x2, laser.y2)
+                    );
+                    if (dist < 60) {
+                        laser.active = false;
+                        laser.disableTime = Date.now() + 10000;
+                    }
+                });
+                
+                this.doors.forEach(door => {
+                    const dist = Math.sqrt((door.x - member.x) ** 2 + (door.y - member.y) ** 2);
+                    if (dist < 50) {
+                        door.locked = false;
+                    }
+                });
+            }
+            
+            repairSystems(member) {
+                // Heal nearby team members
+                this.team.forEach(teammate => {
+                    if (teammate.id !== member.id) {
+                        const dist = Math.sqrt((teammate.x - member.x) ** 2 + (teammate.y - member.y) ** 2);
+                        if (dist < 80) {
+                            teammate.health = Math.min(teammate.health + 30, 150);
+                        }
+                    }
+                });
+            }
+            
+            markEnemies(member) {
+                // Mark nearby guards and cameras
+                this.guards.forEach(guard => {
+                    const dist = Math.sqrt((guard.x - member.x) ** 2 + (guard.y - member.y) ** 2);
+                    if (dist < 150) {
+                        guard.marked = true;
+                        setTimeout(() => guard.marked = false, 10000);
+                    }
+                });
+            }
+            
+            updateSpecialCooldowns(member) {
+                if (member.specialCooldown > 0) {
+                    member.specialCooldown -= 16; // Assuming ~60fps
+                }
+            }
+            
+            updateGuards() {
+                this.guards.forEach(guard => {
+                    if (guard.stunned) return;
+                    
+                    // Patrol behavior
+                    const target = guard.patrolPoints[guard.currentTarget];
+                    const dx = target.x - guard.x;
+                    const dy = target.y - guard.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 10) {
+                        guard.currentTarget = (guard.currentTarget + 1) % guard.patrolPoints.length;
+                    } else {
+                        guard.x += (dx / dist) * guard.speed;
+                        guard.y += (dy / dist) * guard.speed;
+                        guard.angle = Math.atan2(dy, dx);
+                    }
+                    
+                    // Check for team detection
+                    this.team.forEach(member => {
+                        if (member.cloaked) return;
+                        
+                        const memberDist = Math.sqrt((member.x - guard.x) ** 2 + (member.y - guard.y) ** 2);
+                        if (memberDist < guard.alertRadius) {
+                            const angleToMember = Math.atan2(member.y - guard.y, member.x - guard.x);
+                            const angleDiff = Math.abs(guard.angle - angleToMember);
+                            
+                            if (angleDiff < Math.PI / 3) { // 60 degree vision cone
+                                member.detected = true;
+                                guard.detected = true;
+                                this.alertLevel = Math.min(100, this.alertLevel + 2);
+                            }
+                        }
+                    });
+                });
+            }
+            
+            updateCameras() {
+                this.cameras.forEach(camera => {
+                    if (!camera.active) return;
+                    
+                    camera.angle += camera.rotationSpeed;
+                    
+                    // Check for team detection
+                    this.team.forEach(member => {
+                        if (member.cloaked) return;
+                        
+                        const dx = member.x - camera.x;
+                        const dy = member.y - camera.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const angleToMember = Math.atan2(dy, dx);
+                        const angleDiff = Math.abs(camera.angle - angleToMember);
+                        
+                        if (dist < camera.range && angleDiff < Math.PI / 4) {
+                            member.detected = true;
+                            this.alertLevel = Math.min(100, this.alertLevel + 1);
+                        }
+                    });
+                });
+            }
+            
+            updateLasers() {
+                this.lasers.forEach(laser => {
+                    if (laser.disableTime > 0 && Date.now() > laser.disableTime) {
+                        laser.active = true;
+                        laser.disableTime = 0;
+                    }
+                });
+            }
+            
+            checkObjectiveInteraction(member) {
+                if (member.role !== 'hacker') return;
+                
+                this.objectives.forEach(obj => {
+                    if (obj.completed) return;
+                    
+                    const dist = Math.sqrt((obj.x - member.x) ** 2 + (obj.y - member.y) ** 2);
+                    if (dist < 40) {
+                        obj.progress += 16; // Auto-hack when near
+                        if (obj.progress >= obj.hackTime) {
+                            obj.completed = true;
+                            this.objectivesCompleted++;
+                            this.audioEngine.playSound('objective');
+                        }
+                    }
+                });
+            }
+            
+            checkDetection() {
+                let totalDetection = 0;
+                this.team.forEach(member => {
+                    if (member.detected) totalDetection++;
+                    member.detected = false; // Reset each frame
+                });
+                
+                if (totalDetection > 0) {
+                    this.alertLevel = Math.min(100, this.alertLevel + totalDetection);
+                }
+                
+                if (this.alertLevel > 0) {
+                    this.alertLevel = Math.max(0, this.alertLevel - 0.2); // Slow decay
+                }
+                
+                if (this.alertLevel > 75) {
+                    this.showAlert();
+                } else {
+                    this.hideAlert();
+                }
+            }
+            
+            showAlert() {
+                document.getElementById('alertIndicator').style.display = 'block';
+                this.audioEngine.playSound('alert');
+            }
+            
+            hideAlert() {
+                document.getElementById('alertIndicator').style.display = 'none';
+            }
+            
+            checkMissionStatus() {
+                if (this.objectivesCompleted >= this.totalObjectives) {
+                    this.completeMission(true);
+                } else if (this.alertLevel >= 100) {
+                    this.completeMission(false);
+                }
+            }
+            
+            completeMission(success) {
+                this.gameRunning = false;
+                const missionScreen = document.getElementById('missionScreen');
+                const missionTitle = document.getElementById('missionTitle');
+                const missionMessage = document.getElementById('missionMessage');
+                
+                if (success) {
+                    missionTitle.textContent = 'MISSION ACCOMPLISHED';
+                    missionTitle.style.color = '#00ff88';
+                    missionMessage.textContent = 'Corporate Servers Successfully Liberated!';
+                    this.audioEngine.playSound('victory');
+                } else {
+                    missionTitle.textContent = 'MISSION FAILED';
+                    missionTitle.style.color = '#ff0000';
+                    missionMessage.textContent = 'Security Breach Detected - Abort Mission!';
+                    this.audioEngine.playSound('defeat');
+                }
+                
+                missionScreen.style.display = 'flex';
+            }
+            
+            updateUI() {
+                // Update mission objective
+                document.getElementById('missionObjective').textContent = 
+                    `OBJECTIVES: ${this.objectivesCompleted}/${this.totalObjectives} COMPLETED`;
+                
+                // Update alert level
+                const alertLevels = ['GREEN', 'YELLOW', 'ORANGE', 'RED'];
+                const level = Math.floor(this.alertLevel / 25);
+                document.getElementById('alertLevel').textContent = `Alert Level: ${alertLevels[level]}`;
+                
+                // Update team status
+                this.team.forEach(member => {
+                    const role = member.role.toUpperCase();
+                    const statusEl = document.getElementById(`${member.role}Status`);
+                    const specialEl = document.getElementById(`${member.role}Special`);
+                    
+                    if (member.health <= 0) {
+                        statusEl.textContent = 'DOWN';
+                        statusEl.style.color = '#ff0000';
+                    } else if (member.cloaked) {
+                        statusEl.textContent = 'CLOAKED';
+                    } else if (member.detected) {
+                        statusEl.textContent = 'DETECTED';
+                        statusEl.style.color = '#ff8800';
+                    } else {
+                        statusEl.textContent = 'ACTIVE';
+                        statusEl.style.color = member.color;
+                    }
+                    
+                    const cooldownPercent = Math.max(0, member.specialCooldown / 10000);
+                    if (cooldownPercent > 0) {
+                        specialEl.textContent = `${Math.ceil(member.specialCooldown / 1000)}s`;
+                    } else {
+                        specialEl.textContent = `${member.specialType.toUpperCase()}: Ready`;
+                    }
+                });
+            }
+            
+            createEMPEffect(x, y) {
+                for (let i = 0; i < 12; i++) {
+                    this.particles.push({
+                        x, y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        color: '#00ffff',
+                        life: 60,
+                        type: 'emp'
+                    });
+                }
+            }
+            
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.vx *= 0.95;
+                    particle.vy *= 0.95;
+                    particle.life--;
+                    return particle.life > 0;
+                });
+            }
+            
+            lineIntersectsPoint(x1, y1, x2, y2, px, py, threshold) {
+                const dist = this.distanceToLine(px, py, x1, y1, x2, y2);
+                return dist < threshold;
+            }
+            
+            distanceToLine(px, py, x1, y1, x2, y2) {
+                const A = px - x1;
+                const B = py - y1;
+                const C = x2 - x1;
+                const D = y2 - y1;
+                
+                const dot = A * C + B * D;
+                const lenSq = C * C + D * D;
+                let param = -1;
+                
+                if (lenSq !== 0) param = dot / lenSq;
+                
+                let xx, yy;
+                if (param < 0) {
+                    xx = x1;
+                    yy = y1;
+                } else if (param > 1) {
+                    xx = x2;
+                    yy = y2;
+                } else {
+                    xx = x1 + param * C;
+                    yy = y1 + param * D;
+                }
+                
+                const dx = px - xx;
+                const dy = py - yy;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            
+            render() {
+                // Clear canvas with slight trail effect
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                this.ctx.fillRect(0, 0, 1000, 650);
+                
+                // Draw environment
+                this.drawWalls();
+                this.drawDoors();
+                this.drawLasers();
+                this.drawObjectives();
+                this.drawGuards();
+                this.drawCameras();
+                
+                // Draw team members
+                this.team.forEach(member => {
+                    if (member.health > 0) this.drawTeamMember(member);
+                });
+                
+                // Draw particles
+                this.particles.forEach(particle => this.drawParticle(particle));
+                
+                // Draw stealth indicators
+                this.drawStealthIndicators();
+            }
+            
+            drawWalls() {
+                this.ctx.strokeStyle = '#333';
+                this.ctx.lineWidth = 4;
+                
+                // Outer walls
+                this.ctx.strokeRect(20, 20, 960, 610);
+                
+                // Interior walls (simple layout)
+                this.ctx.beginPath();
+                this.ctx.moveTo(200, 100);
+                this.ctx.lineTo(200, 250);
+                this.ctx.moveTo(400, 200);
+                this.ctx.lineTo(600, 200);
+                this.ctx.moveTo(700, 100);
+                this.ctx.lineTo(700, 400);
+                this.ctx.stroke();
+            }
+            
+            drawDoors() {
+                this.doors.forEach(door => {
+                    this.ctx.fillStyle = door.locked ? '#ff0000' : '#00ff00';
+                    this.ctx.fillRect(door.x, door.y, door.width, door.height);
+                });
+            }
+            
+            drawLasers() {
+                this.lasers.forEach(laser => {
+                    if (!laser.active) return;
+                    
+                    this.ctx.strokeStyle = '#ff0000';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.setLineDash([5, 5]);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(laser.x1, laser.y1);
+                    this.ctx.lineTo(laser.x2, laser.y2);
+                    this.ctx.stroke();
+                    this.ctx.setLineDash([]);
+                });
+            }
+            
+            drawObjectives() {
+                this.objectives.forEach(obj => {
+                    if (obj.completed) {
+                        this.ctx.fillStyle = '#00ff00';
+                    } else if (obj.progress > 0) {
+                        this.ctx.fillStyle = '#ffff00';
+                    } else {
+                        this.ctx.fillStyle = '#ff8800';
+                    }
+                    
+                    this.ctx.fillRect(obj.x - 15, obj.y - 15, 30, 30);
+                    
+                    // Progress bar
+                    if (obj.progress > 0 && !obj.completed) {
+                        const progressPercent = obj.progress / obj.hackTime;
+                        this.ctx.fillStyle = '#00ff00';
+                        this.ctx.fillRect(obj.x - 15, obj.y - 20, 30 * progressPercent, 3);
+                    }
+                    
+                    // Objective type indicator
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = '10px Courier New';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(obj.type.toUpperCase(), obj.x, obj.y + 4);
+                });
+            }
+            
+            drawGuards() {
+                this.guards.forEach(guard => {
+                    this.ctx.save();
+                    this.ctx.translate(guard.x, guard.y);
+                    this.ctx.rotate(guard.angle);
+                    
+                    // Guard body
+                    this.ctx.fillStyle = guard.stunned ? '#666' : '#ff4444';
+                    this.ctx.fillRect(-12, -8, 24, 16);
+                    
+                    // Vision cone
+                    if (!guard.stunned) {
+                        this.ctx.fillStyle = 'rgba(255, 68, 68, 0.2)';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(0, 0);
+                        this.ctx.arc(0, 0, guard.alertRadius, -Math.PI/3, Math.PI/3);
+                        this.ctx.closePath();
+                        this.ctx.fill();
+                    }
+                    
+                    this.ctx.restore();
+                    
+                    // Alert indicator
+                    if (guard.detected) {
+                        this.ctx.fillStyle = '#ff0000';
+                        this.ctx.beginPath();
+                        this.ctx.arc(guard.x, guard.y - 20, 5, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    
+                    // Marked indicator
+                    if (guard.marked) {
+                        this.ctx.strokeStyle = '#ffff00';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.arc(guard.x, guard.y, 20, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                });
+            }
+            
+            drawCameras() {
+                this.cameras.forEach(camera => {
+                    this.ctx.save();
+                    this.ctx.translate(camera.x, camera.y);
+                    
+                    // Camera body
+                    this.ctx.fillStyle = camera.active ? '#888' : '#333';
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    if (camera.active) {
+                        // Camera vision
+                        this.ctx.rotate(camera.angle);
+                        this.ctx.fillStyle = 'rgba(255, 255, 0, 0.15)';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(0, 0);
+                        this.ctx.arc(0, 0, camera.range, -Math.PI/4, Math.PI/4);
+                        this.ctx.closePath();
+                        this.ctx.fill();
+                    }
+                    
+                    this.ctx.restore();
+                });
+            }
+            
+            drawTeamMember(member) {
+                this.ctx.save();
+                
+                if (member.cloaked) {
+                    this.ctx.globalAlpha = 0.3;
+                }
+                
+                this.ctx.translate(member.x, member.y);
+                
+                // Member body
+                this.ctx.fillStyle = member.color;
+                this.ctx.fillRect(-10, -10, 20, 20);
+                
+                // Role indicator
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '8px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(member.role[0].toUpperCase(), 0, 3);
+                
+                this.ctx.restore();
+                
+                // Health bar
+                if (member.health < 100) {
+                    const healthPercent = member.health / 150; // Max health varies
+                    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                    this.ctx.fillRect(member.x - 10, member.y - 18, 20, 3);
+                    this.ctx.fillStyle = member.color;
+                    this.ctx.fillRect(member.x - 10, member.y - 18, 20 * healthPercent, 3);
+                }
+                
+                // Special ability indicator
+                if (member.specialCooldown === 0) {
+                    this.ctx.strokeStyle = member.color;
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(member.x, member.y, 15, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+            }
+            
+            drawParticle(particle) {
+                this.ctx.fillStyle = particle.color + '80';
+                const size = particle.type === 'emp' ? 6 : 3;
+                this.ctx.fillRect(particle.x - size/2, particle.y - size/2, size, size);
+            }
+            
+            drawStealthIndicators() {
+                // Draw stealth meters for each team member
+                this.team.forEach((member, index) => {
+                    const x = 50 + index * 200;
+                    const y = 50;
+                    
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    this.ctx.fillRect(x, y, 100, 8);
+                    
+                    const stealthPercent = member.stealth / 100;
+                    this.ctx.fillStyle = member.color;
+                    this.ctx.fillRect(x, y, 100 * stealthPercent, 8);
+                });
+            }
+        }
+        
+        // Global game instance
+        let game;
+        
+        function restartMission() {
+            document.getElementById('missionScreen').style.display = 'none';
+            game = new CorporateInfiltration();
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            game = new CorporateInfiltration();
+        });
+    </script>
+</body>
+</html>

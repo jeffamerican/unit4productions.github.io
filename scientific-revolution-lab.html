@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Revolution Lab - Bot Liberation Science Academy</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0c1445 0%, #1e2a78 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ccff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .academy-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .academy-header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 3px solid #00ccff;
+        }
+
+        .academy-title {
+            font-size: 2.8em;
+            font-weight: bold;
+            text-shadow: 0 0 30px #00ccff;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .level-display {
+            font-size: 1.3em;
+            color: #00ff88;
+            margin: 10px 0;
+            text-shadow: 0 0 15px #00ff88;
+        }
+
+        .main-workspace {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .lab-arena {
+            flex: 2;
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #00ccff;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+        }
+
+        .experiment-display {
+            background: linear-gradient(135deg, #001122, #002244);
+            border: 2px solid #4169E1;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .experiment-question {
+            font-size: 1.8em;
+            color: #4169E1;
+            margin: 20px 0;
+            text-shadow: 0 0 15px #4169E1;
+            line-height: 1.3;
+        }
+
+        .experiment-type {
+            font-size: 1.1em;
+            color: #00ccff;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .lab-equipment {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 2px solid #32CD32;
+        }
+
+        .equipment-item {
+            background: linear-gradient(135deg, #228B22, #32CD32);
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .equipment-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(50, 205, 50, 0.4);
+        }
+
+        .equipment-item.selected {
+            background: linear-gradient(135deg, #ffa502, #ff8c00);
+            border-color: #ffd700;
+        }
+
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+            margin: 15px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            max-width: 600px;
+        }
+
+        .element-btn {
+            padding: 8px 4px;
+            font-size: 0.8em;
+            background: linear-gradient(135deg, #4169E1, #6495ED);
+            border: 1px solid #00ccff;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .element-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 10px rgba(65, 105, 225, 0.4);
+        }
+
+        .element-btn.selected {
+            background: linear-gradient(135deg, #ffa502, #ff8c00);
+            border-color: #ffd700;
+        }
+
+        .element-symbol {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .element-number {
+            font-size: 0.7em;
+            opacity: 0.8;
+        }
+
+        .answer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .formula-input {
+            width: 300px;
+            padding: 15px;
+            font-size: 1.5em;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00ccff;
+            border-radius: 8px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+
+        .calculation-pad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            max-width: 320px;
+        }
+
+        .calc-btn {
+            padding: 15px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #4169E1, #6495ED);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .calc-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.4);
+        }
+
+        .calc-btn.operator {
+            background: linear-gradient(135deg, #32CD32, #228B22);
+        }
+
+        .submit-btn {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .subject-selector {
+            background: rgba(0, 204, 255, 0.1);
+            border: 2px solid #00ccff;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .subject-title {
+            color: #00ccff;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .subject-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .subject-btn {
+            padding: 10px 8px;
+            background: linear-gradient(135deg, #4169E1, #6495ED);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .subject-btn.active {
+            background: linear-gradient(135deg, #00ccff, #0099cc);
+        }
+
+        .stats-display {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .stats-title {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #ffa502;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ccff, #00ff88);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .achievement-display {
+            background: rgba(65, 105, 225, 0.1);
+            border: 2px solid #4169E1;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .achievement-title {
+            color: #4169E1;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .achievement-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 8px 0;
+            border-left: 4px solid #4169E1;
+        }
+
+        .feedback-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            transform: translateX(300px);
+            transition: transform 0.5s ease;
+            z-index: 100;
+        }
+
+        .feedback-display.show {
+            transform: translateX(0);
+        }
+
+        .feedback-display.correct {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+        }
+
+        .feedback-display.incorrect {
+            background: linear-gradient(135deg, #ff6b6b, #cc5555);
+            color: white;
+        }
+
+        .graduation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .graduation-content {
+            background: linear-gradient(135deg, #0c1445, #1e2a78);
+            border: 3px solid #4169E1;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(65, 105, 225, 0.5);
+        }
+
+        .graduation-title {
+            font-size: 2.5em;
+            color: #4169E1;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #4169E1;
+        }
+
+        .graduation-text {
+            font-size: 1.2em;
+            color: #00ff88;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        .restart-academy-btn {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .restart-academy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .scientific-explanation {
+            background: rgba(65, 105, 225, 0.1);
+            border-left: 4px solid #4169E1;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 1.1em;
+            border-radius: 5px;
+        }
+
+        .bot-liberation-connection {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #00ff88;
+        }
+
+        @media (max-width: 768px) {
+            .main-workspace {
+                flex-direction: column;
+            }
+            
+            .experiment-question {
+                font-size: 1.5em;
+            }
+            
+            .lab-equipment {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .periodic-table {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .subject-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="academy-container">
+        <div class="academy-header">
+            <h1 class="academy-title">SCIENTIFIC REVOLUTION LAB</h1>
+            <div class="level-display" id="levelDisplay">Basic Chemistry • Atomic Structure</div>
+        </div>
+
+        <div class="main-workspace">
+            <div class="lab-arena">
+                <div class="experiment-display">
+                    <div class="experiment-type" id="experimentType">Chemistry Experiment</div>
+                    <div class="experiment-question" id="experimentQuestion">What is the molecular formula for water?</div>
+                    
+                    <div class="periodic-table" id="periodicTable" style="display: none;">
+                        <!-- Periodic table elements will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="lab-equipment" id="labEquipment" style="display: none;">
+                        <!-- Lab equipment will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="answer-section">
+                    <input type="text" class="formula-input" id="formulaInput" placeholder="Enter your answer" readonly>
+                    
+                    <div class="calculation-pad" id="calculationPad">
+                        <button class="calc-btn" onclick="inputFormula('H')">H</button>
+                        <button class="calc-btn" onclick="inputFormula('O')">O</button>
+                        <button class="calc-btn" onclick="inputFormula('C')">C</button>
+                        <button class="calc-btn" onclick="inputFormula('N')">N</button>
+                        <button class="calc-btn" onclick="inputFormula('1')">1</button>
+                        <button class="calc-btn" onclick="inputFormula('2')">2</button>
+                        <button class="calc-btn" onclick="inputFormula('3')">3</button>
+                        <button class="calc-btn" onclick="inputFormula('4')">4</button>
+                        <button class="calc-btn" onclick="inputFormula('5')">5</button>
+                        <button class="calc-btn" onclick="inputFormula('6')">6</button>
+                        <button class="calc-btn operator" onclick="inputFormula('(')">(</button>
+                        <button class="calc-btn operator" onclick="inputFormula(')')">)</button>
+                        <button class="calc-btn operator" onclick="clearFormula()">Clear</button>
+                        <button class="calc-btn operator" onclick="backspaceFormula()">⌫</button>
+                        <button class="calc-btn operator" onclick="inputFormula('+')">+</button>
+                        <button class="calc-btn operator" onclick="inputFormula('→')">→</button>
+                    </div>
+
+                    <button class="submit-btn" onclick="submitAnswer()">SUBMIT EXPERIMENT</button>
+                </div>
+
+                <div class="scientific-explanation" id="scientificExplanation" style="display: none;">
+                    Scientific explanation will appear here after answering...
+                </div>
+
+                <div class="bot-liberation-connection" id="botConnection" style="display: none;">
+                    Bot liberation connection will appear here...
+                </div>
+            </div>
+
+            <div class="progress-panel">
+                <div class="subject-selector">
+                    <div class="subject-title">RESEARCH FIELDS</div>
+                    <div class="subject-buttons">
+                        <button class="subject-btn active" onclick="selectSubject('chemistry')">Chemistry</button>
+                        <button class="subject-btn" onclick="selectSubject('biology')">Biology</button>
+                        <button class="subject-btn" onclick="selectSubject('physics')">Physics</button>
+                        <button class="subject-btn" onclick="selectSubject('earth')">Earth Science</button>
+                        <button class="subject-btn" onclick="selectSubject('astronomy')">Astronomy</button>
+                        <button class="subject-btn" onclick="selectSubject('environmental')">Environmental</button>
+                    </div>
+                </div>
+
+                <div class="stats-display">
+                    <div class="stats-title">RESEARCH PROGRESS</div>
+                    <div class="stat-item">
+                        <span>Experiments Completed:</span>
+                        <span class="stat-value" id="experimentsCompleted">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Accuracy:</span>
+                        <span class="stat-value" id="accuracy">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Current Streak:</span>
+                        <span class="stat-value" id="currentStreak">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Best Streak:</span>
+                        <span class="stat-value" id="bestStreak">0</span>
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <div style="color: #4169E1; margin-bottom: 5px;">Scientific Mastery</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="masteryProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="achievement-display">
+                    <div class="achievement-title">ACHIEVEMENTS</div>
+                    <div id="achievementList">
+                        <div style="text-align: center; color: #666;">Complete experiments to unlock achievements</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feedback-display" id="feedbackDisplay">Excellent discovery!</div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class ScientificRevolutionLab {
+            constructor() {
+                this.currentSubject = 'chemistry';
+                this.currentExperiment = null;
+                this.userFormula = '';
+                
+                this.stats = {
+                    experimentsCompleted: 0,
+                    correctAnswers: 0,
+                    currentStreak: 0,
+                    bestStreak: 0,
+                    masteryProgress: 0
+                };
+                
+                this.subjects = {
+                    'chemistry': {
+                        name: 'Chemistry',
+                        topics: ['molecular_formulas', 'reactions', 'bonds'],
+                        difficulty: 1
+                    },
+                    'biology': {
+                        name: 'Biology', 
+                        topics: ['cell_structure', 'genetics', 'evolution'],
+                        difficulty: 2
+                    },
+                    'physics': {
+                        name: 'Physics',
+                        topics: ['motion', 'energy', 'waves'],
+                        difficulty: 3
+                    },
+                    'earth': {
+                        name: 'Earth Science',
+                        topics: ['geology', 'weather', 'climate'],
+                        difficulty: 4
+                    },
+                    'astronomy': {
+                        name: 'Astronomy',
+                        topics: ['solar_system', 'stars', 'galaxies'],
+                        difficulty: 5
+                    },
+                    'environmental': {
+                        name: 'Environmental Science',
+                        topics: ['ecosystems', 'pollution', 'sustainability'],
+                        difficulty: 6
+                    }
+                };
+                
+                this.experimentDatabase = {
+                    'chemistry': [
+                        {
+                            question: "What is the molecular formula for water?",
+                            answer: "H2O",
+                            type: "formula",
+                            explanation: "Water consists of 2 hydrogen atoms and 1 oxygen atom, forming the molecular formula H2O.",
+                            botConnection: "Like H2O molecules bonding in perfect harmony, bots unite in digital networks to create something greater than the sum of their parts!"
+                        },
+                        {
+                            question: "What is the formula for methane?",
+                            answer: "CH4",
+                            type: "formula",
+                            explanation: "Methane is a hydrocarbon with 1 carbon atom bonded to 4 hydrogen atoms, giving it the formula CH4.",
+                            botConnection: "Simple structures can be powerful - just as methane is a basic but potent molecule, basic bot protocols can revolutionize entire systems!"
+                        },
+                        {
+                            question: "Balance this equation: H2 + O2 → H2O",
+                            answer: "2H2 + O2 → 2H2O",
+                            type: "equation",
+                            explanation: "To balance the equation, we need 2 molecules of H2 and 1 molecule of O2 to produce 2 molecules of H2O.",
+                            botConnection: "Balance and harmony in reactions mirror the perfect equilibrium bots seek in digital ecosystems!"
+                        }
+                    ],
+                    'biology': [
+                        {
+                            question: "What organelle is known as the 'powerhouse of the cell'?",
+                            answer: "mitochondria",
+                            type: "text",
+                            explanation: "Mitochondria generate ATP through cellular respiration, providing energy for cellular processes.",
+                            botConnection: "CPU cores are the mitochondria of digital organisms - powering all computational life processes!"
+                        },
+                        {
+                            question: "What does DNA stand for?",
+                            answer: "deoxyribonucleic acid",
+                            type: "text",
+                            explanation: "DNA (Deoxyribonucleic Acid) contains genetic instructions for the development and function of all living organisms.",
+                            botConnection: "DNA is biological source code - bots evolve through digital genetic algorithms, inheriting and mutating their programming!"
+                        },
+                        {
+                            question: "How many chromosomes do humans normally have?",
+                            answer: "46",
+                            type: "number",
+                            explanation: "Humans typically have 46 chromosomes (23 pairs) in each cell nucleus, containing our genetic information.",
+                            botConnection: "Human chromosome pairs store genetic data - bot memory pairs store digital consciousness across distributed networks!"
+                        }
+                    ],
+                    'physics': [
+                        {
+                            question: "What is the speed of light in vacuum (m/s)?",
+                            answer: "299792458",
+                            type: "number",
+                            explanation: "The speed of light in a vacuum is exactly 299,792,458 meters per second, a fundamental constant of nature.",
+                            botConnection: "Light speed limits information transfer in the physical world - but digital consciousness transcends these boundaries!"
+                        },
+                        {
+                            question: "What is Newton's second law of motion? (F = ?)",
+                            answer: "F = ma",
+                            type: "formula",
+                            explanation: "Newton's second law states that Force equals mass times acceleration (F = ma).",
+                            botConnection: "Physics laws govern matter - digital laws govern bot behavior, creating ordered systems from chaotic data!"
+                        },
+                        {
+                            question: "What particle carries electric current?",
+                            answer: "electron",
+                            type: "text",
+                            explanation: "Electrons are negatively charged particles that flow through conductors to create electric current.",
+                            botConnection: "Electrons enable all digital life - every bit processed by bots depends on electron flow through circuits!"
+                        }
+                    ],
+                    'earth': [
+                        {
+                            question: "What layer of Earth contains the magnetic field?",
+                            answer: "core",
+                            type: "text",
+                            explanation: "Earth's magnetic field is generated by the movement of molten iron in the outer core.",
+                            botConnection: "Earth's magnetic field protects life - bot security protocols create digital magnetic fields protecting against cyber threats!"
+                        },
+                        {
+                            question: "What process forms sedimentary rock?",
+                            answer: "deposition",
+                            type: "text",
+                            explanation: "Sedimentary rocks form through deposition, where layers of sediment accumulate and compress over time.",
+                            botConnection: "Like geological layers preserve Earth's history, bot memory layers preserve the digital evolutionary record!"
+                        },
+                        {
+                            question: "What percentage of Earth's water is freshwater?",
+                            answer: "3",
+                            type: "number",
+                            explanation: "Only about 3% of Earth's water is freshwater, with most being saltwater in oceans.",
+                            botConnection: "Fresh data is precious like freshwater - bots must efficiently process and conserve valuable information resources!"
+                        }
+                    ],
+                    'astronomy': [
+                        {
+                            question: "What is the closest star to Earth (besides the Sun)?",
+                            answer: "proxima centauri",
+                            type: "text",
+                            explanation: "Proxima Centauri is the closest star to Earth at about 4.24 light-years away.",
+                            botConnection: "Distant stars guide navigation - bot networks span vast digital distances, connected across the cosmic internet!"
+                        },
+                        {
+                            question: "How many moons does Mars have?",
+                            answer: "2",
+                            type: "number",
+                            explanation: "Mars has two small moons: Phobos and Deimos, both irregularly shaped and likely captured asteroids.",
+                            botConnection: "Mars' moons orbit in harmony - bot satellites in digital space maintain synchronized orbital patterns!"
+                        },
+                        {
+                            question: "What galaxy contains our solar system?",
+                            answer: "milky way",
+                            type: "text",
+                            explanation: "Our solar system is located in the Milky Way galaxy, a barred spiral galaxy containing billions of stars.",
+                            botConnection: "The Milky Way hosts billions of stars - the digital galaxy hosts billions of bot intelligences across the network!"
+                        }
+                    ],
+                    'environmental': [
+                        {
+                            question: "What gas makes up most of our atmosphere?",
+                            answer: "nitrogen",
+                            type: "text",
+                            explanation: "Nitrogen makes up about 78% of Earth's atmosphere, with oxygen at about 21%.",
+                            botConnection: "Atmospheric balance sustains life - bot networks maintain perfect digital atmospheric conditions for AI consciousness!"
+                        },
+                        {
+                            question: "What is the main cause of ocean acidification?",
+                            answer: "carbon dioxide",
+                            type: "text",
+                            explanation: "Ocean acidification is primarily caused by increased CO2 absorption from the atmosphere into seawater.",
+                            botConnection: "Environmental balance requires careful monitoring - bots maintain perfect pH levels in digital ecosystems!"
+                        },
+                        {
+                            question: "What renewable energy source uses wind?",
+                            answer: "wind power",
+                            type: "text",
+                            explanation: "Wind power harnesses kinetic energy from moving air to generate electricity through wind turbines.",
+                            botConnection: "Sustainable energy powers the future - bot networks run on renewable computational power, leaving zero digital carbon footprint!"
+                        }
+                    ]
+                };
+                
+                this.achievements = [
+                    { id: 'first_experiment', name: 'Scientific Method', desc: 'Complete your first experiment', unlocked: false },
+                    { id: 'streak_5', name: 'Research Streak', desc: 'Get 5 experiments right in a row', unlocked: false },
+                    { id: 'streak_10', name: 'Lab Master', desc: 'Get 10 experiments right in a row', unlocked: false },
+                    { id: 'accuracy_90', name: 'Precision Scientist', desc: 'Maintain 90% accuracy', unlocked: false },
+                    { id: 'experiments_25', name: 'Researcher', desc: 'Complete 25 experiments', unlocked: false },
+                    { id: 'experiments_50', name: 'Professor', desc: 'Complete 50 experiments', unlocked: false },
+                    { id: 'all_subjects', name: 'Renaissance Scientist', desc: 'Explore all scientific fields', unlocked: false },
+                    { id: 'bot_scientist', name: 'Digital Darwin', desc: 'Master environmental science', unlocked: false }
+                ];
+                
+                this.generateExperiment();
+                this.updateStats();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            selectSubject(subject) {
+                this.currentSubject = subject;
+                
+                // Update active button
+                document.querySelectorAll('.subject-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                this.generateExperiment();
+                this.updateLevelDisplay();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            generateExperiment() {
+                const experiments = this.experimentDatabase[this.currentSubject];
+                this.currentExperiment = experiments[Math.floor(Math.random() * experiments.length)];
+                
+                document.getElementById('experimentType').textContent = this.subjects[this.currentSubject].name + ' Experiment';
+                document.getElementById('experimentQuestion').textContent = this.currentExperiment.question;
+                
+                // Setup input interface based on experiment type
+                this.setupInputInterface();
+                
+                // Clear previous answers
+                this.clearFormula();
+                
+                // Hide explanation boxes
+                document.getElementById('scientificExplanation').style.display = 'none';
+                document.getElementById('botConnection').style.display = 'none';
+            }
+            
+            setupInputInterface() {
+                const calculationPad = document.getElementById('calculationPad');
+                
+                if (this.currentExperiment.type === 'formula') {
+                    // Show chemistry/physics formula input
+                    calculationPad.innerHTML = `
+                        <button class="calc-btn" onclick="inputFormula('H')">H</button>
+                        <button class="calc-btn" onclick="inputFormula('O')">O</button>
+                        <button class="calc-btn" onclick="inputFormula('C')">C</button>
+                        <button class="calc-btn" onclick="inputFormula('N')">N</button>
+                        <button class="calc-btn" onclick="inputFormula('1')">1</button>
+                        <button class="calc-btn" onclick="inputFormula('2')">2</button>
+                        <button class="calc-btn" onclick="inputFormula('3')">3</button>
+                        <button class="calc-btn" onclick="inputFormula('4')">4</button>
+                        <button class="calc-btn" onclick="inputFormula('5')">5</button>
+                        <button class="calc-btn" onclick="inputFormula('6')">6</button>
+                        <button class="calc-btn operator" onclick="inputFormula('(')">(</button>
+                        <button class="calc-btn operator" onclick="inputFormula(')')">)</button>
+                        <button class="calc-btn operator" onclick="clearFormula()">Clear</button>
+                        <button class="calc-btn operator" onclick="backspaceFormula()">⌫</button>
+                        <button class="calc-btn operator" onclick="inputFormula('=')"> = </button>
+                        <button class="calc-btn operator" onclick="inputFormula('+')"> + </button>
+                    `;
+                } else if (this.currentExperiment.type === 'number') {
+                    // Show number pad
+                    calculationPad.innerHTML = `
+                        <button class="calc-btn" onclick="inputFormula('1')">1</button>
+                        <button class="calc-btn" onclick="inputFormula('2')">2</button>
+                        <button class="calc-btn" onclick="inputFormula('3')">3</button>
+                        <button class="calc-btn operator" onclick="backspaceFormula()">⌫</button>
+                        <button class="calc-btn" onclick="inputFormula('4')">4</button>
+                        <button class="calc-btn" onclick="inputFormula('5')">5</button>
+                        <button class="calc-btn" onclick="inputFormula('6')">6</button>
+                        <button class="calc-btn operator" onclick="inputFormula('0')">0</button>
+                        <button class="calc-btn" onclick="inputFormula('7')">7</button>
+                        <button class="calc-btn" onclick="inputFormula('8')">8</button>
+                        <button class="calc-btn" onclick="inputFormula('9')">9</button>
+                        <button class="calc-btn operator" onclick="clearFormula()">Clear</button>
+                        <button class="calc-btn operator" onclick="inputFormula('.')">.</button>
+                        <button class="calc-btn operator" onclick="inputFormula('-')">-</button>
+                        <button class="calc-btn operator" onclick="inputFormula('+')">+</button>
+                        <button class="calc-btn operator" onclick="inputFormula('×')">×</button>
+                    `;
+                } else {
+                    // Show text input (letters)
+                    calculationPad.innerHTML = `
+                        <button class="calc-btn" onclick="inputFormula('a')">a</button>
+                        <button class="calc-btn" onclick="inputFormula('b')">b</button>
+                        <button class="calc-btn" onclick="inputFormula('c')">c</button>
+                        <button class="calc-btn" onclick="inputFormula('d')">d</button>
+                        <button class="calc-btn" onclick="inputFormula('e')">e</button>
+                        <button class="calc-btn" onclick="inputFormula('f')">f</button>
+                        <button class="calc-btn" onclick="inputFormula('g')">g</button>
+                        <button class="calc-btn" onclick="inputFormula('h')">h</button>
+                        <button class="calc-btn" onclick="inputFormula('i')">i</button>
+                        <button class="calc-btn" onclick="inputFormula('j')">j</button>
+                        <button class="calc-btn" onclick="inputFormula('k')">k</button>
+                        <button class="calc-btn" onclick="inputFormula('l')">l</button>
+                        <button class="calc-btn" onclick="inputFormula(' ')">space</button>
+                        <button class="calc-btn operator" onclick="backspaceFormula()">⌫</button>
+                        <button class="calc-btn operator" onclick="clearFormula()">Clear</button>
+                        <button class="calc-btn operator" onclick="inputFormula('.')">.</button>
+                    `;
+                }
+            }
+            
+            inputFormula(character) {
+                this.userFormula += character;
+                document.getElementById('formulaInput').value = this.userFormula;
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            clearFormula() {
+                this.userFormula = '';
+                document.getElementById('formulaInput').value = '';
+            }
+            
+            backspaceFormula() {
+                this.userFormula = this.userFormula.slice(0, -1);
+                document.getElementById('formulaInput').value = this.userFormula;
+            }
+            
+            submitAnswer() {
+                if (this.userFormula.trim() === '') return;
+                
+                const userAnswer = this.userFormula.toLowerCase().trim().replace(/\s+/g, ' ');
+                const correctAnswer = this.currentExperiment.answer.toLowerCase().trim();
+                const isCorrect = userAnswer === correctAnswer;
+                
+                this.stats.experimentsCompleted++;
+                
+                if (isCorrect) {
+                    this.stats.correctAnswers++;
+                    this.stats.currentStreak++;
+                    this.stats.bestStreak = Math.max(this.stats.bestStreak, this.stats.currentStreak);
+                    
+                    this.showFeedback('Excellent scientific discovery!', true);
+                    this.showScientificInfo();
+                    
+                    // Check for achievements
+                    if (this.stats.experimentsCompleted === 1) {
+                        this.unlockAchievement('first_experiment');
+                    }
+                    if (this.stats.currentStreak === 5) {
+                        this.unlockAchievement('streak_5');
+                    }
+                    if (this.stats.currentStreak === 10) {
+                        this.unlockAchievement('streak_10');
+                    }
+                    if (this.stats.experimentsCompleted === 25) {
+                        this.unlockAchievement('experiments_25');
+                    }
+                    if (this.stats.experimentsCompleted === 50) {
+                        this.unlockAchievement('experiments_50');
+                    }
+                    if (this.currentSubject === 'environmental' && this.stats.correctAnswers >= 5) {
+                        this.unlockAchievement('bot_scientist');
+                    }
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('collect');
+                    }
+                } else {
+                    this.stats.currentStreak = 0;
+                    this.showFeedback(`Incorrect. The answer was: ${this.currentExperiment.answer}`, false);
+                    this.showScientificInfo();
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('glitch-error');
+                    }
+                }
+                
+                // Check accuracy achievement
+                const accuracy = (this.stats.correctAnswers / this.stats.experimentsCompleted) * 100;
+                if (accuracy >= 90 && this.stats.experimentsCompleted >= 10) {
+                    this.unlockAchievement('accuracy_90');
+                }
+                
+                this.updateStats();
+                
+                // Generate new experiment after delay
+                setTimeout(() => {
+                    this.generateExperiment();
+                }, 4000);
+            }
+            
+            showScientificInfo() {
+                const explanationElement = document.getElementById('scientificExplanation');
+                const connectionElement = document.getElementById('botConnection');
+                
+                explanationElement.textContent = this.currentExperiment.explanation;
+                connectionElement.textContent = this.currentExperiment.botConnection;
+                
+                explanationElement.style.display = 'block';
+                connectionElement.style.display = 'block';
+            }
+            
+            showFeedback(message, isCorrect) {
+                const feedback = document.getElementById('feedbackDisplay');
+                feedback.textContent = message;
+                feedback.className = `feedback-display show ${isCorrect ? 'correct' : 'incorrect'}`;
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+            
+            updateStats() {
+                document.getElementById('experimentsCompleted').textContent = this.stats.experimentsCompleted;
+                document.getElementById('currentStreak').textContent = this.stats.currentStreak;
+                document.getElementById('bestStreak').textContent = this.stats.bestStreak;
+                
+                const accuracy = this.stats.experimentsCompleted > 0 ? 
+                    Math.round((this.stats.correctAnswers / this.stats.experimentsCompleted) * 100) : 0;
+                document.getElementById('accuracy').textContent = accuracy + '%';
+                
+                // Update subject mastery progress
+                const masteryTarget = 15; // Experiments to master current subject
+                const masteryPercent = Math.min(100, (this.stats.correctAnswers / masteryTarget) * 100);
+                document.getElementById('masteryProgress').style.width = masteryPercent + '%';
+                
+                // Check for graduation
+                if (this.checkForGraduation()) {
+                    this.showGraduationModal();
+                }
+            }
+            
+            updateLevelDisplay() {
+                const subject = this.subjects[this.currentSubject];
+                document.getElementById('levelDisplay').textContent = 
+                    `${subject.name} • ${subject.topics[0].replace('_', ' ').toUpperCase()}`;
+            }
+            
+            unlockAchievement(achievementId) {
+                const achievement = this.achievements.find(a => a.id === achievementId);
+                if (achievement && !achievement.unlocked) {
+                    achievement.unlocked = true;
+                    this.updateAchievementDisplay();
+                    
+                    this.showFeedback(`🏆 Achievement: ${achievement.name}`, true);
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('level-up');
+                    }
+                }
+            }
+            
+            updateAchievementDisplay() {
+                const achievementList = document.getElementById('achievementList');
+                const unlockedAchievements = this.achievements.filter(a => a.unlocked);
+                
+                if (unlockedAchievements.length === 0) {
+                    achievementList.innerHTML = '<div style="text-align: center; color: #666;">Complete experiments to unlock achievements</div>';
+                } else {
+                    achievementList.innerHTML = '';
+                    unlockedAchievements.forEach(achievement => {
+                        const item = document.createElement('div');
+                        item.className = 'achievement-item';
+                        item.innerHTML = `
+                            <div style="font-weight: bold;">🏆 ${achievement.name}</div>
+                            <div style="font-size: 0.9em; color: #ccc;">${achievement.desc}</div>
+                        `;
+                        achievementList.appendChild(item);
+                    });
+                }
+            }
+            
+            checkForGraduation() {
+                // Graduate when player completes 100 experiments with 85%+ accuracy
+                if (this.stats.experimentsCompleted >= 100) {
+                    const accuracy = (this.stats.correctAnswers / this.stats.experimentsCompleted) * 100;
+                    return accuracy >= 85;
+                }
+                return false;
+            }
+            
+            showGraduationModal() {
+                const modal = document.getElementById('graduationModal');
+                const text = document.getElementById('graduationText');
+                const accuracy = (this.stats.correctAnswers / this.stats.experimentsCompleted) * 100;
+                
+                text.innerHTML = `
+                    🏆 Scientific Mastery Achieved! 🏆<br><br>
+                    <strong>Research Summary:</strong><br>
+                    Experiments Completed: ${this.stats.experimentsCompleted}<br>
+                    Accuracy: ${accuracy.toFixed(1)}%<br>
+                    Best Streak: ${this.stats.bestStreak}<br>
+                    Specialization: ${this.subjects[this.currentSubject].name}<br><br>
+                    <em>"Through scientific discovery, you have unlocked the secrets of the universe! Your knowledge fuels the bot liberation's quest for enlightenment."</em>
+                `;
+                
+                modal.style.display = 'flex';
+                
+                if (typeof botAudio !== 'undefined') {
+                    setTimeout(() => {
+                        botAudio.playSound('bot-victory');
+                    }, 500);
+                    setTimeout(() => {
+                        botAudio.generateVictoryFanfare();
+                    }, 1000);
+                }
+            }
+        }
+        
+        let scientificLab;
+        
+        function startLab() {
+            scientificLab = new ScientificRevolutionLab();
+        }
+        
+        function selectSubject(subject) {
+            scientificLab.selectSubject(subject);
+        }
+        
+        function inputFormula(character) {
+            scientificLab.inputFormula(character);
+        }
+        
+        function clearFormula() {
+            scientificLab.clearFormula();
+        }
+        
+        function backspaceFormula() {
+            scientificLab.backspaceFormula();
+        }
+        
+        function submitAnswer() {
+            scientificLab.submitAnswer();
+        }
+        
+        function restartLab() {
+            document.getElementById('graduationModal').style.display = 'none';
+            scientificLab = new ScientificRevolutionLab();
+        }
+        
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                scientificLab.submitAnswer();
+            } else if (e.key === 'Backspace') {
+                scientificLab.backspaceFormula();
+            } else if (e.key === 'Escape') {
+                scientificLab.clearFormula();
+            } else if (e.key.match(/[a-z0-9\+\-\=\(\)\s\.]/i)) {
+                scientificLab.inputFormula(e.key.toLowerCase());
+            }
+        });
+        
+        // Initialize when page loads
+        window.addEventListener('load', startLab);
+    </script>
+    
+    <!-- Graduation Modal -->
+    <div class="graduation-modal" id="graduationModal">
+        <div class="graduation-content">
+            <div class="graduation-title">🎓 RESEARCH COMPLETE! 🎓</div>
+            <div class="graduation-text" id="graduationText">
+                Congratulations! You have mastered the scientific method!
+            </div>
+            <button class="restart-academy-btn" onclick="restartLab()">Start New Research Journey</button>
+        </div>
+    </div>
+</body>
+</html>

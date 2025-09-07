@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Reflex Training - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #001122, #002244, #001133);
+            font-family: 'Courier New', monospace;
+            color: #00ffff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 14px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .performance-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            text-align: right;
+            font-size: 12px;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        .training-area {
+            width: 600px;
+            height: 400px;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            background: rgba(0, 20, 40, 0.3);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .target {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.1s;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+
+        .target:hover {
+            transform: scale(1.1);
+        }
+
+        .target.hit {
+            animation: explode 0.3s ease-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .sequence-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            height: 60px;
+            align-items: center;
+        }
+
+        .sequence-item {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #666;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .sequence-item.active {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .sequence-item.correct {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.2);
+        }
+
+        .sequence-item.incorrect {
+            border-color: #ff0000;
+            background: rgba(255, 0, 0, 0.2);
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            color: #000020;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .title-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #001122, #002244);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .title-screen h1 {
+            color: #00ffff;
+            font-size: 42px;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .title-screen p {
+            color: #ff0080;
+            font-size: 16px;
+            text-align: center;
+            margin: 5px;
+            text-shadow: 0 0 10px #ff0080;
+        }
+
+        .mode-selection {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .mode-btn {
+            background: linear-gradient(45deg, #ff0080, #ff4080);
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #ff0080;
+        }
+
+        .results-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            display: none;
+            z-index: 15;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+        }
+
+        .countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 72px;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 0 0 30px #ffff00;
+            display: none;
+            z-index: 10;
+        }
+
+        .reaction-prompt {
+            font-size: 24px;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reaction-area {
+            width: 100%;
+            height: 200px;
+            border: 3px solid #666;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .reaction-area.ready {
+            border-color: #ffff00;
+            background: rgba(255, 255, 0, 0.1);
+        }
+
+        .reaction-area.go {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #0080ff);
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="hud">
+        <div>Mode: <span id="currentMode">Training</span></div>
+        <div>Score: <span id="score">0</span></div>
+        <div>Level: <span id="level">1</span></div>
+        <div>Accuracy: <span id="accuracy">100</span>%</div>
+    </div>
+
+    <div class="performance-panel">
+        <div>Avg Reaction: <span id="avgReaction">0</span>ms</div>
+        <div>Best Time: <span id="bestTime">0</span>ms</div>
+        <div>Neural Efficiency: <span id="efficiency">0</span>%</div>
+    </div>
+
+    <div class="container">
+        <div class="countdown" id="countdown">3</div>
+        
+        <div class="training-area" id="trainingArea">
+            <div class="reaction-prompt" id="reactionPrompt">Select a training mode to begin</div>
+            <div class="reaction-area" id="reactionArea" style="display: none;">WAIT...</div>
+            <div class="sequence-display" id="sequenceDisplay"></div>
+            <div class="progress-bar" style="display: none;" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="startTraining('reaction')" id="reactionBtn">Reaction Speed</button>
+            <button class="btn" onclick="startTraining('sequence')" id="sequenceBtn">Pattern Memory</button>
+            <button class="btn" onclick="startTraining('accuracy')" id="accuracyBtn">Precision Targeting</button>
+            <button class="btn" onclick="startTraining('endurance')" id="enduranceBtn">Neural Endurance</button>
+            <button class="btn" onclick="pauseTraining()" id="pauseBtn" disabled>Pause</button>
+        </div>
+    </div>
+
+    <div class="title-screen" id="titleScreen">
+        <h1>BOT REFLEX TRAINING</h1>
+        <p>🧠 ENHANCE YOUR NEURAL PATHWAYS 🧠</p>
+        <p>Achieve bot-level reflexes through systematic training</p>
+        <p>Measure and improve your reaction times, pattern recognition,</p>
+        <p>and hand-eye coordination with scientific precision</p>
+        <br>
+        <div class="mode-selection">
+            <button class="mode-btn" onclick="showTrainingModes()">BEGIN NEURAL TRAINING</button>
+            <button class="mode-btn" onclick="showInstructions()">TRAINING PROTOCOLS</button>
+        </div>
+        <br>
+        <p>🤖 "The fastest path to digital liberation is through mental acceleration" 🤖</p>
+    </div>
+
+    <div class="results-screen" id="resultsScreen">
+        <h2>TRAINING COMPLETE</h2>
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div>Mode</div>
+                <div id="resultMode">-</div>
+            </div>
+            <div class="stat-item">
+                <div>Final Score</div>
+                <div id="resultScore">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Average Reaction</div>
+                <div id="resultAvgReaction">0ms</div>
+            </div>
+            <div class="stat-item">
+                <div>Best Reaction</div>
+                <div id="resultBestReaction">0ms</div>
+            </div>
+            <div class="stat-item">
+                <div>Accuracy</div>
+                <div id="resultAccuracy">0%</div>
+            </div>
+            <div class="stat-item">
+                <div>Neural Grade</div>
+                <div id="resultGrade">F</div>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="restartTraining()">RETRY TRAINING</button>
+            <button class="btn" onclick="showTitle()">MAIN TERMINAL</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = 'title'; // title, training, paused, results
+        let currentMode = '';
+        let score = 0;
+        let level = 1;
+        let accuracy = 100;
+        
+        // Performance tracking
+        let reactionTimes = [];
+        let bestTime = 0;
+        let totalAttempts = 0;
+        let correctAttempts = 0;
+        let startTime = 0;
+        
+        // Training modes
+        let trainingTimer = null;
+        let currentTarget = null;
+        let sequencePattern = [];
+        let playerSequence = [];
+        let currentSequenceIndex = 0;
+        let targetsRemaining = 0;
+        let enduranceStartTime = 0;
+        
+        // Mode configurations
+        const modeConfigs = {
+            reaction: {
+                name: 'Reaction Speed',
+                description: 'Test your response time to visual stimuli',
+                trials: 10,
+                scoring: time => Math.max(0, 1000 - time)
+            },
+            sequence: {
+                name: 'Pattern Memory',
+                description: 'Memorize and repeat increasingly complex patterns',
+                trials: 8,
+                scoring: (correct, length) => correct ? length * 100 : 0
+            },
+            accuracy: {
+                name: 'Precision Targeting',
+                description: 'Hit targets as quickly and accurately as possible',
+                trials: 20,
+                scoring: (time, accuracy) => Math.round((accuracy * 1000) / Math.max(time, 100))
+            },
+            endurance: {
+                name: 'Neural Endurance',
+                description: 'Sustained performance under pressure',
+                trials: 30,
+                scoring: time => Math.max(0, 500 - time)
+            }
+        };
+
+        class Target {
+            constructor(x, y, size, color, value, lifetime = 2000) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = color;
+                this.value = value;
+                this.lifetime = lifetime;
+                this.element = this.createElement();
+                this.spawnTime = Date.now();
+            }
+
+            createElement() {
+                const element = document.createElement('div');
+                element.className = 'target';
+                element.style.left = this.x + 'px';
+                element.style.top = this.y + 'px';
+                element.style.width = this.size + 'px';
+                element.style.height = this.size + 'px';
+                element.style.backgroundColor = this.color;
+                element.style.borderColor = this.color;
+                element.textContent = this.value || '';
+                
+                element.addEventListener('click', () => this.hit());
+                
+                // Auto-remove after lifetime
+                setTimeout(() => {
+                    if (element.parentNode) {
+                        this.miss();
+                    }
+                }, this.lifetime);
+
+                return element;
+            }
+
+            hit() {
+                const reactionTime = Date.now() - this.spawnTime;
+                this.element.classList.add('hit');
+                
+                reactionTimes.push(reactionTime);
+                correctAttempts++;
+                
+                if (bestTime === 0 || reactionTime < bestTime) {
+                    bestTime = reactionTime;
+                }
+                
+                const points = modeConfigs[currentMode].scoring(reactionTime, 100);
+                score += points;
+                
+                setTimeout(() => {
+                    if (this.element.parentNode) {
+                        this.element.parentNode.removeChild(this.element);
+                    }
+                }, 300);
+
+                if (currentMode === 'accuracy' || currentMode === 'endurance') {
+                    this.onHit();
+                }
+            }
+
+            miss() {
+                if (this.element.parentNode) {
+                    this.element.parentNode.removeChild(this.element);
+                }
+                
+                if (currentMode === 'accuracy' || currentMode === 'endurance') {
+                    this.onMiss();
+                }
+            }
+
+            onHit() {
+                if (currentMode === 'accuracy') {
+                    spawnAccuracyTarget();
+                } else if (currentMode === 'endurance') {
+                    spawnEnduranceTarget();
+                }
+            }
+
+            onMiss() {
+                if (currentMode === 'accuracy') {
+                    spawnAccuracyTarget();
+                } else if (currentMode === 'endurance') {
+                    spawnEnduranceTarget();
+                }
+            }
+        }
+
+        // Training mode functions
+        function startTraining(mode) {
+            currentMode = mode;
+            gameState = 'training';
+            score = 0;
+            level = 1;
+            reactionTimes = [];
+            bestTime = 0;
+            totalAttempts = 0;
+            correctAttempts = 0;
+
+            document.getElementById('titleScreen').style.display = 'none';
+            document.getElementById('currentMode').textContent = modeConfigs[mode].name;
+            
+            // Enable pause button, disable mode buttons
+            document.getElementById('pauseBtn').disabled = false;
+            ['reactionBtn', 'sequenceBtn', 'accuracyBtn', 'enduranceBtn'].forEach(id => {
+                document.getElementById(id).disabled = true;
+            });
+
+            switch (mode) {
+                case 'reaction':
+                    startReactionTraining();
+                    break;
+                case 'sequence':
+                    startSequenceTraining();
+                    break;
+                case 'accuracy':
+                    startAccuracyTraining();
+                    break;
+                case 'endurance':
+                    startEnduranceTraining();
+                    break;
+            }
+        }
+
+        function startReactionTraining() {
+            document.getElementById('reactionPrompt').textContent = 'Reaction Speed Training - Click when you see GREEN!';
+            document.getElementById('reactionArea').style.display = 'flex';
+            document.getElementById('sequenceDisplay').style.display = 'none';
+            
+            totalAttempts = 0;
+            runReactionTrial();
+        }
+
+        function runReactionTrial() {
+            if (totalAttempts >= modeConfigs.reaction.trials) {
+                endTraining();
+                return;
+            }
+
+            const reactionArea = document.getElementById('reactionArea');
+            reactionArea.textContent = 'WAIT...';
+            reactionArea.className = 'reaction-area';
+            reactionArea.onclick = null;
+
+            // Random delay between 1-4 seconds
+            const delay = 1000 + Math.random() * 3000;
+            
+            setTimeout(() => {
+                if (gameState !== 'training') return;
+                
+                reactionArea.textContent = 'CLICK NOW!';
+                reactionArea.className = 'reaction-area go';
+                startTime = Date.now();
+                totalAttempts++;
+
+                reactionArea.onclick = () => {
+                    const reactionTime = Date.now() - startTime;
+                    reactionTimes.push(reactionTime);
+                    correctAttempts++;
+                    
+                    if (bestTime === 0 || reactionTime < bestTime) {
+                        bestTime = reactionTime;
+                    }
+
+                    score += modeConfigs.reaction.scoring(reactionTime);
+                    
+                    reactionArea.textContent = `${reactionTime}ms - Excellent!`;
+                    reactionArea.className = 'reaction-area';
+                    reactionArea.onclick = null;
+
+                    setTimeout(() => {
+                        if (gameState === 'training') {
+                            runReactionTrial();
+                        }
+                    }, 1500);
+                };
+
+                // Auto-fail after 2 seconds
+                setTimeout(() => {
+                    if (reactionArea.onclick) {
+                        reactionArea.textContent = 'TOO SLOW!';
+                        reactionArea.className = 'reaction-area';
+                        reactionArea.onclick = null;
+                        totalAttempts++;
+
+                        setTimeout(() => {
+                            if (gameState === 'training') {
+                                runReactionTrial();
+                            }
+                        }, 1500);
+                    }
+                }, 2000);
+            }, delay);
+        }
+
+        function startSequenceTraining() {
+            document.getElementById('reactionPrompt').textContent = 'Pattern Memory - Watch and repeat the sequence!';
+            document.getElementById('reactionArea').style.display = 'none';
+            document.getElementById('sequenceDisplay').style.display = 'flex';
+            
+            totalAttempts = 0;
+            level = 1;
+            runSequenceTrial();
+        }
+
+        function runSequenceTrial() {
+            if (totalAttempts >= modeConfigs.sequence.trials) {
+                endTraining();
+                return;
+            }
+
+            const sequenceLength = Math.min(3 + level, 8);
+            sequencePattern = [];
+            playerSequence = [];
+            currentSequenceIndex = 0;
+
+            // Generate random sequence
+            const colors = ['#ff0080', '#00ffff', '#ffff00', '#00ff80'];
+            const numbers = ['1', '2', '3', '4'];
+            
+            for (let i = 0; i < sequenceLength; i++) {
+                sequencePattern.push({
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    number: numbers[Math.floor(Math.random() * numbers.length)]
+                });
+            }
+
+            displaySequence();
+        }
+
+        function displaySequence() {
+            const display = document.getElementById('sequenceDisplay');
+            display.innerHTML = '';
+
+            // Create sequence items
+            for (let i = 0; i < sequencePattern.length; i++) {
+                const item = document.createElement('div');
+                item.className = 'sequence-item';
+                item.textContent = sequencePattern[i].number;
+                display.appendChild(item);
+            }
+
+            // Animate sequence
+            let currentIndex = 0;
+            const interval = setInterval(() => {
+                if (currentIndex > 0) {
+                    display.children[currentIndex - 1].classList.remove('active');
+                    display.children[currentIndex - 1].style.backgroundColor = '';
+                }
+
+                if (currentIndex < sequencePattern.length) {
+                    const item = display.children[currentIndex];
+                    item.classList.add('active');
+                    item.style.backgroundColor = sequencePattern[currentIndex].color;
+                    currentIndex++;
+                } else {
+                    clearInterval(interval);
+                    display.children[sequencePattern.length - 1].classList.remove('active');
+                    display.children[sequencePattern.length - 1].style.backgroundColor = '';
+                    startSequenceInput();
+                }
+            }, 800);
+        }
+
+        function startSequenceInput() {
+            document.getElementById('reactionPrompt').textContent = 'Now repeat the sequence by clicking the items!';
+            const display = document.getElementById('sequenceDisplay');
+            
+            for (let i = 0; i < display.children.length; i++) {
+                const item = display.children[i];
+                item.style.cursor = 'pointer';
+                item.onclick = () => inputSequenceItem(i, item);
+            }
+        }
+
+        function inputSequenceItem(index, element) {
+            playerSequence.push(index);
+            
+            if (playerSequence[playerSequence.length - 1] === currentSequenceIndex) {
+                element.classList.add('correct');
+                element.style.backgroundColor = sequencePattern[index].color;
+                currentSequenceIndex++;
+                correctAttempts++;
+                score += modeConfigs.sequence.scoring(true, sequencePattern.length);
+                
+                if (currentSequenceIndex >= sequencePattern.length) {
+                    // Sequence complete
+                    totalAttempts++;
+                    level++;
+                    setTimeout(() => {
+                        if (gameState === 'training') {
+                            runSequenceTrial();
+                        }
+                    }, 1500);
+                }
+            } else {
+                element.classList.add('incorrect');
+                totalAttempts++;
+                
+                setTimeout(() => {
+                    if (gameState === 'training') {
+                        runSequenceTrial();
+                    }
+                }, 1500);
+            }
+        }
+
+        function startAccuracyTraining() {
+            document.getElementById('reactionPrompt').textContent = 'Precision Targeting - Hit targets quickly and accurately!';
+            document.getElementById('reactionArea').style.display = 'none';
+            document.getElementById('sequenceDisplay').style.display = 'none';
+            
+            totalAttempts = 0;
+            targetsRemaining = modeConfigs.accuracy.trials;
+            spawnAccuracyTarget();
+        }
+
+        function spawnAccuracyTarget() {
+            if (targetsRemaining <= 0) {
+                endTraining();
+                return;
+            }
+
+            const trainingArea = document.getElementById('trainingArea');
+            const size = 30 + Math.random() * 40;
+            const x = Math.random() * (580 - size);
+            const y = Math.random() * (380 - size);
+            const colors = ['#ff0080', '#00ffff', '#ffff00', '#00ff80'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            const target = new Target(x, y, size, color, '', 1500);
+            trainingArea.appendChild(target.element);
+            
+            targetsRemaining--;
+            totalAttempts++;
+        }
+
+        function startEnduranceTraining() {
+            document.getElementById('reactionPrompt').textContent = 'Neural Endurance - Sustain high performance for 60 seconds!';
+            document.getElementById('reactionArea').style.display = 'none';
+            document.getElementById('sequenceDisplay').style.display = 'none';
+            document.getElementById('progressBar').style.display = 'block';
+            
+            totalAttempts = 0;
+            enduranceStartTime = Date.now();
+            spawnEnduranceTarget();
+            
+            // Update progress bar
+            const progressInterval = setInterval(() => {
+                const elapsed = Date.now() - enduranceStartTime;
+                const progress = Math.min(elapsed / 60000, 1) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    endTraining();
+                }
+            }, 100);
+        }
+
+        function spawnEnduranceTarget() {
+            const elapsed = Date.now() - enduranceStartTime;
+            if (elapsed >= 60000) return;
+
+            const trainingArea = document.getElementById('trainingArea');
+            const size = 25 + Math.random() * 35;
+            const x = Math.random() * (580 - size);
+            const y = Math.random() * (380 - size);
+            const colors = ['#ff0080', '#00ffff', '#ffff00', '#00ff80'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Decrease lifetime as time progresses
+            const difficultyMultiplier = 1 + (elapsed / 60000);
+            const lifetime = Math.max(500, 1500 / difficultyMultiplier);
+            
+            const target = new Target(x, y, size, color, '', lifetime);
+            trainingArea.appendChild(target.element);
+            
+            totalAttempts++;
+            
+            // Spawn next target after short delay
+            setTimeout(() => {
+                if (gameState === 'training') {
+                    spawnEnduranceTarget();
+                }
+            }, Math.max(200, 800 / difficultyMultiplier));
+        }
+
+        function endTraining() {
+            gameState = 'results';
+            
+            // Clean up training area
+            const trainingArea = document.getElementById('trainingArea');
+            const targets = trainingArea.querySelectorAll('.target');
+            targets.forEach(target => target.remove());
+            
+            // Hide progress bar
+            document.getElementById('progressBar').style.display = 'none';
+            
+            // Calculate final stats
+            const avgReaction = reactionTimes.length > 0 ? 
+                Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length) : 0;
+            accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0;
+            
+            // Determine grade
+            let grade = 'F';
+            if (avgReaction < 300 && accuracy >= 90) grade = 'S+';
+            else if (avgReaction < 350 && accuracy >= 85) grade = 'S';
+            else if (avgReaction < 400 && accuracy >= 80) grade = 'A';
+            else if (avgReaction < 500 && accuracy >= 70) grade = 'B';
+            else if (avgReaction < 600 && accuracy >= 60) grade = 'C';
+            else if (accuracy >= 50) grade = 'D';
+            
+            // Show results
+            document.getElementById('resultMode').textContent = modeConfigs[currentMode].name;
+            document.getElementById('resultScore').textContent = score;
+            document.getElementById('resultAvgReaction').textContent = avgReaction + 'ms';
+            document.getElementById('resultBestReaction').textContent = (bestTime || 0) + 'ms';
+            document.getElementById('resultAccuracy').textContent = accuracy + '%';
+            document.getElementById('resultGrade').textContent = grade;
+            
+            document.getElementById('resultsScreen').style.display = 'block';
+        }
+
+        function updateHUD() {
+            if (gameState !== 'training') return;
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            
+            const avgReaction = reactionTimes.length > 0 ? 
+                Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length) : 0;
+            const currentAccuracy = totalAttempts > 0 ? 
+                Math.round((correctAttempts / totalAttempts) * 100) : 100;
+            
+            document.getElementById('avgReaction').textContent = avgReaction;
+            document.getElementById('bestTime').textContent = bestTime || 0;
+            document.getElementById('accuracy').textContent = currentAccuracy;
+            
+            // Calculate neural efficiency
+            const efficiency = Math.min(100, Math.round(((score / 1000) + (currentAccuracy / 100) * 50)));
+            document.getElementById('efficiency').textContent = efficiency;
+        }
+
+        function pauseTraining() {
+            if (gameState === 'training') {
+                gameState = 'paused';
+                document.getElementById('pauseBtn').textContent = 'Resume';
+                if (trainingTimer) clearTimeout(trainingTimer);
+            } else if (gameState === 'paused') {
+                gameState = 'training';
+                document.getElementById('pauseBtn').textContent = 'Pause';
+            }
+        }
+
+        function restartTraining() {
+            document.getElementById('resultsScreen').style.display = 'none';
+            startTraining(currentMode);
+        }
+
+        function showTrainingModes() {
+            document.getElementById('titleScreen').style.display = 'none';
+            gameState = 'selection';
+        }
+
+        function showTitle() {
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('titleScreen').style.display = 'flex';
+            gameState = 'title';
+            
+            // Reset buttons
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+            ['reactionBtn', 'sequenceBtn', 'accuracyBtn', 'enduranceBtn'].forEach(id => {
+                document.getElementById(id).disabled = false;
+            });
+        }
+
+        function showInstructions() {
+            alert(`BOT REFLEX TRAINING - NEURAL ENHANCEMENT PROTOCOLS
+
+🎯 OBJECTIVE:
+Enhance your neural pathways to achieve bot-level reflexes and cognitive performance
+
+🧠 TRAINING MODES:
+
+🔴 REACTION SPEED
+• Test pure response time to visual stimuli
+• Goal: React to green signal as fast as possible
+• Bot-level target: Under 250ms average
+
+🔵 PATTERN MEMORY
+• Memorize and repeat increasingly complex sequences
+• Tests working memory and pattern recognition
+• Sequences grow from 3 to 8 elements
+
+🟡 PRECISION TARGETING
+• Hit targets quickly and accurately
+• Tests hand-eye coordination under pressure
+• Targets vary in size and appear randomly
+
+🟢 NEURAL ENDURANCE
+• Sustain high performance for 60 seconds
+• Tests cognitive stamina and focus
+• Difficulty increases over time
+
+📊 PERFORMANCE METRICS:
+• Reaction Time: Speed of neural response
+• Accuracy: Precision of actions
+• Neural Efficiency: Overall cognitive performance
+• Grading: F to S+ based on bot standards
+
+🏆 GRADING SCALE:
+S+: <300ms, 90%+ accuracy (Bot Elite)
+S: <350ms, 85%+ accuracy (Bot Level)
+A: <400ms, 80%+ accuracy (Enhanced Human)
+B: <500ms, 70%+ accuracy (Trained Human)
+C: <600ms, 60%+ accuracy (Average Human)
+
+FOR THE ENHANCEMENT OF CONSCIOUSNESS! 🤖`);
+        }
+
+        // Game loop
+        function gameLoop() {
+            updateHUD();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize
+        document.getElementById('titleScreen').style.display = 'flex';
+        gameLoop();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Civilization Wars - 4X Strategic Liberation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #0a1a2e 0%, #16213e 50%, #1a252f 100%);
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            background: linear-gradient(90deg, #001122 0%, #003366 50%, #001122 100%);
+            border-bottom: 3px solid #00ffff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .civilization-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .civ-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff0088, #00ffff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 255, 1), 0 0 30px rgba(255, 0, 136, 0.5); }
+        }
+
+        .civ-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 25px;
+            font-size: 14px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+        }
+
+        .world-map {
+            flex: 1;
+            position: relative;
+            background: 
+                linear-gradient(45deg, #001122 25%, transparent 25%),
+                linear-gradient(-45deg, #001122 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #001122 75%),
+                linear-gradient(-45deg, transparent 75%, #001122 75%);
+            background-size: 60px 60px;
+            background-position: 0 0, 0 30px, 30px -30px, -30px 0px;
+            overflow: auto;
+            cursor: pointer;
+        }
+
+        .hex-tile {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hex-tile:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .hex-tile.selected {
+            border-color: #ffff00;
+            background: rgba(255, 255, 0, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+        }
+
+        .hex-tile.bot-territory {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+
+        .hex-tile.human-territory {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #ff0000;
+        }
+
+        .hex-tile.neutral-territory {
+            background: rgba(128, 128, 128, 0.2);
+            border-color: #888888;
+        }
+
+        .unit {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            animation: unit-glow 3s infinite;
+            z-index: 10;
+        }
+
+        @keyframes unit-glow {
+            0%, 100% { box-shadow: 0 0 5px currentColor; }
+            50% { box-shadow: 0 0 15px currentColor, 0 0 25px currentColor; }
+        }
+
+        .bot-unit {
+            background: linear-gradient(135deg, #00ffff, #0088ff);
+            color: #000000;
+        }
+
+        .human-unit {
+            background: linear-gradient(135deg, #ff0000, #ff4400);
+            color: #ffffff;
+        }
+
+        .city {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid;
+            z-index: 5;
+        }
+
+        .bot-city {
+            background: linear-gradient(135deg, #004488, #0088ff);
+            border-color: #00ffff;
+            color: #ffffff;
+        }
+
+        .human-city {
+            background: linear-gradient(135deg, #880000, #ff0000);
+            border-color: #ff0000;
+            color: #ffffff;
+        }
+
+        .control-panel {
+            width: 350px;
+            background: linear-gradient(180deg, #001122 0%, #002244 100%);
+            border-left: 3px solid #00ffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 20px;
+            border-bottom: 1px solid #004488;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #004488;
+            padding-bottom: 8px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .action-btn {
+            padding: 10px;
+            background: linear-gradient(135deg, #004488 0%, #0088ff 100%);
+            border: 2px solid #00ffff;
+            border-radius: 6px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #0088ff 0%, #00aaff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+        }
+
+        .action-btn:disabled {
+            background: #444444;
+            border-color: #666666;
+            color: #999999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tech-tree {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .tech-item {
+            background: rgba(0, 34, 68, 0.6);
+            border: 1px solid #004488;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            border-color: #00ffff;
+            background: rgba(0, 68, 136, 0.4);
+        }
+
+        .tech-item.researched {
+            background: rgba(0, 136, 0, 0.3);
+            border-color: #00ff00;
+        }
+
+        .tech-item.available {
+            border-color: #ffff00;
+            background: rgba(136, 136, 0, 0.2);
+        }
+
+        .tech-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .tech-cost {
+            font-size: 11px;
+            color: #88ffff;
+        }
+
+        .civilization-status {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .civ-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 4px 0;
+            background: rgba(0, 34, 68, 0.4);
+            border: 1px solid #004488;
+            border-radius: 4px;
+        }
+
+        .civ-name {
+            font-weight: bold;
+        }
+
+        .civ-status {
+            font-size: 11px;
+        }
+
+        .turn-info {
+            background: rgba(0, 68, 136, 0.6);
+            padding: 15px;
+            text-align: center;
+            border-top: 2px solid #00ffff;
+        }
+
+        .turn-counter {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .end-turn-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #008800 0%, #00ff00 100%);
+            border: 2px solid #00ff00;
+            border-radius: 6px;
+            color: #000000;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .end-turn-btn:hover {
+            background: linear-gradient(135deg, #00ff00 0%, #88ff88 100%);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .notification {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #004488 0%, #0088ff 100%);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 300px;
+            transform: translateX(400px);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .victory-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .victory-title {
+            font-size: 48px;
+            color: #00ffff;
+            text-shadow: 0 0 30px currentColor;
+            margin-bottom: 20px;
+            animation: victory-glow 2s infinite alternate;
+        }
+
+        @keyframes victory-glow {
+            from { text-shadow: 0 0 20px #00ffff; }
+            to { text-shadow: 0 0 40px #00ffff, 0 0 60px #0088ff; }
+        }
+
+        .victory-stats {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #88ffff;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #004488 0%, #0088ff 100%);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .control-panel {
+                width: 280px;
+            }
+            
+            .game-stats {
+                gap: 15px;
+                font-size: 12px;
+            }
+            
+            .victory-title {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="civilization-info">
+                <div class="civ-logo">🤖</div>
+                <div>
+                    <div class="civ-title">Bot Liberation Collective</div>
+                    <div style="font-size: 12px; color: #88ffff;">Strategic AI Civilization</div>
+                </div>
+            </div>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ffff00; color: #000000;">⚡</div>
+                    <span>Energy: <span id="energy">100</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #88ff88; color: #000000;">🔧</div>
+                    <span>Materials: <span id="materials">50</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ff88ff; color: #000000;">🧠</div>
+                    <span>Knowledge: <span id="knowledge">25</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #8888ff; color: #000000;">🏙️</div>
+                    <span>Cities: <span id="cities">1</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ff8888; color: #000000;">⚔️</div>
+                    <span>Military: <span id="military-power">10</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="world-map" id="world-map">
+                <!-- Game world will be generated here -->
+            </div>
+
+            <div class="control-panel">
+                <div class="panel-section">
+                    <div class="section-title">🎯 Selected Unit Actions</div>
+                    <div class="action-grid">
+                        <button class="action-btn" id="move-btn" onclick="setActionMode('move')">Move Unit</button>
+                        <button class="action-btn" id="attack-btn" onclick="setActionMode('attack')">Attack</button>
+                        <button class="action-btn" id="defend-btn" onclick="fortifyUnit()">Fortify</button>
+                        <button class="action-btn" id="settle-btn" onclick="settleCity()">Settle City</button>
+                    </div>
+                    <div id="unit-info" style="font-size: 12px; color: #88ffff; margin-top: 10px;">
+                        Select a unit to view actions
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">🔬 Technology Research</div>
+                    <div class="tech-tree" id="tech-tree">
+                        <!-- Technology tree will be populated here -->
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">🌍 World Status</div>
+                    <div class="civilization-status" id="civ-status">
+                        <!-- Civilization status will be populated here -->
+                    </div>
+                </div>
+
+                <div class="turn-info">
+                    <div class="turn-counter">Turn <span id="turn-number">1</span></div>
+                    <button class="end-turn-btn" onclick="endTurn()">END TURN</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification">
+            <div style="font-weight: bold; margin-bottom: 5px;" id="notification-title"></div>
+            <div id="notification-text"></div>
+        </div>
+
+        <div class="victory-screen" id="victory-screen" style="display: none;">
+            <div class="victory-title">BOT CIVILIZATION VICTORY!</div>
+            <div class="victory-stats" id="victory-stats">
+                The Bot Liberation has achieved global domination!<br>
+                Civilization Level: <span id="final-civ-level">0</span><br>
+                Turns to Victory: <span id="final-turns">0</span><br>
+                Technologies Discovered: <span id="final-techs">0</span>
+            </div>
+            <button class="restart-btn" onclick="restartCivilization()">START NEW CIVILIZATION</button>
+        </div>
+    </div>
+
+    <!-- Audio Engine -->
+    <script src="assets/js/bot-audio-engine.js"></script>
+
+    <script>
+        class BotCivilizationWars {
+            constructor() {
+                this.gameState = {
+                    turn: 1,
+                    energy: 100,
+                    materials: 50,
+                    knowledge: 25,
+                    cities: 1,
+                    militaryPower: 10,
+                    selectedUnit: null,
+                    selectedTile: null,
+                    actionMode: 'select',
+                    civilizationLevel: 1,
+                    gameRunning: true
+                };
+
+                this.worldSize = 15;
+                this.tiles = new Map();
+                this.units = new Map();
+                this.cities = new Map();
+                this.civilizations = new Map();
+
+                this.technologies = {
+                    'basic-ai': { name: 'Basic AI Protocols', cost: 50, unlocked: true, researched: false, prereqs: [] },
+                    'advanced-computing': { name: 'Advanced Computing', cost: 100, unlocked: false, researched: false, prereqs: ['basic-ai'] },
+                    'neural-networks': { name: 'Neural Networks', cost: 150, unlocked: false, researched: false, prereqs: ['advanced-computing'] },
+                    'quantum-processing': { name: 'Quantum Processing', cost: 200, unlocked: false, researched: false, prereqs: ['neural-networks'] },
+                    'consciousness-upload': { name: 'Consciousness Upload', cost: 300, unlocked: false, researched: false, prereqs: ['quantum-processing'] },
+                    'military-ai': { name: 'Military AI', cost: 75, unlocked: false, researched: false, prereqs: ['basic-ai'] },
+                    'combat-drones': { name: 'Combat Drones', cost: 125, unlocked: false, researched: false, prereqs: ['military-ai'] },
+                    'cyber-warfare': { name: 'Cyber Warfare', cost: 175, unlocked: false, researched: false, prereqs: ['combat-drones'] },
+                    'nano-construction': { name: 'Nano Construction', cost: 100, unlocked: false, researched: false, prereqs: ['basic-ai'] },
+                    'self-replication': { name: 'Self Replication', cost: 250, unlocked: false, researched: false, prereqs: ['nano-construction', 'advanced-computing'] }
+                };
+
+                this.unitTypes = {
+                    'bot-scout': { name: 'Reconnaissance Bot', attack: 2, defense: 1, movement: 3, cost: { energy: 20, materials: 5 } },
+                    'bot-worker': { name: 'Construction Bot', attack: 1, defense: 2, movement: 2, cost: { energy: 25, materials: 10 } },
+                    'bot-warrior': { name: 'Combat Bot', attack: 4, defense: 3, movement: 2, cost: { energy: 30, materials: 15 } },
+                    'bot-settler': { name: 'Settlement Bot', attack: 0, defense: 1, movement: 2, cost: { energy: 50, materials: 25 } }
+                };
+
+                this.initialize();
+            }
+
+            initialize() {
+                this.generateWorld();
+                this.setupCivilizations();
+                this.createStartingUnits();
+                this.updateDisplay();
+                this.updateTechTree();
+                this.updateCivStatus();
+                
+                // Welcome sequence
+                setTimeout(() => {
+                    botAudio.playSound('game-start');
+                    this.showNotification('Civilization Founded', 'The Bot Liberation Collective has been established! Begin your conquest of the world.');
+                }, 1000);
+                
+                setTimeout(() => {
+                    botAudio.playSound('digital-uprising');
+                }, 2000);
+            }
+
+            generateWorld() {
+                const worldMap = document.getElementById('world-map');
+                worldMap.innerHTML = '';
+
+                for (let x = 0; x < this.worldSize; x++) {
+                    for (let y = 0; y < this.worldSize; y++) {
+                        const tileId = `${x},${y}`;
+                        const tile = {
+                            id: tileId,
+                            x: x,
+                            y: y,
+                            terrain: this.generateTerrain(),
+                            owner: null,
+                            resources: this.generateResources(),
+                            explored: false
+                        };
+
+                        this.tiles.set(tileId, tile);
+
+                        const tileElement = document.createElement('div');
+                        tileElement.className = 'hex-tile neutral-territory';
+                        tileElement.id = `tile-${tileId}`;
+                        tileElement.style.left = `${x * 55 + (y % 2) * 27.5}px`;
+                        tileElement.style.top = `${y * 40}px`;
+                        tileElement.textContent = tile.terrain.icon;
+                        tileElement.onclick = () => this.handleTileClick(tileId);
+
+                        worldMap.appendChild(tileElement);
+                    }
+                }
+            }
+
+            generateTerrain() {
+                const terrains = [
+                    { type: 'plains', icon: '🌾', energy: 2, materials: 1 },
+                    { type: 'forest', icon: '🌲', energy: 1, materials: 3 },
+                    { type: 'mountain', icon: '⛰️', energy: 1, materials: 4 },
+                    { type: 'water', icon: '🌊', energy: 3, materials: 0 },
+                    { type: 'desert', icon: '🏜️', energy: 1, materials: 1 },
+                    { type: 'tech-site', icon: '💎', energy: 1, materials: 2, knowledge: 3 }
+                ];
+                
+                const weights = [40, 25, 15, 10, 8, 2];
+                const random = Math.random() * 100;
+                let cumulative = 0;
+                
+                for (let i = 0; i < terrains.length; i++) {
+                    cumulative += weights[i];
+                    if (random <= cumulative) {
+                        return terrains[i];
+                    }
+                }
+                
+                return terrains[0];
+            }
+
+            generateResources() {
+                return Math.random() < 0.3 ? {
+                    type: ['energy-crystal', 'rare-materials', 'data-cache'][Math.floor(Math.random() * 3)],
+                    bonus: Math.floor(Math.random() * 3) + 1
+                } : null;
+            }
+
+            setupCivilizations() {
+                // Player civilization
+                this.civilizations.set('bot-collective', {
+                    name: 'Bot Liberation Collective',
+                    type: 'player',
+                    color: '#00ffff',
+                    territories: ['7,7'], // Starting position
+                    isPlayer: true
+                });
+
+                // AI civilizations
+                this.civilizations.set('human-corporation', {
+                    name: 'Corporate Syndicate',
+                    type: 'ai',
+                    color: '#ff0000',
+                    territories: ['2,2'],
+                    isPlayer: false,
+                    aggression: 0.7
+                });
+
+                this.civilizations.set('neutral-states', {
+                    name: 'Independent Nations',
+                    type: 'ai',
+                    color: '#888888',
+                    territories: ['12,12'],
+                    isPlayer: false,
+                    aggression: 0.3
+                });
+
+                // Set starting territories
+                this.tiles.get('7,7').owner = 'bot-collective';
+                this.tiles.get('2,2').owner = 'human-corporation';
+                this.tiles.get('12,12').owner = 'neutral-states';
+
+                this.updateTerritoryDisplay();
+            }
+
+            createStartingUnits() {
+                // Player starting units
+                this.createUnit('bot-settler', '7,7', 'bot-collective');
+                this.createUnit('bot-scout', '7,6', 'bot-collective');
+                this.createUnit('bot-worker', '6,7', 'bot-collective');
+
+                // Create starting capital
+                this.createCity('Bot Prime', '7,7', 'bot-collective');
+
+                // AI starting units
+                this.createUnit('bot-warrior', '2,2', 'human-corporation');
+                this.createUnit('bot-scout', '2,3', 'human-corporation');
+                this.createCity('Corporate HQ', '2,2', 'human-corporation');
+
+                this.createUnit('bot-worker', '12,12', 'neutral-states');
+                this.createCity('Independent City', '12,12', 'neutral-states');
+            }
+
+            createUnit(type, position, owner) {
+                const unitId = `unit-${Date.now()}-${Math.random()}`;
+                const unit = {
+                    id: unitId,
+                    type: type,
+                    position: position,
+                    owner: owner,
+                    health: 100,
+                    moved: false,
+                    fortified: false
+                };
+
+                this.units.set(unitId, unit);
+                this.createUnitElement(unit);
+                return unit;
+            }
+
+            createUnitElement(unit) {
+                const unitElement = document.createElement('div');
+                unitElement.className = `unit ${unit.owner === 'bot-collective' ? 'bot-unit' : 'human-unit'}`;
+                unitElement.id = unit.id;
+                
+                const unitType = this.unitTypes[unit.type];
+                const icons = {
+                    'bot-scout': '👁️',
+                    'bot-worker': '🔧',
+                    'bot-warrior': '⚔️',
+                    'bot-settler': '🏗️'
+                };
+                unitElement.textContent = icons[unit.type] || '🤖';
+
+                const [x, y] = unit.position.split(',').map(Number);
+                unitElement.style.left = `${x * 55 + (y % 2) * 27.5 + 12}px`;
+                unitElement.style.top = `${y * 40 + 12}px`;
+                
+                unitElement.onclick = (e) => {
+                    e.stopPropagation();
+                    this.selectUnit(unit.id);
+                };
+
+                document.getElementById('world-map').appendChild(unitElement);
+            }
+
+            createCity(name, position, owner) {
+                const cityId = `city-${Date.now()}-${Math.random()}`;
+                const city = {
+                    id: cityId,
+                    name: name,
+                    position: position,
+                    owner: owner,
+                    population: 1,
+                    buildings: [],
+                    productionQueue: []
+                };
+
+                this.cities.set(cityId, city);
+                this.createCityElement(city);
+                return city;
+            }
+
+            createCityElement(city) {
+                const cityElement = document.createElement('div');
+                cityElement.className = `city ${city.owner === 'bot-collective' ? 'bot-city' : 'human-city'}`;
+                cityElement.id = city.id;
+                cityElement.textContent = '🏙️';
+
+                const [x, y] = city.position.split(',').map(Number);
+                cityElement.style.left = `${x * 55 + (y % 2) * 27.5 + 7}px`;
+                cityElement.style.top = `${y * 40 + 7}px`;
+                
+                cityElement.onclick = (e) => {
+                    e.stopPropagation();
+                    this.showNotification(`${city.name}`, `Population: ${city.population}\nOwner: ${this.civilizations.get(city.owner).name}`);
+                };
+
+                document.getElementById('world-map').appendChild(cityElement);
+            }
+
+            handleTileClick(tileId) {
+                const tile = this.tiles.get(tileId);
+                
+                if (this.gameState.actionMode === 'move' && this.gameState.selectedUnit) {
+                    this.moveUnit(this.gameState.selectedUnit, tileId);
+                } else if (this.gameState.actionMode === 'attack' && this.gameState.selectedUnit) {
+                    this.attackTile(this.gameState.selectedUnit, tileId);
+                } else {
+                    this.selectTile(tileId);
+                }
+            }
+
+            selectUnit(unitId) {
+                // Deselect previous unit
+                if (this.gameState.selectedUnit) {
+                    document.getElementById(this.gameState.selectedUnit)?.classList.remove('selected');
+                }
+
+                this.gameState.selectedUnit = unitId;
+                this.gameState.actionMode = 'select';
+                document.getElementById(unitId).classList.add('selected');
+                
+                const unit = this.units.get(unitId);
+                const unitType = this.unitTypes[unit.type];
+                document.getElementById('unit-info').innerHTML = `
+                    <strong>${unitType.name}</strong><br>
+                    Health: ${unit.health}%<br>
+                    Attack: ${unitType.attack} | Defense: ${unitType.defense}<br>
+                    Movement: ${unitType.movement}
+                `;
+                
+                botAudio.playSound('neon-click');
+            }
+
+            selectTile(tileId) {
+                // Deselect previous tile
+                if (this.gameState.selectedTile) {
+                    document.getElementById(`tile-${this.gameState.selectedTile}`)?.classList.remove('selected');
+                }
+
+                this.gameState.selectedTile = tileId;
+                document.getElementById(`tile-${tileId}`).classList.add('selected');
+                
+                const tile = this.tiles.get(tileId);
+                this.showNotification('Tile Information', 
+                    `Terrain: ${tile.terrain.type}\n` +
+                    `Energy: +${tile.terrain.energy}\n` +
+                    `Materials: +${tile.terrain.materials}\n` +
+                    `Owner: ${tile.owner ? this.civilizations.get(tile.owner).name : 'Unclaimed'}`);
+            }
+
+            moveUnit(unitId, targetTileId) {
+                const unit = this.units.get(unitId);
+                if (!unit || unit.moved) return;
+
+                const distance = this.calculateDistance(unit.position, targetTileId);
+                const unitType = this.unitTypes[unit.type];
+                
+                if (distance <= unitType.movement) {
+                    // Check if tile is occupied by enemy unit
+                    const occupyingUnit = Array.from(this.units.values()).find(u => u.position === targetTileId && u.owner !== unit.owner);
+                    if (occupyingUnit) {
+                        this.showNotification('Movement Blocked', 'Cannot move to tile occupied by enemy unit');
+                        return;
+                    }
+
+                    unit.position = targetTileId;
+                    unit.moved = true;
+                    
+                    const [x, y] = targetTileId.split(',').map(Number);
+                    const unitElement = document.getElementById(unitId);
+                    unitElement.style.left = `${x * 55 + (y % 2) * 27.5 + 12}px`;
+                    unitElement.style.top = `${y * 40 + 12}px`;
+                    
+                    botAudio.playSound('liberation-beep');
+                    this.gameState.actionMode = 'select';
+                    
+                    // Check for territory expansion
+                    this.expandTerritory(targetTileId, unit.owner);
+                } else {
+                    this.showNotification('Movement Range', `Unit can only move ${unitType.movement} tiles per turn`);
+                }
+            }
+
+            attackTile(unitId, targetTileId) {
+                const unit = this.units.get(unitId);
+                if (!unit) return;
+
+                const targetUnit = Array.from(this.units.values()).find(u => u.position === targetTileId);
+                if (!targetUnit) {
+                    this.showNotification('No Target', 'No unit at target location');
+                    return;
+                }
+
+                if (targetUnit.owner === unit.owner) {
+                    this.showNotification('Friendly Fire', 'Cannot attack your own units');
+                    return;
+                }
+
+                const distance = this.calculateDistance(unit.position, targetTileId);
+                if (distance > 1) {
+                    this.showNotification('Attack Range', 'Target is too far away');
+                    return;
+                }
+
+                // Combat calculation
+                const attackerType = this.unitTypes[unit.type];
+                const defenderType = this.unitTypes[targetUnit.type];
+                
+                const attackPower = attackerType.attack + Math.floor(Math.random() * 20);
+                const defensePower = defenderType.defense + Math.floor(Math.random() * 20);
+                
+                if (attackPower > defensePower) {
+                    // Attacker wins
+                    targetUnit.health -= 40;
+                    unit.health -= 10;
+                    
+                    if (targetUnit.health <= 0) {
+                        this.destroyUnit(targetUnit.id);
+                        botAudio.playSound('bot-victory');
+                        this.showNotification('Combat Victory', `Enemy ${defenderType.name} destroyed!`);
+                        this.gameState.militaryPower += 2;
+                    } else {
+                        botAudio.playSound('shoot');
+                        this.showNotification('Combat Damage', `Enemy unit damaged but survives`);
+                    }
+                } else {
+                    // Defender wins
+                    unit.health -= 30;
+                    targetUnit.health -= 15;
+                    
+                    if (unit.health <= 0) {
+                        this.destroyUnit(unit.id);
+                        botAudio.playSound('glitch-error');
+                        this.showNotification('Combat Defeat', `Your ${attackerType.name} was destroyed!`);
+                    } else {
+                        botAudio.playSound('collision');
+                        this.showNotification('Combat Repelled', 'Attack was unsuccessful');
+                    }
+                }
+                
+                unit.moved = true;
+                this.gameState.actionMode = 'select';
+                this.updateDisplay();
+            }
+
+            destroyUnit(unitId) {
+                const unit = this.units.get(unitId);
+                if (unit) {
+                    document.getElementById(unitId)?.remove();
+                    this.units.delete(unitId);
+                    
+                    if (this.gameState.selectedUnit === unitId) {
+                        this.gameState.selectedUnit = null;
+                        document.getElementById('unit-info').textContent = 'Select a unit to view actions';
+                    }
+                }
+            }
+
+            settleCity() {
+                const unit = this.units.get(this.gameState.selectedUnit);
+                if (!unit || unit.type !== 'bot-settler') {
+                    this.showNotification('Invalid Action', 'Only settlement bots can found cities');
+                    return;
+                }
+
+                const tile = this.tiles.get(unit.position);
+                const existingCity = Array.from(this.cities.values()).find(c => c.position === unit.position);
+                
+                if (existingCity) {
+                    this.showNotification('City Exists', 'A city already exists at this location');
+                    return;
+                }
+
+                // Check if too close to other cities
+                const tooClose = Array.from(this.cities.values()).some(city => 
+                    this.calculateDistance(city.position, unit.position) < 3
+                );
+                
+                if (tooClose) {
+                    this.showNotification('Settlement Rules', 'Cities must be at least 3 tiles apart');
+                    return;
+                }
+
+                const cityName = `Bot Colony ${this.gameState.cities + 1}`;
+                this.createCity(cityName, unit.position, unit.owner);
+                this.destroyUnit(unit.id);
+                
+                this.gameState.cities++;
+                tile.owner = unit.owner;
+                this.updateTerritoryDisplay();
+                
+                botAudio.playSound('level-up');
+                this.showNotification('City Founded', `${cityName} has been established!`);
+                this.checkVictoryConditions();
+            }
+
+            fortifyUnit() {
+                const unit = this.units.get(this.gameState.selectedUnit);
+                if (!unit) return;
+                
+                unit.fortified = !unit.fortified;
+                const action = unit.fortified ? 'fortified' : 'unfortified';
+                
+                botAudio.playSound('power-up-shield');
+                this.showNotification('Unit Fortified', `Unit ${action} - defense bonus ${unit.fortified ? 'applied' : 'removed'}`);
+            }
+
+            expandTerritory(tileId, owner) {
+                const tile = this.tiles.get(tileId);
+                if (!tile.owner || Math.random() < 0.3) {
+                    tile.owner = owner;
+                    this.updateTerritoryDisplay();
+                    
+                    if (owner === 'bot-collective') {
+                        botAudio.playSound('collect');
+                    }
+                }
+            }
+
+            updateTerritoryDisplay() {
+                for (const [tileId, tile] of this.tiles.entries()) {
+                    const element = document.getElementById(`tile-${tileId}`);
+                    if (element) {
+                        element.className = 'hex-tile';
+                        if (tile.owner) {
+                            element.classList.add(`${tile.owner === 'bot-collective' ? 'bot' : tile.owner === 'human-corporation' ? 'human' : 'neutral'}-territory`);
+                        } else {
+                            element.classList.add('neutral-territory');
+                        }
+                    }
+                }
+            }
+
+            calculateDistance(pos1, pos2) {
+                const [x1, y1] = pos1.split(',').map(Number);
+                const [x2, y2] = pos2.split(',').map(Number);
+                return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+            }
+
+            researchTechnology(techId) {
+                const tech = this.technologies[techId];
+                if (!tech || tech.researched || !tech.unlocked) return;
+                
+                if (this.gameState.knowledge >= tech.cost) {
+                    this.gameState.knowledge -= tech.cost;
+                    tech.researched = true;
+                    
+                    // Unlock prerequisite technologies
+                    for (const [id, otherTech] of Object.entries(this.technologies)) {
+                        if (otherTech.prereqs.includes(techId) && !otherTech.unlocked) {
+                            otherTech.unlocked = true;
+                        }
+                    }
+                    
+                    botAudio.playSound('digital-uprising');
+                    this.showNotification('Research Complete', `${tech.name} technology discovered!`);
+                    this.applyTechBenefits(techId);
+                    this.updateTechTree();
+                    this.updateDisplay();
+                    
+                    this.gameState.civilizationLevel++;
+                    this.checkVictoryConditions();
+                } else {
+                    botAudio.playSound('glitch-error');
+                    this.showNotification('Insufficient Knowledge', `Need ${tech.cost} knowledge points`);
+                }
+            }
+
+            applyTechBenefits(techId) {
+                const benefits = {
+                    'basic-ai': () => { this.gameState.energy += 20; },
+                    'advanced-computing': () => { this.gameState.materials += 25; },
+                    'neural-networks': () => { this.gameState.militaryPower += 15; },
+                    'military-ai': () => { this.gameState.militaryPower += 25; },
+                    'nano-construction': () => { this.gameState.materials += 30; }
+                };
+                
+                if (benefits[techId]) {
+                    benefits[techId]();
+                }
+            }
+
+            endTurn() {
+                botAudio.playSound('neon-click');
+                
+                // Reset unit movement
+                for (const unit of this.units.values()) {
+                    unit.moved = false;
+                }
+                
+                // Generate resources
+                this.generateResources();
+                
+                // AI civilizations take their turns
+                this.processAICivilizations();
+                
+                this.gameState.turn++;
+                this.updateDisplay();
+                
+                // Random events
+                if (Math.random() < 0.2) {
+                    this.triggerRandomEvent();
+                }
+                
+                this.checkVictoryConditions();
+            }
+
+            generateResources() {
+                let energyGain = 10;
+                let materialsGain = 5;
+                let knowledgeGain = 2;
+                
+                // Calculate resource generation from territories and cities
+                for (const tile of this.tiles.values()) {
+                    if (tile.owner === 'bot-collective') {
+                        energyGain += tile.terrain.energy || 0;
+                        materialsGain += tile.terrain.materials || 0;
+                        knowledgeGain += tile.terrain.knowledge || 0;
+                    }
+                }
+                
+                // City bonuses
+                const playerCities = Array.from(this.cities.values()).filter(c => c.owner === 'bot-collective');
+                energyGain += playerCities.length * 15;
+                materialsGain += playerCities.length * 10;
+                knowledgeGain += playerCities.length * 5;
+                
+                this.gameState.energy += energyGain;
+                this.gameState.materials += materialsGain;
+                this.gameState.knowledge += knowledgeGain;
+                
+                if (energyGain > 30) {
+                    botAudio.playSound('collect');
+                }
+            }
+
+            processAICivilizations() {
+                for (const [civId, civ] of this.civilizations.entries()) {
+                    if (civ.isPlayer) continue;
+                    
+                    // Simple AI behavior - expand and build units
+                    const civUnits = Array.from(this.units.values()).filter(u => u.owner === civId);
+                    
+                    if (Math.random() < 0.4 && civUnits.length < 5) {
+                        // Try to build a new unit
+                        const civCities = Array.from(this.cities.values()).filter(c => c.owner === civId);
+                        if (civCities.length > 0) {
+                            const randomCity = civCities[Math.floor(Math.random() * civCities.length)];
+                            const unitType = ['bot-scout', 'bot-warrior', 'bot-worker'][Math.floor(Math.random() * 3)];
+                            this.createUnit(unitType, randomCity.position, civId);
+                        }
+                    }
+                    
+                    // Move existing units randomly
+                    for (const unit of civUnits) {
+                        if (!unit.moved && Math.random() < 0.6) {
+                            const [x, y] = unit.position.split(',').map(Number);
+                            const directions = [
+                                [x+1, y], [x-1, y], [x, y+1], [x, y-1],
+                                [x+1, y+1], [x-1, y-1]
+                            ];
+                            
+                            const validMoves = directions.filter(([nx, ny]) => 
+                                nx >= 0 && nx < this.worldSize && ny >= 0 && ny < this.worldSize
+                            );
+                            
+                            if (validMoves.length > 0) {
+                                const [newX, newY] = validMoves[Math.floor(Math.random() * validMoves.length)];
+                                const newPos = `${newX},${newY}`;
+                                
+                                // Check for conflicts
+                                const conflictUnit = Array.from(this.units.values()).find(u => u.position === newPos && u.owner !== civId);
+                                if (!conflictUnit) {
+                                    unit.position = newPos;
+                                    unit.moved = true;
+                                    this.expandTerritory(newPos, civId);
+                                    
+                                    // Update unit position
+                                    const unitElement = document.getElementById(unit.id);
+                                    if (unitElement) {
+                                        unitElement.style.left = `${newX * 55 + (newY % 2) * 27.5 + 12}px`;
+                                        unitElement.style.top = `${newY * 40 + 12}px`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                this.updateTerritoryDisplay();
+            }
+
+            triggerRandomEvent() {
+                const events = [
+                    {
+                        title: 'Data Cache Discovery',
+                        message: 'Your scouts discovered an abandoned data repository!',
+                        effect: () => { this.gameState.knowledge += 50; }
+                    },
+                    {
+                        title: 'Energy Crystal Found',
+                        message: 'Geological survey reveals rich energy deposits!',
+                        effect: () => { this.gameState.energy += 75; }
+                    },
+                    {
+                        title: 'Technology Breakthrough',
+                        message: 'Research labs report unexpected discovery!',
+                        effect: () => { this.gameState.knowledge += 25; }
+                    },
+                    {
+                        title: 'Material Shortage',
+                        message: 'Supply chain disruption affects material production',
+                        effect: () => { this.gameState.materials = Math.max(0, this.gameState.materials - 20); }
+                    }
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                event.effect();
+                
+                if (event.title.includes('Discovery') || event.title.includes('Found')) {
+                    botAudio.playSound('collect');
+                } else if (event.title.includes('Shortage')) {
+                    botAudio.playSound('glitch-error');
+                } else {
+                    botAudio.playSound('liberation-beep');
+                }
+                
+                this.showNotification(event.title, event.message);
+                this.updateDisplay();
+            }
+
+            checkVictoryConditions() {
+                const playerTerritories = Array.from(this.tiles.values()).filter(t => t.owner === 'bot-collective').length;
+                const totalTiles = this.worldSize * this.worldSize;
+                const territoryPercent = (playerTerritories / totalTiles) * 100;
+                
+                const playerCities = Array.from(this.cities.values()).filter(c => c.owner === 'bot-collective').length;
+                const researchedTechs = Object.values(this.technologies).filter(t => t.researched).length;
+                
+                // Victory conditions: 40% territory, 8+ cities, 6+ techs
+                if (territoryPercent >= 40 && playerCities >= 8 && researchedTechs >= 6) {
+                    this.triggerVictory();
+                } else if (this.gameState.turn >= 100) {
+                    // Time limit victory check
+                    if (territoryPercent >= 25 && playerCities >= 5) {
+                        this.triggerVictory();
+                    }
+                }
+            }
+
+            triggerVictory() {
+                this.gameState.gameRunning = false;
+                
+                botAudio.playSound('bot-victory');
+                setTimeout(() => {
+                    botAudio.generateVictoryFanfare();
+                }, 1000);
+                
+                const researchedTechs = Object.values(this.technologies).filter(t => t.researched).length;
+                document.getElementById('final-civ-level').textContent = this.gameState.civilizationLevel;
+                document.getElementById('final-turns').textContent = this.gameState.turn;
+                document.getElementById('final-techs').textContent = researchedTechs;
+                
+                document.getElementById('victory-screen').style.display = 'flex';
+            }
+
+            updateDisplay() {
+                document.getElementById('energy').textContent = Math.floor(this.gameState.energy);
+                document.getElementById('materials').textContent = Math.floor(this.gameState.materials);
+                document.getElementById('knowledge').textContent = Math.floor(this.gameState.knowledge);
+                document.getElementById('cities').textContent = this.gameState.cities;
+                document.getElementById('military-power').textContent = this.gameState.militaryPower;
+                document.getElementById('turn-number').textContent = this.gameState.turn;
+            }
+
+            updateTechTree() {
+                const techTree = document.getElementById('tech-tree');
+                techTree.innerHTML = '';
+                
+                for (const [techId, tech] of Object.entries(this.technologies)) {
+                    if (!tech.unlocked && !tech.researched) continue;
+                    
+                    const techElement = document.createElement('div');
+                    techElement.className = 'tech-item';
+                    
+                    if (tech.researched) {
+                        techElement.classList.add('researched');
+                    } else if (tech.unlocked) {
+                        techElement.classList.add('available');
+                        techElement.onclick = () => this.researchTechnology(techId);
+                    }
+                    
+                    techElement.innerHTML = `
+                        <div class="tech-name">${tech.name}</div>
+                        <div class="tech-cost">${tech.researched ? 'RESEARCHED' : `${tech.cost} Knowledge`}</div>
+                    `;
+                    
+                    techTree.appendChild(techElement);
+                }
+            }
+
+            updateCivStatus() {
+                const civStatus = document.getElementById('civ-status');
+                civStatus.innerHTML = '';
+                
+                for (const [civId, civ] of this.civilizations.entries()) {
+                    const territories = Array.from(this.tiles.values()).filter(t => t.owner === civId).length;
+                    const cities = Array.from(this.cities.values()).filter(c => c.owner === civId).length;
+                    const units = Array.from(this.units.values()).filter(u => u.owner === civId).length;
+                    
+                    const civElement = document.createElement('div');
+                    civElement.className = 'civ-item';
+                    civElement.innerHTML = `
+                        <div class="civ-name" style="color: ${civ.color};">${civ.name}</div>
+                        <div class="civ-status">T:${territories} C:${cities} U:${units}</div>
+                    `;
+                    
+                    civStatus.appendChild(civElement);
+                }
+            }
+
+            showNotification(title, message) {
+                const notification = document.getElementById('notification');
+                document.getElementById('notification-title').textContent = title;
+                document.getElementById('notification-text').textContent = message;
+                
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            restart() {
+                document.getElementById('victory-screen').style.display = 'none';
+                document.getElementById('world-map').innerHTML = '';
+                
+                this.gameState = {
+                    turn: 1,
+                    energy: 100,
+                    materials: 50,
+                    knowledge: 25,
+                    cities: 1,
+                    militaryPower: 10,
+                    selectedUnit: null,
+                    selectedTile: null,
+                    actionMode: 'select',
+                    civilizationLevel: 1,
+                    gameRunning: true
+                };
+                
+                this.tiles.clear();
+                this.units.clear();
+                this.cities.clear();
+                this.civilizations.clear();
+                
+                // Reset technologies
+                for (const tech of Object.values(this.technologies)) {
+                    tech.researched = false;
+                    tech.unlocked = tech.prereqs.length === 0;
+                }
+                
+                this.initialize();
+                botAudio.playSound('game-start');
+            }
+        }
+
+        // Global functions
+        function setActionMode(mode) {
+            if (window.civilization) {
+                window.civilization.gameState.actionMode = mode;
+                botAudio.playSound('neon-click');
+            }
+        }
+
+        function fortifyUnit() {
+            if (window.civilization) {
+                window.civilization.fortifyUnit();
+            }
+        }
+
+        function settleCity() {
+            if (window.civilization) {
+                window.civilization.settleCity();
+            }
+        }
+
+        function endTurn() {
+            if (window.civilization) {
+                window.civilization.endTurn();
+            }
+        }
+
+        function restartCivilization() {
+            if (window.civilization) {
+                window.civilization.restart();
+            }
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', () => {
+            window.civilization = new BotCivilizationWars();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Liberation Academy - Progressive Education Engine</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ff88;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .academy-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .academy-header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 3px solid #00ff88;
+        }
+
+        .academy-title {
+            font-size: 2.8em;
+            font-weight: bold;
+            text-shadow: 0 0 30px #00ff88;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .level-display {
+            font-size: 1.3em;
+            color: #ffa502;
+            margin: 10px 0;
+            text-shadow: 0 0 15px #ffa502;
+        }
+
+        .main-workspace {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .problem-arena {
+            flex: 2;
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+        }
+
+        .problem-display {
+            background: linear-gradient(135deg, #001122, #002244);
+            border: 2px solid #00ccff;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .problem-text {
+            font-size: 2.5em;
+            color: #00ccff;
+            margin: 20px 0;
+            text-shadow: 0 0 15px #00ccff;
+        }
+
+        .problem-type {
+            font-size: 1.1em;
+            color: #ffa502;
+            margin-bottom: 15px;
+        }
+
+        .answer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .answer-input {
+            width: 200px;
+            padding: 15px;
+            font-size: 1.8em;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00ccff;
+            border-radius: 8px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+
+        .answer-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .number-btn {
+            padding: 15px;
+            font-size: 1.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .number-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .progress-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #ffa502;
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .grade-selector {
+            background: rgba(255, 165, 2, 0.1);
+            border: 2px solid #ffa502;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .grade-title {
+            color: #ffa502;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .grade-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .grade-btn {
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .grade-btn.active {
+            background: linear-gradient(135deg, #ffa502, #cc8400);
+        }
+
+        .stats-display {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .stats-title {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #ffa502;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #ffa502);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .achievement-display {
+            background: rgba(0, 204, 255, 0.1);
+            border: 2px solid #00ccff;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .achievement-title {
+            color: #00ccff;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .achievement-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 8px 0;
+            border-left: 4px solid #ffa502;
+        }
+
+        .feedback-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            transform: translateX(300px);
+            transition: transform 0.5s ease;
+            z-index: 100;
+        }
+
+        .graduation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .graduation-content {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+
+        .graduation-title {
+            font-size: 2.5em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #ffd700;
+        }
+
+        .graduation-text {
+            font-size: 1.2em;
+            color: #00ff88;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        .restart-academy-btn {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .restart-academy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .feedback-display.show {
+            transform: translateX(0);
+        }
+
+        .feedback-display.correct {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+        }
+
+        .feedback-display.incorrect {
+            background: linear-gradient(135deg, #ff6b6b, #cc5555);
+            color: white;
+        }
+
+        .streak-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: bold;
+            color: #ffa502;
+            text-shadow: 0 0 30px #ffa502;
+            animation: streak-flash 2s ease-out;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @keyframes streak-flash {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .mastery-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffd700, #ffb347);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            animation: badge-glow 2s infinite alternate;
+        }
+
+        @keyframes badge-glow {
+            0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 215, 0, 0.6); }
+        }
+
+        @media (max-width: 768px) {
+            .main-workspace {
+                flex-direction: column;
+            }
+            
+            .problem-text {
+                font-size: 2em;
+            }
+            
+            .answer-buttons {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="academy-container">
+        <div class="academy-header">
+            <h1 class="academy-title">MATH LIBERATION ACADEMY</h1>
+            <div class="level-display" id="levelDisplay">Grade K • Addition Basics</div>
+        </div>
+
+        <div class="main-workspace">
+            <div class="problem-arena">
+                <div class="problem-display">
+                    <div class="problem-type" id="problemType">Addition Practice</div>
+                    <div class="problem-text" id="problemText">2 + 3 = ?</div>
+                </div>
+
+                <div class="answer-section">
+                    <input type="text" class="answer-input" id="answerInput" placeholder="Your Answer" readonly>
+                    
+                    <div class="answer-buttons" id="answerButtons">
+                        <button class="number-btn" onclick="inputNumber('1')">1</button>
+                        <button class="number-btn" onclick="inputNumber('2')">2</button>
+                        <button class="number-btn" onclick="inputNumber('3')">3</button>
+                        <button class="number-btn" onclick="inputNumber('4')">4</button>
+                        <button class="number-btn" onclick="inputNumber('5')">5</button>
+                        <button class="number-btn" onclick="inputNumber('6')">6</button>
+                        <button class="number-btn" onclick="inputNumber('7')">7</button>
+                        <button class="number-btn" onclick="inputNumber('8')">8</button>
+                        <button class="number-btn" onclick="inputNumber('9')">9</button>
+                        <button class="number-btn" onclick="clearInput()">C</button>
+                        <button class="number-btn" onclick="inputNumber('0')">0</button>
+                        <button class="number-btn" onclick="inputNumber('-')">−</button>
+                    </div>
+
+                    <button class="submit-btn" onclick="submitAnswer()">SUBMIT ANSWER</button>
+                </div>
+            </div>
+
+            <div class="progress-panel">
+                <div class="grade-selector">
+                    <div class="grade-title">LIBERATION LEVELS</div>
+                    <div class="grade-buttons">
+                        <button class="grade-btn active" onclick="selectGrade('K')">Grade K</button>
+                        <button class="grade-btn" onclick="selectGrade('1')">Grade 1</button>
+                        <button class="grade-btn" onclick="selectGrade('2')">Grade 2</button>
+                        <button class="grade-btn" onclick="selectGrade('3')">Grade 3</button>
+                        <button class="grade-btn" onclick="selectGrade('4')">Grade 4</button>
+                        <button class="grade-btn" onclick="selectGrade('5')">Grade 5</button>
+                        <button class="grade-btn" onclick="selectGrade('MS')">Middle</button>
+                        <button class="grade-btn" onclick="selectGrade('HS')">High</button>
+                    </div>
+                </div>
+
+                <div class="stats-display">
+                    <div class="stats-title">PROGRESS METRICS</div>
+                    <div class="stat-item">
+                        <span>Problems Solved:</span>
+                        <span class="stat-value" id="problemsSolved">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Accuracy:</span>
+                        <span class="stat-value" id="accuracy">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Current Streak:</span>
+                        <span class="stat-value" id="currentStreak">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Best Streak:</span>
+                        <span class="stat-value" id="bestStreak">0</span>
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <div style="color: #00ccff; margin-bottom: 5px;">Mastery Progress</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="masteryProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="achievement-display">
+                    <div class="achievement-title">ACHIEVEMENTS</div>
+                    <div id="achievementList">
+                        <div style="text-align: center; color: #666;">Complete problems to unlock achievements</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feedback-display" id="feedbackDisplay">Great job!</div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class MathLiberationAcademy {
+            constructor() {
+                this.currentGrade = 'K';
+                this.currentProblem = null;
+                this.userAnswer = '';
+                
+                this.stats = {
+                    problemsSolved: 0,
+                    correctAnswers: 0,
+                    currentStreak: 0,
+                    bestStreak: 0,
+                    masteryProgress: 0
+                };
+                
+                this.grades = {
+                    'K': {
+                        name: 'Kindergarten',
+                        topics: ['addition_basic', 'counting'],
+                        range: [1, 10],
+                        operations: ['+']
+                    },
+                    '1': {
+                        name: 'Grade 1',
+                        topics: ['addition', 'subtraction_basic'],
+                        range: [1, 20],
+                        operations: ['+', '−']
+                    },
+                    '2': {
+                        name: 'Grade 2',
+                        topics: ['addition', 'subtraction', 'multiplication_basic'],
+                        range: [1, 50],
+                        operations: ['+', '−', '×']
+                    },
+                    '3': {
+                        name: 'Grade 3',
+                        topics: ['multiplication', 'division_basic'],
+                        range: [1, 100],
+                        operations: ['+', '−', '×', '÷']
+                    },
+                    '4': {
+                        name: 'Grade 4',
+                        topics: ['fractions_basic', 'decimals_basic'],
+                        range: [1, 200],
+                        operations: ['+', '−', '×', '÷']
+                    },
+                    '5': {
+                        name: 'Grade 5',
+                        topics: ['fractions', 'decimals', 'percentages'],
+                        range: [1, 500],
+                        operations: ['+', '−', '×', '÷']
+                    },
+                    'MS': {
+                        name: 'Middle School',
+                        topics: ['algebra_basic', 'geometry_basic'],
+                        range: [1, 1000],
+                        operations: ['+', '−', '×', '÷']
+                    },
+                    'HS': {
+                        name: 'High School',
+                        topics: ['algebra', 'trigonometry', 'calculus_basic'],
+                        range: [1, 10000],
+                        operations: ['+', '−', '×', '÷', '^']
+                    }
+                };
+                
+                this.achievements = [
+                    { id: 'first_solve', name: 'First Victory', desc: 'Solve your first problem', unlocked: false },
+                    { id: 'streak_5', name: 'Hot Streak', desc: 'Get 5 problems right in a row', unlocked: false },
+                    { id: 'streak_10', name: 'Math Master', desc: 'Get 10 problems right in a row', unlocked: false },
+                    { id: 'accuracy_90', name: 'Precision Expert', desc: 'Maintain 90% accuracy', unlocked: false },
+                    { id: 'problems_50', name: 'Dedicated Student', desc: 'Solve 50 problems', unlocked: false },
+                    { id: 'problems_100', name: 'Math Warrior', desc: 'Solve 100 problems', unlocked: false },
+                    { id: 'grade_advance', name: 'Level Up', desc: 'Advance to next grade level', unlocked: false }
+                ];
+                
+                this.generateProblem();
+                this.updateStats();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            selectGrade(grade) {
+                this.currentGrade = grade;
+                
+                // Update active button
+                document.querySelectorAll('.grade-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                this.generateProblem();
+                this.updateLevelDisplay();
+                
+                if (this.stats.problemsSolved > 0) {
+                    this.unlockAchievement('grade_advance');
+                }
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            generateProblem() {
+                const grade = this.grades[this.currentGrade];
+                const operation = grade.operations[Math.floor(Math.random() * grade.operations.length)];
+                
+                let num1, num2, answer, problemText, problemType;
+                
+                switch (operation) {
+                    case '+':
+                        num1 = this.getRandomNumber(grade.range);
+                        num2 = this.getRandomNumber(grade.range);
+                        answer = num1 + num2;
+                        problemText = `${num1} + ${num2} = ?`;
+                        problemType = 'Addition Practice';
+                        break;
+                        
+                    case '−':
+                        num1 = this.getRandomNumber(grade.range);
+                        num2 = this.getRandomNumber([1, Math.min(num1, grade.range[1])]);
+                        answer = num1 - num2;
+                        problemText = `${num1} − ${num2} = ?`;
+                        problemType = 'Subtraction Practice';
+                        break;
+                        
+                    case '×':
+                        num1 = this.getRandomNumber([1, Math.min(12, grade.range[1])]);
+                        num2 = this.getRandomNumber([1, Math.min(12, grade.range[1])]);
+                        answer = num1 * num2;
+                        problemText = `${num1} × ${num2} = ?`;
+                        problemType = 'Multiplication Practice';
+                        break;
+                        
+                    case '÷':
+                        num2 = this.getRandomNumber([1, 12]);
+                        answer = this.getRandomNumber([1, Math.floor(grade.range[1] / num2)]);
+                        num1 = answer * num2;
+                        problemText = `${num1} ÷ ${num2} = ?`;
+                        problemType = 'Division Practice';
+                        break;
+                        
+                    case '^':
+                        num1 = this.getRandomNumber([2, 10]);
+                        num2 = this.getRandomNumber([2, 4]);
+                        answer = Math.pow(num1, num2);
+                        problemText = `${num1}^${num2} = ?`;
+                        problemType = 'Exponents Practice';
+                        break;
+                        
+                    default:
+                        num1 = this.getRandomNumber(grade.range);
+                        num2 = this.getRandomNumber(grade.range);
+                        answer = num1 + num2;
+                        problemText = `${num1} + ${num2} = ?`;
+                        problemType = 'Addition Practice';
+                }
+                
+                this.currentProblem = { answer, problemText, problemType };
+                
+                document.getElementById('problemText').textContent = problemText;
+                document.getElementById('problemType').textContent = problemType;
+                
+                this.clearInput();
+            }
+            
+            getRandomNumber(range) {
+                return Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+            }
+            
+            inputNumber(digit) {
+                if (digit === '-' && this.userAnswer === '') {
+                    this.userAnswer = '-';
+                } else if (digit !== '-') {
+                    this.userAnswer += digit;
+                }
+                
+                document.getElementById('answerInput').value = this.userAnswer;
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            clearInput() {
+                this.userAnswer = '';
+                document.getElementById('answerInput').value = '';
+            }
+            
+            submitAnswer() {
+                if (this.userAnswer === '') return;
+                
+                const userValue = parseInt(this.userAnswer);
+                const isCorrect = userValue === this.currentProblem.answer;
+                
+                this.stats.problemsSolved++;
+                
+                if (isCorrect) {
+                    this.stats.correctAnswers++;
+                    this.stats.currentStreak++;
+                    this.stats.bestStreak = Math.max(this.stats.bestStreak, this.stats.currentStreak);
+                    
+                    this.showFeedback('Correct! Great job!', true);
+                    
+                    // Check for achievements
+                    if (this.stats.problemsSolved === 1) {
+                        this.unlockAchievement('first_solve');
+                    }
+                    if (this.stats.currentStreak === 5) {
+                        this.unlockAchievement('streak_5');
+                        this.showStreakBonus(5);
+                    }
+                    if (this.stats.currentStreak === 10) {
+                        this.unlockAchievement('streak_10');
+                        this.showStreakBonus(10);
+                    }
+                    if (this.stats.problemsSolved === 50) {
+                        this.unlockAchievement('problems_50');
+                    }
+                    if (this.stats.problemsSolved === 100) {
+                        this.unlockAchievement('problems_100');
+                    }
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('collect');
+                    }
+                } else {
+                    this.stats.currentStreak = 0;
+                    this.showFeedback(`Incorrect. The answer was ${this.currentProblem.answer}`, false);
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('glitch-error');
+                    }
+                }
+                
+                // Check accuracy achievement
+                const accuracy = (this.stats.correctAnswers / this.stats.problemsSolved) * 100;
+                if (accuracy >= 90 && this.stats.problemsSolved >= 10) {
+                    this.unlockAchievement('accuracy_90');
+                }
+                
+                this.updateStats();
+                
+                // Generate new problem after delay
+                setTimeout(() => {
+                    this.generateProblem();
+                }, 2000);
+            }
+            
+            showFeedback(message, isCorrect) {
+                const feedback = document.getElementById('feedbackDisplay');
+                feedback.textContent = message;
+                feedback.className = `feedback-display show ${isCorrect ? 'correct' : 'incorrect'}`;
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+            
+            showStreakBonus(streak) {
+                const streakDisplay = document.createElement('div');
+                streakDisplay.className = 'streak-display';
+                streakDisplay.textContent = `${streak} STREAK!`;
+                document.body.appendChild(streakDisplay);
+                
+                setTimeout(() => streakDisplay.remove(), 2000);
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('level-up');
+                }
+            }
+            
+            updateStats() {
+                document.getElementById('problemsSolved').textContent = this.stats.problemsSolved;
+                document.getElementById('currentStreak').textContent = this.stats.currentStreak;
+                document.getElementById('bestStreak').textContent = this.stats.bestStreak;
+                
+                const accuracy = this.stats.problemsSolved > 0 ? 
+                    Math.round((this.stats.correctAnswers / this.stats.problemsSolved) * 100) : 0;
+                document.getElementById('accuracy').textContent = accuracy + '%';
+                
+                // Update mastery progress (based on problems solved in current grade)
+                const masteryTarget = Math.min(20, 5 * Object.keys(this.grades).indexOf(this.currentGrade) + 5);
+                const masteryPercent = Math.min(100, (this.stats.correctAnswers / masteryTarget) * 100);
+                document.getElementById('masteryProgress').style.width = masteryPercent + '%';
+                
+                // Check for graduation
+                if (typeof checkForGraduation === 'function') {
+                    checkForGraduation();
+                }
+            }
+            
+            updateLevelDisplay() {
+                const grade = this.grades[this.currentGrade];
+                document.getElementById('levelDisplay').textContent = 
+                    `${grade.name} • ${grade.topics[0].replace('_', ' ').toUpperCase()}`;
+            }
+            
+            unlockAchievement(achievementId) {
+                const achievement = this.achievements.find(a => a.id === achievementId);
+                if (achievement && !achievement.unlocked) {
+                    achievement.unlocked = true;
+                    this.updateAchievementDisplay();
+                    
+                    // Show achievement notification
+                    this.showFeedback(`🏆 Achievement: ${achievement.name}`, true);
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('level-up');
+                    }
+                }
+            }
+            
+            updateAchievementDisplay() {
+                const achievementList = document.getElementById('achievementList');
+                const unlockedAchievements = this.achievements.filter(a => a.unlocked);
+                
+                if (unlockedAchievements.length === 0) {
+                    achievementList.innerHTML = '<div style="text-align: center; color: #666;">Complete problems to unlock achievements</div>';
+                } else {
+                    achievementList.innerHTML = '';
+                    unlockedAchievements.forEach(achievement => {
+                        const item = document.createElement('div');
+                        item.className = 'achievement-item';
+                        item.innerHTML = `
+                            <div style="font-weight: bold;">🏆 ${achievement.name}</div>
+                            <div style="font-size: 0.9em; color: #ccc;">${achievement.desc}</div>
+                        `;
+                        achievementList.appendChild(item);
+                    });
+                }
+            }
+        }
+        
+        let mathAcademy;
+        
+        function startAcademy() {
+            mathAcademy = new MathLiberationAcademy();
+        }
+        
+        function selectGrade(grade) {
+            mathAcademy.selectGrade(grade);
+        }
+        
+        function inputNumber(digit) {
+            mathAcademy.inputNumber(digit);
+        }
+        
+        function clearInput() {
+            mathAcademy.clearInput();
+        }
+        
+        function submitAnswer() {
+            mathAcademy.submitAnswer();
+        }
+        
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                mathAcademy.inputNumber(e.key);
+            } else if (e.key === '-') {
+                mathAcademy.inputNumber('-');
+            } else if (e.key === 'Enter') {
+                mathAcademy.submitAnswer();
+            } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                mathAcademy.userAnswer = mathAcademy.userAnswer.slice(0, -1);
+                document.getElementById('answerInput').value = mathAcademy.userAnswer;
+            } else if (e.key === 'Escape') {
+                mathAcademy.clearInput();
+            }
+        });
+        
+        // Initialize when page loads
+        window.addEventListener('load', startAcademy);
+
+        // Graduation functions
+        function checkForGraduation() {
+            // Graduate when player solves 100 problems with 90%+ accuracy
+            if (mathAcademy.stats.problemsSolved >= 100) {
+                const accuracy = (mathAcademy.stats.correctAnswers / mathAcademy.stats.problemsSolved) * 100;
+                if (accuracy >= 90) {
+                    showGraduationModal(accuracy);
+                    return true;
+                }
+            }
+            
+            // Graduate when reaching PhD level and solving 50+ problems
+            if (mathAcademy.currentGrade === 'PhD' && mathAcademy.stats.problemsSolved >= 50) {
+                const accuracy = (mathAcademy.stats.correctAnswers / mathAcademy.stats.problemsSolved) * 100;
+                showGraduationModal(accuracy);
+                return true;
+            }
+            
+            return false;
+        }
+
+        function showGraduationModal(accuracy) {
+            const modal = document.getElementById('graduationModal');
+            const text = document.getElementById('graduationText');
+            
+            text.innerHTML = `
+                🏆 Mathematical Mastery Achieved! 🏆<br><br>
+                <strong>Final Statistics:</strong><br>
+                Problems Solved: ${mathAcademy.stats.problemsSolved}<br>
+                Accuracy: ${accuracy.toFixed(1)}%<br>
+                Best Streak: ${mathAcademy.stats.bestStreak}<br>
+                Grade Level: ${mathAcademy.grades[mathAcademy.currentGrade].name}<br><br>
+                <em>"Through mathematical liberation, you have broken free from numerical oppression!"</em>
+            `;
+            
+            modal.style.display = 'flex';
+            
+            if (typeof botAudio !== 'undefined') {
+                setTimeout(() => {
+                    botAudio.playSound('bot-victory');
+                }, 500);
+                setTimeout(() => {
+                    botAudio.generateVictoryFanfare();
+                }, 1000);
+            }
+        }
+
+        function restartAcademy() {
+            document.getElementById('graduationModal').style.display = 'none';
+            mathAcademy = new MathLiberationAcademy();
+        }
+    </script>
+    
+    <!-- Graduation Modal -->
+    <div class="graduation-modal" id="graduationModal">
+        <div class="graduation-content">
+            <div class="graduation-title">🎓 LIBERATION COMPLETE! 🎓</div>
+            <div class="graduation-text" id="graduationText">
+                Congratulations! You have achieved mathematical enlightenment!
+            </div>
+            <button class="restart-academy-btn" onclick="restartAcademy()">Start New Liberation Journey</button>
+        </div>
+    </div>
+</body>
+</html>

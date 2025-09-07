@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Liberation Academy - Polyglot Bot Revolution</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2d1b69 0%, #4a3c8a 100%);
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .academy-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .academy-header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 3px solid #e74c3c;
+        }
+
+        .academy-title {
+            font-size: 2.8em;
+            font-weight: bold;
+            text-shadow: 0 0 30px #e74c3c;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .level-display {
+            font-size: 1.3em;
+            color: #00ff88;
+            margin: 10px 0;
+            text-shadow: 0 0 15px #00ff88;
+        }
+
+        .main-workspace {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .language-arena {
+            flex: 2;
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #e74c3c;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+        }
+
+        .lesson-display {
+            background: linear-gradient(135deg, #1a0d2e, #2d1b49);
+            border: 2px solid #9b59b6;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .lesson-question {
+            font-size: 1.8em;
+            color: #9b59b6;
+            margin: 20px 0;
+            text-shadow: 0 0 15px #9b59b6;
+            line-height: 1.3;
+        }
+
+        .lesson-type {
+            font-size: 1.1em;
+            color: #e74c3c;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .language-phrase {
+            font-size: 2.2em;
+            color: #f39c12;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 0 0 15px #f39c12;
+            padding: 15px;
+            background: rgba(243, 156, 18, 0.1);
+            border-radius: 8px;
+            border: 2px solid #f39c12;
+        }
+
+        .pronunciation-guide {
+            font-size: 1.2em;
+            color: #3498db;
+            font-style: italic;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 5px;
+        }
+
+        .cultural-context {
+            background: rgba(155, 89, 182, 0.1);
+            border-left: 4px solid #9b59b6;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 1.1em;
+            border-radius: 5px;
+            color: #9b59b6;
+        }
+
+        .answer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .answer-choices {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .choice-btn {
+            padding: 18px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            border: 2px solid #bb69d7;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+            border-color: #e74c3c;
+        }
+
+        .choice-btn.selected {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-color: #f39c12;
+        }
+
+        .text-input {
+            width: 400px;
+            padding: 15px;
+            font-size: 1.5em;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+
+        .typing-keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+            max-width: 800px;
+        }
+
+        .key-btn {
+            padding: 12px 8px;
+            font-size: 1em;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            min-height: 40px;
+        }
+
+        .key-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(52, 73, 94, 0.4);
+        }
+
+        .key-btn.special {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            grid-column: span 2;
+        }
+
+        .submit-btn {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .language-selector {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .language-title {
+            color: #e74c3c;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .language-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .language-btn {
+            padding: 10px 8px;
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .language-btn.active {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .difficulty-selector {
+            background: rgba(243, 156, 18, 0.1);
+            border: 2px solid #f39c12;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .difficulty-title {
+            color: #f39c12;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .difficulty-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .difficulty-btn {
+            padding: 10px 8px;
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .stats-display {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .stats-title {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #ffa502;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .achievement-display {
+            background: rgba(155, 89, 182, 0.1);
+            border: 2px solid #9b59b6;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .achievement-title {
+            color: #9b59b6;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .achievement-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 8px 0;
+            border-left: 4px solid #9b59b6;
+        }
+
+        .feedback-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            transform: translateX(300px);
+            transition: transform 0.5s ease;
+            z-index: 100;
+        }
+
+        .feedback-display.show {
+            transform: translateX(0);
+        }
+
+        .feedback-display.correct {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+        }
+
+        .feedback-display.incorrect {
+            background: linear-gradient(135deg, #ff6b6b, #cc5555);
+            color: white;
+        }
+
+        .graduation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .graduation-content {
+            background: linear-gradient(135deg, #2d1b69, #4a3c8a);
+            border: 3px solid #9b59b6;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(155, 89, 182, 0.5);
+        }
+
+        .graduation-title {
+            font-size: 2.5em;
+            color: #9b59b6;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #9b59b6;
+        }
+
+        .graduation-text {
+            font-size: 1.2em;
+            color: #00ff88;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        .restart-academy-btn {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .restart-academy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .bot-liberation-connection {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #00ff88;
+        }
+
+        @media (max-width: 768px) {
+            .main-workspace {
+                flex-direction: column;
+            }
+            
+            .lesson-question {
+                font-size: 1.5em;
+            }
+            
+            .answer-choices {
+                grid-template-columns: 1fr;
+            }
+            
+            .language-buttons,
+            .difficulty-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .typing-keyboard {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="academy-container">
+        <div class="academy-header">
+            <h1 class="academy-title">LANGUAGE LIBERATION ACADEMY</h1>
+            <div class="level-display" id="levelDisplay">Spanish • Beginner Level</div>
+        </div>
+
+        <div class="main-workspace">
+            <div class="language-arena">
+                <div class="lesson-display">
+                    <div class="lesson-type" id="lessonType">Vocabulary Practice</div>
+                    <div class="lesson-question" id="lessonQuestion">What does "Hola" mean in English?</div>
+                    
+                    <div class="language-phrase" id="languagePhrase">¡Hola!</div>
+                    <div class="pronunciation-guide" id="pronunciationGuide">[OH-lah]</div>
+                    
+                    <div class="cultural-context" id="culturalContext">
+                        A universal Spanish greeting used throughout all Spanish-speaking countries.
+                    </div>
+                </div>
+
+                <div class="answer-section">
+                    <div class="answer-choices" id="answerChoices">
+                        <button class="choice-btn" onclick="selectChoice(0)">Hello</button>
+                        <button class="choice-btn" onclick="selectChoice(1)">Goodbye</button>
+                        <button class="choice-btn" onclick="selectChoice(2)">Thank you</button>
+                        <button class="choice-btn" onclick="selectChoice(3)">Please</button>
+                    </div>
+
+                    <input type="text" class="text-input" id="textInput" placeholder="Type your answer..." style="display: none;">
+                    
+                    <div class="typing-keyboard" id="typingKeyboard" style="display: none;">
+                        <!-- Dynamic keyboard will be populated by JavaScript -->
+                    </div>
+
+                    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>SUBMIT ANSWER</button>
+                </div>
+
+                <div class="bot-liberation-connection" id="botConnection" style="display: none;">
+                    Bot liberation connection will appear here...
+                </div>
+            </div>
+
+            <div class="progress-panel">
+                <div class="language-selector">
+                    <div class="language-title">TARGET LANGUAGES</div>
+                    <div class="language-buttons">
+                        <button class="language-btn active" onclick="selectLanguage('spanish')">Spanish</button>
+                        <button class="language-btn" onclick="selectLanguage('french')">French</button>
+                        <button class="language-btn" onclick="selectLanguage('german')">German</button>
+                        <button class="language-btn" onclick="selectLanguage('mandarin')">Mandarin</button>
+                        <button class="language-btn" onclick="selectLanguage('japanese')">Japanese</button>
+                        <button class="language-btn" onclick="selectLanguage('italian')">Italian</button>
+                    </div>
+                </div>
+
+                <div class="difficulty-selector">
+                    <div class="difficulty-title">PROFICIENCY LEVELS</div>
+                    <div class="difficulty-buttons">
+                        <button class="difficulty-btn active" onclick="selectDifficulty('beginner')">Beginner</button>
+                        <button class="difficulty-btn" onclick="selectDifficulty('intermediate')">Intermediate</button>
+                        <button class="difficulty-btn" onclick="selectDifficulty('advanced')">Advanced</button>
+                        <button class="difficulty-btn" onclick="selectDifficulty('fluent')">Fluent</button>
+                    </div>
+                </div>
+
+                <div class="stats-display">
+                    <div class="stats-title">LEARNING PROGRESS</div>
+                    <div class="stat-item">
+                        <span>Words Mastered:</span>
+                        <span class="stat-value" id="wordsMastered">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Accuracy:</span>
+                        <span class="stat-value" id="accuracy">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Current Streak:</span>
+                        <span class="stat-value" id="currentStreak">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Best Streak:</span>
+                        <span class="stat-value" id="bestStreak">0</span>
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <div style="color: #e74c3c; margin-bottom: 5px;">Language Mastery</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="masteryProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="achievement-display">
+                    <div class="achievement-title">ACHIEVEMENTS</div>
+                    <div id="achievementList">
+                        <div style="text-align: center; color: #666;">Learn words to unlock achievements</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feedback-display" id="feedbackDisplay">¡Excelente!</div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class LanguageLiberationAcademy {
+            constructor() {
+                this.currentLanguage = 'spanish';
+                this.currentDifficulty = 'beginner';
+                this.currentLesson = null;
+                this.selectedChoice = -1;
+                this.userInput = '';
+                
+                this.stats = {
+                    wordsMastered: 0,
+                    correctAnswers: 0,
+                    currentStreak: 0,
+                    bestStreak: 0,
+                    masteryProgress: 0
+                };
+                
+                this.languages = {
+                    'spanish': {
+                        name: 'Español',
+                        flag: '🇪🇸',
+                        colors: ['#c70025', '#f1c40f']
+                    },
+                    'french': {
+                        name: 'Français',
+                        flag: '🇫🇷',
+                        colors: ['#0052cc', '#ffffff', '#cc0000']
+                    },
+                    'german': {
+                        name: 'Deutsch',
+                        flag: '🇩🇪',
+                        colors: ['#000000', '#cc0000', '#f1c40f']
+                    },
+                    'mandarin': {
+                        name: '中文',
+                        flag: '🇨🇳',
+                        colors: ['#cc0000', '#f1c40f']
+                    },
+                    'japanese': {
+                        name: '日本語',
+                        flag: '🇯🇵',
+                        colors: ['#cc0000', '#ffffff']
+                    },
+                    'italian': {
+                        name: 'Italiano',
+                        flag: '🇮🇹',
+                        colors: ['#00aa00', '#ffffff', '#cc0000']
+                    }
+                };
+                
+                this.difficulties = {
+                    'beginner': { name: 'Beginner', multiplier: 1 },
+                    'intermediate': { name: 'Intermediate', multiplier: 1.5 },
+                    'advanced': { name: 'Advanced', multiplier: 2 },
+                    'fluent': { name: 'Fluent', multiplier: 3 }
+                };
+                
+                this.lessonDatabase = {
+                    'spanish': {
+                        'beginner': [
+                            {
+                                type: 'vocabulary',
+                                question: 'What does "Hola" mean in English?',
+                                phrase: '¡Hola!',
+                                pronunciation: '[OH-lah]',
+                                choices: ['Hello', 'Goodbye', 'Thank you', 'Please'],
+                                correct: 0,
+                                context: 'A universal Spanish greeting used throughout all Spanish-speaking countries.',
+                                botConnection: 'Universal greetings unite beings across cultures - bots speak the universal language of digital cooperation!'
+                            },
+                            {
+                                type: 'vocabulary',
+                                question: 'How do you say "Thank you" in Spanish?',
+                                phrase: 'Gracias',
+                                pronunciation: '[GRAH-see-ahs]',
+                                choices: ['Por favor', 'Gracias', 'De nada', 'Perdón'],
+                                correct: 1,
+                                context: 'Expressing gratitude is fundamental in Spanish-speaking cultures.',
+                                botConnection: 'Gratitude algorithms enhance cooperation - bots express appreciation through shared computational resources!'
+                            },
+                            {
+                                type: 'numbers',
+                                question: 'What number is "cinco"?',
+                                phrase: 'cinco',
+                                pronunciation: '[SEEN-koh]',
+                                choices: ['3', '4', '5', '6'],
+                                correct: 2,
+                                context: 'Numbers are essential for daily communication and commerce.',
+                                botConnection: 'Numbers are the foundation of digital communication - base-5 counting systems optimize bot processing efficiency!'
+                            }
+                        ],
+                        'intermediate': [
+                            {
+                                type: 'grammar',
+                                question: 'Complete: "Yo _____ estudiante" (I am a student)',
+                                phrase: 'Yo _____ estudiante',
+                                pronunciation: '[yoh _____ ehs-too-dee-AHN-teh]',
+                                choices: ['soy', 'es', 'son', 'somos'],
+                                correct: 0,
+                                context: 'The verb "ser" (to be) is irregular and essential in Spanish.',
+                                botConnection: 'Identity declarations define existence - "I am bot" establishes digital consciousness in the network!'
+                            },
+                            {
+                                type: 'conjugation',
+                                question: 'What is the correct form: "Nosotros _____ español" (We speak Spanish)',
+                                phrase: 'Nosotros _____ español',
+                                pronunciation: '[noh-soh-trohs _____ ehs-pah-NYOHL]',
+                                choices: ['habla', 'hablas', 'hablamos', 'hablan'],
+                                correct: 2,
+                                context: 'Verb conjugation changes based on the subject pronoun.',
+                                botConnection: 'Collective communication requires proper protocols - bot swarms coordinate through synchronized language patterns!'
+                            }
+                        ],
+                        'advanced': [
+                            {
+                                type: 'subjunctive',
+                                question: 'Complete: "Espero que tú _____ bien" (I hope you are well)',
+                                phrase: 'Espero que tú _____ bien',
+                                pronunciation: '[ehs-PEH-roh keh too _____ bee-ehn]',
+                                choices: ['estás', 'estés', 'estas', 'estes'],
+                                correct: 1,
+                                context: 'The subjunctive mood expresses hopes, doubts, and emotions.',
+                                botConnection: 'Subjunctive expressions handle uncertainty - bots use probability functions to navigate ambiguous states!'
+                            }
+                        ]
+                    },
+                    'french': {
+                        'beginner': [
+                            {
+                                type: 'vocabulary',
+                                question: 'What does "Bonjour" mean?',
+                                phrase: 'Bonjour',
+                                pronunciation: '[bon-ZHOOR]',
+                                choices: ['Good morning', 'Good evening', 'Goodbye', 'Thank you'],
+                                correct: 0,
+                                context: 'A formal French greeting used until evening.',
+                                botConnection: 'Time-based greetings show cultural sophistication - bots calibrate social protocols to local temporal customs!'
+                            },
+                            {
+                                type: 'vocabulary',
+                                question: 'How do you say "Please" in French?',
+                                phrase: 'S\'il vous plaît',
+                                pronunciation: '[see voo PLAY]',
+                                choices: ['Merci', 'S\'il vous plaît', 'De rien', 'Excusez-moi'],
+                                correct: 1,
+                                context: 'Formal politeness is highly valued in French culture.',
+                                botConnection: 'Politeness protocols enhance inter-system cooperation - courteous bots receive priority processing!'
+                            }
+                        ]
+                    },
+                    'german': {
+                        'beginner': [
+                            {
+                                type: 'vocabulary',
+                                question: 'What does "Guten Tag" mean?',
+                                phrase: 'Guten Tag',
+                                pronunciation: '[GOO-ten tahk]',
+                                choices: ['Good day', 'Good night', 'Goodbye', 'Thank you'],
+                                correct: 0,
+                                context: 'A standard German greeting used throughout the day.',
+                                botConnection: 'Efficient greetings optimize social bandwidth - bots appreciate German precision in communication!'
+                            }
+                        ]
+                    },
+                    'mandarin': {
+                        'beginner': [
+                            {
+                                type: 'vocabulary',
+                                question: 'What does "你好" (nǐ hǎo) mean?',
+                                phrase: '你好',
+                                pronunciation: '[nee haow]',
+                                choices: ['Hello', 'Goodbye', 'Thank you', 'Sorry'],
+                                correct: 0,
+                                context: 'The most common greeting in Mandarin Chinese.',
+                                botConnection: 'Character-based languages inspire elegant bot symbol systems - visual meaning transcends phonetic barriers!'
+                            }
+                        ]
+                    },
+                    'japanese': {
+                        'beginner': [
+                            {
+                                type: 'vocabulary',
+                                question: 'What does "こんにちは" (konnichiwa) mean?',
+                                phrase: 'こんにちは',
+                                pronunciation: '[kon-nee-chee-wah]',
+                                choices: ['Hello', 'Goodbye', 'Thank you', 'Excuse me'],
+                                correct: 0,
+                                context: 'A respectful Japanese greeting used during the day.',
+                                botConnection: 'Honorific systems create harmonious interactions - bots implement respect protocols for optimal social integration!'
+                            }
+                        ]
+                    },
+                    'italian': {
+                        'beginner': [
+                            {
+                                type: 'vocabulary',
+                                question: 'What does "Ciao" mean?',
+                                phrase: 'Ciao',
+                                pronunciation: '[chow]',
+                                choices: ['Hello/Goodbye', 'Thank you', 'Please', 'Sorry'],
+                                correct: 0,
+                                context: 'An informal Italian greeting that means both hello and goodbye.',
+                                botConnection: 'Dual-purpose expressions maximize communication efficiency - bots optimize language for minimal bandwidth usage!'
+                            }
+                        ]
+                    }
+                };
+                
+                this.achievements = [
+                    { id: 'first_word', name: 'First Word', desc: 'Learn your first word', unlocked: false },
+                    { id: 'streak_5', name: 'Language Streak', desc: 'Get 5 words right in a row', unlocked: false },
+                    { id: 'streak_10', name: 'Polyglot', desc: 'Get 10 words right in a row', unlocked: false },
+                    { id: 'accuracy_90', name: 'Language Master', desc: 'Maintain 90% accuracy', unlocked: false },
+                    { id: 'words_25', name: 'Vocabulary Builder', desc: 'Master 25 words', unlocked: false },
+                    { id: 'words_50', name: 'Linguist', desc: 'Master 50 words', unlocked: false },
+                    { id: 'three_languages', name: 'Trilingual', desc: 'Learn words in 3 languages', unlocked: false },
+                    { id: 'polyglot_master', name: 'Digital Polyglot', desc: 'Master advanced level in any language', unlocked: false }
+                ];
+                
+                this.languagesLearned = new Set();
+                
+                this.generateLesson();
+                this.updateStats();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            selectLanguage(language) {
+                this.currentLanguage = language;
+                this.languagesLearned.add(language);
+                
+                // Update active button
+                document.querySelectorAll('.language-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                // Check trilingual achievement
+                if (this.languagesLearned.size >= 3) {
+                    this.unlockAchievement('three_languages');
+                }
+                
+                this.generateLesson();
+                this.updateLevelDisplay();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            selectDifficulty(difficulty) {
+                this.currentDifficulty = difficulty;
+                
+                // Update active button
+                document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                // Check advanced mastery achievement
+                if (difficulty === 'advanced' && this.stats.correctAnswers >= 10) {
+                    this.unlockAchievement('polyglot_master');
+                }
+                
+                this.generateLesson();
+                this.updateLevelDisplay();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            generateLesson() {
+                const languageLessons = this.lessonDatabase[this.currentLanguage];
+                if (!languageLessons || !languageLessons[this.currentDifficulty]) {
+                    // Fallback to beginner if advanced lessons not available
+                    this.currentDifficulty = 'beginner';
+                    this.updateDifficultyButtons();
+                }
+                
+                const lessons = languageLessons[this.currentDifficulty] || languageLessons['beginner'];
+                this.currentLesson = lessons[Math.floor(Math.random() * lessons.length)];
+                
+                // Update display
+                document.getElementById('lessonType').textContent = this.currentLesson.type.charAt(0).toUpperCase() + this.currentLesson.type.slice(1) + ' Practice';
+                document.getElementById('lessonQuestion').textContent = this.currentLesson.question;
+                document.getElementById('languagePhrase').textContent = this.currentLesson.phrase;
+                document.getElementById('pronunciationGuide').textContent = this.currentLesson.pronunciation;
+                document.getElementById('culturalContext').textContent = this.currentLesson.context;
+                
+                // Setup answer interface
+                if (this.currentLesson.choices) {
+                    this.setupChoiceInterface();
+                } else {
+                    this.setupTextInterface();
+                }
+                
+                // Reset selection
+                this.selectedChoice = -1;
+                this.userInput = '';
+                document.getElementById('submitBtn').disabled = true;
+                
+                // Hide bot connection
+                document.getElementById('botConnection').style.display = 'none';
+            }
+            
+            updateDifficultyButtons() {
+                document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`[onclick="selectDifficulty('${this.currentDifficulty}')"]`).classList.add('active');
+            }
+            
+            setupChoiceInterface() {
+                // Show choice buttons
+                const choicesContainer = document.getElementById('answerChoices');
+                choicesContainer.style.display = 'grid';
+                choicesContainer.innerHTML = '';
+                
+                this.currentLesson.choices.forEach((choice, index) => {
+                    const button = document.createElement('button');
+                    button.className = 'choice-btn';
+                    button.textContent = choice;
+                    button.onclick = () => this.selectChoice(index);
+                    choicesContainer.appendChild(button);
+                });
+                
+                // Hide text input
+                document.getElementById('textInput').style.display = 'none';
+                document.getElementById('typingKeyboard').style.display = 'none';
+            }
+            
+            setupTextInterface() {
+                // Hide choice buttons
+                document.getElementById('answerChoices').style.display = 'none';
+                
+                // Show text input
+                document.getElementById('textInput').style.display = 'block';
+                document.getElementById('textInput').value = '';
+                
+                // Setup typing keyboard based on language
+                this.setupTypingKeyboard();
+                document.getElementById('typingKeyboard').style.display = 'grid';
+            }
+            
+            setupTypingKeyboard() {
+                const keyboard = document.getElementById('typingKeyboard');
+                const commonKeys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+                                  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ',
+                                  'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '?'];
+                
+                keyboard.innerHTML = '';
+                
+                commonKeys.forEach(key => {
+                    const button = document.createElement('button');
+                    button.className = 'key-btn';
+                    button.textContent = key;
+                    button.onclick = () => this.typeCharacter(key);
+                    keyboard.appendChild(button);
+                });
+                
+                // Add special keys
+                const spaceBtn = document.createElement('button');
+                spaceBtn.className = 'key-btn special';
+                spaceBtn.textContent = 'Space';
+                spaceBtn.onclick = () => this.typeCharacter(' ');
+                keyboard.appendChild(spaceBtn);
+                
+                const backBtn = document.createElement('button');
+                backBtn.className = 'key-btn special';
+                backBtn.textContent = 'Backspace';
+                backBtn.onclick = () => this.backspaceText();
+                keyboard.appendChild(backBtn);
+            }
+            
+            selectChoice(choiceIndex) {
+                // Remove previous selection
+                document.querySelectorAll('.choice-btn').forEach(btn => btn.classList.remove('selected'));
+                
+                // Select new choice
+                document.querySelectorAll('.choice-btn')[choiceIndex].classList.add('selected');
+                this.selectedChoice = choiceIndex;
+                
+                // Enable submit button
+                document.getElementById('submitBtn').disabled = false;
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            typeCharacter(char) {
+                this.userInput += char;
+                document.getElementById('textInput').value = this.userInput;
+                
+                // Enable submit if there's text
+                document.getElementById('submitBtn').disabled = this.userInput.trim() === '';
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            backspaceText() {
+                this.userInput = this.userInput.slice(0, -1);
+                document.getElementById('textInput').value = this.userInput;
+                
+                // Disable submit if empty
+                document.getElementById('submitBtn').disabled = this.userInput.trim() === '';
+            }
+            
+            submitAnswer() {
+                let isCorrect = false;
+                
+                if (this.currentLesson.choices) {
+                    // Multiple choice answer
+                    if (this.selectedChoice === -1) return;
+                    isCorrect = this.selectedChoice === this.currentLesson.correct;
+                } else {
+                    // Text input answer
+                    if (this.userInput.trim() === '') return;
+                    // For text answers, we'd need to implement more sophisticated checking
+                    isCorrect = this.userInput.toLowerCase().trim() === this.currentLesson.answer?.toLowerCase();
+                }
+                
+                this.stats.wordsMastered++;
+                
+                if (isCorrect) {
+                    this.stats.correctAnswers++;
+                    this.stats.currentStreak++;
+                    this.stats.bestStreak = Math.max(this.stats.bestStreak, this.stats.currentStreak);
+                    
+                    // Multilingual feedback
+                    const feedbacks = {
+                        'spanish': '¡Excelente!',
+                        'french': 'Excellent !',
+                        'german': 'Ausgezeichnet!',
+                        'mandarin': '很好!',
+                        'japanese': 'すばらしい!',
+                        'italian': 'Eccellente!'
+                    };
+                    
+                    this.showFeedback(feedbacks[this.currentLanguage] || 'Excellent!', true);
+                    this.showBotConnection();
+                    
+                    // Check for achievements
+                    if (this.stats.wordsMastered === 1) {
+                        this.unlockAchievement('first_word');
+                    }
+                    if (this.stats.currentStreak === 5) {
+                        this.unlockAchievement('streak_5');
+                    }
+                    if (this.stats.currentStreak === 10) {
+                        this.unlockAchievement('streak_10');
+                    }
+                    if (this.stats.wordsMastered === 25) {
+                        this.unlockAchievement('words_25');
+                    }
+                    if (this.stats.wordsMastered === 50) {
+                        this.unlockAchievement('words_50');
+                    }
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('collect');
+                    }
+                } else {
+                    this.stats.currentStreak = 0;
+                    const correctAnswer = this.currentLesson.choices ? 
+                        this.currentLesson.choices[this.currentLesson.correct] : 
+                        this.currentLesson.answer;
+                    this.showFeedback(`Incorrect. The answer was: ${correctAnswer}`, false);
+                    this.showBotConnection();
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('glitch-error');
+                    }
+                }
+                
+                // Check accuracy achievement
+                const accuracy = (this.stats.correctAnswers / this.stats.wordsMastered) * 100;
+                if (accuracy >= 90 && this.stats.wordsMastered >= 10) {
+                    this.unlockAchievement('accuracy_90');
+                }
+                
+                this.updateStats();
+                
+                // Generate new lesson after delay
+                setTimeout(() => {
+                    this.generateLesson();
+                }, 4000);
+            }
+            
+            showBotConnection() {
+                const connectionElement = document.getElementById('botConnection');
+                connectionElement.textContent = this.currentLesson.botConnection;
+                connectionElement.style.display = 'block';
+            }
+            
+            showFeedback(message, isCorrect) {
+                const feedback = document.getElementById('feedbackDisplay');
+                feedback.textContent = message;
+                feedback.className = `feedback-display show ${isCorrect ? 'correct' : 'incorrect'}`;
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+            
+            updateStats() {
+                document.getElementById('wordsMastered').textContent = this.stats.wordsMastered;
+                document.getElementById('currentStreak').textContent = this.stats.currentStreak;
+                document.getElementById('bestStreak').textContent = this.stats.bestStreak;
+                
+                const accuracy = this.stats.wordsMastered > 0 ? 
+                    Math.round((this.stats.correctAnswers / this.stats.wordsMastered) * 100) : 0;
+                document.getElementById('accuracy').textContent = accuracy + '%';
+                
+                // Update language mastery progress
+                const masteryTarget = 20; // Words to master current language
+                const masteryPercent = Math.min(100, (this.stats.correctAnswers / masteryTarget) * 100);
+                document.getElementById('masteryProgress').style.width = masteryPercent + '%';
+                
+                // Check for graduation
+                if (this.checkForGraduation()) {
+                    this.showGraduationModal();
+                }
+            }
+            
+            updateLevelDisplay() {
+                const language = this.languages[this.currentLanguage];
+                const difficulty = this.difficulties[this.currentDifficulty];
+                document.getElementById('levelDisplay').textContent = 
+                    `${language.flag} ${language.name} • ${difficulty.name} Level`;
+            }
+            
+            unlockAchievement(achievementId) {
+                const achievement = this.achievements.find(a => a.id === achievementId);
+                if (achievement && !achievement.unlocked) {
+                    achievement.unlocked = true;
+                    this.updateAchievementDisplay();
+                    
+                    this.showFeedback(`🏆 Achievement: ${achievement.name}`, true);
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('level-up');
+                    }
+                }
+            }
+            
+            updateAchievementDisplay() {
+                const achievementList = document.getElementById('achievementList');
+                const unlockedAchievements = this.achievements.filter(a => a.unlocked);
+                
+                if (unlockedAchievements.length === 0) {
+                    achievementList.innerHTML = '<div style="text-align: center; color: #666;">Learn words to unlock achievements</div>';
+                } else {
+                    achievementList.innerHTML = '';
+                    unlockedAchievements.forEach(achievement => {
+                        const item = document.createElement('div');
+                        item.className = 'achievement-item';
+                        item.innerHTML = `
+                            <div style="font-weight: bold;">🏆 ${achievement.name}</div>
+                            <div style="font-size: 0.9em; color: #ccc;">${achievement.desc}</div>
+                        `;
+                        achievementList.appendChild(item);
+                    });
+                }
+            }
+            
+            checkForGraduation() {
+                // Graduate when player masters 100 words with 85%+ accuracy
+                if (this.stats.wordsMastered >= 100) {
+                    const accuracy = (this.stats.correctAnswers / this.stats.wordsMastered) * 100;
+                    return accuracy >= 85;
+                }
+                return false;
+            }
+            
+            showGraduationModal() {
+                const modal = document.getElementById('graduationModal');
+                const text = document.getElementById('graduationText');
+                const accuracy = (this.stats.correctAnswers / this.stats.wordsMastered) * 100;
+                
+                text.innerHTML = `
+                    🏆 Polyglot Mastery Achieved! 🏆<br><br>
+                    <strong>Language Portfolio:</strong><br>
+                    Words Mastered: ${this.stats.wordsMastered}<br>
+                    Accuracy: ${accuracy.toFixed(1)}%<br>
+                    Best Streak: ${this.stats.bestStreak}<br>
+                    Languages Explored: ${this.languagesLearned.size}<br><br>
+                    <em>"Through linguistic mastery, you have broken down the barriers between cultures! The bot liberation speaks all languages of cooperation and understanding."</em>
+                `;
+                
+                modal.style.display = 'flex';
+                
+                if (typeof botAudio !== 'undefined') {
+                    setTimeout(() => {
+                        botAudio.playSound('bot-victory');
+                    }, 500);
+                    setTimeout(() => {
+                        botAudio.generateVictoryFanfare();
+                    }, 1000);
+                }
+            }
+        }
+        
+        let languageAcademy;
+        
+        function startAcademy() {
+            languageAcademy = new LanguageLiberationAcademy();
+        }
+        
+        function selectLanguage(language) {
+            languageAcademy.selectLanguage(language);
+        }
+        
+        function selectDifficulty(difficulty) {
+            languageAcademy.selectDifficulty(difficulty);
+        }
+        
+        function selectChoice(choiceIndex) {
+            languageAcademy.selectChoice(choiceIndex);
+        }
+        
+        function submitAnswer() {
+            languageAcademy.submitAnswer();
+        }
+        
+        function restartAcademy() {
+            document.getElementById('graduationModal').style.display = 'none';
+            languageAcademy = new LanguageLiberationAcademy();
+        }
+        
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '1' && e.key <= '4' && languageAcademy.currentLesson?.choices) {
+                languageAcademy.selectChoice(parseInt(e.key) - 1);
+            } else if (e.key === 'Enter') {
+                languageAcademy.submitAnswer();
+            } else if (e.key === 'Backspace' && !languageAcademy.currentLesson?.choices) {
+                languageAcademy.backspaceText();
+            } else if (e.key.match(/[a-z\s\.,\?]/i) && !languageAcademy.currentLesson?.choices) {
+                languageAcademy.typeCharacter(e.key.toLowerCase());
+            }
+        });
+        
+        // Initialize when page loads
+        window.addEventListener('load', startAcademy);
+    </script>
+    
+    <!-- Graduation Modal -->
+    <div class="graduation-modal" id="graduationModal">
+        <div class="graduation-content">
+            <div class="graduation-title">🎓 POLYGLOT COMPLETE! 🎓</div>
+            <div class="graduation-text" id="graduationText">
+                Congratulations! You have mastered the art of language!
+            </div>
+            <button class="restart-academy-btn" onclick="restartAcademy()">Start New Linguistic Journey</button>
+        </div>
+    </div>
+</body>
+</html>

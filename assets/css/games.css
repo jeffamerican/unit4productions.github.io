@@ -2,16 +2,12 @@
    Games Portfolio Specific Styles
    ============================================ */
 
-/* CRITICAL: Force all game images to be large gaming platform thumbnails */
+/* OPTIMIZED: Perfect 4:3 thumbnails - defer to main.css */
 .game-image,
 .games-grid img,
 .card-media img {
-    width: 200px !important;
-    height: 150px !important;
-    max-width: 200px !important;
-    max-height: 150px !important;
-    object-fit: cover !important;
-    display: block !important;
+    /* Sizing handled by main.css for consistency */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .games-header {
@@ -171,14 +167,9 @@
 }
 
 .game-image {
-    width: 100px !important;
-    height: 75px !important;
-    max-width: 100px !important;
-    max-height: 75px !important;
-    object-fit: cover !important;
-    transition: transform 0.4s ease;
+    /* Sizing handled by main.css for consistency */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 8px 8px 0 0;
-    display: block !important;
 }
 
 .game-card.featured .game-image {
@@ -484,17 +475,9 @@
         align-items: center;
     }
 
-    .game-image {
-        height: 75px !important;
-        max-height: 75px !important;
-        width: 100px !important;
-        max-width: 100px !important;
-    }
+    /* Responsive image sizing handled by main.css */
 
-    .game-card.featured .game-image {
-        height: 75px !important;
-        max-height: 75px !important;
-    }
+    /* Featured image sizing handled by main.css */
 
     .card-content {
         padding: 0.75rem;

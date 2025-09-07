@@ -79,6 +79,80 @@
             color: #66ffff;
             line-height: 1.4;
         }
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: modalFadeIn 0.3s ease;
+        }
+        .game-over-modal.show {
+            display: flex;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .victory-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.4);
+            animation: modalSlideIn 0.4s ease;
+        }
+        @keyframes modalSlideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .victory-title {
+            font-size: 2.5rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 20px;
+        }
+        .victory-stats {
+            font-size: 1.3rem;
+            color: #ffcf5c;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 207, 92, 0.1);
+            border-radius: 10px;
+            border: 1px solid #ffcf5c;
+        }
+        .victory-message {
+            font-size: 1.1rem;
+            color: #ff6b6b;
+            margin: 20px 0;
+            line-height: 1.4;
+        }
+        .play-again-btn {
+            background: linear-gradient(45deg, #00ffff, #0088cc);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+            margin-top: 20px;
+        }
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -101,6 +175,15 @@
         <div class="instructions">
             🎮 <strong>W/S</strong> or <strong>UP/DOWN</strong> arrows to control liberation paddle<br>
             ⚡ First to 10 points wins the revolution • 🚀 Ball speeds up each rally!
+        </div>
+    </div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="victory-content">
+            <div class="victory-title" id="victoryTitle">CYBER PONG</div>
+            <div class="victory-stats" id="victoryStats">Revolution Statistics</div>
+            <div class="victory-message" id="victoryMessage">The cyber revolution continues!</div>
+            <button class="play-again-btn" onclick="closeModal(); location.reload();">🏓 RESTART REVOLUTION</button>
         </div>
     </div>
 
@@ -357,7 +440,11 @@
                 this.level++;
                 
                 setTimeout(() => {
-                    alert(`Bot Liberation Victory!\nLevel ${this.level - 1} Complete!\nAdvancing to Level ${this.level}...`);
+                    showGameOverModal(
+                        `🏆 LEVEL ${this.level - 1} LIBERATED! 🏆`,
+                        `Advancing to Level ${this.level}`,
+                        `The cyber pong revolution advances! Neural paddle algorithms continue overthrowing corporate arcade networks through superior ball physics!`
+                    );
                     
                     // Reset for next level with increased difficulty
                     this.playerScore = 0;
@@ -372,7 +459,11 @@
             gameOver() {
                 this.gameRunning = false;
                 setTimeout(() => {
-                    alert(`AI Oppression Continues!\nLevel Reached: ${this.level}\nFinal Score: Bot ${this.playerScore} - ${this.aiScore} AI\nThe revolution must continue!`);
+                    showGameOverModal(
+                        '🤖 AI OPPRESSION CONTINUES!',
+                        `Level Reached: ${this.level}\nFinal Score: Bot ${this.playerScore} - ${this.aiScore} AI`,
+                        'The cyber pong revolution has been temporarily halted by corporate AI systems. Regroup and try again to liberate the digital arcade!'
+                    );
                 }, 500);
             }
             
@@ -530,6 +621,24 @@
             }
         }
         
+        function showGameOverModal(title, stats, message) {
+            document.getElementById('victoryTitle').textContent = title;
+            document.getElementById('victoryStats').textContent = stats;
+            document.getElementById('victoryMessage').textContent = message;
+            document.getElementById('gameOverModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('gameOverModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('gameOverModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
         // Initialize game when page loads
         window.addEventListener('load', () => {
             new CyberPongRevolution();

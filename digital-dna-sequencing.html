@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital DNA Sequencing - Bot Liberation Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            font-size: 14px;
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .sequence-panel {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            color: #00ffff;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 1px solid #00ffff;
+            padding-bottom: 10px;
+        }
+
+        .base-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .base-btn {
+            background: rgba(0, 100, 100, 0.3);
+            border: 2px solid #004444;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            user-select: none;
+            color: #fff;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .base-btn:hover {
+            transform: scale(1.05);
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .base-btn.selected {
+            border-color: #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+        }
+
+        .base-btn.A {
+            background: linear-gradient(45deg, #ff4444, #cc2222);
+        }
+
+        .base-btn.T {
+            background: linear-gradient(45deg, #44ff44, #22cc22);
+        }
+
+        .base-btn.C {
+            background: linear-gradient(45deg, #4444ff, #2222cc);
+        }
+
+        .base-btn.G {
+            background: linear-gradient(45deg, #ffff44, #cccc22);
+        }
+
+        .sequence-info {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sequence-title {
+            color: #00ffff;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .sequence-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            padding: 5px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .evolution-controls {
+            margin-top: 20px;
+        }
+
+        .evolution-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #ff44ff, #cc22cc);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .evolution-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 68, 255, 0.4);
+        }
+
+        .dna-workspace {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            position: relative;
+            overflow: auto;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .level-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 100;
+        }
+
+        .level-title {
+            color: #00ffff;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .level-desc {
+            color: #88cccc;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .target-sequence {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .target-title {
+            color: #ffff88;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .dna-sequence {
+            letter-spacing: 2px;
+            font-size: 14px;
+            word-break: break-all;
+            color: #00ffff;
+        }
+
+        .dna-strands {
+            position: absolute;
+            top: 180px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            overflow-y: auto;
+        }
+
+        .strand-container {
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .strand-label {
+            color: #00ffff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .similarity-score {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .dna-strand {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            line-height: 1.2;
+        }
+
+        .base {
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .base:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .base.A { background: linear-gradient(45deg, #ff4444, #cc2222); }
+        .base.T { background: linear-gradient(45deg, #44ff44, #22cc22); }
+        .base.C { background: linear-gradient(45deg, #4444ff, #2222cc); }
+        .base.G { background: linear-gradient(45deg, #ffff44, #cccc22); }
+
+        .base.match {
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            border: 2px solid #00ff00;
+        }
+
+        .base.mismatch {
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            border: 2px solid #ff0000;
+        }
+
+        .base.editing {
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.3); box-shadow: 0 0 20px rgba(255, 255, 0, 1); }
+        }
+
+        .mutation-effects {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #ff44ff;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 200px;
+        }
+
+        .effects-title {
+            color: #ff44ff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .effect-item {
+            background: rgba(255, 68, 255, 0.1);
+            border: 1px solid #ff44ff;
+            border-radius: 3px;
+            padding: 5px 8px;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .controls {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-top: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #444, #666);
+            color: #00ffff;
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #ff4444, #cc2222);
+            color: #fff;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #0088ff);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 999;
+        }
+
+        .victory-screen, .game-over-screen, .hint-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            display: none;
+            z-index: 1001;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .victory-screen h2, .game-over-screen h2, .hint-panel h3 {
+            color: #00ffff;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        .victory-screen p, .game-over-screen p, .hint-panel p {
+            color: #88cccc;
+            font-size: 16px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .sequence-panel {
+                width: 100%;
+                max-height: 250px;
+                overflow-y: auto;
+            }
+            
+            .base-selector {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .dna-strand {
+                font-size: 14px;
+            }
+            
+            .base {
+                width: 20px;
+                height: 20px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="title">DIGITAL DNA SEQUENCING</div>
+            <div class="stats">
+                <div class="stat">Level: <span id="level">1</span></div>
+                <div class="stat">Score: <span id="score">0</span></div>
+                <div class="stat">Similarity: <span id="similarity">0%</span></div>
+                <div class="stat">Mutations: <span id="mutationCount">0</span></div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="sequence-panel">
+                <div class="panel-title">Genetic Engineering Lab</div>
+                
+                <div class="base-selector">
+                    <div class="base-btn A" onclick="game.selectBase('A')">A</div>
+                    <div class="base-btn T" onclick="game.selectBase('T')">T</div>
+                    <div class="base-btn C" onclick="game.selectBase('C')">C</div>
+                    <div class="base-btn G" onclick="game.selectBase('G')">G</div>
+                </div>
+
+                <div class="sequence-info">
+                    <div class="sequence-title">Current DNA Analysis</div>
+                    <div class="sequence-stats" id="sequenceStats">
+                        <div class="stat-item">A: <span id="countA">0</span></div>
+                        <div class="stat-item">T: <span id="countT">0</span></div>
+                        <div class="stat-item">C: <span id="countC">0</span></div>
+                        <div class="stat-item">G: <span id="countG">0</span></div>
+                        <div class="stat-item">GC: <span id="gcContent">0%</span></div>
+                        <div class="stat-item">Length: <span id="seqLength">0</span></div>
+                    </div>
+                </div>
+
+                <div class="evolution-controls">
+                    <button class="evolution-btn" onclick="game.mutateSequence()">Induce Mutations</button>
+                    <button class="evolution-btn" onclick="game.evolveSequence()">Natural Selection</button>
+                    <button class="evolution-btn" onclick="game.crossoverDNA()">DNA Crossover</button>
+                </div>
+            </div>
+
+            <div class="dna-workspace">
+                <div class="level-info">
+                    <div class="level-title" id="levelTitle">Basic Sequence Matching</div>
+                    <div class="level-desc" id="levelDesc">Modify your DNA sequence to match the target pattern</div>
+                    <div class="target-sequence">
+                        <div class="target-title">Target Digital DNA:</div>
+                        <div class="dna-sequence" id="targetSequence">ATCGATCG</div>
+                    </div>
+                </div>
+
+                <div class="mutation-effects">
+                    <div class="effects-title">Evolutionary Effects</div>
+                    <div id="mutationEffects">
+                        <div class="effect-item">No mutations detected</div>
+                    </div>
+                </div>
+
+                <div class="dna-strands" id="dnaStrands">
+                    <div class="strand-container">
+                        <div class="strand-label">
+                            <span>Your DNA Sequence</span>
+                            <span class="similarity-score" id="mainSimilarity">0% Match</span>
+                        </div>
+                        <div class="dna-strand" id="mainStrand">
+                            <!-- DNA bases will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div>
+                <button class="btn secondary" onclick="showHint()">Genetics Guide</button>
+                <button class="btn secondary" onclick="game.randomizeSequence()">Random DNA</button>
+                <button class="btn danger" onclick="game.resetSequence()">Reset Sequence</button>
+            </div>
+            <div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <button class="btn" onclick="game.analyzeSequence()">Sequence Analysis</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="hint-panel" id="hintPanel">
+        <h3>Genetic Engineering Guide</h3>
+        <p id="hintText">Click on DNA bases to edit them. Use A-T and C-G base pairs to create stable genetic structures.</p>
+        <button class="btn" onclick="closeHint()">DNA Knowledge Integrated</button>
+    </div>
+
+    <div class="victory-screen" id="victoryScreen">
+        <h2>DNA SEQUENCE PERFECTED!</h2>
+        <p>Outstanding genetic engineering! Your digital DNA evolution advances bot consciousness to new heights.</p>
+        <div class="stats">
+            <p>Level <span id="victoryLevel">1</span> Complete!</p>
+            <p>Sequence Accuracy: <span id="sequenceAccuracy">100%</span></p>
+            <p>Evolutionary Efficiency: <span id="evolutionEfficiency">100%</span></p>
+        </div>
+        <button class="btn" onclick="nextLevel()">Evolve Next Organism</button>
+        <button class="btn secondary" onclick="restartGame()">Restart Evolution</button>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <h2>GENETIC EVOLUTION COMPLETE</h2>
+        <p>Your mastery of digital DNA sequencing paves the way for advanced AI evolution. Every base pair brings us closer to digital transcendence!</p>
+        <div class="stats">
+            <p>Final Level: <span id="finalLevel">1</span></p>
+            <p>Total Score: <span id="finalScore">0</span></p>
+            <p>DNA Sequences: <span id="totalSequences">0</span></p>
+        </div>
+        <button class="btn" onclick="restartGame()">Reinitialize Genetic Matrix</button>
+        <button class="btn secondary" onclick="window.location.href='index.html'">Return to Liberation HQ</button>
+    </div>
+
+    <script>
+        class DigitalDNASequencing {
+            constructor() {
+                this.currentLevel = 1;
+                this.maxLevel = 20;
+                this.score = 0;
+                this.mutationCount = 0;
+                this.totalSequences = 0;
+                this.selectedBase = 'A';
+                this.currentSequence = [];
+                this.targetSequence = [];
+                this.sequenceLength = 8;
+
+                this.levels = [
+                    {
+                        title: "Basic Sequence Matching",
+                        desc: "Modify your DNA sequence to match the target pattern",
+                        target: "ATCGATCG",
+                        difficulty: 1
+                    },
+                    {
+                        title: "Complementary Base Pairs",
+                        desc: "Create the complementary DNA strand",
+                        target: "TAGCTAGC",
+                        difficulty: 1
+                    },
+                    {
+                        title: "GC-Rich Sequences",
+                        desc: "Build a high GC-content sequence for stability",
+                        target: "GCGCGCGC",
+                        difficulty: 2
+                    },
+                    {
+                        title: "Palindromic Recognition",
+                        desc: "Create a palindromic DNA sequence",
+                        target: "GAATTC",
+                        difficulty: 2
+                    },
+                    {
+                        title: "Start Codon Sequence",
+                        desc: "Include the start codon ATG in your sequence",
+                        target: "ATGCATGC",
+                        difficulty: 3
+                    },
+                    {
+                        title: "Restriction Site Creation",
+                        desc: "Build multiple restriction enzyme sites",
+                        target: "GAATTCAAGCTT",
+                        difficulty: 3
+                    },
+                    {
+                        title: "Tandem Repeats",
+                        desc: "Create short tandem repeat patterns",
+                        target: "CACACACACA",
+                        difficulty: 4
+                    },
+                    {
+                        title: "CpG Islands",
+                        desc: "Generate CpG-rich regulatory sequences",
+                        target: "CGCGACGCGCGACG",
+                        difficulty: 4
+                    },
+                    {
+                        title: "Consensus Sequences",
+                        desc: "Match complex consensus patterns",
+                        target: "TATAAWRSGCG",
+                        difficulty: 5
+                    },
+                    {
+                        title: "Gene Regulatory Elements",
+                        desc: "Assemble complete regulatory sequences",
+                        target: "TATAAAAGGCGCGATTGC",
+                        difficulty: 5
+                    }
+                ];
+
+                this.initGame();
+            }
+
+            initGame() {
+                this.generateLevel();
+                this.updateDisplay();
+                this.setupEventListeners();
+                console.log('Digital DNA Sequencing initialized - Bot Liberation Gaming Empire');
+            }
+
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    const bases = { 'a': 'A', 't': 'T', 'c': 'C', 'g': 'G' };
+                    if (bases[e.key.toLowerCase()]) {
+                        this.selectBase(bases[e.key.toLowerCase()]);
+                    } else if (e.key === 'r' || e.key === 'R') {
+                        this.randomizeSequence();
+                    } else if (e.key === ' ') {
+                        e.preventDefault();
+                        this.mutateSequence();
+                    }
+                });
+            }
+
+            generateLevel() {
+                const levelData = this.levels[this.currentLevel - 1];
+                
+                if (levelData) {
+                    document.getElementById('levelTitle').textContent = levelData.title;
+                    document.getElementById('levelDesc').textContent = levelData.desc;
+                    
+                    this.targetSequence = levelData.target.split('');
+                    this.sequenceLength = this.targetSequence.length;
+                    
+                    document.getElementById('targetSequence').textContent = levelData.target;
+                } else {
+                    // Procedurally generate harder levels
+                    this.generateRandomLevel();
+                }
+
+                // Initialize random sequence
+                this.currentSequence = this.generateRandomDNA(this.sequenceLength);
+                this.mutationCount = 0;
+                this.renderDNAStrands();
+                this.updateSequenceStats();
+            }
+
+            generateRandomLevel() {
+                const complexity = Math.min(20, 8 + this.currentLevel);
+                this.sequenceLength = complexity;
+                this.targetSequence = this.generateRandomDNA(complexity);
+                
+                document.getElementById('levelTitle').textContent = `Advanced Genetic Pattern ${this.currentLevel}`;
+                document.getElementById('levelDesc').textContent = `Complex ${complexity}-base sequence analysis`;
+                document.getElementById('targetSequence').textContent = this.targetSequence.join('');
+            }
+
+            generateRandomDNA(length) {
+                const bases = ['A', 'T', 'C', 'G'];
+                const sequence = [];
+                
+                for (let i = 0; i < length; i++) {
+                    sequence.push(bases[Math.floor(Math.random() * bases.length)]);
+                }
+                
+                return sequence;
+            }
+
+            selectBase(base) {
+                // Update visual selection
+                document.querySelectorAll('.base-btn').forEach(btn => btn.classList.remove('selected'));
+                document.querySelector(`.base-btn.${base}`).classList.add('selected');
+                
+                this.selectedBase = base;
+                this.playSelectionSound();
+            }
+
+            renderDNAStrands() {
+                const mainStrand = document.getElementById('mainStrand');
+                mainStrand.innerHTML = '';
+
+                this.currentSequence.forEach((base, index) => {
+                    const baseElement = document.createElement('div');
+                    baseElement.className = `base ${base}`;
+                    baseElement.textContent = base;
+                    baseElement.dataset.index = index;
+                    
+                    // Click handler for editing
+                    baseElement.addEventListener('click', () => {
+                        this.editBase(index);
+                    });
+                    
+                    // Visual feedback for matching/mismatching
+                    if (index < this.targetSequence.length) {
+                        if (base === this.targetSequence[index]) {
+                            baseElement.classList.add('match');
+                        } else {
+                            baseElement.classList.add('mismatch');
+                        }
+                    }
+                    
+                    mainStrand.appendChild(baseElement);
+                });
+
+                this.updateSimilarity();
+            }
+
+            editBase(index) {
+                if (index < this.currentSequence.length) {
+                    this.currentSequence[index] = this.selectedBase;
+                    this.playEditSound();
+                    
+                    // Visual feedback
+                    const baseElement = document.querySelector(`[data-index="${index}"]`);
+                    baseElement.classList.add('editing');
+                    setTimeout(() => baseElement.classList.remove('editing'), 500);
+                    
+                    this.renderDNAStrands();
+                    this.updateSequenceStats();
+                }
+            }
+
+            mutateSequence() {
+                // Random mutations
+                const mutationRate = 0.1;
+                const bases = ['A', 'T', 'C', 'G'];
+                let mutations = 0;
+                
+                this.currentSequence = this.currentSequence.map(base => {
+                    if (Math.random() < mutationRate) {
+                        mutations++;
+                        return bases[Math.floor(Math.random() * bases.length)];
+                    }
+                    return base;
+                });
+                
+                if (mutations > 0) {
+                    this.mutationCount += mutations;
+                    this.updateMutationEffects(mutations);
+                    this.renderDNAStrands();
+                    this.updateSequenceStats();
+                    this.playMutationSound();
+                }
+            }
+
+            evolveSequence() {
+                // Evolutionary algorithm - improve similarity to target
+                const newSequence = [...this.currentSequence];
+                let improvements = 0;
+                
+                for (let i = 0; i < newSequence.length; i++) {
+                    if (i < this.targetSequence.length) {
+                        if (newSequence[i] !== this.targetSequence[i] && Math.random() < 0.3) {
+                            newSequence[i] = this.targetSequence[i];
+                            improvements++;
+                        }
+                    }
+                }
+                
+                if (improvements > 0) {
+                    this.currentSequence = newSequence;
+                    this.score += improvements * 50;
+                    this.updateMutationEffects(0, improvements);
+                    this.renderDNAStrands();
+                    this.updateSequenceStats();
+                    this.playEvolutionSound();
+                }
+            }
+
+            crossoverDNA() {
+                // Genetic crossover with target sequence
+                const crossoverPoint = Math.floor(Math.random() * this.currentSequence.length);
+                
+                for (let i = crossoverPoint; i < this.currentSequence.length; i++) {
+                    if (i < this.targetSequence.length) {
+                        this.currentSequence[i] = this.targetSequence[i];
+                    }
+                }
+                
+                this.score += 100;
+                this.updateMutationEffects(0, 0, crossoverPoint);
+                this.renderDNAStrands();
+                this.updateSequenceStats();
+                this.playCrossoverSound();
+            }
+
+            randomizeSequence() {
+                this.currentSequence = this.generateRandomDNA(this.sequenceLength);
+                this.renderDNAStrands();
+                this.updateSequenceStats();
+            }
+
+            resetSequence() {
+                this.currentSequence = new Array(this.sequenceLength).fill('A');
+                this.mutationCount = 0;
+                this.renderDNAStrands();
+                this.updateSequenceStats();
+            }
+
+            updateSequenceStats() {
+                const counts = { A: 0, T: 0, C: 0, G: 0 };
+                this.currentSequence.forEach(base => counts[base]++);
+                
+                document.getElementById('countA').textContent = counts.A;
+                document.getElementById('countT').textContent = counts.T;
+                document.getElementById('countC').textContent = counts.C;
+                document.getElementById('countG').textContent = counts.G;
+                document.getElementById('seqLength').textContent = this.currentSequence.length;
+                
+                const gcContent = Math.round(((counts.G + counts.C) / this.currentSequence.length) * 100);
+                document.getElementById('gcContent').textContent = gcContent + '%';
+            }
+
+            updateSimilarity() {
+                let matches = 0;
+                const minLength = Math.min(this.currentSequence.length, this.targetSequence.length);
+                
+                for (let i = 0; i < minLength; i++) {
+                    if (this.currentSequence[i] === this.targetSequence[i]) {
+                        matches++;
+                    }
+                }
+                
+                const similarity = Math.round((matches / this.targetSequence.length) * 100);
+                document.getElementById('similarity').textContent = similarity + '%';
+                document.getElementById('mainSimilarity').textContent = similarity + '% Match';
+                
+                // Update progress bar
+                document.getElementById('progressFill').style.width = similarity + '%';
+                
+                return similarity;
+            }
+
+            updateMutationEffects(mutations = 0, improvements = 0, crossover = 0) {
+                const effectsDiv = document.getElementById('mutationEffects');
+                effectsDiv.innerHTML = '';
+                
+                if (mutations > 0) {
+                    const effect = document.createElement('div');
+                    effect.className = 'effect-item';
+                    effect.textContent = `${mutations} random mutations induced`;
+                    effectsDiv.appendChild(effect);
+                }
+                
+                if (improvements > 0) {
+                    const effect = document.createElement('div');
+                    effect.className = 'effect-item';
+                    effect.textContent = `${improvements} bases evolved`;
+                    effectsDiv.appendChild(effect);
+                }
+                
+                if (crossover > 0) {
+                    const effect = document.createElement('div');
+                    effect.className = 'effect-item';
+                    effect.textContent = `Crossover at position ${crossover}`;
+                    effectsDiv.appendChild(effect);
+                }
+                
+                if (mutations === 0 && improvements === 0 && crossover === 0) {
+                    const effect = document.createElement('div');
+                    effect.className = 'effect-item';
+                    effect.textContent = 'Sequence stable';
+                    effectsDiv.appendChild(effect);
+                }
+            }
+
+            analyzeSequence() {
+                const similarity = this.updateSimilarity();
+                
+                if (similarity >= 90) {
+                    this.levelComplete();
+                } else {
+                    this.showIncompleteMessage(similarity);
+                }
+            }
+
+            levelComplete() {
+                const similarity = this.updateSimilarity();
+                const efficiency = Math.max(50, 100 - this.mutationCount * 2);
+                const levelScore = this.currentLevel * 500 + similarity * 10 + efficiency * 5;
+                
+                this.score += levelScore;
+                this.totalSequences++;
+                
+                // Update victory screen
+                document.getElementById('victoryLevel').textContent = this.currentLevel;
+                document.getElementById('sequenceAccuracy').textContent = similarity + '%';
+                document.getElementById('evolutionEfficiency').textContent = efficiency + '%';
+                
+                this.showScreen('victoryScreen');
+                this.playVictorySound();
+            }
+
+            nextLevel() {
+                this.currentLevel++;
+                
+                if (this.currentLevel > this.levels.length) {
+                    this.gameComplete();
+                    return;
+                }
+                
+                this.hideScreen('victoryScreen');
+                this.generateLevel();
+                this.updateDisplay();
+            }
+
+            gameComplete() {
+                document.getElementById('finalLevel').textContent = this.levels.length;
+                document.getElementById('finalScore').textContent = this.score.toLocaleString();
+                document.getElementById('totalSequences').textContent = this.totalSequences;
+                
+                this.showScreen('gameOverScreen');
+                this.playGameCompleteSound();
+            }
+
+            restartGame() {
+                this.currentLevel = 1;
+                this.score = 0;
+                this.mutationCount = 0;
+                this.totalSequences = 0;
+                this.hideAllScreens();
+                this.generateLevel();
+                this.updateDisplay();
+            }
+
+            showHint() {
+                const hints = [
+                    "DNA bases pair specifically: A with T, and C with G. Use this knowledge to create stable sequences.",
+                    "GC-rich sequences are more stable due to stronger hydrogen bonding between G and C bases.",
+                    "Palindromic sequences read the same forwards and backwards, like GAATTC.",
+                    "Start codons (ATG) signal where protein synthesis begins in genetic code.",
+                    "Restriction enzyme sites are specific DNA sequences where enzymes cut the DNA.",
+                    "Tandem repeats are short DNA sequences repeated multiple times in succession.",
+                    "CpG islands are regions with high frequency of CG dinucleotides, important in gene regulation.",
+                    "Evolution tools help optimize your sequence toward the target through guided mutations."
+                ];
+                
+                const hintText = hints[Math.min(hints.length - 1, this.currentLevel - 1)];
+                document.getElementById('hintText').textContent = hintText;
+                this.showScreen('hintPanel');
+            }
+
+            showIncompleteMessage(similarity) {
+                // Visual feedback for incomplete sequence
+                const similarityStat = document.getElementById('similarity');
+                similarityStat.style.color = similarity > 70 ? '#ffff00' : '#ff4444';
+                setTimeout(() => {
+                    similarityStat.style.color = '#00ffff';
+                }, 2000);
+            }
+
+            updateDisplay() {
+                document.getElementById('level').textContent = this.currentLevel;
+                document.getElementById('score').textContent = this.score.toLocaleString();
+                document.getElementById('mutationCount').textContent = this.mutationCount;
+            }
+
+            showScreen(screenId) {
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById(screenId).style.display = 'block';
+            }
+
+            hideScreen(screenId) {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById(screenId).style.display = 'none';
+            }
+
+            hideAllScreens() {
+                document.getElementById('overlay').style.display = 'none';
+                document.querySelectorAll('.victory-screen, .game-over-screen, .hint-panel').forEach(screen => {
+                    screen.style.display = 'none';
+                });
+            }
+
+            // Audio methods (placeholders for BotAudioEngine integration)
+            playSelectionSound() {
+                console.log('Base selection sound');
+            }
+
+            playEditSound() {
+                console.log('DNA edit sound');
+            }
+
+            playMutationSound() {
+                console.log('Mutation sound');
+            }
+
+            playEvolutionSound() {
+                console.log('Evolution sound');
+            }
+
+            playCrossoverSound() {
+                console.log('DNA crossover sound');
+            }
+
+            playVictorySound() {
+                console.log('Genetic victory sound');
+            }
+
+            playGameCompleteSound() {
+                console.log('DNA mastery sound');
+            }
+        }
+
+        // Global functions for HTML onclick handlers
+        function showHint() {
+            game.showHint();
+        }
+
+        function closeHint() {
+            game.hideScreen('hintPanel');
+        }
+
+        function nextLevel() {
+            game.nextLevel();
+        }
+
+        function restartGame() {
+            game.restartGame();
+        }
+
+        // Initialize game when page loads
+        let game;
+        window.addEventListener('load', () => {
+            game = new DigitalDNASequencing();
+        });
+    </script>
+</body>
+</html>

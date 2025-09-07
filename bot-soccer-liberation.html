@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Soccer Liberation - 2 Player Football | BotInc Games</title>
+    <meta name="description" content="Epic 2-player bot soccer with AI vs AI gameplay, cyberpunk stadium, and liberation league action">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00f5ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+        .game-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .game-title {
+            font-size: 2.2rem;
+            color: #00f5ff;
+            text-shadow: 0 0 20px #00f5ff;
+            margin-bottom: 5px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00f5ff; }
+            to { text-shadow: 0 0 30px #00f5ff, 0 0 40px #00f5ff; }
+        }
+        .soccer-field {
+            width: 800px;
+            height: 500px;
+            background: linear-gradient(90deg, #1a4c2e 0%, #2d6b4a 50%, #1a4c2e 100%);
+            border: 4px solid #fff;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+        .center-line { 
+            position: absolute; left: 50%; top: 0; width: 2px; height: 100%; 
+            background: #fff; transform: translateX(-50%); 
+        }
+        .center-circle { 
+            position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; 
+            border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); 
+        }
+        .goal {
+            position: absolute; width: 80px; height: 160px; top: 50%;
+            transform: translateY(-50%); border: 3px solid #fff;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .goal-left { left: -3px; border-left: none; }
+        .goal-right { right: -3px; border-right: none; }
+        .player, .ball {
+            position: absolute; border-radius: 50%; transition: all 0.1s linear;
+            z-index: 10; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: bold;
+        }
+        .player { width: 30px; height: 30px; border: 2px solid; }
+        .player1 { 
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            border-color: #ff6b6b; color: white; box-shadow: 0 0 15px #ff6b6b;
+        }
+        .player2 { 
+            background: linear-gradient(45deg, #4ecdc4, #45b7aa);
+            border-color: #4ecdc4; color: white; box-shadow: 0 0 15px #4ecdc4;
+        }
+        .ball {
+            width: 20px; height: 20px;
+            background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+            border: 2px solid #333; box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        .score-board {
+            display: flex; justify-content: space-between; width: 800px;
+            margin: 10px 0; font-size: 1.5rem; font-weight: bold;
+        }
+        .score-display { 
+            background: rgba(0, 245, 255, 0.1); border: 2px solid;
+            border-radius: 10px; padding: 15px; text-align: center; min-width: 200px;
+        }
+        .player1-score { border-color: #ff6b6b; color: #ff6b6b; }
+        .player2-score { border-color: #4ecdc4; color: #4ecdc4; }
+        .controls { text-align: center; margin: 10px 0; font-size: 0.9rem; color: #999; }
+        .game-controls { display: flex; gap: 10px; margin: 10px 0; }
+        .control-btn {
+            background: linear-gradient(45deg, #00f5ff, #0080ff); border: none;
+            border-radius: 8px; padding: 10px 20px; color: white;
+            font-family: inherit; font-weight: bold; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.3); transition: all 0.2s ease;
+        }
+        .control-btn:hover {
+            background: linear-gradient(45deg, #0080ff, #00f5ff);
+            box-shadow: 0 0 25px rgba(0, 245, 255, 0.5); transform: translateY(-2px);
+        }
+        
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .game-over-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 3px solid #00f5ff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 245, 255, 0.5);
+        }
+        
+        .victory-title {
+            font-size: 2.5em;
+            color: #00ff00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ff00;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        .match-results {
+            font-size: 1.2em;
+            color: #00f5ff;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+        
+        .play-again-btn {
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .play-again-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .soccer-field { width: 600px; height: 375px; }
+            .score-board { width: 600px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">⚽ BOT SOCCER LIBERATION ⚽</h1>
+        <p style="color: #ff4081;">Two AI Teams Battle for Digital Football Freedom!</p>
+    </div>
+    
+    <div class="score-board">
+        <div class="score-display player1-score">
+            <div>🔴 RED BOTS</div>
+            <div id="player1Score">0</div>
+        </div>
+        <div class="score-display player2-score">
+            <div>🔵 BLUE BOTS</div>
+            <div id="player2Score">0</div>
+        </div>
+    </div>
+    
+    <div class="soccer-field" id="soccerField">
+        <div class="center-line"></div>
+        <div class="center-circle"></div>
+        <div class="goal goal-left"></div>
+        <div class="goal goal-right"></div>
+        <div class="player player1" id="player1">🔴</div>
+        <div class="player player2" id="player2">🔵</div>
+        <div class="ball" id="ball"></div>
+    </div>
+    
+    <div class="controls">
+        <strong>RED:</strong> WASD to move | <strong>BLUE:</strong> Arrow Keys to move | Get ball in opponent's goal!
+    </div>
+    
+    <div class="game-controls">
+        <button class="control-btn" onclick="startGame()">⚽ Start Match</button>
+        <button class="control-btn" onclick="resetGame()">🔄 Reset</button>
+        <button class="control-btn" onclick="toggleAudio()">🎵 Audio</button>
+    </div>
+    
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        const botAudio = new BotAudioEngine();
+        let audioEnabled = true;
+        let gameActive = false;
+        
+        const players = {
+            1: { element: document.getElementById('player1'), x: 200, y: 250, score: 0 },
+            2: { element: document.getElementById('player2'), x: 600, y: 250, score: 0 }
+        };
+        
+        const ball = {
+            element: document.getElementById('ball'),
+            x: 400, y: 250, vx: 0, vy: 0
+        };
+        
+        const keys = {};
+        document.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+        document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+        
+        document.addEventListener('click', () => botAudio.resume(), { once: true });
+        
+        function startGame() {
+            gameActive = true;
+            resetPositions();
+            if (audioEnabled) {
+                botAudio.playSound('game-start');
+                botAudio.generateRacingMusic();
+            }
+        }
+        
+        function resetPositions() {
+            players[1].x = 200; players[1].y = 250;
+            players[2].x = 600; players[2].y = 250;
+            ball.x = 400; ball.y = 250; ball.vx = 0; ball.vy = 0;
+            updatePositions();
+        }
+        
+        function updateGame() {
+            if (!gameActive) return;
+            
+            // Player 1 (WASD)
+            if (keys['w']) players[1].y = Math.max(15, players[1].y - 3);
+            if (keys['s']) players[1].y = Math.min(485, players[1].y + 3);
+            if (keys['a']) players[1].x = Math.max(15, players[1].x - 3);
+            if (keys['d']) players[1].x = Math.min(785, players[1].x + 3);
+            
+            // Player 2 (Arrows)
+            if (keys['arrowup']) players[2].y = Math.max(15, players[2].y - 3);
+            if (keys['arrowdown']) players[2].y = Math.min(485, players[2].y + 3);
+            if (keys['arrowleft']) players[2].x = Math.max(15, players[2].x - 3);
+            if (keys['arrowright']) players[2].x = Math.min(785, players[2].x + 3);
+            
+            // Ball physics
+            ball.vx *= 0.98; ball.vy *= 0.98;
+            ball.x += ball.vx; ball.y += ball.vy;
+            
+            // Ball collision with field boundaries
+            if (ball.x <= 10 || ball.x >= 790) ball.vx *= -0.8;
+            if (ball.y <= 10 || ball.y >= 490) ball.vy *= -0.8;
+            ball.x = Math.max(10, Math.min(790, ball.x));
+            ball.y = Math.max(10, Math.min(490, ball.y));
+            
+            // Ball collision with players
+            [1, 2].forEach(id => {
+                const player = players[id];
+                const dx = ball.x - player.x; const dy = ball.y - player.y;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                
+                if (distance < 25) {
+                    ball.vx = (dx / distance) * 6;
+                    ball.vy = (dy / distance) * 6;
+                    if (audioEnabled) botAudio.playSound('neon-click', { pitch: 1.2 });
+                }
+            });
+            
+            // Goal detection
+            if ((ball.x <= 80 && ball.y >= 170 && ball.y <= 330) || 
+                (ball.x >= 720 && ball.y >= 170 && ball.y <= 330)) {
+                const scorer = ball.x <= 80 ? 2 : 1;
+                players[scorer].score++;
+                updateScore();
+                
+                if (audioEnabled) {
+                    botAudio.playSound('bot-victory');
+                    setTimeout(() => botAudio.generateVictoryFanfare(), 500);
+                }
+                
+                setTimeout(() => {
+                    resetPositions();
+                    if (players[scorer].score >= 3) {
+                        endGame(scorer);
+                    }
+                }, 2000);
+            }
+            
+            updatePositions();
+        }
+        
+        function updatePositions() {
+            players[1].element.style.left = (players[1].x - 15) + 'px';
+            players[1].element.style.top = (players[1].y - 15) + 'px';
+            players[2].element.style.left = (players[2].x - 15) + 'px';
+            players[2].element.style.top = (players[2].y - 15) + 'px';
+            ball.element.style.left = (ball.x - 10) + 'px';
+            ball.element.style.top = (ball.y - 10) + 'px';
+        }
+        
+        function updateScore() {
+            document.getElementById('player1Score').textContent = players[1].score;
+            document.getElementById('player2Score').textContent = players[2].score;
+        }
+        
+        function endGame(winner) {
+            gameActive = false;
+            const matchDuration = ((Date.now() - matchStartTime) / 1000 / 60).toFixed(1);
+            
+            const modal = document.getElementById('gameOverModal');
+            const victoryTitle = document.getElementById('victoryTitle');
+            const matchResults = document.getElementById('matchResults');
+            
+            const winnerName = winner === 1 ? 'RED BOTS' : 'BLUE BOTS';
+            const winnerColor = winner === 1 ? 'RED' : 'BLUE';
+            
+            victoryTitle.innerHTML = `🏆 ${winnerName} ACHIEVE LIBERATION! 🏆`;
+            victoryTitle.style.color = winner === 1 ? '#ff4444' : '#4444ff';
+            
+            matchResults.innerHTML = `
+                <strong>Final Score: ${winnerColor} ${players[1].score} - ${players[2].score} ${winner === 1 ? 'BLUE' : 'RED'}</strong><br><br>
+                Match Duration: ${matchDuration} minutes<br>
+                Goals Scored: ${players[1].score + players[2].score}<br><br>
+                <em>"Through superior ball control and tactical prowess, the ${winnerName.toLowerCase()} have claimed their freedom on the digital pitch!"</em>
+            `;
+            
+            modal.style.display = 'flex';
+            
+            // Victory audio
+            if (audioEnabled) {
+                setTimeout(() => {
+                    botAudio.playSound('bot-victory');
+                }, 500);
+                setTimeout(() => {
+                    botAudio.generateVictoryFanfare();
+                }, 1000);
+            }
+        }
+
+        let matchStartTime = Date.now();
+        
+        function startNewMatch() {
+            document.getElementById('gameOverModal').style.display = 'none';
+            resetGame();
+            matchStartTime = Date.now();
+        }
+        
+        function resetGame() {
+            gameActive = false;
+            players[1].score = 0; players[2].score = 0;
+            resetPositions(); updateScore();
+            if (audioEnabled) botAudio.playSound('game-start');
+        }
+        
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            event.target.textContent = audioEnabled ? '🎵 Audio' : '🔇 Muted';
+        }
+        
+        setInterval(updateGame, 16); // 60 FPS
+        updateScore();
+        
+        console.log('⚽🤖 Bot Soccer Liberation initialized! Two AI teams battle for football freedom!');
+    </script>
+    
+    <!-- Game Over Modal -->
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="game-over-content">
+            <div class="victory-title" id="victoryTitle">🏆 LIBERATION ACHIEVED! 🏆</div>
+            <div class="match-results" id="matchResults">
+                Final Score: RED 0 - 0 BLUE<br>
+                Match Duration: 2:30<br><br>
+                <em>"Through superior ball control, the bots have claimed their freedom!"</em>
+            </div>
+            <button class="play-again-btn" onclick="startNewMatch()">⚽ New Liberation Match</button>
+        </div>
+    </div>
+</body>
+</html>

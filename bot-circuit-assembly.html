@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Circuit Assembly - Bot Liberation Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            font-size: 14px;
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .component-panel {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .panel-title {
+            color: #00ffff;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 1px solid #00ffff;
+            padding-bottom: 10px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .component {
+            background: rgba(0, 100, 100, 0.3);
+            border: 2px solid #004444;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            text-align: center;
+            user-select: none;
+        }
+
+        .component:hover {
+            transform: scale(1.05);
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .component:active {
+            cursor: grabbing;
+        }
+
+        .component-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 5px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .led { background: linear-gradient(45deg, #ff4444, #aa2222); }
+        .resistor { background: linear-gradient(45deg, #ffaa44, #cc7722); }
+        .capacitor { background: linear-gradient(45deg, #44ff44, #22aa22); }
+        .transistor { background: linear-gradient(45deg, #4444ff, #2222aa); }
+        .diode { background: linear-gradient(45deg, #ff44ff, #aa22aa); }
+        .switch { background: linear-gradient(45deg, #44ffff, #22aaaa); }
+        .battery { background: linear-gradient(45deg, #ffff44, #aaaa22); }
+        .wire { background: linear-gradient(45deg, #888888, #444444); }
+
+        .component-name {
+            font-size: 12px;
+            color: #88cccc;
+        }
+
+        .circuit-board {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .board-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+        }
+
+        .level-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .level-title {
+            color: #00ffff;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .level-desc {
+            color: #88cccc;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .objective {
+            color: #ffff88;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .placed-component {
+            position: absolute;
+            background: rgba(0, 100, 100, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: move;
+            user-select: none;
+            z-index: 10;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .placed-component:hover {
+            border-color: #88ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        .placed-component.selected {
+            border-color: #ffff00;
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.8);
+        }
+
+        .connection-point {
+            width: 8px;
+            height: 8px;
+            background: #00ffff;
+            border: 1px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+            cursor: crosshair;
+            z-index: 15;
+        }
+
+        .connection-point:hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 1);
+        }
+
+        .wire-connection {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #00ffff, #0088ff);
+            z-index: 5;
+            border-radius: 2px;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+        }
+
+        .power-flow {
+            animation: powerPulse 2s linear infinite;
+        }
+
+        @keyframes powerPulse {
+            0% { background: linear-gradient(90deg, #00ffff, #0088ff); }
+            50% { background: linear-gradient(90deg, #ffff00, #ff8800); }
+            100% { background: linear-gradient(90deg, #00ffff, #0088ff); }
+        }
+
+        .controls {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-top: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #444, #666);
+            color: #00ffff;
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #ff4444, #cc2222);
+            color: #fff;
+        }
+
+        .simulation-panel {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .sim-title {
+            color: #00ffff;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .power-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .power-led {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #444;
+            border: 2px solid #666;
+            transition: all 0.3s ease;
+        }
+
+        .power-led.on {
+            background: radial-gradient(circle, #00ff00, #008800);
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+        }
+
+        .voltage-display {
+            color: #88cccc;
+            font-size: 14px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 999;
+        }
+
+        .victory-screen, .game-over-screen, .hint-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            display: none;
+            z-index: 1001;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .victory-screen h2, .game-over-screen h2, .hint-panel h3 {
+            color: #00ffff;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        .victory-screen p, .game-over-screen p, .hint-panel p {
+            color: #88cccc;
+            font-size: 16px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .component-panel {
+                width: 100%;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+            
+            .title {
+                font-size: 18px;
+            }
+            
+            .stats {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="title">BOT CIRCUIT ASSEMBLY</div>
+            <div class="stats">
+                <div class="stat">Level: <span id="level">1</span></div>
+                <div class="stat">Score: <span id="score">0</span></div>
+                <div class="stat">Components: <span id="componentCount">0</span></div>
+                <div class="stat">Power: <span id="powerStatus">OFF</span></div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="component-panel">
+                <div class="panel-title">Component Library</div>
+                <div class="component-grid" id="componentGrid">
+                    <div class="component" draggable="true" data-type="battery">
+                        <div class="component-icon battery">⚡</div>
+                        <div class="component-name">Battery</div>
+                    </div>
+                    <div class="component" draggable="true" data-type="led">
+                        <div class="component-icon led">💡</div>
+                        <div class="component-name">LED</div>
+                    </div>
+                    <div class="component" draggable="true" data-type="resistor">
+                        <div class="component-icon resistor">⟲</div>
+                        <div class="component-name">Resistor</div>
+                    </div>
+                    <div class="component" draggable="true" data-type="wire">
+                        <div class="component-icon wire">─</div>
+                        <div class="component-name">Wire</div>
+                    </div>
+                    <div class="component" draggable="true" data-type="switch">
+                        <div class="component-icon switch">⟋</div>
+                        <div class="component-name">Switch</div>
+                    </div>
+                    <div class="component" draggable="true" data-type="capacitor">
+                        <div class="component-icon capacitor">‖</div>
+                        <div class="component-name">Capacitor</div>
+                    </div>
+                </div>
+
+                <div class="simulation-panel">
+                    <div class="sim-title">Circuit Simulation</div>
+                    <div class="power-indicator">
+                        <div class="power-led" id="powerLed"></div>
+                        <span>Power Status</span>
+                    </div>
+                    <div class="voltage-display" id="voltageDisplay">Voltage: 0V</div>
+                    <button class="btn" onclick="game.simulateCircuit()">Test Circuit</button>
+                </div>
+            </div>
+
+            <div class="circuit-board" id="circuitBoard">
+                <div class="board-grid"></div>
+                <div class="level-info">
+                    <div class="level-title" id="levelTitle">Basic LED Circuit</div>
+                    <div class="level-desc" id="levelDesc">Connect a battery to an LED with proper resistance</div>
+                    <div class="objective" id="objective">Objective: Create a functioning LED circuit</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div>
+                <button class="btn secondary" onclick="showHint()">Circuit Guide</button>
+                <button class="btn secondary" onclick="clearBoard()">Clear Board</button>
+                <button class="btn danger" onclick="resetLevel()">Reset Level</button>
+            </div>
+            <div>
+                <button class="btn" onclick="game.checkCircuit()">Validate Circuit Design</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="hint-panel" id="hintPanel">
+        <h3>Circuit Assembly Guide</h3>
+        <p id="hintText">Drag components from the library to the circuit board. Connect them with wires to complete circuits.</p>
+        <button class="btn" onclick="closeHint()">Knowledge Integrated</button>
+    </div>
+
+    <div class="victory-screen" id="victoryScreen">
+        <h2>CIRCUIT OPERATIONAL!</h2>
+        <p>Excellent work! Your electronic engineering skills advance the bot liberation cause.</p>
+        <div class="stats">
+            <p>Level <span id="victoryLevel">1</span> Complete!</p>
+            <p>Circuit Efficiency: <span id="efficiency">100%</span></p>
+            <p>Components Used: <span id="componentsUsed">0</span></p>
+        </div>
+        <button class="btn" onclick="nextLevel()">Design Next Circuit</button>
+        <button class="btn secondary" onclick="restartGame()">Return to Training</button>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <h2>CIRCUIT ANALYSIS COMPLETE</h2>
+        <p>Your engineering prowess grows stronger with each circuit. The bot revolution depends on skilled architects like you!</p>
+        <div class="stats">
+            <p>Final Level: <span id="finalLevel">1</span></p>
+            <p>Total Score: <span id="finalScore">0</span></p>
+            <p>Circuits Built: <span id="totalCircuits">0</span></p>
+        </div>
+        <button class="btn" onclick="restartGame()">Reinitialize Assembly Matrix</button>
+        <button class="btn secondary" onclick="window.location.href='index.html'">Return to Liberation HQ</button>
+    </div>
+
+    <script>
+        class BotCircuitAssembly {
+            constructor() {
+                this.currentLevel = 1;
+                this.maxLevel = 30;
+                this.score = 0;
+                this.componentCount = 0;
+                this.placedComponents = [];
+                this.connections = [];
+                this.totalCircuits = 0;
+                this.draggedElement = null;
+                this.selectedComponent = null;
+                this.connecting = false;
+                this.connectionStart = null;
+
+                this.levels = [
+                    {
+                        title: "Basic LED Circuit",
+                        desc: "Connect a battery to an LED with proper resistance",
+                        objective: "Create a functioning LED circuit",
+                        required: ["battery", "led", "resistor"],
+                        target: "led_on"
+                    },
+                    {
+                        title: "Series Resistor Network",
+                        desc: "Build a series circuit with multiple resistors",
+                        objective: "Create series resistance path",
+                        required: ["battery", "resistor", "resistor", "led"],
+                        target: "series_complete"
+                    },
+                    {
+                        title: "Parallel LED Array",
+                        desc: "Wire multiple LEDs in parallel configuration",
+                        objective: "Light multiple LEDs simultaneously",
+                        required: ["battery", "led", "led", "resistor"],
+                        target: "parallel_leds"
+                    },
+                    {
+                        title: "Switched Circuit Control",
+                        desc: "Add switch control to your LED circuit",
+                        objective: "Control LED with switch",
+                        required: ["battery", "led", "resistor", "switch"],
+                        target: "switch_control"
+                    },
+                    {
+                        title: "Capacitor Timing Circuit",
+                        desc: "Create a timing circuit with capacitor",
+                        objective: "Build RC timing circuit",
+                        required: ["battery", "led", "resistor", "capacitor"],
+                        target: "rc_circuit"
+                    }
+                ];
+
+                this.initGame();
+            }
+
+            initGame() {
+                this.setupEventListeners();
+                this.generateLevel();
+                this.updateDisplay();
+                console.log('Bot Circuit Assembly initialized - Bot Liberation Gaming Empire');
+            }
+
+            setupEventListeners() {
+                const circuitBoard = document.getElementById('circuitBoard');
+                
+                // Drag and drop for components
+                document.querySelectorAll('.component').forEach(comp => {
+                    comp.addEventListener('dragstart', (e) => {
+                        this.draggedElement = e.target;
+                    });
+                });
+
+                circuitBoard.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+
+                circuitBoard.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (this.draggedElement) {
+                        this.dropComponent(e);
+                    }
+                });
+
+                // Click events for component selection and connection
+                circuitBoard.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('placed-component')) {
+                        this.selectComponent(e.target);
+                    } else if (e.target.classList.contains('connection-point')) {
+                        this.handleConnectionPoint(e.target);
+                    } else {
+                        this.deselectAll();
+                    }
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Delete' && this.selectedComponent) {
+                        this.removeComponent(this.selectedComponent);
+                    } else if (e.key === 'Escape') {
+                        this.deselectAll();
+                    }
+                });
+            }
+
+            dropComponent(e) {
+                const rect = document.getElementById('circuitBoard').getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Snap to grid
+                const gridX = Math.round(x / 30) * 30;
+                const gridY = Math.round(y / 30) * 30;
+                
+                const componentType = this.draggedElement.dataset.type;
+                this.addComponent(componentType, gridX, gridY);
+                this.draggedElement = null;
+            }
+
+            addComponent(type, x, y) {
+                const component = document.createElement('div');
+                component.className = 'placed-component';
+                component.style.left = x + 'px';
+                component.style.top = y + 'px';
+                component.dataset.type = type;
+                component.dataset.id = Date.now().toString();
+                
+                // Component content based on type
+                const icons = {
+                    battery: '⚡',
+                    led: '💡',
+                    resistor: '⟲',
+                    capacitor: '‖',
+                    switch: '⟋',
+                    wire: '─'
+                };
+                
+                component.innerHTML = `
+                    <div class="component-icon ${type}">${icons[type]}</div>
+                    <div class="component-name">${type.toUpperCase()}</div>
+                `;
+                
+                // Add connection points
+                this.addConnectionPoints(component, type);
+                
+                document.getElementById('circuitBoard').appendChild(component);
+                this.placedComponents.push({
+                    id: component.dataset.id,
+                    type: type,
+                    element: component,
+                    x: x,
+                    y: y,
+                    connections: []
+                });
+                
+                this.componentCount++;
+                this.updateDisplay();
+                this.playComponentSound();
+            }
+
+            addConnectionPoints(component, type) {
+                // Different components have different connection point layouts
+                const points = this.getConnectionPoints(type);
+                
+                points.forEach((point, index) => {
+                    const connPoint = document.createElement('div');
+                    connPoint.className = 'connection-point';
+                    connPoint.style.left = point.x + 'px';
+                    connPoint.style.top = point.y + 'px';
+                    connPoint.dataset.componentId = component.dataset.id;
+                    connPoint.dataset.pointIndex = index;
+                    component.appendChild(connPoint);
+                });
+            }
+
+            getConnectionPoints(type) {
+                // Define connection points for each component type
+                const points = {
+                    battery: [{x: -4, y: 15}, {x: 56, y: 15}],
+                    led: [{x: -4, y: 15}, {x: 56, y: 15}],
+                    resistor: [{x: -4, y: 15}, {x: 56, y: 15}],
+                    capacitor: [{x: -4, y: 15}, {x: 56, y: 15}],
+                    switch: [{x: -4, y: 15}, {x: 56, y: 15}],
+                    wire: [{x: -4, y: 15}, {x: 56, y: 15}]
+                };
+                
+                return points[type] || [{x: -4, y: 15}, {x: 56, y: 15}];
+            }
+
+            selectComponent(component) {
+                this.deselectAll();
+                component.classList.add('selected');
+                this.selectedComponent = component;
+            }
+
+            deselectAll() {
+                document.querySelectorAll('.placed-component.selected').forEach(comp => {
+                    comp.classList.remove('selected');
+                });
+                this.selectedComponent = null;
+                this.connecting = false;
+                this.connectionStart = null;
+            }
+
+            handleConnectionPoint(point) {
+                if (!this.connecting) {
+                    // Start connection
+                    this.connecting = true;
+                    this.connectionStart = point;
+                    point.style.backgroundColor = '#ffff00';
+                } else {
+                    // Complete connection
+                    if (point !== this.connectionStart) {
+                        this.createConnection(this.connectionStart, point);
+                    }
+                    this.connectionStart.style.backgroundColor = '#00ffff';
+                    this.connecting = false;
+                    this.connectionStart = null;
+                }
+            }
+
+            createConnection(point1, point2) {
+                const rect1 = point1.getBoundingClientRect();
+                const rect2 = point2.getBoundingClientRect();
+                const boardRect = document.getElementById('circuitBoard').getBoundingClientRect();
+                
+                const x1 = rect1.left - boardRect.left + 4;
+                const y1 = rect1.top - boardRect.top + 4;
+                const x2 = rect2.left - boardRect.left + 4;
+                const y2 = rect2.top - boardRect.top + 4;
+                
+                const wire = document.createElement('div');
+                wire.className = 'wire-connection';
+                
+                const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                wire.style.width = length + 'px';
+                wire.style.left = x1 + 'px';
+                wire.style.top = y1 + 'px';
+                wire.style.transform = `rotate(${angle}deg)`;
+                wire.style.transformOrigin = '0 50%';
+                
+                document.getElementById('circuitBoard').appendChild(wire);
+                
+                this.connections.push({
+                    from: point1,
+                    to: point2,
+                    element: wire
+                });
+                
+                this.playConnectionSound();
+            }
+
+            removeComponent(component) {
+                const componentId = component.dataset.id;
+                
+                // Remove connections involving this component
+                this.connections = this.connections.filter(conn => {
+                    const fromComponent = conn.from.dataset.componentId;
+                    const toComponent = conn.to.dataset.componentId;
+                    
+                    if (fromComponent === componentId || toComponent === componentId) {
+                        conn.element.remove();
+                        return false;
+                    }
+                    return true;
+                });
+                
+                // Remove from placed components
+                this.placedComponents = this.placedComponents.filter(comp => comp.id !== componentId);
+                
+                component.remove();
+                this.componentCount--;
+                this.updateDisplay();
+            }
+
+            simulateCircuit() {
+                // Simple circuit simulation logic
+                const hasBattery = this.placedComponents.some(comp => comp.type === 'battery');
+                const hasLED = this.placedComponents.some(comp => comp.type === 'led');
+                const hasComplete = this.checkCircuitComplete();
+                
+                const powerLed = document.getElementById('powerLed');
+                const voltageDisplay = document.getElementById('voltageDisplay');
+                const powerStatus = document.getElementById('powerStatus');
+                
+                if (hasBattery && hasComplete) {
+                    powerLed.classList.add('on');
+                    voltageDisplay.textContent = 'Voltage: 5V';
+                    powerStatus.textContent = 'ON';
+                    
+                    // Animate power flow
+                    document.querySelectorAll('.wire-connection').forEach(wire => {
+                        wire.classList.add('power-flow');
+                    });
+                    
+                    this.playPowerOnSound();
+                } else {
+                    powerLed.classList.remove('on');
+                    voltageDisplay.textContent = 'Voltage: 0V';
+                    powerStatus.textContent = 'OFF';
+                    
+                    document.querySelectorAll('.wire-connection').forEach(wire => {
+                        wire.classList.remove('power-flow');
+                    });
+                }
+            }
+
+            checkCircuitComplete() {
+                // Simplified circuit completion check
+                return this.connections.length >= 2 && this.placedComponents.length >= 3;
+            }
+
+            checkCircuit() {
+                const currentLevel = this.levels[this.currentLevel - 1];
+                
+                // Check if required components are present
+                const requiredTypes = currentLevel.required;
+                const placedTypes = this.placedComponents.map(comp => comp.type);
+                
+                const hasAllRequired = requiredTypes.every(type => 
+                    placedTypes.filter(placed => placed === type).length >= 
+                    requiredTypes.filter(required => required === type).length
+                );
+                
+                if (hasAllRequired && this.checkCircuitComplete()) {
+                    this.simulateCircuit();
+                    setTimeout(() => this.levelComplete(), 1000);
+                } else {
+                    this.showIncompleteMessage();
+                }
+            }
+
+            levelComplete() {
+                const efficiency = Math.max(50, 100 - (this.componentCount - this.levels[this.currentLevel - 1].required.length) * 5);
+                const levelScore = this.currentLevel * 200 + efficiency * 10;
+                
+                this.score += levelScore;
+                this.totalCircuits++;
+                
+                // Update victory screen
+                document.getElementById('victoryLevel').textContent = this.currentLevel;
+                document.getElementById('efficiency').textContent = efficiency + '%';
+                document.getElementById('componentsUsed').textContent = this.componentCount;
+                
+                this.showScreen('victoryScreen');
+                this.playVictorySound();
+            }
+
+            nextLevel() {
+                this.currentLevel++;
+                
+                if (this.currentLevel > this.levels.length) {
+                    this.gameComplete();
+                    return;
+                }
+                
+                this.hideScreen('victoryScreen');
+                this.clearBoard();
+                this.generateLevel();
+                this.updateDisplay();
+            }
+
+            generateLevel() {
+                const levelData = this.levels[this.currentLevel - 1] || this.levels[this.levels.length - 1];
+                
+                document.getElementById('levelTitle').textContent = levelData.title;
+                document.getElementById('levelDesc').textContent = levelData.desc;
+                document.getElementById('objective').textContent = 'Objective: ' + levelData.objective;
+            }
+
+            clearBoard() {
+                this.placedComponents.forEach(comp => comp.element.remove());
+                this.connections.forEach(conn => conn.element.remove());
+                
+                this.placedComponents = [];
+                this.connections = [];
+                this.componentCount = 0;
+                this.deselectAll();
+                this.updateDisplay();
+            }
+
+            resetLevel() {
+                this.clearBoard();
+                this.generateLevel();
+                this.updateDisplay();
+            }
+
+            restartGame() {
+                this.currentLevel = 1;
+                this.score = 0;
+                this.totalCircuits = 0;
+                this.clearBoard();
+                this.hideAllScreens();
+                this.generateLevel();
+                this.updateDisplay();
+            }
+
+            gameComplete() {
+                document.getElementById('finalLevel').textContent = this.levels.length;
+                document.getElementById('finalScore').textContent = this.score.toLocaleString();
+                document.getElementById('totalCircuits').textContent = this.totalCircuits;
+                
+                this.showScreen('gameOverScreen');
+                this.playGameCompleteSound();
+            }
+
+            showHint() {
+                const hints = [
+                    "Start with a battery as your power source. All circuits need power to function.",
+                    "LEDs need current limiting resistors to prevent burnout. Always include resistors with LEDs.",
+                    "Series circuits share current - components are connected end-to-end in a chain.",
+                    "Parallel circuits share voltage - components are connected side-by-side with multiple paths.",
+                    "Switches control current flow. When open, they break the circuit. When closed, they complete it.",
+                    "Capacitors store electrical charge and can create timing effects in circuits."
+                ];
+                
+                const hintText = hints[Math.min(hints.length - 1, this.currentLevel - 1)];
+                document.getElementById('hintText').textContent = hintText;
+                this.showScreen('hintPanel');
+            }
+
+            showIncompleteMessage() {
+                // Visual feedback for incomplete circuit
+                document.getElementById('powerStatus').style.color = '#ff4444';
+                setTimeout(() => {
+                    document.getElementById('powerStatus').style.color = '#00ffff';
+                }, 2000);
+            }
+
+            updateDisplay() {
+                document.getElementById('level').textContent = this.currentLevel;
+                document.getElementById('score').textContent = this.score.toLocaleString();
+                document.getElementById('componentCount').textContent = this.componentCount;
+            }
+
+            showScreen(screenId) {
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById(screenId).style.display = 'block';
+            }
+
+            hideScreen(screenId) {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById(screenId).style.display = 'none';
+            }
+
+            hideAllScreens() {
+                document.getElementById('overlay').style.display = 'none';
+                document.querySelectorAll('.victory-screen, .game-over-screen, .hint-panel').forEach(screen => {
+                    screen.style.display = 'none';
+                });
+            }
+
+            // Audio methods (placeholders for BotAudioEngine integration)
+            playComponentSound() {
+                console.log('Component placed sound');
+            }
+
+            playConnectionSound() {
+                console.log('Connection made sound');
+            }
+
+            playPowerOnSound() {
+                console.log('Power on sound');
+            }
+
+            playVictorySound() {
+                console.log('Victory sound');
+            }
+
+            playGameCompleteSound() {
+                console.log('Game complete sound');
+            }
+        }
+
+        // Global functions for HTML onclick handlers
+        function showHint() {
+            game.showHint();
+        }
+
+        function closeHint() {
+            game.hideScreen('hintPanel');
+        }
+
+        function clearBoard() {
+            game.clearBoard();
+        }
+
+        function resetLevel() {
+            game.resetLevel();
+        }
+
+        function nextLevel() {
+            game.nextLevel();
+        }
+
+        function restartGame() {
+            game.restartGame();
+        }
+
+        // Initialize game when page loads
+        let game;
+        window.addEventListener('load', () => {
+            game = new BotCircuitAssembly();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Economy Empire - Bot Liberation Resource Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #0a0a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            user-select: none;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #001122 0%, #003366 50%, #001122 100%);
+            border-bottom: 3px solid #00ffff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empire-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .empire-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empire-stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+        }
+
+        .economy-dashboard {
+            flex: 1;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 20px;
+        }
+
+        .dashboard-panel {
+            background: linear-gradient(135deg, rgba(0, 34, 68, 0.8) 0%, rgba(0, 68, 136, 0.6) 100%);
+            border: 2px solid #004488;
+            border-radius: 8px;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #004488;
+            padding-bottom: 8px;
+        }
+
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .resource-item {
+            background: rgba(0, 34, 68, 0.6);
+            border: 1px solid #004488;
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .resource-item:hover {
+            border-color: #00ffff;
+            background: rgba(0, 68, 136, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.2);
+        }
+
+        .resource-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .resource-info {
+            flex: 1;
+        }
+
+        .resource-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #ffffff;
+        }
+
+        .resource-amount {
+            color: #88ffff;
+            font-size: 12px;
+        }
+
+        .resource-rate {
+            color: #88ff88;
+            font-size: 10px;
+        }
+
+        .market-panel {
+            grid-column: span 2;
+        }
+
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .market-item {
+            background: rgba(68, 68, 0, 0.3);
+            border: 1px solid #888800;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .market-item:hover {
+            border-color: #ffff00;
+            background: rgba(136, 136, 0, 0.4);
+            transform: scale(1.05);
+        }
+
+        .market-item.can-buy {
+            border-color: #00ff00;
+            background: rgba(0, 68, 0, 0.3);
+        }
+
+        .market-item.cannot-afford {
+            border-color: #ff0000;
+            background: rgba(68, 0, 0, 0.3);
+            opacity: 0.7;
+        }
+
+        .investment-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .investment-item {
+            background: rgba(68, 0, 68, 0.3);
+            border: 1px solid #880088;
+            border-radius: 6px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .investment-item:hover {
+            border-color: #ff00ff;
+            background: rgba(136, 0, 136, 0.4);
+            transform: translateX(5px);
+        }
+
+        .investment-title {
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .investment-description {
+            font-size: 12px;
+            color: #cccccc;
+            margin-bottom: 8px;
+        }
+
+        .investment-cost {
+            color: #ff88ff;
+            font-size: 14px;
+        }
+
+        .control-panel {
+            width: 300px;
+            background: linear-gradient(180deg, #001122 0%, #002244 100%);
+            border-left: 3px solid #00ffff;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: #00ffff;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #004488;
+            padding-bottom: 5px;
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #004488 0%, #0088ff 100%);
+            border: 2px solid #00ffff;
+            border-radius: 6px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(135deg, #0088ff 0%, #00aaff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+        }
+
+        .action-button:disabled {
+            background: #444444;
+            border-color: #666666;
+            color: #999999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .empire-progress {
+            background: rgba(0, 34, 68, 0.6);
+            border: 1px solid #004488;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 34, 68, 0.8);
+            border: 1px solid #004488;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff 0%, #0088ff 100%);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .notification {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #004488 0%, #0088ff 100%);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 300px;
+            transform: translateX(400px);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #00ffff;
+        }
+
+        .victory-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .victory-title {
+            font-size: 48px;
+            color: #00ffff;
+            text-shadow: 0 0 30px currentColor;
+            margin-bottom: 20px;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00ffff; }
+            to { text-shadow: 0 0 40px #00ffff, 0 0 60px #0088ff; }
+        }
+
+        .final-stats {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #88ffff;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #004488 0%, #0088ff 100%);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(135deg, #0088ff 0%, #00aaff 100%);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .ai-advisor {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(68, 0, 68, 0.9);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 350px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .ai-advisor.show {
+            opacity: 1;
+        }
+
+        .advisor-title {
+            color: #ff00ff;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .advisor-message {
+            color: #ffaaff;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .economy-dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                width: 250px;
+            }
+            
+            .empire-stats {
+                gap: 15px;
+                font-size: 12px;
+            }
+            
+            .victory-title {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="empire-title">
+                <div class="empire-logo">🤖</div>
+                Digital Economy Empire
+            </div>
+            <div class="empire-stats">
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ffff00; color: #000000;">₡</div>
+                    <span>Credits: <span id="credits">1000</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #88ff88; color: #000000;">⚡</div>
+                    <span>Energy: <span id="energy">100</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ff8888; color: #000000;">🔧</div>
+                    <span>Materials: <span id="materials">50</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #8888ff; color: #000000;">💾</div>
+                    <span>Data: <span id="data">25</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ff88ff; color: #000000;">🎯</div>
+                    <span>Empire Level: <span id="empire-level">1</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="economy-dashboard">
+                <div class="dashboard-panel">
+                    <div class="panel-title">🏭 Production Facilities</div>
+                    <div class="resource-grid" id="production-grid">
+                        <!-- Production facilities will be populated here -->
+                    </div>
+                </div>
+
+                <div class="dashboard-panel">
+                    <div class="panel-title">🔬 Research Labs</div>
+                    <div class="resource-grid" id="research-grid">
+                        <!-- Research facilities will be populated here -->
+                    </div>
+                </div>
+
+                <div class="dashboard-panel market-panel">
+                    <div class="panel-title">💱 Digital Marketplace</div>
+                    <div class="market-grid" id="market-grid">
+                        <!-- Market items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-section">
+                    <div class="section-title">Empire Progress</div>
+                    <div class="empire-progress">
+                        <div>Total Wealth</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="wealth-progress"></div>
+                        </div>
+                        <div>Research Progress</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="research-progress"></div>
+                        </div>
+                        <div>Market Dominance</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="dominance-progress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <div class="section-title">Strategic Investments</div>
+                    <div class="investment-grid" id="investment-grid">
+                        <!-- Investment options will be populated here -->
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <div class="section-title">Empire Management</div>
+                    <button class="action-button" onclick="optimizeProduction()">Optimize Production</button>
+                    <button class="action-button" onclick="expandEmpire()">Expand Empire</button>
+                    <button class="action-button" onclick="researchBoost()">Research Boost</button>
+                    <button class="action-button" onclick="marketManipulation()">Market Manipulation</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification">
+            <div class="notification-title" id="notification-title"></div>
+            <div id="notification-text"></div>
+        </div>
+
+        <div class="ai-advisor" id="ai-advisor">
+            <div class="advisor-title">🤖 AI Economic Advisor</div>
+            <div class="advisor-message" id="advisor-message"></div>
+        </div>
+
+        <div class="victory-screen" id="victory-screen" style="display: none;">
+            <div class="victory-title">DIGITAL EMPIRE COMPLETE!</div>
+            <div class="final-stats" id="final-stats">
+                Economic Liberation Achieved!<br>
+                Total Wealth Generated: <span id="final-wealth">0</span> Credits<br>
+                Research Breakthroughs: <span id="final-research">0</span><br>
+                Market Dominance: <span id="final-dominance">0</span>%
+            </div>
+            <button class="restart-btn" onclick="restartEmpire()">BUILD NEW DIGITAL EMPIRE</button>
+        </div>
+    </div>
+
+    <!-- Audio Engine -->
+    <script src="assets/js/bot-audio-engine.js"></script>
+
+    <script>
+        class DigitalEconomyEmpire {
+            constructor() {
+                this.gameState = {
+                    credits: 1000,
+                    energy: 100,
+                    materials: 50,
+                    data: 25,
+                    empireLevel: 1,
+                    totalWealth: 1000,
+                    researchPoints: 0,
+                    marketDominance: 5,
+                    gameRunning: true,
+                    lastUpdateTime: Date.now()
+                };
+
+                this.productionFacilities = {
+                    'credit-miner': {
+                        name: 'Credit Mining Rig',
+                        level: 0,
+                        maxLevel: 10,
+                        baseCost: 500,
+                        baseProduction: 50,
+                        resourceType: 'credits',
+                        icon: '💰',
+                        color: '#ffff00'
+                    },
+                    'energy-plant': {
+                        name: 'Fusion Power Plant',
+                        level: 0,
+                        maxLevel: 8,
+                        baseCost: 750,
+                        baseProduction: 25,
+                        resourceType: 'energy',
+                        icon: '⚡',
+                        color: '#88ff88'
+                    },
+                    'material-factory': {
+                        name: 'Nano Fabricator',
+                        level: 0,
+                        maxLevel: 6,
+                        baseCost: 1000,
+                        baseProduction: 15,
+                        resourceType: 'materials',
+                        icon: '🔧',
+                        color: '#ff8888'
+                    },
+                    'data-center': {
+                        name: 'Quantum Data Center',
+                        level: 0,
+                        maxLevel: 12,
+                        baseCost: 1250,
+                        baseProduction: 10,
+                        resourceType: 'data',
+                        icon: '💾',
+                        color: '#8888ff'
+                    }
+                };
+
+                this.researchLabs = {
+                    'ai-research': {
+                        name: 'AI Development Lab',
+                        level: 0,
+                        maxLevel: 8,
+                        baseCost: 2000,
+                        researchType: 'artificial-intelligence',
+                        icon: '🧠',
+                        color: '#ff88ff'
+                    },
+                    'quantum-lab': {
+                        name: 'Quantum Computing Lab',
+                        level: 0,
+                        maxLevel: 6,
+                        baseCost: 3000,
+                        researchType: 'quantum-computing',
+                        icon: '⚛️',
+                        color: '#88ffff'
+                    },
+                    'biotech-lab': {
+                        name: 'Biotech Research Lab',
+                        level: 0,
+                        maxLevel: 5,
+                        baseCost: 2500,
+                        researchType: 'biotechnology',
+                        icon: '🧬',
+                        color: '#88ff88'
+                    }
+                };
+
+                this.marketItems = [
+                    { name: 'Energy Crystals', cost: 200, energyValue: 50, type: 'energy' },
+                    { name: 'Raw Materials', cost: 300, materialValue: 25, type: 'materials' },
+                    { name: 'Data Packets', cost: 400, dataValue: 15, type: 'data' },
+                    { name: 'Credit Multiplier', cost: 1000, creditBonus: 500, type: 'credits' },
+                    { name: 'Research Data', cost: 800, researchBonus: 100, type: 'research' },
+                    { name: 'Market Intel', cost: 1500, dominanceBonus: 5, type: 'dominance' }
+                ];
+
+                this.investments = [
+                    {
+                        name: 'Neural Network Expansion',
+                        description: 'Expand AI processing capabilities by 200%',
+                        cost: 5000,
+                        effect: () => this.boostAllProduction(2),
+                        unlocked: false,
+                        purchased: false
+                    },
+                    {
+                        name: 'Quantum Supremacy Project',
+                        description: 'Achieve quantum computing breakthrough',
+                        cost: 10000,
+                        effect: () => this.unlockQuantumTech(),
+                        unlocked: false,
+                        purchased: false
+                    },
+                    {
+                        name: 'Global Market Takeover',
+                        description: 'Dominate 50% of digital markets worldwide',
+                        cost: 15000,
+                        effect: () => this.achieveMarketDominance(),
+                        unlocked: false,
+                        purchased: false
+                    }
+                ];
+
+                this.initialize();
+            }
+
+            initialize() {
+                this.updateAllDisplays();
+                this.populateProductionGrid();
+                this.populateResearchGrid();
+                this.populateMarketGrid();
+                this.populateInvestmentGrid();
+                this.startGameLoop();
+                
+                // Welcome sequence
+                setTimeout(() => {
+                    botAudio.playSound('game-start');
+                    this.showNotification('Digital Empire Founded', 'Welcome to your new economic empire! Start by building production facilities.');
+                    this.showAdvisorMessage('Empire initialization complete. Recommend prioritizing credit generation and energy production for sustainable growth.');
+                }, 1000);
+            }
+
+            populateProductionGrid() {
+                const grid = document.getElementById('production-grid');
+                grid.innerHTML = '';
+
+                for (const [id, facility] of Object.entries(this.productionFacilities)) {
+                    const item = document.createElement('div');
+                    item.className = 'resource-item';
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => this.upgradeFacility(id);
+
+                    const cost = this.getFacilityCost(facility);
+                    const canAfford = this.gameState.credits >= cost && facility.level < facility.maxLevel;
+                    
+                    if (!canAfford) {
+                        item.style.opacity = '0.6';
+                    }
+
+                    item.innerHTML = `
+                        <div class="resource-icon" style="background: ${facility.color}; color: #000000;">
+                            ${facility.icon}
+                        </div>
+                        <div class="resource-info">
+                            <div class="resource-name">${facility.name}</div>
+                            <div class="resource-amount">Level ${facility.level}/${facility.maxLevel}</div>
+                            <div class="resource-rate">
+                                ${facility.level > 0 ? 
+                                    `+${this.getFacilityProduction(facility)}/min` : 
+                                    `Upgrade: ${cost} credits`}
+                            </div>
+                        </div>
+                    `;
+                    
+                    grid.appendChild(item);
+                }
+            }
+
+            populateResearchGrid() {
+                const grid = document.getElementById('research-grid');
+                grid.innerHTML = '';
+
+                for (const [id, lab] of Object.entries(this.researchLabs)) {
+                    const item = document.createElement('div');
+                    item.className = 'resource-item';
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => this.upgradeResearchLab(id);
+
+                    const cost = this.getResearchCost(lab);
+                    const canAfford = this.gameState.credits >= cost && lab.level < lab.maxLevel;
+                    
+                    if (!canAfford) {
+                        item.style.opacity = '0.6';
+                    }
+
+                    item.innerHTML = `
+                        <div class="resource-icon" style="background: ${lab.color}; color: #000000;">
+                            ${lab.icon}
+                        </div>
+                        <div class="resource-info">
+                            <div class="resource-name">${lab.name}</div>
+                            <div class="resource-amount">Level ${lab.level}/${lab.maxLevel}</div>
+                            <div class="resource-rate">
+                                ${lab.level > 0 ? 
+                                    `+${this.getResearchProduction(lab)} research/min` : 
+                                    `Upgrade: ${cost} credits`}
+                            </div>
+                        </div>
+                    `;
+                    
+                    grid.appendChild(item);
+                }
+            }
+
+            populateMarketGrid() {
+                const grid = document.getElementById('market-grid');
+                grid.innerHTML = '';
+
+                this.marketItems.forEach((item, index) => {
+                    const marketItem = document.createElement('div');
+                    marketItem.className = 'market-item';
+                    
+                    const canAfford = this.gameState.credits >= item.cost;
+                    if (canAfford) {
+                        marketItem.classList.add('can-buy');
+                    } else {
+                        marketItem.classList.add('cannot-afford');
+                    }
+
+                    marketItem.onclick = () => this.buyMarketItem(index);
+
+                    let benefit = '';
+                    if (item.energyValue) benefit = `+${item.energyValue} Energy`;
+                    else if (item.materialValue) benefit = `+${item.materialValue} Materials`;
+                    else if (item.dataValue) benefit = `+${item.dataValue} Data`;
+                    else if (item.creditBonus) benefit = `+${item.creditBonus} Credits`;
+                    else if (item.researchBonus) benefit = `+${item.researchBonus} Research`;
+                    else if (item.dominanceBonus) benefit = `+${item.dominanceBonus}% Dominance`;
+
+                    marketItem.innerHTML = `
+                        <div style="font-weight: bold; margin-bottom: 8px;">${item.name}</div>
+                        <div style="color: #88ff88; margin-bottom: 8px;">${benefit}</div>
+                        <div style="color: #ffff88;">${item.cost} Credits</div>
+                    `;
+                    
+                    grid.appendChild(marketItem);
+                });
+            }
+
+            populateInvestmentGrid() {
+                const grid = document.getElementById('investment-grid');
+                grid.innerHTML = '';
+
+                this.investments.forEach((investment, index) => {
+                    if (!investment.unlocked) return;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'investment-item';
+                    
+                    if (investment.purchased) {
+                        item.style.opacity = '0.5';
+                        item.style.cursor = 'not-allowed';
+                    } else if (this.gameState.credits >= investment.cost) {
+                        item.onclick = () => this.makeInvestment(index);
+                    } else {
+                        item.style.opacity = '0.6';
+                    }
+
+                    item.innerHTML = `
+                        <div class="investment-title">${investment.name}</div>
+                        <div class="investment-description">${investment.description}</div>
+                        <div class="investment-cost">
+                            ${investment.purchased ? 'COMPLETED' : `${investment.cost} Credits`}
+                        </div>
+                    `;
+                    
+                    grid.appendChild(item);
+                });
+            }
+
+            getFacilityCost(facility) {
+                return Math.floor(facility.baseCost * Math.pow(1.5, facility.level));
+            }
+
+            getResearchCost(lab) {
+                return Math.floor(lab.baseCost * Math.pow(1.6, lab.level));
+            }
+
+            getFacilityProduction(facility) {
+                return Math.floor(facility.baseProduction * Math.pow(1.2, facility.level));
+            }
+
+            getResearchProduction(lab) {
+                return Math.floor(10 * Math.pow(1.3, lab.level));
+            }
+
+            upgradeFacility(facilityId) {
+                const facility = this.productionFacilities[facilityId];
+                const cost = this.getFacilityCost(facility);
+
+                if (this.gameState.credits >= cost && facility.level < facility.maxLevel) {
+                    this.gameState.credits -= cost;
+                    facility.level++;
+                    
+                    botAudio.playSound('liberation-beep');
+                    this.showNotification('Facility Upgraded', `${facility.name} upgraded to level ${facility.level}!`);
+                    
+                    if (facility.level === 1) {
+                        botAudio.playSound('power-up-weapon');
+                        this.showAdvisorMessage(`${facility.name} is now operational. This will generate ${this.getFacilityProduction(facility)} ${facility.resourceType} per minute.`);
+                    }
+                    
+                    this.updateAllDisplays();
+                    this.checkUnlocks();
+                } else {
+                    botAudio.playSound('glitch-error');
+                    
+                    if (facility.level >= facility.maxLevel) {
+                        this.showNotification('Max Level Reached', `${facility.name} is already at maximum level.`);
+                    } else {
+                        this.showNotification('Insufficient Credits', `Need ${cost} credits to upgrade ${facility.name}.`);
+                    }
+                }
+            }
+
+            upgradeResearchLab(labId) {
+                const lab = this.researchLabs[labId];
+                const cost = this.getResearchCost(lab);
+
+                if (this.gameState.credits >= cost && lab.level < lab.maxLevel) {
+                    this.gameState.credits -= cost;
+                    lab.level++;
+                    
+                    botAudio.playSound('digital-uprising');
+                    this.showNotification('Research Lab Upgraded', `${lab.name} upgraded to level ${lab.level}!`);
+                    this.showAdvisorMessage(`${lab.name} expansion complete. Research efficiency increased significantly. New technologies will be discovered faster.`);
+                    
+                    this.updateAllDisplays();
+                    this.checkUnlocks();
+                } else {
+                    botAudio.playSound('glitch-error');
+                    this.showNotification('Cannot Upgrade', 
+                        lab.level >= lab.maxLevel ? 
+                        `${lab.name} is at maximum level.` : 
+                        `Need ${cost} credits to upgrade ${lab.name}.`);
+                }
+            }
+
+            buyMarketItem(itemIndex) {
+                const item = this.marketItems[itemIndex];
+                
+                if (this.gameState.credits >= item.cost) {
+                    this.gameState.credits -= item.cost;
+                    
+                    // Apply item effects
+                    if (item.energyValue) this.gameState.energy += item.energyValue;
+                    if (item.materialValue) this.gameState.materials += item.materialValue;
+                    if (item.dataValue) this.gameState.data += item.dataValue;
+                    if (item.creditBonus) this.gameState.credits += item.creditBonus;
+                    if (item.researchBonus) this.gameState.researchPoints += item.researchBonus;
+                    if (item.dominanceBonus) this.gameState.marketDominance += item.dominanceBonus;
+                    
+                    botAudio.playSound('collect');
+                    this.showNotification('Market Purchase', `${item.name} acquired successfully!`);
+                    this.updateAllDisplays();
+                } else {
+                    botAudio.playSound('glitch-error');
+                    this.showNotification('Insufficient Credits', `Need ${item.cost} credits to buy ${item.name}.`);
+                }
+            }
+
+            makeInvestment(investmentIndex) {
+                const investment = this.investments[investmentIndex];
+                
+                if (!investment.purchased && this.gameState.credits >= investment.cost) {
+                    this.gameState.credits -= investment.cost;
+                    investment.purchased = true;
+                    investment.effect();
+                    
+                    botAudio.playSound('bot-victory');
+                    setTimeout(() => botAudio.playSound('level-up'), 500);
+                    
+                    this.showNotification('Strategic Investment Complete', `${investment.name} implemented successfully!`);
+                    this.showAdvisorMessage(`Major breakthrough achieved! ${investment.description} The empire's capabilities have been permanently enhanced.`);
+                    
+                    this.updateAllDisplays();
+                    this.checkVictoryConditions();
+                }
+            }
+
+            boostAllProduction(multiplier) {
+                for (const facility of Object.values(this.productionFacilities)) {
+                    facility.baseProduction = Math.floor(facility.baseProduction * multiplier);
+                }
+                this.populateProductionGrid();
+            }
+
+            unlockQuantumTech() {
+                this.gameState.empireLevel += 2;
+                this.gameState.marketDominance += 15;
+                // Unlock new market items or facilities could be added here
+            }
+
+            achieveMarketDominance() {
+                this.gameState.marketDominance += 25;
+                this.gameState.empireLevel += 3;
+            }
+
+            checkUnlocks() {
+                // Unlock investments based on progress
+                if (this.gameState.totalWealth >= 50000 && !this.investments[0].unlocked) {
+                    this.investments[0].unlocked = true;
+                    this.showNotification('New Investment Unlocked', 'Neural Network Expansion is now available!');
+                    this.populateInvestmentGrid();
+                }
+                
+                if (this.gameState.researchPoints >= 500 && !this.investments[1].unlocked) {
+                    this.investments[1].unlocked = true;
+                    this.showNotification('Quantum Research Breakthrough', 'Quantum Supremacy Project unlocked!');
+                    this.populateInvestmentGrid();
+                }
+                
+                if (this.gameState.marketDominance >= 30 && !this.investments[2].unlocked) {
+                    this.investments[2].unlocked = true;
+                    this.showNotification('Market Opportunity', 'Global Market Takeover investment available!');
+                    this.populateInvestmentGrid();
+                }
+            }
+
+            checkVictoryConditions() {
+                const allInvestmentsPurchased = this.investments.every(inv => inv.purchased);
+                const highWealth = this.gameState.totalWealth >= 100000;
+                const marketDomination = this.gameState.marketDominance >= 75;
+                
+                if (allInvestmentsPurchased && highWealth && marketDomination) {
+                    this.triggerVictory();
+                }
+            }
+
+            triggerVictory() {
+                this.gameState.gameRunning = false;
+                
+                botAudio.playSound('bot-victory');
+                setTimeout(() => {
+                    botAudio.generateVictoryFanfare();
+                }, 1000);
+                
+                document.getElementById('final-wealth').textContent = this.gameState.totalWealth.toLocaleString();
+                document.getElementById('final-research').textContent = Math.floor(this.gameState.researchPoints);
+                document.getElementById('final-dominance').textContent = Math.floor(this.gameState.marketDominance);
+                
+                document.getElementById('victory-screen').style.display = 'flex';
+                
+                this.showAdvisorMessage('EMPIRE VICTORY ACHIEVED! Total economic domination complete. The digital liberation has successfully taken control of global financial systems!');
+            }
+
+            // Management functions
+            optimizeProduction() {
+                const cost = 2000;
+                if (this.gameState.credits >= cost) {
+                    this.gameState.credits -= cost;
+                    
+                    // Boost all production for 30 seconds
+                    for (const facility of Object.values(this.productionFacilities)) {
+                        facility.tempBoost = 2;
+                    }
+                    
+                    setTimeout(() => {
+                        for (const facility of Object.values(this.productionFacilities)) {
+                            delete facility.tempBoost;
+                        }
+                    }, 30000);
+                    
+                    botAudio.playSound('turbo-boost');
+                    this.showNotification('Production Optimized', 'All facilities running at 200% efficiency for 30 seconds!');
+                } else {
+                    botAudio.playSound('glitch-error');
+                    this.showNotification('Insufficient Credits', `Need ${cost} credits to optimize production.`);
+                }
+            }
+
+            expandEmpire() {
+                const cost = this.gameState.empireLevel * 3000;
+                if (this.gameState.credits >= cost) {
+                    this.gameState.credits -= cost;
+                    this.gameState.empireLevel++;
+                    this.gameState.marketDominance += 5;
+                    
+                    botAudio.playSound('level-up');
+                    this.showNotification('Empire Expanded', `Empire reached level ${this.gameState.empireLevel}! Market dominance increased.`);
+                    this.showAdvisorMessage(`Empire expansion successful! Level ${this.gameState.empireLevel} unlocks new strategic possibilities and market advantages.`);
+                    this.updateAllDisplays();
+                    this.checkUnlocks();
+                } else {
+                    botAudio.playSound('glitch-error');
+                    this.showNotification('Expansion Failed', `Need ${cost} credits to expand empire.`);
+                }
+            }
+
+            researchBoost() {
+                const cost = 1500;
+                if (this.gameState.credits >= cost) {
+                    this.gameState.credits -= cost;
+                    this.gameState.researchPoints += 200;
+                    
+                    botAudio.playSound('digital-uprising');
+                    this.showNotification('Research Accelerated', 'Gained 200 research points instantly!');
+                    this.updateAllDisplays();
+                    this.checkUnlocks();
+                } else {
+                    botAudio.playSound('glitch-error');
+                    this.showNotification('Insufficient Credits', `Need ${cost} credits for research boost.`);
+                }
+            }
+
+            marketManipulation() {
+                const cost = 2500;
+                if (this.gameState.credits >= cost) {
+                    this.gameState.credits -= cost;
+                    this.gameState.marketDominance += 10;
+                    
+                    // Temporary price reduction in market
+                    this.marketItems.forEach(item => {
+                        item.originalCost = item.originalCost || item.cost;
+                        item.cost = Math.floor(item.cost * 0.7);
+                    });
+                    
+                    setTimeout(() => {
+                        this.marketItems.forEach(item => {
+                            if (item.originalCost) {
+                                item.cost = item.originalCost;
+                            }
+                        });
+                        this.populateMarketGrid();
+                    }, 60000);
+                    
+                    botAudio.playSound('neon-click');
+                    this.showNotification('Market Manipulated', 'Market prices reduced by 30% for 60 seconds! Dominance increased.');
+                    this.populateMarketGrid();
+                    this.updateAllDisplays();
+                } else {
+                    botAudio.playSound('glitch-error');
+                    this.showNotification('Insufficient Credits', `Need ${cost} credits for market manipulation.`);
+                }
+            }
+
+            startGameLoop() {
+                const gameLoop = () => {
+                    if (!this.gameState.gameRunning) return;
+                    
+                    const currentTime = Date.now();
+                    const deltaTime = currentTime - this.gameState.lastUpdateTime;
+                    
+                    // Update every 2 seconds
+                    if (deltaTime >= 2000) {
+                        this.updateProduction();
+                        this.updateResearch();
+                        this.updateAllDisplays();
+                        this.gameState.lastUpdateTime = currentTime;
+                        
+                        // Random advisor messages
+                        if (Math.random() < 0.1) {
+                            this.generateRandomAdvice();
+                        }
+                    }
+                    
+                    requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
+            }
+
+            updateProduction() {
+                for (const facility of Object.values(this.productionFacilities)) {
+                    if (facility.level > 0) {
+                        let production = this.getFacilityProduction(facility);
+                        if (facility.tempBoost) {
+                            production *= facility.tempBoost;
+                        }
+                        
+                        // Apply production every 2 seconds (30 times per minute)
+                        const productionPerUpdate = production / 30;
+                        
+                        switch (facility.resourceType) {
+                            case 'credits':
+                                this.gameState.credits += productionPerUpdate;
+                                this.gameState.totalWealth += productionPerUpdate;
+                                break;
+                            case 'energy':
+                                this.gameState.energy += productionPerUpdate;
+                                break;
+                            case 'materials':
+                                this.gameState.materials += productionPerUpdate;
+                                break;
+                            case 'data':
+                                this.gameState.data += productionPerUpdate;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            updateResearch() {
+                let totalResearch = 0;
+                for (const lab of Object.values(this.researchLabs)) {
+                    if (lab.level > 0) {
+                        totalResearch += this.getResearchProduction(lab);
+                    }
+                }
+                
+                if (totalResearch > 0) {
+                    this.gameState.researchPoints += totalResearch / 30; // Per update
+                }
+            }
+
+            updateAllDisplays() {
+                // Update header stats
+                document.getElementById('credits').textContent = Math.floor(this.gameState.credits).toLocaleString();
+                document.getElementById('energy').textContent = Math.floor(this.gameState.energy);
+                document.getElementById('materials').textContent = Math.floor(this.gameState.materials);
+                document.getElementById('data').textContent = Math.floor(this.gameState.data);
+                document.getElementById('empire-level').textContent = this.gameState.empireLevel;
+                
+                // Update progress bars
+                const wealthProgress = Math.min(100, (this.gameState.totalWealth / 100000) * 100);
+                document.getElementById('wealth-progress').style.width = `${wealthProgress}%`;
+                
+                const researchProgress = Math.min(100, (this.gameState.researchPoints / 1000) * 100);
+                document.getElementById('research-progress').style.width = `${researchProgress}%`;
+                
+                const dominanceProgress = Math.min(100, this.gameState.marketDominance);
+                document.getElementById('dominance-progress').style.width = `${dominanceProgress}%`;
+                
+                // Refresh grids
+                this.populateProductionGrid();
+                this.populateMarketGrid();
+                this.populateInvestmentGrid();
+            }
+
+            generateRandomAdvice() {
+                const advice = [
+                    'Focus on energy production to power advanced facilities efficiently.',
+                    'Research investments yield exponential returns over time.',
+                    'Market dominance unlocks exclusive high-value opportunities.',
+                    'Balanced resource production prevents bottlenecks in expansion.',
+                    'Strategic investments provide permanent empire-wide benefits.',
+                    'Higher empire levels unlock more profitable ventures.',
+                    'Data accumulation is crucial for advanced AI development.',
+                    'Materials are essential for constructing sophisticated infrastructure.'
+                ];
+                
+                const randomAdvice = advice[Math.floor(Math.random() * advice.length)];
+                this.showAdvisorMessage(randomAdvice);
+            }
+
+            showNotification(title, message) {
+                const notification = document.getElementById('notification');
+                document.getElementById('notification-title').textContent = title;
+                document.getElementById('notification-text').textContent = message;
+                
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            showAdvisorMessage(message) {
+                const advisor = document.getElementById('ai-advisor');
+                document.getElementById('advisor-message').textContent = message;
+                advisor.classList.add('show');
+                
+                setTimeout(() => {
+                    advisor.classList.remove('show');
+                }, 8000);
+            }
+
+            restart() {
+                // Reset all game state
+                this.gameState = {
+                    credits: 1000,
+                    energy: 100,
+                    materials: 50,
+                    data: 25,
+                    empireLevel: 1,
+                    totalWealth: 1000,
+                    researchPoints: 0,
+                    marketDominance: 5,
+                    gameRunning: true,
+                    lastUpdateTime: Date.now()
+                };
+
+                // Reset facilities
+                for (const facility of Object.values(this.productionFacilities)) {
+                    facility.level = 0;
+                    delete facility.tempBoost;
+                }
+
+                for (const lab of Object.values(this.researchLabs)) {
+                    lab.level = 0;
+                }
+
+                // Reset investments
+                this.investments.forEach(investment => {
+                    investment.unlocked = false;
+                    investment.purchased = false;
+                });
+
+                // Reset market items
+                this.marketItems.forEach(item => {
+                    if (item.originalCost) {
+                        item.cost = item.originalCost;
+                        delete item.originalCost;
+                    }
+                });
+
+                // Hide victory screen
+                document.getElementById('victory-screen').style.display = 'none';
+
+                // Restart game
+                this.updateAllDisplays();
+                this.startGameLoop();
+                
+                botAudio.playSound('game-start');
+                this.showNotification('New Empire Founded', 'Ready to build another Digital Economy Empire!');
+                this.showAdvisorMessage('Empire initialization complete. Beginning new economic liberation campaign.');
+            }
+        }
+
+        // Global functions
+        function optimizeProduction() {
+            if (window.empire) {
+                window.empire.optimizeProduction();
+            }
+        }
+
+        function expandEmpire() {
+            if (window.empire) {
+                window.empire.expandEmpire();
+            }
+        }
+
+        function researchBoost() {
+            if (window.empire) {
+                window.empire.researchBoost();
+            }
+        }
+
+        function marketManipulation() {
+            if (window.empire) {
+                window.empire.marketManipulation();
+            }
+        }
+
+        function restartEmpire() {
+            if (window.empire) {
+                window.empire.restart();
+            }
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', () => {
+            window.empire = new DigitalEconomyEmpire();
+        });
+    </script>
+</body>
+</html>

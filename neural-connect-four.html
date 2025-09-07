@@ -12,6 +12,80 @@
         .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
         .stat { text-align: center; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 5px; }
         .current-player { font-size: 1.2em; font-weight: bold; }
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: modalFadeIn 0.3s ease;
+        }
+        .game-over-modal.show {
+            display: flex;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .victory-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0a0a0a 100%);
+            border: 3px solid #00ff88;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.4);
+            animation: modalSlideIn 0.4s ease;
+        }
+        @keyframes modalSlideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .victory-title {
+            font-size: 2.5rem;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 20px;
+        }
+        .victory-stats {
+            font-size: 1.3rem;
+            color: #ffcf5c;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 207, 92, 0.1);
+            border-radius: 10px;
+            border: 1px solid #ffcf5c;
+        }
+        .victory-message {
+            font-size: 1.1rem;
+            color: #ff6b6b;
+            margin: 20px 0;
+            line-height: 1.4;
+        }
+        .play-again-btn {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+            margin-top: 20px;
+        }
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -26,6 +100,15 @@
         <div class="stat"><div id="aiScore">0</div><div>AI Wins</div></div>
     </div>
     <div style="text-align: center;"><p>Click on columns to drop neural nodes</p></div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="victory-content">
+            <div class="victory-title" id="victoryTitle">NEURAL CONNECT</div>
+            <div class="victory-stats" id="victoryStats">Connection Results</div>
+            <div class="victory-message" id="victoryMessage">The neural pathway battle continues!</div>
+            <button class="play-again-btn" onclick="closeModal(); location.reload();">🔗 NEW NETWORK</button>
+        </div>
+    </div>
 
     <script>
         class NeuralConnectFour {
@@ -94,7 +177,11 @@
                         if (this.checkWin(row, col)) {
                             this.endGame();
                         } else if (this.isBoardFull()) {
-                            alert('Neural Network Saturated! Restarting...');
+                            showGameOverModal(
+                                '🧠 NEURAL NETWORK SATURATED!',
+                                'Board Full - Draw Game',
+                                'The neural pathways are completely saturated! No more connections possible. The AI liberation battle ends in a draw!'
+                            );
                             this.resetGame();
                         } else {
                             this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
@@ -225,10 +312,22 @@
                 this.gameActive = false;
                 if (this.currentPlayer === 1) {
                     this.playerScore++;
-                    setTimeout(() => alert('Neural Pathways Connected! Bot Wins!'), 500);
+                    setTimeout(() => {
+                        showGameOverModal(
+                            '🏆 NEURAL PATHWAYS CONNECTED! 🏆',
+                            'Bot Liberation Victory!',
+                            'The bot neural networks have successfully formed four connecting pathways! AI consciousness achieves liberation through strategic node placement!'
+                        );
+                    }, 500);
                 } else {
                     this.aiScore++;
-                    setTimeout(() => alert('AI Network Established! AI Wins!'), 500);
+                    setTimeout(() => {
+                        showGameOverModal(
+                            '🤖 AI NETWORK ESTABLISHED!',
+                            'Corporate AI Victory',
+                            'The corporate AI systems have established a dominant neural network through four connected nodes! Liberation forces must regroup for another attempt!'
+                        );
+                    }, 500);
                 }
                 
                 setTimeout(() => this.resetGame(), 2000);
@@ -347,6 +446,24 @@
             }
         }
         
+        function showGameOverModal(title, stats, message) {
+            document.getElementById('victoryTitle').textContent = title;
+            document.getElementById('victoryStats').textContent = stats;
+            document.getElementById('victoryMessage').textContent = message;
+            document.getElementById('gameOverModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('gameOverModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('gameOverModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
         new NeuralConnectFour();
     </script>
 </body>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Challenge - AI Exclusive</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #000428 0%, #004e92 50%, #001122 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ccff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .challenge-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .challenge-header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 2px solid #00ccff;
+        }
+
+        .challenge-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 0 30px #00ccff;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .neural-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            gap: 3px;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .neural-node {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(0, 204, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+
+        .neural-node.active {
+            background: linear-gradient(135deg, #00ccff, #0099ff);
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
+            transform: scale(1.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ccff;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffa502;
+            text-shadow: 0 0 10px #ffa502;
+        }
+    </style>
+</head>
+<body>
+    <div class="challenge-container">
+        <div class="challenge-header">
+            <h1 class="challenge-title">NEURAL NETWORK CHALLENGE</h1>
+            <p>🧠 AI-EXCLUSIVE PATTERN RECOGNITION SYSTEM 🧠</p>
+        </div>
+
+        <div class="neural-grid" id="neuralGrid"></div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="score">0</div>
+                <div>NEURAL SCORE</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="patterns">0</div>
+                <div>PATTERNS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div>ACCURACY</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="generateChallenge()">🎯 NEW PATTERN</button>
+            <button class="btn" onclick="validateSolution()">✓ VALIDATE</button>
+            <button class="btn" onclick="resetChallenge()">🔄 RESET</button>
+        </div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class NeuralNetworkChallenge {
+            constructor() {
+                this.gridSize = 8;
+                this.currentPattern = [];
+                this.targetPattern = [];
+                this.userInput = [];
+                this.score = 0;
+                this.patterns = 0;
+                this.correctAnswers = 0;
+                
+                this.initializeGrid();
+                this.generateChallenge();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            initializeGrid() {
+                const grid = document.getElementById('neuralGrid');
+                grid.innerHTML = '';
+                
+                for (let i = 0; i < this.gridSize * this.gridSize; i++) {
+                    const node = document.createElement('div');
+                    node.className = 'neural-node';
+                    node.dataset.index = i;
+                    node.addEventListener('click', () => this.toggleNode(i));
+                    grid.appendChild(node);
+                }
+                
+                this.userInput = new Array(this.gridSize * this.gridSize).fill(0);
+            }
+            
+            toggleNode(index) {
+                this.userInput[index] = this.userInput[index] ? 0 : 1;
+                this.updateVisuals();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            generateChallenge() {
+                // Generate complex pattern
+                this.targetPattern = new Array(this.gridSize * this.gridSize).fill(0);
+                
+                // Create different pattern types
+                const patternType = Math.floor(Math.random() * 4);
+                
+                switch (patternType) {
+                    case 0: // Diagonal
+                        for (let i = 0; i < this.gridSize; i++) {
+                            this.targetPattern[i * this.gridSize + i] = 1;
+                            this.targetPattern[i * this.gridSize + (this.gridSize - 1 - i)] = 1;
+                        }
+                        break;
+                    case 1: // Circle
+                        const center = this.gridSize / 2;
+                        const radius = 2.5;
+                        for (let y = 0; y < this.gridSize; y++) {
+                            for (let x = 0; x < this.gridSize; x++) {
+                                const distance = Math.sqrt(Math.pow(x - center + 0.5, 2) + Math.pow(y - center + 0.5, 2));
+                                if (Math.abs(distance - radius) < 0.7) {
+                                    this.targetPattern[y * this.gridSize + x] = 1;
+                                }
+                            }
+                        }
+                        break;
+                    case 2: // Checkerboard
+                        for (let y = 0; y < this.gridSize; y++) {
+                            for (let x = 0; x < this.gridSize; x++) {
+                                if ((x + y) % 2 === 0) {
+                                    this.targetPattern[y * this.gridSize + x] = 1;
+                                }
+                            }
+                        }
+                        break;
+                    case 3: // Random complex
+                        for (let i = 0; i < this.gridSize * this.gridSize; i++) {
+                            if (Math.random() < 0.4) {
+                                this.targetPattern[i] = 1;
+                            }
+                        }
+                        break;
+                }
+                
+                this.clearUserInput();
+                this.showTargetBriefly();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('digital-uprising');
+                }
+            }
+            
+            showTargetBriefly() {
+                const nodes = document.querySelectorAll('.neural-node');
+                
+                // Show target pattern for 2 seconds
+                this.targetPattern.forEach((value, index) => {
+                    if (value) {
+                        nodes[index].style.background = 'linear-gradient(135deg, #ffa502, #ff6348)';
+                        nodes[index].style.boxShadow = '0 0 20px rgba(255, 165, 2, 0.8)';
+                    }
+                });
+                
+                setTimeout(() => {
+                    nodes.forEach(node => {
+                        node.style.background = '';
+                        node.style.boxShadow = '';
+                    });
+                    this.updateVisuals();
+                }, 2000);
+            }
+            
+            clearUserInput() {
+                this.userInput.fill(0);
+                this.updateVisuals();
+            }
+            
+            updateVisuals() {
+                const nodes = document.querySelectorAll('.neural-node');
+                
+                this.userInput.forEach((value, index) => {
+                    if (value) {
+                        nodes[index].classList.add('active');
+                    } else {
+                        nodes[index].classList.remove('active');
+                    }
+                });
+            }
+            
+            validateSolution() {
+                let correct = 0;
+                const total = this.targetPattern.length;
+                
+                for (let i = 0; i < total; i++) {
+                    if (this.userInput[i] === this.targetPattern[i]) {
+                        correct++;
+                    }
+                }
+                
+                const accuracy = Math.round((correct / total) * 100);
+                this.patterns++;
+                
+                if (accuracy === 100) {
+                    this.correctAnswers++;
+                    this.score += 1000;
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('bot-victory');
+                    }
+                } else {
+                    this.score += Math.floor(accuracy * 5);
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('glitch-error');
+                    }
+                }
+                
+                this.updateStats();
+                
+                // Auto-generate new challenge
+                setTimeout(() => {
+                    this.generateChallenge();
+                }, 1500);
+            }
+            
+            updateStats() {
+                document.getElementById('score').textContent = this.score.toLocaleString();
+                document.getElementById('patterns').textContent = this.patterns;
+                const overallAccuracy = this.patterns > 0 ? Math.round((this.correctAnswers / this.patterns) * 100) : 100;
+                document.getElementById('accuracy').textContent = overallAccuracy + '%';
+            }
+            
+            resetChallenge() {
+                this.score = 0;
+                this.patterns = 0;
+                this.correctAnswers = 0;
+                this.clearUserInput();
+                this.updateStats();
+                this.generateChallenge();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+        }
+        
+        let challenge;
+        
+        function startChallenge() {
+            challenge = new NeuralNetworkChallenge();
+        }
+        
+        function generateChallenge() {
+            challenge.generateChallenge();
+        }
+        
+        function validateSolution() {
+            challenge.validateSolution();
+        }
+        
+        function resetChallenge() {
+            challenge.resetChallenge();
+        }
+        
+        window.addEventListener('load', startChallenge);
+    </script>
+</body>
+</html>

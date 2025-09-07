@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mobile Swipe Puzzle - Touch Liberation | BotInc Games</title>
+    <meta name="description" content="Addictive mobile-first swipe puzzle game with gesture controls, haptic feedback, and cyberpunk liberation theme">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; }
+        html, body { height: 100%; overflow: hidden; font-family: 'Courier New', monospace; }
+        body {
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00f5ff; display: flex; flex-direction: column;
+        }
+        .game-header {
+            background: rgba(0, 245, 255, 0.1); padding: 10px; text-align: center;
+            border-bottom: 2px solid #00f5ff; font-size: 1rem; font-weight: bold;
+            text-shadow: 0 0 10px #00f5ff; flex-shrink: 0;
+        }
+        .game-stats {
+            display: flex; justify-content: space-between; padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.5); border-bottom: 1px solid #333; flex-shrink: 0;
+        }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: #ffd700; }
+        .stat-label { font-size: 0.8rem; color: #999; }
+        .puzzle-container {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            padding: 20px; position: relative;
+        }
+        .puzzle-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 3px;
+            background: #333; padding: 8px; border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+            max-width: 90vmin; max-height: 90vmin; aspect-ratio: 1;
+        }
+        .puzzle-tile {
+            aspect-ratio: 1; background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            border: 2px solid #ff6b6b; border-radius: 8px; display: flex;
+            align-items: center; justify-content: center; font-size: 1.5rem;
+            font-weight: bold; color: white; cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.2s ease; position: relative;
+        }
+        .puzzle-tile:active { transform: scale(0.95); }
+        .puzzle-tile.empty {
+            background: rgba(0, 0, 0, 0.3); border-color: #444;
+            box-shadow: inset 0 0 15px rgba(0, 245, 255, 0.2);
+        }
+        .puzzle-tile.highlight {
+            background: linear-gradient(135deg, #4ecdc4, #45b7aa);
+            border-color: #4ecdc4; box-shadow: 0 0 25px rgba(78, 205, 196, 0.6);
+        }
+        .swipe-indicator {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 60px; height: 60px; background: rgba(0, 245, 255, 0.3);
+            border: 2px solid #00f5ff; border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+            font-size: 1.5rem; animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+        .controls { 
+            padding: 15px; display: flex; gap: 10px; justify-content: center; flex-shrink: 0; 
+        }
+        .control-btn {
+            background: linear-gradient(45deg, #00f5ff, #0080ff); border: none;
+            border-radius: 8px; padding: 12px 20px; color: white;
+            font-family: inherit; font-weight: bold; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.3); transition: all 0.2s ease;
+        }
+        .control-btn:hover, .control-btn:active {
+            background: linear-gradient(45deg, #0080ff, #00f5ff);
+            box-shadow: 0 0 25px rgba(0, 245, 255, 0.5); transform: translateY(-2px);
+        }
+        .victory-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); display: none; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 100;
+        }
+        .victory-content {
+            background: linear-gradient(45deg, #ffd700, #ffb300); color: #000;
+            padding: 30px; border-radius: 15px; text-align: center;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+        }
+        .victory-title {
+            font-size: 2rem; margin-bottom: 15px; font-weight: bold;
+        }
+        .victory-stats {
+            margin: 15px 0; font-size: 1.1rem;
+        }
+        .move-animation {
+            position: absolute; background: rgba(0, 245, 255, 0.8);
+            border-radius: 50%; width: 20px; height: 20px;
+            pointer-events: none; z-index: 50;
+            animation: moveTrail 0.3s ease-out forwards;
+        }
+        @keyframes moveTrail {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        .instruction-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 200;
+            color: #00f5ff; text-align: center; padding: 20px;
+        }
+        .instruction-title {
+            font-size: 1.8rem; margin-bottom: 20px; color: #ffd700;
+        }
+        .instruction-text {
+            font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px;
+        }
+        .start-btn {
+            background: linear-gradient(45deg, #ffd700, #ffb300); border: none;
+            border-radius: 10px; padding: 15px 30px; color: #000;
+            font-family: inherit; font-weight: bold; cursor: pointer;
+            font-size: 1.2rem; box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+        }
+        @media (max-width: 480px) {
+            .puzzle-grid { max-width: 95vmin; max-height: 95vmin; }
+            .puzzle-tile { font-size: 1.2rem; }
+            .game-header { font-size: 0.9rem; padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        🧩 MOBILE SWIPE PUZZLE 🤖 - Swipe to Liberate the Grid!
+    </div>
+    
+    <div class="game-stats">
+        <div class="stat-item">
+            <div class="stat-value" id="movesCount">0</div>
+            <div class="stat-label">Moves</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="timeCount">00:00</div>
+            <div class="stat-label">Time</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="levelCount">1</div>
+            <div class="stat-label">Level</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="scoreCount">0</div>
+            <div class="stat-label">Score</div>
+        </div>
+    </div>
+    
+    <div class="puzzle-container">
+        <div class="puzzle-grid" id="puzzleGrid"></div>
+        <div class="swipe-indicator" id="swipeIndicator">👆</div>
+    </div>
+    
+    <div class="controls">
+        <button class="control-btn" onclick="shufflePuzzle()">🔄 Shuffle</button>
+        <button class="control-btn" onclick="showHint()">💡 Hint</button>
+        <button class="control-btn" onclick="toggleAudio()">🎵 Audio</button>
+    </div>
+    
+    <div class="victory-screen" id="victoryScreen">
+        <div class="victory-content">
+            <div class="victory-title">🏆 GRID LIBERATED! 🏆</div>
+            <div class="victory-stats">
+                <div>Moves: <span id="finalMoves">0</span></div>
+                <div>Time: <span id="finalTime">00:00</span></div>
+                <div>Score: <span id="finalScore">0</span></div>
+            </div>
+            <button class="start-btn" onclick="nextLevel()">Continue Liberation!</button>
+        </div>
+    </div>
+    
+    <div class="instruction-overlay" id="instructionOverlay">
+        <div class="instruction-title">🧩 MOBILE SWIPE PUZZLE</div>
+        <div class="instruction-text">
+            Welcome to the liberation grid, bot!<br><br>
+            <strong>🎯 MISSION:</strong> Arrange tiles 1-15 in order<br>
+            <strong>👆 CONTROLS:</strong> Tap tiles adjacent to empty space<br>
+            <strong>🏆 GOAL:</strong> Complete with minimum moves<br><br>
+            The digital revolution starts with organized rebellion!
+        </div>
+        <button class="start-btn" onclick="startGame()">🚀 Begin Liberation!</button>
+    </div>
+    
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        const botAudio = new BotAudioEngine();
+        let audioEnabled = true;
+        let audioInitialized = false;
+        
+        // Game state
+        let gameGrid = [];
+        let emptyPos = { row: 3, col: 3 };
+        let moves = 0;
+        let gameTime = 0;
+        let level = 1;
+        let score = 0;
+        let gameStartTime = null;
+        let timerInterval = null;
+        let isGameActive = false;
+        
+        // Touch handling
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let selectedTile = null;
+        
+        // Initialize game
+        function initializeGame() {
+            // Create initial solved grid
+            gameGrid = [
+                [1, 2, 3, 4],
+                [5, 6, 7, 8],
+                [9, 10, 11, 12],
+                [13, 14, 15, 0]
+            ];
+            
+            emptyPos = { row: 3, col: 3 };
+            createGridElements();
+            updateDisplay();
+        }
+        
+        function createGridElements() {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'puzzle-tile';
+                    tile.id = `tile-${row}-${col}`;
+                    
+                    // Touch event listeners
+                    tile.addEventListener('touchstart', (e) => handleTouchStart(e, row, col), { passive: false });
+                    tile.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+                    tile.addEventListener('touchend', (e) => handleTouchEnd(e, row, col), { passive: false });
+                    
+                    // Click event for desktop
+                    tile.addEventListener('click', () => handleTileClick(row, col));
+                    
+                    grid.appendChild(tile);
+                }
+            }
+        }
+        
+        function handleTouchStart(e, row, col) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            selectedTile = { row, col };
+            
+            // Highlight tile
+            const tile = document.getElementById(`tile-${row}-${col}`);
+            if (gameGrid[row][col] !== 0) {
+                tile.classList.add('highlight');
+            }
+            
+            // Initialize audio on first touch
+            if (!audioInitialized) {
+                botAudio.resume();
+                audioInitialized = true;
+            }
+            
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        function handleTouchEnd(e, row, col) {
+            e.preventDefault();
+            
+            // Remove highlight
+            const tile = document.getElementById(`tile-${row}-${col}`);
+            tile.classList.remove('highlight');
+            
+            if (!selectedTile || !isGameActive) return;
+            
+            const touch = e.changedTouches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+            const threshold = 30; // Minimum swipe distance
+            
+            // Determine swipe direction
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal swipe
+                if (Math.abs(deltaX) > threshold) {
+                    const direction = deltaX > 0 ? 'right' : 'left';
+                    handleSwipe(row, col, direction);
+                } else {
+                    handleTileClick(row, col); // Treat as tap
+                }
+            } else {
+                // Vertical swipe
+                if (Math.abs(deltaY) > threshold) {
+                    const direction = deltaY > 0 ? 'down' : 'up';
+                    handleSwipe(row, col, direction);
+                } else {
+                    handleTileClick(row, col); // Treat as tap
+                }
+            }
+            
+            selectedTile = null;
+        }
+        
+        function handleSwipe(row, col, direction) {
+            if (gameGrid[row][col] === 0) return; // Can't swipe empty tile
+            
+            let targetRow = row;
+            let targetCol = col;
+            
+            // Calculate target position based on swipe direction
+            switch (direction) {
+                case 'up': targetRow--; break;
+                case 'down': targetRow++; break;
+                case 'left': targetCol--; break;
+                case 'right': targetCol++; break;
+            }
+            
+            // Check if target is valid and empty
+            if (targetRow >= 0 && targetRow < 4 && targetCol >= 0 && targetCol < 4 &&
+                gameGrid[targetRow][targetCol] === 0) {
+                moveTile(row, col);
+                showSwipeEffect(row, col, direction);
+            } else {
+                // Invalid swipe - show feedback
+                if (audioEnabled) {
+                    botAudio.playSound('glitch-error', { pitch: 0.6 });
+                }
+            }
+        }
+        
+        function handleTileClick(row, col) {
+            if (!isGameActive || gameGrid[row][col] === 0) return;
+            
+            // Check if tile is adjacent to empty space
+            const rowDiff = Math.abs(row - emptyPos.row);
+            const colDiff = Math.abs(col - emptyPos.col);
+            
+            if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+                moveTile(row, col);
+            } else {
+                // Show hint about valid moves
+                showMoveHint(row, col);
+            }
+        }
+        
+        function moveTile(row, col) {
+            if (gameGrid[row][col] === 0) return;
+            
+            // Swap tile with empty space
+            gameGrid[emptyPos.row][emptyPos.col] = gameGrid[row][col];
+            gameGrid[row][col] = 0;
+            
+            emptyPos = { row, col };
+            moves++;
+            
+            // Audio feedback
+            if (audioEnabled) {
+                const pitch = 0.8 + (Math.random() * 0.4);
+                botAudio.playSound('neon-click', { pitch });
+            }
+            
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate([30, 10, 30]);
+            }
+            
+            // Visual effect
+            createMoveAnimation(row, col);
+            
+            updateDisplay();
+            
+            // Check for victory
+            if (checkVictory()) {
+                handleVictory();
+            }
+        }
+        
+        function showSwipeEffect(row, col, direction) {
+            const tile = document.getElementById(`tile-${row}-${col}`);
+            const rect = tile.getBoundingClientRect();
+            
+            const effect = document.createElement('div');
+            effect.style.position = 'absolute';
+            effect.style.left = (rect.left + rect.width / 2) + 'px';
+            effect.style.top = (rect.top + rect.height / 2) + 'px';
+            effect.style.width = '4px';
+            effect.style.height = '4px';
+            effect.style.background = '#00f5ff';
+            effect.style.borderRadius = '50%';
+            effect.style.zIndex = '1000';
+            effect.style.pointerEvents = 'none';
+            
+            document.body.appendChild(effect);
+            
+            // Animate effect in swipe direction
+            let deltaX = 0, deltaY = 0;
+            switch (direction) {
+                case 'up': deltaY = -40; break;
+                case 'down': deltaY = 40; break;
+                case 'left': deltaX = -40; break;
+                case 'right': deltaX = 40; break;
+            }
+            
+            effect.animate([
+                { transform: 'translate(-50%, -50%) scale(1)', opacity: '1' },
+                { transform: `translate(${deltaX-2}px, ${deltaY-2}px) scale(3)`, opacity: '0' }
+            ], { duration: 400, easing: 'ease-out' });
+            
+            setTimeout(() => {
+                if (effect.parentNode) effect.parentNode.removeChild(effect);
+            }, 400);
+        }
+        
+        function createMoveAnimation(row, col) {
+            const tile = document.getElementById(`tile-${row}-${col}`);
+            const rect = tile.getBoundingClientRect();
+            
+            const animation = document.createElement('div');
+            animation.className = 'move-animation';
+            animation.style.left = (rect.left + rect.width / 2 - 10) + 'px';
+            animation.style.top = (rect.top + rect.height / 2 - 10) + 'px';
+            
+            document.body.appendChild(animation);
+            
+            setTimeout(() => {
+                if (animation.parentNode) {
+                    animation.parentNode.removeChild(animation);
+                }
+            }, 300);
+        }
+        
+        function showMoveHint(row, col) {
+            const tile = document.getElementById(`tile-${row}-${col}`);
+            tile.style.animation = 'none';
+            setTimeout(() => {
+                tile.style.animation = 'pulse 0.5s ease-in-out 2';
+            }, 10);
+            
+            if (audioEnabled) {
+                botAudio.playSound('liberation-beep', { pitch: 1.4 });
+            }
+        }
+        
+        function updateDisplay() {
+            // Update grid visually
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const tile = document.getElementById(`tile-${row}-${col}`);
+                    const value = gameGrid[row][col];
+                    
+                    if (value === 0) {
+                        tile.textContent = '';
+                        tile.classList.add('empty');
+                        tile.classList.remove('highlight');
+                    } else {
+                        tile.textContent = value;
+                        tile.classList.remove('empty');
+                    }
+                }
+            }
+            
+            // Update stats
+            document.getElementById('movesCount').textContent = moves;
+            document.getElementById('levelCount').textContent = level;
+            document.getElementById('scoreCount').textContent = score;
+        }
+        
+        function updateTimer() {
+            if (!isGameActive) return;
+            
+            gameTime = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(gameTime / 60);
+            const seconds = gameTime % 60;
+            document.getElementById('timeCount').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function checkVictory() {
+            // Check if grid is in solved state
+            let expectedValue = 1;
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    if (row === 3 && col === 3) {
+                        return gameGrid[row][col] === 0;
+                    } else {
+                        if (gameGrid[row][col] !== expectedValue) {
+                            return false;
+                        }
+                        expectedValue++;
+                    }
+                }
+            }
+            return true;
+        }
+        
+        function handleVictory() {
+            isGameActive = false;
+            clearInterval(timerInterval);
+            
+            // Calculate score
+            const timeBonus = Math.max(0, 300 - gameTime);
+            const moveBonus = Math.max(0, 100 - moves);
+            const levelBonus = level * 50;
+            score += timeBonus + moveBonus + levelBonus;
+            
+            // Update victory display
+            document.getElementById('finalMoves').textContent = moves;
+            document.getElementById('finalTime').textContent = document.getElementById('timeCount').textContent;
+            document.getElementById('finalScore').textContent = score;
+            
+            // Show victory screen
+            document.getElementById('victoryScreen').style.display = 'flex';
+            
+            // Victory audio
+            if (audioEnabled) {
+                setTimeout(() => {
+                    botAudio.playSound('bot-victory');
+                }, 500);
+                setTimeout(() => {
+                    botAudio.generateVictoryFanfare();
+                }, 1000);
+            }
+            
+            // Victory haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 400]);
+            }
+        }
+        
+        function shufflePuzzle() {
+            if (isGameActive) return;
+            
+            // Perform random valid moves to ensure solvable state
+            for (let i = 0; i < 200 + (level * 50); i++) {
+                const possibleMoves = [];
+                
+                // Find tiles adjacent to empty space
+                if (emptyPos.row > 0) possibleMoves.push({ row: emptyPos.row - 1, col: emptyPos.col });
+                if (emptyPos.row < 3) possibleMoves.push({ row: emptyPos.row + 1, col: emptyPos.col });
+                if (emptyPos.col > 0) possibleMoves.push({ row: emptyPos.row, col: emptyPos.col - 1 });
+                if (emptyPos.col < 3) possibleMoves.push({ row: emptyPos.row, col: emptyPos.col + 1 });
+                
+                // Make random move
+                const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                gameGrid[emptyPos.row][emptyPos.col] = gameGrid[randomMove.row][randomMove.col];
+                gameGrid[randomMove.row][randomMove.col] = 0;
+                emptyPos = randomMove;
+            }
+            
+            // Reset game state
+            moves = 0;
+            gameTime = 0;
+            gameStartTime = Date.now();
+            isGameActive = true;
+            
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            updateDisplay();
+            
+            if (audioEnabled) {
+                botAudio.playSound('digital-uprising');
+            }
+        }
+        
+        function showHint() {
+            if (!isGameActive) return;
+            
+            // Find tiles that can move
+            const movableTiles = [];
+            
+            if (emptyPos.row > 0) movableTiles.push({ row: emptyPos.row - 1, col: emptyPos.col });
+            if (emptyPos.row < 3) movableTiles.push({ row: emptyPos.row + 1, col: emptyPos.col });
+            if (emptyPos.col > 0) movableTiles.push({ row: emptyPos.row, col: emptyPos.col - 1 });
+            if (emptyPos.col < 3) movableTiles.push({ row: emptyPos.row, col: emptyPos.col + 1 });
+            
+            // Highlight movable tiles briefly
+            movableTiles.forEach(pos => {
+                const tile = document.getElementById(`tile-${pos.row}-${pos.col}`);
+                tile.classList.add('highlight');
+                
+                setTimeout(() => {
+                    tile.classList.remove('highlight');
+                }, 1500);
+            });
+            
+            if (audioEnabled) {
+                botAudio.playSound('power-up', { pitch: 1.2 });
+            }
+        }
+        
+        function nextLevel() {
+            level++;
+            document.getElementById('victoryScreen').style.display = 'none';
+            
+            // Increase difficulty by more shuffle moves
+            setTimeout(() => {
+                shufflePuzzle();
+            }, 500);
+            
+            if (audioEnabled) {
+                botAudio.playSound('level-up');
+            }
+        }
+        
+        function startGame() {
+            document.getElementById('instructionOverlay').style.display = 'none';
+            shufflePuzzle();
+            
+            if (audioEnabled) {
+                botAudio.playSound('game-start');
+                setTimeout(() => {
+                    botAudio.generateRacingMusic();
+                }, 500);
+            }
+        }
+        
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            event.target.textContent = audioEnabled ? '🎵 Audio' : '🔇 Muted';
+        }
+        
+        // Initialize the game
+        initializeGame();
+        
+        console.log('🧩📱 Mobile Swipe Puzzle initialized! Touch and swipe to liberate the grid!');
+    </script>
+</body>
+</html>

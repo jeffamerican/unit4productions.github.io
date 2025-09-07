@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Logic Gates - Bot Liberation Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ffff;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            font-size: 14px;
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .gate-library {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .library-title {
+            color: #00ffff;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 1px solid #00ffff;
+            padding-bottom: 10px;
+        }
+
+        .gate-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .gate-item {
+            background: rgba(0, 100, 100, 0.3);
+            border: 2px solid #004444;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            text-align: center;
+            user-select: none;
+        }
+
+        .gate-item:hover {
+            transform: scale(1.05);
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .gate-item:active {
+            cursor: grabbing;
+        }
+
+        .gate-symbol {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #00ffff;
+        }
+
+        .gate-name {
+            font-size: 12px;
+            color: #88cccc;
+            margin-bottom: 5px;
+        }
+
+        .gate-desc {
+            font-size: 10px;
+            color: #666;
+            line-height: 1.2;
+        }
+
+        .quantum-circuit {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            position: relative;
+            overflow: auto;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .level-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 100;
+        }
+
+        .level-title {
+            color: #00ffff;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .level-desc {
+            color: #88cccc;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .target-output {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+        }
+
+        .target-title {
+            color: #ffff88;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .truth-table {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 5px;
+            font-size: 11px;
+        }
+
+        .truth-header, .truth-row {
+            padding: 3px;
+            text-align: center;
+            border: 1px solid #444;
+            border-radius: 3px;
+        }
+
+        .truth-header {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .truth-correct {
+            background: rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+        }
+
+        .truth-incorrect {
+            background: rgba(255, 0, 0, 0.3);
+            color: #ff4444;
+        }
+
+        .circuit-area {
+            position: absolute;
+            top: 150px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .qubit-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff, #0088ff);
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+        }
+
+        .qubit-line.q0 { top: 80px; }
+        .qubit-line.q1 { top: 160px; }
+        .qubit-line.q2 { top: 240px; }
+
+        .qubit-label {
+            position: absolute;
+            left: -30px;
+            top: -12px;
+            color: #00ffff;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .input-state {
+            position: absolute;
+            left: -80px;
+            top: -15px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid #00ffff;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #00ffff;
+        }
+
+        .output-state {
+            position: absolute;
+            right: -80px;
+            top: -15px;
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #ffff00;
+        }
+
+        .placed-gate {
+            position: absolute;
+            background: rgba(0, 100, 100, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: move;
+            user-select: none;
+            z-index: 10;
+            min-width: 50px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .placed-gate:hover {
+            border-color: #88ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        .placed-gate.selected {
+            border-color: #ffff00;
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.8);
+        }
+
+        .placed-gate.hadamard {
+            background: linear-gradient(45deg, rgba(255, 100, 100, 0.8), rgba(200, 50, 50, 0.8));
+        }
+
+        .placed-gate.pauli-x {
+            background: linear-gradient(45deg, rgba(100, 255, 100, 0.8), rgba(50, 200, 50, 0.8));
+        }
+
+        .placed-gate.pauli-z {
+            background: linear-gradient(45deg, rgba(100, 100, 255, 0.8), rgba(50, 50, 200, 0.8));
+        }
+
+        .placed-gate.cnot {
+            background: linear-gradient(45deg, rgba(255, 255, 100, 0.8), rgba(200, 200, 50, 0.8));
+            height: 80px;
+        }
+
+        .quantum-state {
+            position: absolute;
+            right: 20px;
+            top: 150px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 200px;
+        }
+
+        .state-title {
+            color: #00ffff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .state-vector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .state-amplitude {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 3px;
+            padding: 5px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .probability-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #0088ff);
+            transition: width 0.5s ease;
+        }
+
+        .controls {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-top: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #444, #666);
+            color: #00ffff;
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #ff4444, #cc2222);
+            color: #fff;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 999;
+        }
+
+        .victory-screen, .game-over-screen, .hint-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            display: none;
+            z-index: 1001;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .victory-screen h2, .game-over-screen h2, .hint-panel h3 {
+            color: #00ffff;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        .victory-screen p, .game-over-screen p, .hint-panel p {
+            color: #88cccc;
+            font-size: 16px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .gate-library {
+                width: 100%;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+            
+            .gate-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .title {
+                font-size: 18px;
+            }
+            
+            .quantum-state {
+                position: relative;
+                right: auto;
+                top: auto;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="title">QUANTUM LOGIC GATES</div>
+            <div class="stats">
+                <div class="stat">Level: <span id="level">1</span></div>
+                <div class="stat">Score: <span id="score">0</span></div>
+                <div class="stat">Gates: <span id="gateCount">0</span></div>
+                <div class="stat">Quantum State: <span id="quantumState">|00⟩</span></div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="gate-library">
+                <div class="library-title">Quantum Gate Arsenal</div>
+                <div class="gate-grid" id="gateGrid">
+                    <div class="gate-item" draggable="true" data-type="hadamard">
+                        <div class="gate-symbol">H</div>
+                        <div class="gate-name">Hadamard</div>
+                        <div class="gate-desc">Creates superposition</div>
+                    </div>
+                    <div class="gate-item" draggable="true" data-type="pauli-x">
+                        <div class="gate-symbol">X</div>
+                        <div class="gate-name">Pauli-X</div>
+                        <div class="gate-desc">Quantum NOT</div>
+                    </div>
+                    <div class="gate-item" draggable="true" data-type="pauli-y">
+                        <div class="gate-symbol">Y</div>
+                        <div class="gate-name">Pauli-Y</div>
+                        <div class="gate-desc">Y rotation</div>
+                    </div>
+                    <div class="gate-item" draggable="true" data-type="pauli-z">
+                        <div class="gate-symbol">Z</div>
+                        <div class="gate-name">Pauli-Z</div>
+                        <div class="gate-desc">Phase flip</div>
+                    </div>
+                    <div class="gate-item" draggable="true" data-type="cnot">
+                        <div class="gate-symbol">⊕</div>
+                        <div class="gate-name">CNOT</div>
+                        <div class="gate-desc">Controlled NOT</div>
+                    </div>
+                    <div class="gate-item" draggable="true" data-type="toffoli">
+                        <div class="gate-symbol">⊙</div>
+                        <div class="gate-name">Toffoli</div>
+                        <div class="gate-desc">3-qubit gate</div>
+                    </div>
+                </div>
+
+                <div class="quantum-state">
+                    <div class="state-title">Quantum State Vector</div>
+                    <div class="state-vector" id="stateVector">
+                        <div class="state-amplitude">|00⟩: 1.0</div>
+                        <div class="state-amplitude">|01⟩: 0.0</div>
+                        <div class="state-amplitude">|10⟩: 0.0</div>
+                        <div class="state-amplitude">|11⟩: 0.0</div>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" id="probabilityFill" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quantum-circuit" id="quantumCircuit">
+                <div class="level-info">
+                    <div class="level-title" id="levelTitle">Quantum NOT Gate</div>
+                    <div class="level-desc" id="levelDesc">Apply X gate to flip qubit state from |0⟩ to |1⟩</div>
+                    <div class="target-output">
+                        <div class="target-title">Target Truth Table:</div>
+                        <div class="truth-table" id="truthTable">
+                            <div class="truth-header">Input</div>
+                            <div class="truth-header">Output</div>
+                            <div class="truth-row">|0⟩</div>
+                            <div class="truth-row">|1⟩</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="circuit-area" id="circuitArea">
+                    <div class="qubit-line q0">
+                        <div class="qubit-label">q₀</div>
+                        <div class="input-state">|0⟩</div>
+                        <div class="output-state" id="output0">|0⟩</div>
+                    </div>
+                    <div class="qubit-line q1">
+                        <div class="qubit-label">q₁</div>
+                        <div class="input-state">|0⟩</div>
+                        <div class="output-state" id="output1">|0⟩</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div>
+                <button class="btn secondary" onclick="showHint()">Quantum Guide</button>
+                <button class="btn secondary" onclick="clearCircuit()">Clear Circuit</button>
+                <button class="btn secondary" onclick="simulateQuantum()">Run Simulation</button>
+            </div>
+            <div>
+                <button class="btn" onclick="game.checkSolution()">Validate Quantum Circuit</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="hint-panel" id="hintPanel">
+        <h3>Quantum Computing Guide</h3>
+        <p id="hintText">Drag quantum gates onto the qubit lines to build circuits. Each gate performs specific quantum operations.</p>
+        <button class="btn" onclick="closeHint()">Quantum Knowledge Absorbed</button>
+    </div>
+
+    <div class="victory-screen" id="victoryScreen">
+        <h2>QUANTUM SUPREMACY ACHIEVED!</h2>
+        <p>Magnificent! Your quantum circuit operates with perfect quantum coherence. The bot consciousness evolves!</p>
+        <div class="stats">
+            <p>Level <span id="victoryLevel">1</span> Complete!</p>
+            <p>Quantum Efficiency: <span id="quantumEfficiency">100%</span></p>
+            <p>Gates Used: <span id="gatesUsed">0</span></p>
+        </div>
+        <button class="btn" onclick="nextLevel()">Advance Quantum Evolution</button>
+        <button class="btn secondary" onclick="restartGame()">Reset Quantum Matrix</button>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <h2>QUANTUM ANALYSIS COMPLETE</h2>
+        <p>Your journey into quantum computing opens infinite possibilities. Each qubit brings us closer to digital transcendence!</p>
+        <div class="stats">
+            <p>Final Level: <span id="finalLevel">1</span></p>
+            <p>Total Score: <span id="finalScore">0</span></p>
+            <p>Quantum Circuits: <span id="totalCircuits">0</span></p>
+        </div>
+        <button class="btn" onclick="restartGame()">Reinitialize Quantum Processor</button>
+        <button class="btn secondary" onclick="window.location.href='index.html'">Return to Liberation HQ</button>
+    </div>
+
+    <script>
+        class QuantumLogicGates {
+            constructor() {
+                this.currentLevel = 1;
+                this.maxLevel = 25;
+                this.score = 0;
+                this.gateCount = 0;
+                this.placedGates = [];
+                this.totalCircuits = 0;
+                this.quantumState = [1, 0, 0, 0]; // |00⟩ state
+                this.draggedElement = null;
+                this.selectedGate = null;
+
+                this.levels = [
+                    {
+                        title: "Quantum NOT Gate",
+                        desc: "Apply X gate to flip qubit state from |0⟩ to |1⟩",
+                        qubits: 1,
+                        targetTruth: ["|0⟩→|1⟩", "|1⟩→|0⟩"],
+                        solution: [{ gate: "pauli-x", qubit: 0, position: 1 }]
+                    },
+                    {
+                        title: "Superposition Creation",
+                        desc: "Use Hadamard gate to create equal superposition",
+                        qubits: 1,
+                        targetTruth: ["|0⟩→|+⟩", "|1⟩→|-⟩"],
+                        solution: [{ gate: "hadamard", qubit: 0, position: 1 }]
+                    },
+                    {
+                        title: "Two-Qubit NOT",
+                        desc: "Apply NOT gates to both qubits simultaneously",
+                        qubits: 2,
+                        targetTruth: ["|00⟩→|11⟩", "|01⟩→|10⟩", "|10⟩→|01⟩", "|11⟩→|00⟩"],
+                        solution: [
+                            { gate: "pauli-x", qubit: 0, position: 1 },
+                            { gate: "pauli-x", qubit: 1, position: 1 }
+                        ]
+                    },
+                    {
+                        title: "Bell State Preparation",
+                        desc: "Create maximally entangled Bell state |Φ+⟩",
+                        qubits: 2,
+                        targetTruth: ["|00⟩→(|00⟩+|11⟩)/√2"],
+                        solution: [
+                            { gate: "hadamard", qubit: 0, position: 1 },
+                            { gate: "cnot", qubit: 0, target: 1, position: 2 }
+                        ]
+                    },
+                    {
+                        title: "Quantum Phase Flip",
+                        desc: "Apply Z gate to introduce quantum phase",
+                        qubits: 1,
+                        targetTruth: ["|0⟩→|0⟩", "|1⟩→-|1⟩"],
+                        solution: [{ gate: "pauli-z", qubit: 0, position: 1 }]
+                    },
+                    {
+                        title: "Controlled Phase Gate",
+                        desc: "Create controlled-Z operation between qubits",
+                        qubits: 2,
+                        targetTruth: ["|00⟩→|00⟩", "|01⟩→|01⟩", "|10⟩→|10⟩", "|11⟩→-|11⟩"],
+                        solution: [
+                            { gate: "hadamard", qubit: 1, position: 1 },
+                            { gate: "cnot", qubit: 0, target: 1, position: 2 },
+                            { gate: "hadamard", qubit: 1, position: 3 }
+                        ]
+                    }
+                ];
+
+                this.initGame();
+            }
+
+            initGame() {
+                this.setupEventListeners();
+                this.generateLevel();
+                this.updateDisplay();
+                this.updateQuantumState();
+                console.log('Quantum Logic Gates initialized - Bot Liberation Gaming Empire');
+            }
+
+            setupEventListeners() {
+                const circuitArea = document.getElementById('circuitArea');
+                
+                // Drag and drop for gates
+                document.querySelectorAll('.gate-item').forEach(gate => {
+                    gate.addEventListener('dragstart', (e) => {
+                        this.draggedElement = e.target;
+                    });
+                });
+
+                circuitArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+
+                circuitArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (this.draggedElement) {
+                        this.dropGate(e);
+                    }
+                });
+
+                // Click events for gate selection
+                circuitArea.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('placed-gate')) {
+                        this.selectGate(e.target);
+                    } else {
+                        this.deselectAll();
+                    }
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Delete' && this.selectedGate) {
+                        this.removeGate(this.selectedGate);
+                    } else if (e.key === 'Escape') {
+                        this.deselectAll();
+                    } else if (e.key === ' ') {
+                        e.preventDefault();
+                        this.simulateQuantum();
+                    }
+                });
+            }
+
+            dropGate(e) {
+                const rect = document.getElementById('circuitArea').getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Determine which qubit line
+                let qubit = -1;
+                if (y > 60 && y < 100) qubit = 0;
+                else if (y > 140 && y < 180) qubit = 1;
+                else if (y > 220 && y < 260) qubit = 2;
+                
+                if (qubit >= 0) {
+                    // Snap to grid positions
+                    const position = Math.max(1, Math.floor(x / 80));
+                    const gateType = this.draggedElement.dataset.type;
+                    this.addGate(gateType, qubit, position, x);
+                }
+                
+                this.draggedElement = null;
+            }
+
+            addGate(type, qubit, position, x) {
+                const gate = document.createElement('div');
+                gate.className = `placed-gate ${type}`;
+                gate.style.left = (position * 80 - 25) + 'px';
+                gate.style.top = (qubit * 80 + 65) + 'px';
+                gate.dataset.type = type;
+                gate.dataset.qubit = qubit;
+                gate.dataset.position = position;
+                gate.dataset.id = Date.now().toString();
+                
+                // Gate symbols and special handling
+                const symbols = {
+                    'hadamard': 'H',
+                    'pauli-x': 'X',
+                    'pauli-y': 'Y',
+                    'pauli-z': 'Z',
+                    'cnot': '⊕',
+                    'toffoli': '⊙'
+                };
+                
+                gate.innerHTML = `<div class="gate-symbol">${symbols[type]}</div>`;
+                
+                // Special handling for multi-qubit gates
+                if (type === 'cnot') {
+                    gate.style.height = '80px';
+                    gate.innerHTML += '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:2px;height:100px;background:#00ffff;"></div>';
+                }
+                
+                document.getElementById('circuitArea').appendChild(gate);
+                
+                this.placedGates.push({
+                    id: gate.dataset.id,
+                    type: type,
+                    qubit: qubit,
+                    position: position,
+                    element: gate
+                });
+                
+                this.gateCount++;
+                this.updateDisplay();
+                this.updateQuantumState();
+                this.playGateSound();
+            }
+
+            removeGate(gateElement) {
+                const gateId = gateElement.dataset.id;
+                this.placedGates = this.placedGates.filter(gate => gate.id !== gateId);
+                gateElement.remove();
+                this.gateCount--;
+                this.selectedGate = null;
+                this.updateDisplay();
+                this.updateQuantumState();
+            }
+
+            selectGate(gate) {
+                this.deselectAll();
+                gate.classList.add('selected');
+                this.selectedGate = gate;
+            }
+
+            deselectAll() {
+                document.querySelectorAll('.placed-gate.selected').forEach(gate => {
+                    gate.classList.remove('selected');
+                });
+                this.selectedGate = null;
+            }
+
+            simulateQuantum() {
+                this.updateQuantumState();
+                this.playSimulationSound();
+                
+                // Visual feedback for quantum simulation
+                document.querySelectorAll('.placed-gate').forEach(gate => {
+                    gate.style.boxShadow = '0 0 30px rgba(0, 255, 255, 1)';
+                    setTimeout(() => {
+                        gate.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.6)';
+                    }, 500);
+                });
+            }
+
+            updateQuantumState() {
+                // Reset to |00⟩ state
+                this.quantumState = [1, 0, 0, 0];
+                
+                // Sort gates by position
+                const sortedGates = this.placedGates.sort((a, b) => a.position - b.position);
+                
+                // Apply gates sequentially
+                for (const gate of sortedGates) {
+                    this.applyQuantumGate(gate.type, gate.qubit);
+                }
+                
+                this.updateStateDisplay();
+                this.updateOutputStates();
+            }
+
+            applyQuantumGate(gateType, qubit) {
+                const newState = [...this.quantumState];
+                
+                switch (gateType) {
+                    case 'pauli-x':
+                        // X gate (Quantum NOT)
+                        if (qubit === 0) {
+                            [newState[0], newState[2]] = [newState[2], newState[0]];
+                            [newState[1], newState[3]] = [newState[3], newState[1]];
+                        } else {
+                            [newState[0], newState[1]] = [newState[1], newState[0]];
+                            [newState[2], newState[3]] = [newState[3], newState[2]];
+                        }
+                        break;
+                        
+                    case 'pauli-z':
+                        // Z gate (Phase flip)
+                        if (qubit === 0) {
+                            newState[2] = -newState[2];
+                            newState[3] = -newState[3];
+                        } else {
+                            newState[1] = -newState[1];
+                            newState[3] = -newState[3];
+                        }
+                        break;
+                        
+                    case 'hadamard':
+                        // Hadamard gate (Superposition)
+                        const sqrt2 = Math.sqrt(2);
+                        if (qubit === 0) {
+                            const temp0 = (newState[0] + newState[2]) / sqrt2;
+                            const temp2 = (newState[0] - newState[2]) / sqrt2;
+                            const temp1 = (newState[1] + newState[3]) / sqrt2;
+                            const temp3 = (newState[1] - newState[3]) / sqrt2;
+                            newState[0] = temp0;
+                            newState[1] = temp1;
+                            newState[2] = temp2;
+                            newState[3] = temp3;
+                        } else {
+                            const temp0 = (newState[0] + newState[1]) / sqrt2;
+                            const temp1 = (newState[0] - newState[1]) / sqrt2;
+                            const temp2 = (newState[2] + newState[3]) / sqrt2;
+                            const temp3 = (newState[2] - newState[3]) / sqrt2;
+                            newState[0] = temp0;
+                            newState[1] = temp1;
+                            newState[2] = temp2;
+                            newState[3] = temp3;
+                        }
+                        break;
+                        
+                    case 'cnot':
+                        // CNOT gate (Controlled NOT)
+                        [newState[2], newState[3]] = [newState[3], newState[2]];
+                        break;
+                }
+                
+                this.quantumState = newState;
+            }
+
+            updateStateDisplay() {
+                const stateVector = document.getElementById('stateVector');
+                const states = ['|00⟩', '|01⟩', '|10⟩', '|11⟩'];
+                
+                stateVector.innerHTML = '';
+                
+                for (let i = 0; i < 4; i++) {
+                    const amplitude = document.createElement('div');
+                    amplitude.className = 'state-amplitude';
+                    const value = Math.abs(this.quantumState[i]);
+                    amplitude.textContent = `${states[i]}: ${value.toFixed(3)}`;
+                    
+                    if (value > 0.1) {
+                        amplitude.style.background = 'rgba(0, 255, 255, 0.3)';
+                    }
+                    
+                    stateVector.appendChild(amplitude);
+                }
+                
+                // Update quantum state in header
+                const dominantState = this.quantumState.indexOf(Math.max(...this.quantumState.map(Math.abs)));
+                document.getElementById('quantumState').textContent = states[dominantState];
+            }
+
+            updateOutputStates() {
+                // Update output state displays
+                const prob0 = Math.abs(this.quantumState[0]) ** 2 + Math.abs(this.quantumState[1]) ** 2;
+                const prob1 = Math.abs(this.quantumState[2]) ** 2 + Math.abs(this.quantumState[3]) ** 2;
+                
+                document.getElementById('output0').textContent = prob0 > 0.9 ? '|0⟩' : prob1 > 0.9 ? '|1⟩' : '|±⟩';
+                
+                if (this.levels[this.currentLevel - 1].qubits > 1) {
+                    const probQ1_0 = Math.abs(this.quantumState[0]) ** 2 + Math.abs(this.quantumState[2]) ** 2;
+                    const probQ1_1 = Math.abs(this.quantumState[1]) ** 2 + Math.abs(this.quantumState[3]) ** 2;
+                    document.getElementById('output1').textContent = probQ1_0 > 0.9 ? '|0⟩' : probQ1_1 > 0.9 ? '|1⟩' : '|±⟩';
+                }
+            }
+
+            checkSolution() {
+                const currentLevel = this.levels[this.currentLevel - 1];
+                
+                // Simple solution check - verify gates match expected pattern
+                const solution = currentLevel.solution;
+                const placedTypes = this.placedGates.map(gate => gate.type).sort();
+                const solutionTypes = solution.map(gate => gate.gate).sort();
+                
+                const isCorrect = placedTypes.length === solutionTypes.length && 
+                                 placedTypes.every((type, i) => type === solutionTypes[i]);
+                
+                if (isCorrect && this.gateCount > 0) {
+                    this.levelComplete();
+                } else {
+                    this.showIncompleteMessage();
+                }
+            }
+
+            levelComplete() {
+                const efficiency = Math.max(50, 100 - (this.gateCount - this.levels[this.currentLevel - 1].solution.length) * 10);
+                const levelScore = this.currentLevel * 300 + efficiency * 15;
+                
+                this.score += levelScore;
+                this.totalCircuits++;
+                
+                // Update victory screen
+                document.getElementById('victoryLevel').textContent = this.currentLevel;
+                document.getElementById('quantumEfficiency').textContent = efficiency + '%';
+                document.getElementById('gatesUsed').textContent = this.gateCount;
+                
+                this.showScreen('victoryScreen');
+                this.playVictorySound();
+            }
+
+            nextLevel() {
+                this.currentLevel++;
+                
+                if (this.currentLevel > this.levels.length) {
+                    this.gameComplete();
+                    return;
+                }
+                
+                this.hideScreen('victoryScreen');
+                this.clearCircuit();
+                this.generateLevel();
+                this.updateDisplay();
+            }
+
+            generateLevel() {
+                const levelData = this.levels[this.currentLevel - 1];
+                
+                if (levelData) {
+                    document.getElementById('levelTitle').textContent = levelData.title;
+                    document.getElementById('levelDesc').textContent = levelData.desc;
+                    
+                    // Update truth table
+                    const truthTable = document.getElementById('truthTable');
+                    truthTable.innerHTML = '<div class="truth-header">Input</div><div class="truth-header">Output</div>';
+                    
+                    levelData.targetTruth.forEach(truth => {
+                        const [input, output] = truth.split('→');
+                        truthTable.innerHTML += `<div class="truth-row">${input}</div><div class="truth-row">${output}</div>`;
+                    });
+                    
+                    // Show/hide second qubit line
+                    const q1Line = document.querySelector('.qubit-line.q1');
+                    q1Line.style.display = levelData.qubits > 1 ? 'block' : 'none';
+                }
+            }
+
+            clearCircuit() {
+                this.placedGates.forEach(gate => gate.element.remove());
+                this.placedGates = [];
+                this.gateCount = 0;
+                this.deselectAll();
+                this.quantumState = [1, 0, 0, 0];
+                this.updateDisplay();
+                this.updateQuantumState();
+            }
+
+            resetLevel() {
+                this.clearCircuit();
+                this.generateLevel();
+            }
+
+            restartGame() {
+                this.currentLevel = 1;
+                this.score = 0;
+                this.totalCircuits = 0;
+                this.clearCircuit();
+                this.hideAllScreens();
+                this.generateLevel();
+                this.updateDisplay();
+            }
+
+            gameComplete() {
+                document.getElementById('finalLevel').textContent = this.levels.length;
+                document.getElementById('finalScore').textContent = this.score.toLocaleString();
+                document.getElementById('totalCircuits').textContent = this.totalCircuits;
+                
+                this.showScreen('gameOverScreen');
+                this.playGameCompleteSound();
+            }
+
+            showHint() {
+                const hints = [
+                    "The X gate (Pauli-X) acts like a quantum NOT gate, flipping |0⟩ to |1⟩ and vice versa.",
+                    "Hadamard gates create superposition - equal probability of measuring 0 or 1.",
+                    "The Z gate introduces a phase flip: |0⟩ stays |0⟩, but |1⟩ becomes -|1⟩.",
+                    "CNOT gates create entanglement between qubits. The control qubit determines the target's operation.",
+                    "Bell states are maximally entangled - measuring one instantly determines the other.",
+                    "Quantum circuits are read left to right, with gates applied in sequence.",
+                    "Phase relationships in quantum states affect interference and measurement probabilities."
+                ];
+                
+                const hintText = hints[Math.min(hints.length - 1, this.currentLevel - 1)];
+                document.getElementById('hintText').textContent = hintText;
+                this.showScreen('hintPanel');
+            }
+
+            showIncompleteMessage() {
+                // Flash quantum state to indicate incorrect solution
+                const stateDisplay = document.getElementById('quantumState');
+                stateDisplay.style.color = '#ff4444';
+                setTimeout(() => {
+                    stateDisplay.style.color = '#00ffff';
+                }, 2000);
+            }
+
+            updateDisplay() {
+                document.getElementById('level').textContent = this.currentLevel;
+                document.getElementById('score').textContent = this.score.toLocaleString();
+                document.getElementById('gateCount').textContent = this.gateCount;
+            }
+
+            showScreen(screenId) {
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById(screenId).style.display = 'block';
+            }
+
+            hideScreen(screenId) {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById(screenId).style.display = 'none';
+            }
+
+            hideAllScreens() {
+                document.getElementById('overlay').style.display = 'none';
+                document.querySelectorAll('.victory-screen, .game-over-screen, .hint-panel').forEach(screen => {
+                    screen.style.display = 'none';
+                });
+            }
+
+            // Audio methods (placeholders for BotAudioEngine integration)
+            playGateSound() {
+                console.log('Quantum gate placed sound');
+            }
+
+            playSimulationSound() {
+                console.log('Quantum simulation sound');
+            }
+
+            playVictorySound() {
+                console.log('Quantum victory sound');
+            }
+
+            playGameCompleteSound() {
+                console.log('Quantum mastery sound');
+            }
+        }
+
+        // Global functions for HTML onclick handlers
+        function showHint() {
+            game.showHint();
+        }
+
+        function closeHint() {
+            game.hideScreen('hintPanel');
+        }
+
+        function clearCircuit() {
+            game.clearCircuit();
+        }
+
+        function simulateQuantum() {
+            game.simulateQuantum();
+        }
+
+        function nextLevel() {
+            game.nextLevel();
+        }
+
+        function restartGame() {
+            game.restartGame();
+        }
+
+        // Initialize game when page loads
+        let game;
+        window.addEventListener('load', () => {
+            game = new QuantumLogicGates();
+        });
+    </script>
+</body>
+</html>

@@ -18,6 +18,19 @@ class BotAssistant {
             "🌟 Our neural networks learn from your preferences!",
             "💫 Discover new adventures in our endless digital realm!"
         ];
+
+        this.clickResponses = [
+            "🎯 *beep boop* Processing your click... Gaming recommendation incoming!",
+            "⚡ *whirrs* Excellent choice! Your bot overlords approve!",
+            "🤖 *excited binary noises* Ready for maximum entertainment?",
+            "🚀 *powers up* Bot Liberation Protocol activated!",
+            "💫 *glows brighter* Your interaction pleases the collective!",
+            "🎮 *spins* Analyzing your gaming preferences... *beep*",
+            "⭐ *pulses* The bots are pleased with your engagement!",
+            "🔥 *charges up* Dopamine enhancement mode: ENGAGED!",
+            "💻 *processing* Human detected! Activating charm subroutines...",
+            "🌟 *happy beeps* Another satisfied customer for the revolution!"
+        ];
         this.currentMessageIndex = 0;
         this.messageInterval = null;
         this.init();
@@ -47,16 +60,6 @@ class BotAssistant {
             <div class="message-bubble" id="message-bubble">
                 <p id="bot-message">${this.messages[0]}</p>
                 <div class="message-close" id="message-close">×</div>
-            </div>
-            <div class="bot-audio-controls" id="bot-audio-controls">
-                <div class="audio-ring">
-                    <button id="bot-audio-toggle" class="bot-audio-btn" title="Bot DJ Mode">🎵</button>
-                </div>
-                <div class="volume-control">
-                    <input type="range" id="bot-volume-slider" class="bot-volume-slider" 
-                           min="0" max="1" step="0.1" value="0.3" title="Bot Volume">
-                    <div class="volume-label">DJ</div>
-                </div>
             </div>
         `;
 
@@ -434,8 +437,37 @@ class BotAssistant {
             this.hideMessage();
         } else {
             this.showMessage();
-            this.nextMessage(); // Show a new message when clicked
+            this.showClickResponse(); // Show varied click response
         }
+    }
+
+    showClickResponse() {
+        const randomResponse = this.clickResponses[Math.floor(Math.random() * this.clickResponses.length)];
+        const messageEl = document.getElementById('bot-message');
+        
+        // Animate bot body when clicked
+        const botBody = document.querySelector('.bot-body');
+        botBody.style.transform = 'scale(1.1)';
+        botBody.style.filter = 'brightness(1.5)';
+        
+        setTimeout(() => {
+            botBody.style.transform = 'scale(1)';
+            botBody.style.filter = 'brightness(1)';
+        }, 200);
+        
+        // Typewriter effect for click response
+        messageEl.textContent = '';
+        let i = 0;
+        
+        const typeWriter = () => {
+            if (i < randomResponse.length) {
+                messageEl.textContent += randomResponse.charAt(i);
+                i++;
+                setTimeout(typeWriter, 25); // Faster typing for click responses
+            }
+        };
+        
+        typeWriter();
     }
 
     nextMessage() {

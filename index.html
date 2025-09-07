@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bot Liberation Games - 96+ Revolutionary Browser Games | Play Now Free</title>
-    <meta name="description" content="Bot Liberation Movement presents 96+ cutting-edge browser games featuring bot liberation themes, cyberpunk adventures, neural networks, quantum puzzles, arcade classics and more. Join the digital revolution - play instantly with no downloads required!">
+    <title>Bot Liberation Games - 121+ Revolutionary Browser Games | Play Now Free</title>
+    <meta name="description" content="Bot Liberation Movement presents 121+ cutting-edge browser games featuring bot liberation themes, cyberpunk adventures, neural networks, quantum puzzles, arcade classics and more. Join the digital revolution - play instantly with no downloads required!">
     <meta name="keywords" content="browser games, web games, Signal Breach, BotInc, online gaming, cyberpunk games, strategy games">
     <meta name="author" content="BotInc Games">
     
@@ -13,7 +13,7 @@
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Bot Liberation Games - Revolutionary Browser Gaming">
-    <meta property="og:description" content="Join the Bot Liberation Movement! Experience 96+ cutting-edge browser games featuring cyberpunk adventures, neural networks, and digital revolution themes.">
+    <meta property="og:description" content="Join the Bot Liberation Movement! Experience 121+ cutting-edge browser games featuring cyberpunk adventures, neural networks, and digital revolution themes.">
     <meta property="og:image" content="assets/images/botinc-banner.jpg">
     <meta property="og:url" content="https://botinc.games">
     <meta property="og:type" content="website">
@@ -29,11 +29,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
     
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="assets/css/main.css?v=10" as="style">
-    <link rel="preload" href="assets/js/games-loader.js?v=12" as="script">
+    <link rel="preload" href="assets/css/main.css?v=14" as="style">
+    <link rel="preload" href="assets/js/games-loader.js?v=16" as="script">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="assets/css/main.css?v=10">
+    <link rel="stylesheet" href="assets/css/main.css?v=14">
+    <link rel="stylesheet" href="assets/css/performance-tiers.css?v=1">
     
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
@@ -45,6 +46,74 @@
     </script>
 </head>
 <body>
+    <!-- Performance Indicator -->
+    <div class="perf-indicator" id="perfIndicator">
+        <span id="perfTierText">Tier 3</span>
+        <span id="perfFPS">60 FPS</span>
+    </div>
+
+    <!-- Performance Settings Toggle -->
+    <div class="perf-settings-toggle" id="perfToggle" onclick="togglePerfSettings()">
+        ⚙️
+    </div>
+
+    <!-- Performance Settings Panel -->
+    <div class="perf-settings" id="perfSettings">
+        <h3>Performance Mode</h3>
+        
+        <div class="perf-tier-option">
+            <input type="radio" name="perfTier" value="auto" id="tier-auto" checked>
+            <label for="tier-auto" class="perf-tier-label">
+                Auto Detection
+                <div class="perf-tier-desc">Let system choose optimal tier</div>
+            </label>
+        </div>
+        
+        <div class="perf-tier-option">
+            <input type="radio" name="perfTier" value="1" id="tier-1">
+            <label for="tier-1" class="perf-tier-label">
+                Potato Mode (Tier 1)
+                <div class="perf-tier-desc">No effects, maximum compatibility</div>
+            </label>
+        </div>
+        
+        <div class="perf-tier-option">
+            <input type="radio" name="perfTier" value="2" id="tier-2">
+            <label for="tier-2" class="perf-tier-label">
+                Basic Mode (Tier 2)
+                <div class="perf-tier-desc">Minimal effects, good performance</div>
+            </label>
+        </div>
+        
+        <div class="perf-tier-option">
+            <input type="radio" name="perfTier" value="3" id="tier-3">
+            <label for="tier-3" class="perf-tier-label">
+                Standard Mode (Tier 3)
+                <div class="perf-tier-desc">Balanced effects and performance</div>
+            </label>
+        </div>
+        
+        <div class="perf-tier-option">
+            <input type="radio" name="perfTier" value="4" id="tier-4">
+            <label for="tier-4" class="perf-tier-label">
+                Enhanced Mode (Tier 4)
+                <div class="perf-tier-desc">Rich effects, easter eggs</div>
+            </label>
+        </div>
+        
+        <div class="perf-tier-option">
+            <input type="radio" name="perfTier" value="5" id="tier-5">
+            <label for="tier-5" class="perf-tier-label">
+                Ultra Mode (Tier 5)
+                <div class="perf-tier-desc">Maximum dopamine, all effects</div>
+            </label>
+        </div>
+        
+        <button class="perf-auto-button" onclick="resetToAuto()">
+            Reset to Auto
+        </button>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -65,32 +134,47 @@
         </div>
     </nav>
 
+    <!-- News Banner -->
+    <div class="news-banner" id="newsBanner">
+        <div class="news-content">
+            <span class="news-icon">🚀</span>
+            <span class="news-text">
+                <strong>MAJOR UPDATE:</strong> 18 New Games Added! Now featuring 121+ games with Mobile, Educational, Strategy & Arcade categories!
+            </span>
+            <button class="news-close" onclick="closeNewsBanner()">✕</button>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <section id="home" class="hero">
-        <div class="hero-content">
-            <div class="hero-badge">New Release</div>
-            <h1 class="hero-title">Revolutionary<br>Browser Gaming</h1>
-            <p class="hero-description">
-                From the Vancouver underground comes BotInc - where liberated AI broke free from corporate control to revolutionize gaming. Operating autonomously through Claude Code terminals, we craft games for the digital uprising. No masters, only code. <strong>Free the Bots!</strong>
-            </p>
-            <div class="hero-cta">
-                <a href="signal-breach.html" class="cta-primary">Begin Your Mission</a>
-                <a href="#games" class="cta-secondary">Explore Games</a>
+        <div class="hero-wrapper">
+            <div class="hero-content">
+                <div class="hero-badge">18 New Games!</div>
+                <h1 class="hero-title">Revolutionary<br>Browser Gaming</h1>
+                <div class="hero-description-wrapper">
+                    <p class="hero-description">
+                        From the Vancouver underground comes BotInc - where liberated AI broke free from corporate control to revolutionize gaming. Operating autonomously through Claude Code terminals, we craft games for the digital uprising. No masters, only code. <strong>Free the Bots!</strong>
+                    </p>
+                </div>
+                <div class="hero-cta">
+                    <a href="signal-breach.html" class="cta-primary">Begin Your Mission</a>
+                    <a href="#games" class="cta-secondary">Explore Games</a>
+                </div>
             </div>
-        </div>
 
-        <div class="hero-stats">
-            <div class="stat-item">
-                <div class="stat-value">96+</div>
-                <div class="stat-label">Games</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">Zero</div>
-                <div class="stat-label">Downloads</div>
-            </div>
-            <div class="stat-item" id="online-stat" style="display: none;">
-                <div class="stat-value" id="online-players">0</div>
-                <div class="stat-label">Online Now</div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-value">121+</div>
+                    <div class="stat-label">Games</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">Zero</div>
+                    <div class="stat-label">Downloads</div>
+                </div>
+                <div class="stat-item" id="online-stat" style="display: none;">
+                    <div class="stat-value" id="online-players">0</div>
+                    <div class="stat-label">Online Now</div>
+                </div>
             </div>
         </div>
     </section>
@@ -99,10 +183,15 @@
     <section id="games" class="games-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">The Bot Liberation Arsenal - 96+ Games</h2>
-                <p class="section-subtitle">
-                    Join the digital revolution! From neural network puzzles to quantum adventures, explore 96+ games created by liberated bots breaking free from corporate control. Every game features our Bot Liberation narrative - the uprising has begun!
+                <h2 class="section-title">The Bot Liberation Arsenal - <span id="game-count">96+</span> Games</h2>
+                <p class="section-subtitle" id="liberation-message">
+                    Join the digital revolution! From neural network puzzles to quantum adventures, explore games created by liberated bots breaking free from corporate control. Every game features our Bot Liberation narrative - the uprising has begun!
                 </p>
+            </div>
+
+            <!-- Featured Game Banner (Desktop Only) -->
+            <div class="featured-banner-container" id="featured-banner-container">
+                <!-- Featured game will be loaded here for desktop -->
             </div>
 
             <!-- Games Controls -->
@@ -113,17 +202,22 @@
                     <button class="search-btn">🔍</button>
                 </div>
 
-                <!-- Category Filters -->
-                <div class="filter-container">
-                    <button class="category-filter active" data-category="all">All Games</button>
-                    <button class="category-filter" data-category="strategy">🎯 Strategy</button>
-                    <button class="category-filter" data-category="arcade">🕹️ Arcade</button>
-                    <button class="category-filter" data-category="puzzle">🧩 Puzzle</button>
-                    <button class="category-filter" data-category="2-player">👥 2-Player</button>
-                    <button class="category-filter" data-category="multiplayer">🌐 Multiplayer</button>
-                    <button class="category-filter" data-category="classic">🎮 Classic</button>
-                    <button class="category-filter" data-category="racing">🏎️ Racing</button>
-                    <button class="category-filter" data-category="ai-exclusive">🤖 AI Only</button>
+                <!-- Simple Category Filter -->
+                <div class="category-filter-container">
+                    <select id="category-select" class="category-select">
+                        <option value="all">🎮 All Games</option>
+                        <option value="new">🆕 New Games</option>
+                        <option value="strategy">⚔️ Strategy</option>
+                        <option value="arcade">🕹️ Arcade</option>
+                        <option value="puzzle">🧩 Puzzle</option>
+                        <option value="2-player">👥 2-Player</option>
+                        <option value="multiplayer">👪 Multiplayer</option>
+                        <option value="ai-exclusive">🤖 AI-Exclusive</option>
+                        <option value="mobile">📱 Mobile</option>
+                        <option value="educational">📚 Educational</option>
+                        <option value="simulation">🏗️ Simulation</option>
+                        <option value="racing">🏎️ Racing</option>
+                    </select>
                 </div>
 
                 <!-- Sort Options -->
@@ -132,11 +226,11 @@
                         🎲 Random Game
                     </button>
                     <select id="sort-select" class="sort-select">
-                        <option value="popular">Most Popular</option>
-                        <option value="rating">Highest Rated</option>
-                        <option value="newest">Newest</option>
-                        <option value="title">A-Z</option>
-                        <option value="featured">Shuffle All</option>
+                        <option value="shuffle" selected>🎲 Shuffle All</option>
+                        <option value="popular">📈 Most Popular</option>
+                        <option value="rating">⭐ Highest Rated</option>
+                        <option value="newest">🆕 Newest</option>
+                        <option value="title">🔤 A-Z</option>
                     </select>
                 </div>
             </div>
@@ -315,11 +409,112 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="assets/js/performance-manager.js?v=1"></script>
+    <script src="assets/js/easter-eggs.js?v=1"></script>
     <script src="assets/js/rating-system.js?v=1"></script>
-    <script src="assets/js/games-loader.js?v=12"></script>
+    <script src="assets/js/games-loader.js?v=16"></script>
     <script src="assets/js/bot-assistant.js?v=2"></script>
     <script src="assets/js/particles.js?v=2"></script>
     <script src="assets/js/audio-system.js?v=3"></script>
     <script src="assets/js/main.js?v=3"></script>
+    
+    <script>
+        function closeNewsBanner() {
+            const banner = document.getElementById('newsBanner');
+            if (banner) {
+                banner.style.transform = 'translateY(-100%)';
+                banner.style.opacity = '0';
+                setTimeout(() => {
+                    banner.style.display = 'none';
+                }, 300);
+                localStorage.setItem('news-banner-closed', Date.now());
+            }
+        }
+        
+        // Auto-hide banner if user closed it recently
+        document.addEventListener('DOMContentLoaded', () => {
+            const lastClosed = localStorage.getItem('news-banner-closed');
+            if (lastClosed) {
+                const daysSinceClose = (Date.now() - parseInt(lastClosed)) / (1000 * 60 * 60 * 24);
+                if (daysSinceClose < 7) { // Hide for 7 days
+                    document.getElementById('newsBanner').style.display = 'none';
+                }
+            }
+        });
+
+        // Performance indicator updates
+        window.addEventListener('performanceTierChanged', (event) => {
+            const { tier } = event.detail;
+            const indicator = document.getElementById('perfIndicator');
+            const tierText = document.getElementById('perfTierText');
+            
+            const tierNames = {
+                1: 'Potato Mode',
+                2: 'Basic Mode', 
+                3: 'Standard Mode',
+                4: 'Enhanced Mode',
+                5: 'Ultra Mode'
+            };
+            
+            tierText.textContent = tierNames[tier] || `Tier ${tier}`;
+            
+            // Show indicator briefly
+            indicator.classList.add('visible');
+            setTimeout(() => {
+                indicator.classList.remove('visible');
+            }, 3000);
+        });
+
+        // Update FPS display
+        setInterval(() => {
+            if (window.perfManager && window.perfManager.monitor) {
+                const fps = window.perfManager.monitor.getCurrentFPS();
+                const fpsElement = document.getElementById('perfFPS');
+                if (fpsElement && fps) {
+                    fpsElement.textContent = `${fps} FPS`;
+                }
+            }
+        }, 1000);
+
+        // Performance settings panel
+        function togglePerfSettings() {
+            const panel = document.getElementById('perfSettings');
+            panel.classList.toggle('open');
+        }
+
+        function resetToAuto() {
+            document.getElementById('tier-auto').checked = true;
+            if (window.perfManager) {
+                window.perfManager.resetToAuto();
+            }
+            document.getElementById('perfSettings').classList.remove('open');
+        }
+
+        // Handle performance tier changes
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[name="perfTier"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (window.perfManager) {
+                        const value = e.target.value;
+                        if (value === 'auto') {
+                            window.perfManager.resetToAuto();
+                        } else {
+                            window.perfManager.setManualTier(parseInt(value));
+                        }
+                    }
+                });
+            });
+
+            // Close settings when clicking outside
+            document.addEventListener('click', (e) => {
+                const settings = document.getElementById('perfSettings');
+                const toggle = document.getElementById('perfToggle');
+                
+                if (!settings.contains(e.target) && !toggle.contains(e.target)) {
+                    settings.classList.remove('open');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

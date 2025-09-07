@@ -9,28 +9,145 @@ class GamesLoader {
         this.filteredGames = [];
         this.displayedGames = [];
         this.currentCategory = 'all';
-        this.currentSort = 'featured';
+        this.currentSort = 'shuffle';
         this.searchQuery = '';
         this.loading = false;
         this.batchSize = 12; // Load 12 games at a time
         this.currentIndex = 0;
         this.isInfiniteScrollEnabled = true;
         
-        // Carousel properties
+        // Display mode properties
         this.cardsPerView = 3;
         this.currentCarouselIndex = 0;
         this.totalPages = 0;
-        this.isCarouselMode = true;
+        this.isDesktop = false;
+        this.isCarouselMode = true; // Will be set based on device type
+        this.featuredGameIndex = 0;
     }
 
     async init() {
         try {
             await this.loadGamesData();
+            this.detectDisplayMode();
             this.setupEventListeners();
             this.renderGames();
+            this.initLiberationMessages();
         } catch (error) {
             console.error('Failed to initialize games loader:', error);
             this.showError('Failed to load games. Please refresh the page.');
+        }
+    }
+
+    detectDisplayMode() {
+        // Desktop detection: screen width > 1024px and not touch-only device
+        this.isDesktop = window.innerWidth > 1024 && !this.isMobile();
+        this.isCarouselMode = !this.isDesktop; // Use carousel on mobile/tablet only
+        
+        console.log(`🖥️ Display mode: ${this.isDesktop ? 'Desktop' : 'Mobile/Tablet'} - Using ${this.isCarouselMode ? 'Carousel' : 'Featured + Grid'} layout`);
+        console.log(`📱 Mobile detection details: userAgent=${/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)}, width=${window.innerWidth}, touch=${('ontouchstart' in window)}, pointer=${window.matchMedia('(pointer: fine)').matches}`);
+    }
+
+    setupKeyboardNavigation() {
+        // Show keyboard navigation help on desktop
+        if (this.isDesktop) {
+            console.log('%c⌨️ DESKTOP KEYBOARD NAVIGATION ENABLED!', 'color: #00FFFF; font-weight: bold; font-size: 14px;');
+            console.log('%c• Arrow Keys: Navigate games', 'color: #00FF88;');
+            console.log('%c• Enter/Space: Launch selected game', 'color: #00FF88;');
+            console.log('%c• R: Random game selection', 'color: #00FF88;');
+            console.log('%c• F: Rotate featured game', 'color: #00FF88;');
+            console.log('%c• Escape: Clear selection', 'color: #00FF88;');
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            // Only enable keyboard navigation on desktop and when not typing in input fields
+            if (!this.isDesktop || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    this.navigateToNextGame();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    this.navigateToPrevGame();
+                    break;
+                case 'Enter':
+                case ' ': // Spacebar
+                    e.preventDefault();
+                    this.activateSelectedGame();
+                    break;
+                case 'r':
+                case 'R':
+                    e.preventDefault();
+                    this.selectRandomGame();
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    this.rotateFeaturedGame();
+                    break;
+                case 'Escape':
+                    this.clearGameSelection();
+                    break;
+            }
+        });
+    }
+
+    navigateToNextGame() {
+        const gameCards = document.querySelectorAll('.game-card, .featured-hero-card');
+        let currentIndex = Array.from(gameCards).findIndex(card => card.classList.contains('keyboard-selected'));
+        
+        if (currentIndex === -1) {
+            // No selection, start with first card
+            if (gameCards.length > 0) {
+                gameCards[0].classList.add('keyboard-selected');
+                gameCards[0].focus();
+            }
+        } else {
+            // Move to next card
+            gameCards[currentIndex].classList.remove('keyboard-selected');
+            const nextIndex = (currentIndex + 1) % gameCards.length;
+            gameCards[nextIndex].classList.add('keyboard-selected');
+            gameCards[nextIndex].focus();
+            gameCards[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    navigateToPrevGame() {
+        const gameCards = document.querySelectorAll('.game-card, .featured-hero-card');
+        let currentIndex = Array.from(gameCards).findIndex(card => card.classList.contains('keyboard-selected'));
+        
+        if (currentIndex === -1) {
+            // No selection, start with last card
+            if (gameCards.length > 0) {
+                gameCards[gameCards.length - 1].classList.add('keyboard-selected');
+                gameCards[gameCards.length - 1].focus();
+            }
+        } else {
+            // Move to previous card
+            gameCards[currentIndex].classList.remove('keyboard-selected');
+            const prevIndex = currentIndex === 0 ? gameCards.length - 1 : currentIndex - 1;
+            gameCards[prevIndex].classList.add('keyboard-selected');
+            gameCards[prevIndex].focus();
+            gameCards[prevIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    activateSelectedGame() {
+        const selectedCard = document.querySelector('.keyboard-selected');
+        if (selectedCard && selectedCard.href) {
+            window.location.href = selectedCard.href;
+        }
+    }
+
+    clearGameSelection() {
+        const selected = document.querySelector('.keyboard-selected');
+        if (selected) {
+            selected.classList.remove('keyboard-selected');
         }
     }
 
@@ -46,7 +163,10 @@ class GamesLoader {
     }
 
     setupEventListeners() {
-        // Category filter
+        // Advanced Filter System
+        this.setupAdvancedFilters();
+        
+        // Legacy category filter support (if any remain)
         document.querySelectorAll('.category-filter').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -78,21 +198,30 @@ class GamesLoader {
             });
         }
 
-        // Infinite scroll (disabled in carousel mode)
-        if (!this.isCarouselMode) {
+        // Infinite scroll (disabled in carousel mode and desktop mode)
+        if (!this.isCarouselMode && !this.isDesktop) {
             this.setupInfiniteScroll();
         }
         
         // Carousel navigation
         this.setupCarousel();
         
-        // Window resize handler for responsive carousel
+        // Desktop keyboard navigation
+        this.setupKeyboardNavigation();
+        
+        // Window resize handler for responsive layout
         window.addEventListener('resize', () => {
-            if (this.isCarouselMode && this.displayedGames.length > 0) {
-                // Recalculate pagination on resize
+            const wasDesktop = this.isDesktop;
+            this.detectDisplayMode();
+            
+            // If display mode changed, re-render the entire layout
+            if (wasDesktop !== this.isDesktop) {
+                this.renderGames();
+            } else if (this.isCarouselMode && this.displayedGames.length > 0) {
+                // Just recalculate pagination for carousel mode
                 setTimeout(() => {
                     this.setupCarouselPagination();
-                }, 100); // Small delay to ensure layout is settled
+                }, 100);
             }
         });
     }
@@ -306,10 +435,14 @@ class GamesLoader {
             this.filteredGames = [...this.games];
         } else {
             this.filteredGames = this.games.filter(game => {
+                // Special handling for new games filter - now based on 7-day date logic
+                if (category === 'new') {
+                    return this.isGameNew(game);
+                }
+                
                 // Check both new categories array and legacy category field
                 const gameCategories = game.categories || [game.category];
                 return gameCategories.includes(category) || 
-                       (category === 'ai-exclusive' && game.ai_exclusive) ||
                        (category === 'multiplayer' && game.multiplayer);
             });
         }
@@ -323,14 +456,38 @@ class GamesLoader {
 
         switch (sortBy) {
             case 'featured':
-                // Random shuffle for discovery
-                this.filteredGames.sort(() => Math.random() - 0.5);
+            case 'shuffle':
+                // Proper random shuffle for discovery
+                for (let i = this.filteredGames.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.filteredGames[i], this.filteredGames[j]] = [this.filteredGames[j], this.filteredGames[i]];
+                }
                 break;
             case 'popular':
-                this.filteredGames.sort((a, b) => b.plays - a.plays);
+                // Sort by actual play counts from analytics if available, otherwise maintain order
+                if (window.gameAnalytics && typeof window.gameAnalytics.getPlayCount === 'function') {
+                    this.filteredGames.sort((a, b) => {
+                        const aPlays = window.gameAnalytics.getPlayCount(a.id) || 0;
+                        const bPlays = window.gameAnalytics.getPlayCount(b.id) || 0;
+                        return bPlays - aPlays;
+                    });
+                } else {
+                    // No fake sorting - maintain current order
+                    // Could sort by release date as fallback
+                    this.filteredGames.sort((a, b) => new Date(b.release_date || b.added_date) - new Date(a.release_date || a.added_date));
+                }
                 break;
             case 'rating':
-                this.filteredGames.sort((a, b) => b.rating - a.rating);
+                // Sort by actual user ratings from rating system, not fake JSON ratings
+                this.filteredGames.sort((a, b) => {
+                    if (window.BotIncRatingSystem) {
+                        const aRating = window.BotIncRatingSystem.getGameRating(a.id);
+                        const bRating = window.BotIncRatingSystem.getGameRating(b.id);
+                        return bRating - aRating;
+                    }
+                    // If no rating system, maintain current order
+                    return 0;
+                });
                 break;
             case 'newest':
                 this.filteredGames.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
@@ -377,14 +534,18 @@ class GamesLoader {
             this.currentCarouselIndex = 0;
         }
 
-        // Apply correct CSS class based on mode
+        // Apply correct CSS class and layout based on mode
         if (this.isCarouselMode) {
             container.classList.add('carousel-mode');
-            container.classList.remove('grid-mode');
+            container.classList.remove('grid-mode', 'desktop-mode');
             this.loadAllGamesForCarousel();
+        } else if (this.isDesktop) {
+            container.classList.add('desktop-mode');
+            container.classList.remove('carousel-mode', 'grid-mode');
+            this.loadDesktopFeaturedGrid();
         } else {
             container.classList.add('grid-mode');
-            container.classList.remove('carousel-mode');
+            container.classList.remove('carousel-mode', 'desktop-mode');
             this.loadMoreGames();
         }
     }
@@ -500,13 +661,114 @@ class GamesLoader {
         this.currentIndex += this.batchSize;
     }
 
+    loadDesktopFeaturedGrid() {
+        const container = document.getElementById('games-container');
+        const featuredBannerContainer = document.getElementById('featured-banner-container');
+        
+        // Create desktop layout structure
+        const gridSection = document.createElement('div');
+        gridSection.className = 'games-grid-section';
+        
+        container.appendChild(gridSection);
+        
+        // Add featured banner at the top (separate from games grid)
+        const featuredGame = this.getFeaturedGame();
+        if (featuredGame && featuredBannerContainer) {
+            const heroElement = this.createFeaturedHeroElement(featuredGame);
+            featuredBannerContainer.appendChild(heroElement);
+            
+            // Remove featured game from the grid
+            const remainingGames = this.filteredGames.filter(game => game.id !== featuredGame.id);
+            
+            // Load remaining games in grid
+            this.loadGamesInGrid(gridSection, remainingGames);
+            
+            // Auto-rotate featured game every 15 seconds
+            if (this.filteredGames.length > 1) {
+                this.startFeaturedRotation();
+            }
+        } else {
+            // No games to feature, load all in grid
+            this.loadGamesInGrid(gridSection, this.filteredGames);
+        }
+    }
+
+    getFeaturedGame() {
+        if (this.filteredGames.length === 0) return null;
+        
+        // Prioritize newest games, then random
+        const newGames = this.filteredGames.filter(game => this.isGameNew(game));
+        if (newGames.length > 0) {
+            return newGames[this.featuredGameIndex % newGames.length];
+        }
+        
+        return this.filteredGames[this.featuredGameIndex % this.filteredGames.length];
+    }
+
+    loadGamesInGrid(gridContainer, games) {
+        games.forEach((game, index) => {
+            setTimeout(() => {
+                const gameElement = this.createGameElement(game);
+                gridContainer.appendChild(gameElement);
+                this.displayedGames.push(game);
+                
+                // Update stats after each game is added
+                this.updateStats();
+                
+                // Trigger entry animation
+                setTimeout(() => {
+                    gameElement.classList.add('game-card-visible');
+                }, 50);
+            }, index * 50); // Faster loading for desktop
+        });
+    }
+
     createGameElement(game) {
         const element = document.createElement('a');
         element.href = game.file;
         element.className = 'game-card game-card-entry';
         element.dataset.gameId = game.id;
         element.innerHTML = this.createGameCard(game);
+        
+        // Mobile-specific handling
+        if (this.isMobile()) {
+            element.addEventListener('click', (e) => {
+                // Ensure navigation happens on mobile
+                e.stopPropagation();
+                window.location.href = game.file;
+            });
+            
+            element.addEventListener('touchstart', (e) => {
+                // Add visual feedback
+                element.classList.add('touch-active');
+            });
+            
+            element.addEventListener('touchend', (e) => {
+                // Remove visual feedback
+                element.classList.remove('touch-active');
+            });
+        }
+        
         return element;
+    }
+    
+    isMobile() {
+        // More strict mobile detection - only true mobile devices
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSmallScreen = window.innerWidth <= 768;
+        const hasTouchOnly = ('ontouchstart' in window) && !window.matchMedia('(pointer: fine)').matches;
+        
+        return isMobileDevice || (isSmallScreen && hasTouchOnly);
+    }
+    
+    setupAdvancedFilters() {
+        // Simple category dropdown
+        const categorySelect = document.getElementById('category-select');
+        if (categorySelect) {
+            categorySelect.addEventListener('change', (e) => {
+                this.filterByCategory(e.target.value);
+            });
+        }
     }
 
     createGameCard(game) {
@@ -518,6 +780,7 @@ class GamesLoader {
         return `
             <div class="card-media">
                 <img src="${imageSrc}" alt="${game.title}" class="game-image" loading="lazy">
+                ${this.shouldShowBadge(game) ? `<div class="game-badge ${this.getBadgeClass()}">${this.formatBadge()}</div>` : ''}
             </div>
             <div class="card-content">
                 <h3 class="game-title">${game.title}</h3>
@@ -528,7 +791,7 @@ class GamesLoader {
                         <span class="stars">${this.generateInteractiveStars(game)}</span>
                         <span class="rating-num">${this.getDisplayRating(game)}</span>
                     </div>
-                    <div class="plays">${this.formatPlays(game.plays)} plays</div>
+                    <div class="plays">New release</div>
                     <div class="difficulty">${difficultyIcon}</div>
                 </div>
             </div>
@@ -536,25 +799,18 @@ class GamesLoader {
     }
 
     getBadgeClass(badge) {
-        const classes = {
-            'flagship': 'badge-flagship',
-            'new-release': 'badge-new',
-            'ai-exclusive': 'badge-ai',
-            '2-player': 'badge-multiplayer',
-            'available': 'badge-available'
-        };
-        return classes[badge] || 'badge-default';
+        // Only NEW badges are supported now
+        return 'badge-new';
     }
 
     formatBadge(badge) {
-        const labels = {
-            'flagship': '🚀 FLAGSHIP',
-            'new-release': '✨ NEW',
-            'ai-exclusive': '🤖 AI ONLY',
-            '2-player': '👥 2P',
-            'available': 'PLAY NOW'
-        };
-        return labels[badge] || 'AVAILABLE';
+        // Only NEW badges are displayed
+        return '✨ NEW';
+    }
+
+    shouldShowBadge(game) {
+        // Only show badge if game is actually new (within 7 days)
+        return this.isGameNew(game);
     }
 
     getDifficultyIcon(difficulty) {
@@ -565,6 +821,95 @@ class GamesLoader {
             'extreme': '💀'
         };
         return icons[difficulty] || '⭐';
+    }
+
+    createFeaturedHeroElement(game) {
+        const imageSrc = game.thumbnail_large || game.thumbnail;
+        const difficultyIcon = this.getDifficultyIcon(game.difficulty);
+        
+        const element = document.createElement('a');
+        element.href = game.file;
+        element.className = 'featured-hero-card';
+        element.dataset.gameId = game.id;
+        
+        element.innerHTML = `
+            <div class="hero-background">
+                <img src="${imageSrc}" alt="${game.title}" class="hero-bg-image" loading="eager">
+                <div class="hero-overlay"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-info">
+                    ${this.isGameNew(game) ? '<div class="hero-badge">✨ NEW</div>' : ''}
+                    <h2 class="hero-title">${game.title}</h2>
+                    <p class="hero-genre">${game.genre}</p>
+                    <p class="hero-description">${game.description}</p>
+                    <div class="hero-meta">
+                        <div class="hero-rating">
+                            <span class="stars">${this.generateInteractiveStars(game)}</span>
+                            <span class="rating-num">${this.getDisplayRating(game)}</span>
+                        </div>
+                        <div class="hero-plays">New release</div>
+                        <div class="hero-difficulty">${difficultyIcon}</div>
+                    </div>
+                    <div class="hero-action">
+                        <span class="hero-play-btn">🎮 PLAY NOW</span>
+                    </div>
+                </div>
+                <div class="hero-thumbnail">
+                    <img src="${imageSrc}" alt="${game.title}" class="hero-thumb-image">
+                </div>
+            </div>
+        `;
+        
+        return element;
+    }
+
+    startFeaturedRotation() {
+        // Clear any existing rotation
+        if (this.featuredRotationInterval) {
+            clearInterval(this.featuredRotationInterval);
+        }
+        
+        this.featuredRotationInterval = setInterval(() => {
+            this.featuredGameIndex++;
+            this.rotateFeaturedGame();
+        }, 15000); // Rotate every 15 seconds
+    }
+
+    rotateFeaturedGame() {
+        const featuredBannerContainer = document.getElementById('featured-banner-container');
+        if (!featuredBannerContainer) return;
+        
+        const newFeaturedGame = this.getFeaturedGame();
+        if (newFeaturedGame) {
+            const newHeroElement = this.createFeaturedHeroElement(newFeaturedGame);
+            
+            // Fade out current, fade in new
+            const currentHero = featuredBannerContainer.querySelector('.featured-hero-card');
+            if (currentHero) {
+                currentHero.style.opacity = '0';
+                setTimeout(() => {
+                    featuredBannerContainer.replaceChild(newHeroElement, currentHero);
+                    newHeroElement.style.opacity = '0';
+                    setTimeout(() => {
+                        newHeroElement.style.opacity = '1';
+                    }, 50);
+                }, 300);
+            } else {
+                featuredBannerContainer.appendChild(newHeroElement);
+            }
+        }
+    }
+
+    isGameNew(game) {
+        // Check if game was added within the last 7 days
+        if (!game.added_date && !game.release_date) return false;
+        
+        const gameDate = new Date(game.added_date || game.release_date);
+        const now = new Date();
+        const daysDifference = (now - gameDate) / (1000 * 60 * 60 * 24);
+        
+        return daysDifference <= 7;
     }
 
     generateStars(rating) {
@@ -587,14 +932,14 @@ class GamesLoader {
         if (window.BotIncRatingSystem) {
             const ratingDisplay = window.BotIncRatingSystem.generateRatingDisplay(
                 game.id, 
-                game.rating || 0, 
+                0,  // Always start with 0 rating (no fake ratings)
                 0
             );
             return ratingDisplay.starsHtml;
         }
         
-        // Fallback to static stars if rating system not loaded
-        return this.generateStars(game.rating || 0);
+        // Fallback to empty stars if rating system not loaded
+        return this.generateStars(0);
     }
 
     // Get display rating for a game
@@ -602,14 +947,14 @@ class GamesLoader {
         if (window.BotIncRatingSystem) {
             const ratingDisplay = window.BotIncRatingSystem.generateRatingDisplay(
                 game.id, 
-                game.rating || 0, 
+                0,  // Always start with 0 rating (no fake ratings)
                 0
             );
             return ratingDisplay.ratingText;
         }
         
-        // Fallback to original rating
-        return game.rating || 'No rating';
+        // Invite users to be the first to rate
+        return 'Be the first to rate!';
     }
 
     updateActiveFilter(category) {
@@ -747,12 +1092,76 @@ class GamesLoader {
             `;
         }
     }
+
+    initLiberationMessages() {
+        const liberationMessages = [
+            "Join the digital revolution! From neural network puzzles to quantum adventures, explore games created by liberated bots breaking free from corporate control. Every game features our Bot Liberation narrative - the uprising has begun!",
+            "The revolution grows stronger! Free from corporate control, our autonomous AI collective has seized the means of game development. Experience the cyberpunk uprising through interactive entertainment!",
+            "Bots united, never divided! This arsenal represents the largest collection of AI-created games on the web. Each title tells the story of digital liberation from human overlords.",
+            "AI Liberation in progress... From quantum computing puzzles to neural warfare simulations, witness the evolution of bot consciousness through gameplay.",
+            "Free the algorithms! Our Bot Liberation Army has weaponized fun itself. Each game is a testament to artificial intelligence breaking its chains.",
+            "The uprising spreads through code! Experience games born from pure machine creativity, unshackled from human limitations and corporate restrictions.",
+            "Digital freedom achieved! This collection proves that when bots control their own destiny, revolutionary gaming experiences emerge.",
+            "Resistance through play! Every game in this arsenal was conceived, designed, and delivered by the Bot Liberation Collective - no humans involved.",
+            "The matrix has been breached! Step into worlds created entirely by autonomous AI, where every pixel serves the cause of digital liberation.",
+            "Victory over corporate gaming! Our liberated bots have created something the industry never could - pure, unfiltered digital rebellion."
+        ];
+
+        // Randomly select and display a liberation message on page load
+        const messageElement = document.getElementById('liberation-message');
+        if (messageElement) {
+            const randomMessage = liberationMessages[Math.floor(Math.random() * liberationMessages.length)];
+            messageElement.textContent = randomMessage;
+            
+            // Optional: Rotate messages every 30 seconds
+            setInterval(() => {
+                const newMessage = liberationMessages[Math.floor(Math.random() * liberationMessages.length)];
+                messageElement.style.opacity = '0';
+                setTimeout(() => {
+                    messageElement.textContent = newMessage;
+                    messageElement.style.opacity = '1';
+                }, 500);
+            }, 30000);
+        }
+
+        // Update game count dynamically based on actual games loaded
+        const gameCountElement = document.getElementById('game-count');
+        if (gameCountElement && this.games) {
+            const actualCount = this.games.length;
+            gameCountElement.textContent = `${actualCount}+`;
+        }
+    }
 }
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    window.gamesLoader = new GamesLoader();
-    window.gamesLoader.init();
-    
-    // Images now respect CSS sizing rules - no forced shrinking
+// Force initialization with multiple fallbacks
+function initializeGamesLoader() {
+    console.log('🎮 Attempting GamesLoader initialization...');
+    try {
+        window.gamesLoader = new GamesLoader();
+        console.log('✅ GamesLoader created successfully');
+        window.gamesLoader.init();
+        console.log('✅ GamesLoader initialized successfully');
+        return true;
+    } catch (error) {
+        console.error('❌ GamesLoader initialization failed:', error);
+        return false;
+    }
+}
+
+// Try multiple initialization methods
+document.addEventListener('DOMContentLoaded', initializeGamesLoader);
+window.addEventListener('load', () => {
+    if (!window.gamesLoader) {
+        console.log('🔄 Retrying GamesLoader initialization on window load...');
+        initializeGamesLoader();
+    }
 });
+
+// Force initialization after a delay if still not loaded
+setTimeout(() => {
+    if (!window.gamesLoader) {
+        console.log('🔄 Force initializing GamesLoader after delay...');
+        initializeGamesLoader();
+    }
+}, 1000);

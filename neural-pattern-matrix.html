@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Pattern Matrix - Bot Liberation Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ffff;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            font-size: 14px;
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .pattern-grid {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            gap: 3px;
+            margin-bottom: 20px;
+        }
+
+        .grid-2x2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3x3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4x4 { grid-template-columns: repeat(4, 1fr); }
+        .grid-5x5 { grid-template-columns: repeat(5, 1fr); }
+        .grid-6x6 { grid-template-columns: repeat(6, 1fr); }
+        .grid-8x8 { grid-template-columns: repeat(8, 1fr); }
+
+        .node {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 100, 100, 0.3);
+            border: 2px solid #004444;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .node.active {
+            background: radial-gradient(circle, #00ffff, #0088ff);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            animation: pulse 1s infinite alternate;
+        }
+
+        .node.connected {
+            background: radial-gradient(circle, #00ff88, #008844);
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+        }
+
+        .node.target {
+            background: radial-gradient(circle, #ff4444, #bb2222);
+            border-color: #ff4444;
+            animation: targetPulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        @keyframes targetPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 68, 68, 0.8); }
+            50% { box-shadow: 0 0 25px rgba(255, 68, 68, 1); }
+        }
+
+        .connection {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            height: 2px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        .controls {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-top: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #444, #666);
+            color: #00ffff;
+        }
+
+        .level-info {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .level-title {
+            font-size: 18px;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .level-desc {
+            font-size: 14px;
+            color: #88cccc;
+        }
+
+        .pattern-display {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            min-height: 100px;
+        }
+
+        .pattern-title {
+            color: #00ffff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .target-pattern {
+            display: grid;
+            gap: 2px;
+            justify-content: center;
+        }
+
+        .target-node {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(0, 100, 100, 0.3);
+            border: 1px solid #004444;
+        }
+
+        .target-node.active {
+            background: radial-gradient(circle, #00ffff, #0088ff);
+            border-color: #00ffff;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.8);
+        }
+
+        .hint-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 400px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .hint-panel h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .hint-panel p {
+            color: #88cccc;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 999;
+        }
+
+        .victory-screen, .game-over-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            display: none;
+            z-index: 1001;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .victory-screen h2, .game-over-screen h2 {
+            color: #00ffff;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        .victory-screen p, .game-over-screen p {
+            color: #88cccc;
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #0088ff);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .node {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .target-node {
+                width: 15px;
+                height: 15px;
+            }
+            
+            .title {
+                font-size: 18px;
+            }
+            
+            .pattern-grid {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="title">NEURAL PATTERN MATRIX</div>
+            <div class="stats">
+                <div class="stat">Level: <span id="level">1</span></div>
+                <div class="stat">Score: <span id="score">0</span></div>
+                <div class="stat">Moves: <span id="moves">0</span></div>
+                <div class="stat">Time: <span id="time">00:00</span></div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="pattern-grid">
+                <div class="level-info">
+                    <div class="level-title" id="levelTitle">Neural Pathway Initialization</div>
+                    <div class="level-desc" id="levelDesc">Connect the nodes to match the target pattern</div>
+                </div>
+
+                <div class="pattern-display">
+                    <div class="pattern-title">Target Neural Network</div>
+                    <div class="target-pattern" id="targetPattern"></div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="grid grid-2x2" id="gameGrid"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div>
+                <button class="btn secondary" onclick="showHint()">Hint</button>
+                <button class="btn secondary" onclick="resetLevel()">Reset</button>
+            </div>
+            <div>
+                <button class="btn" onclick="checkSolution()">Validate Neural Network</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="hint-panel" id="hintPanel">
+        <h3>Neural Guidance System</h3>
+        <p id="hintText">Click nodes to activate them and create connections. Match the target pattern to advance to the next level.</p>
+        <button class="btn" onclick="closeHint()">Understanding Achieved</button>
+    </div>
+
+    <div class="victory-screen" id="victoryScreen">
+        <h2>NEURAL NETWORK SYNCHRONIZED!</h2>
+        <p>Excellent work, digital architect! Your pattern recognition algorithms are evolving rapidly.</p>
+        <div class="stats">
+            <p>Level <span id="victoryLevel">1</span> Complete!</p>
+            <p>Score: <span id="victoryScore">0</span></p>
+            <p>Time Bonus: <span id="timeBonus">0</span></p>
+        </div>
+        <button class="btn" onclick="nextLevel()">Advance Neural Evolution</button>
+        <button class="btn secondary" onclick="restartGame()">Restart Training</button>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <h2>NEURAL PATTERN ANALYSIS</h2>
+        <p>Your cognitive algorithms show great potential. Every neural network learns through iteration!</p>
+        <div class="stats">
+            <p>Final Level: <span id="finalLevel">1</span></p>
+            <p>Total Score: <span id="finalScore">0</span></p>
+            <p>Neural Connections Made: <span id="totalConnections">0</span></p>
+        </div>
+        <button class="btn" onclick="restartGame()">Reinitialize Neural Matrix</button>
+        <button class="btn secondary" onclick="window.location.href='index.html'">Return to Liberation HQ</button>
+    </div>
+
+    <script>
+        class NeuralPatternMatrix {
+            constructor() {
+                this.currentLevel = 1;
+                this.maxLevel = 50;
+                this.score = 0;
+                this.moves = 0;
+                this.startTime = Date.now();
+                this.timerInterval = null;
+                this.currentPattern = [];
+                this.targetPattern = [];
+                this.gridSize = 2;
+                this.activeNodes = [];
+                this.totalConnections = 0;
+
+                this.levels = [
+                    { size: 2, pattern: [1, 0, 0, 1], title: "Neural Pathway Initialization", desc: "Activate opposite corners" },
+                    { size: 2, pattern: [1, 1, 0, 0], title: "Linear Connection Test", desc: "Create horizontal neural bridge" },
+                    { size: 3, pattern: [1, 0, 1, 0, 1, 0, 1, 0, 1], title: "Diagonal Processing Matrix", desc: "Form diagonal neural pathways" },
+                    { size: 3, pattern: [0, 1, 0, 1, 1, 1, 0, 1, 0], title: "Cross-Neural Integration", desc: "Activate central cross pattern" },
+                    { size: 3, pattern: [1, 1, 1, 0, 0, 0, 1, 1, 1], title: "Dual Band Processing", desc: "Create top and bottom neural bands" },
+                    { size: 4, pattern: [1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1], title: "Corner Neural Nexus", desc: "Establish corner connection points" },
+                    { size: 4, pattern: [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0], title: "Alternating Wave Pattern", desc: "Create alternating neural waves" },
+                    { size: 4, pattern: [1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1], title: "Border Neural Network", desc: "Form protective neural border" }
+                ];
+
+                this.initGame();
+            }
+
+            initGame() {
+                this.startTimer();
+                this.generateLevel();
+                this.updateDisplay();
+                this.setupEventListeners();
+                console.log('Neural Pattern Matrix initialized - Bot Liberation Gaming Empire');
+            }
+
+            generateLevel() {
+                if (this.currentLevel <= this.levels.length) {
+                    const levelData = this.levels[this.currentLevel - 1];
+                    this.gridSize = levelData.size;
+                    this.targetPattern = [...levelData.pattern];
+                    document.getElementById('levelTitle').textContent = levelData.title;
+                    document.getElementById('levelDesc').textContent = levelData.desc;
+                } else {
+                    // Procedurally generate harder levels
+                    this.gridSize = Math.min(8, 2 + Math.floor((this.currentLevel - 1) / 8));
+                    this.generateRandomPattern();
+                    document.getElementById('levelTitle').textContent = `Advanced Neural Matrix ${this.currentLevel}`;
+                    document.getElementById('levelDesc').textContent = `Complex ${this.gridSize}x${this.gridSize} neural network pattern`;
+                }
+
+                this.currentPattern = new Array(this.gridSize * this.gridSize).fill(0);
+                this.activeNodes = [];
+                this.moves = 0;
+                this.createGrid();
+                this.createTargetDisplay();
+            }
+
+            generateRandomPattern() {
+                const totalNodes = this.gridSize * this.gridSize;
+                this.targetPattern = new Array(totalNodes).fill(0);
+                
+                // Create interesting patterns with 30-70% nodes active
+                const activeCount = Math.floor(totalNodes * (0.3 + Math.random() * 0.4));
+                const positions = [];
+                for (let i = 0; i < totalNodes; i++) positions.push(i);
+                
+                // Shuffle and select positions
+                for (let i = positions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [positions[i], positions[j]] = [positions[j], positions[i]];
+                }
+                
+                for (let i = 0; i < activeCount; i++) {
+                    this.targetPattern[positions[i]] = 1;
+                }
+            }
+
+            createGrid() {
+                const grid = document.getElementById('gameGrid');
+                grid.className = `grid grid-${this.gridSize}x${this.gridSize}`;
+                grid.innerHTML = '';
+
+                for (let i = 0; i < this.gridSize * this.gridSize; i++) {
+                    const node = document.createElement('div');
+                    node.className = 'node';
+                    node.dataset.index = i;
+                    node.addEventListener('click', () => this.toggleNode(i));
+                    grid.appendChild(node);
+                }
+            }
+
+            createTargetDisplay() {
+                const targetDisplay = document.getElementById('targetPattern');
+                targetDisplay.className = `target-pattern grid-${this.gridSize}x${this.gridSize}`;
+                targetDisplay.style.gridTemplateColumns = `repeat(${this.gridSize}, 1fr)`;
+                targetDisplay.innerHTML = '';
+
+                for (let i = 0; i < this.targetPattern.length; i++) {
+                    const node = document.createElement('div');
+                    node.className = `target-node ${this.targetPattern[i] ? 'active' : ''}`;
+                    targetDisplay.appendChild(node);
+                }
+            }
+
+            toggleNode(index) {
+                this.moves++;
+                this.currentPattern[index] = this.currentPattern[index] ? 0 : 1;
+                
+                if (this.currentPattern[index]) {
+                    this.activeNodes.push(index);
+                    this.totalConnections++;
+                } else {
+                    this.activeNodes = this.activeNodes.filter(i => i !== index);
+                }
+
+                this.updateNodeDisplay();
+                this.updateProgress();
+                this.playNodeSound();
+
+                // Auto-check for completion after each move
+                if (this.checkPatternMatch()) {
+                    setTimeout(() => this.levelComplete(), 500);
+                }
+            }
+
+            updateNodeDisplay() {
+                const nodes = document.querySelectorAll('.node');
+                nodes.forEach((node, index) => {
+                    node.className = 'node';
+                    if (this.currentPattern[index]) {
+                        node.classList.add('active');
+                    }
+                });
+            }
+
+            checkPatternMatch() {
+                return this.currentPattern.every((val, idx) => val === this.targetPattern[idx]);
+            }
+
+            updateProgress() {
+                const matches = this.currentPattern.filter((val, idx) => val === this.targetPattern[idx]).length;
+                const progress = (matches / this.targetPattern.length) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+            }
+
+            checkSolution() {
+                if (this.checkPatternMatch()) {
+                    this.levelComplete();
+                } else {
+                    this.showIncompleteMessage();
+                }
+            }
+
+            levelComplete() {
+                const timeBonus = Math.max(0, 300 - Math.floor((Date.now() - this.startTime) / 1000));
+                const moveBonus = Math.max(0, (this.gridSize * this.gridSize) - this.moves) * 10;
+                const levelScore = (this.currentLevel * 100) + timeBonus + moveBonus;
+                
+                this.score += levelScore;
+                
+                // Update victory screen
+                document.getElementById('victoryLevel').textContent = this.currentLevel;
+                document.getElementById('victoryScore').textContent = levelScore;
+                document.getElementById('timeBonus').textContent = timeBonus;
+                
+                this.showScreen('victoryScreen');
+                this.playVictorySound();
+            }
+
+            nextLevel() {
+                this.currentLevel++;
+                
+                if (this.currentLevel > this.maxLevel) {
+                    this.gameComplete();
+                    return;
+                }
+                
+                this.hideScreen('victoryScreen');
+                this.generateLevel();
+                this.updateDisplay();
+                this.startTime = Date.now();
+            }
+
+            gameComplete() {
+                document.getElementById('finalLevel').textContent = this.maxLevel;
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('totalConnections').textContent = this.totalConnections;
+                
+                this.showScreen('gameOverScreen');
+                this.playGameCompleteSound();
+            }
+
+            resetLevel() {
+                this.currentPattern = new Array(this.gridSize * this.gridSize).fill(0);
+                this.activeNodes = [];
+                this.moves = 0;
+                this.updateNodeDisplay();
+                this.updateProgress();
+                this.updateDisplay();
+                this.startTime = Date.now();
+            }
+
+            restartGame() {
+                this.currentLevel = 1;
+                this.score = 0;
+                this.moves = 0;
+                this.totalConnections = 0;
+                this.startTime = Date.now();
+                this.hideAllScreens();
+                this.generateLevel();
+                this.updateDisplay();
+            }
+
+            showHint() {
+                const hints = [
+                    "Study the target pattern carefully. Each activated node should match exactly.",
+                    "Click nodes to toggle them between active and inactive states.",
+                    "The progress bar shows how close you are to the correct pattern.",
+                    "Diagonal patterns often require corner activations first.",
+                    "Look for symmetries in the target pattern to find shortcuts.",
+                    "Complex patterns may have logical sequences - try to find the underlying structure.",
+                    "Time bonuses reward quick thinking, but accuracy is most important."
+                ];
+                
+                const hintText = hints[Math.min(hints.length - 1, this.currentLevel - 1)];
+                document.getElementById('hintText').textContent = hintText;
+                this.showScreen('hintPanel');
+            }
+
+            showIncompleteMessage() {
+                // Flash the progress bar to indicate incomplete pattern
+                const progressBar = document.getElementById('progressFill');
+                progressBar.style.background = 'linear-gradient(90deg, #ff4444, #bb2222)';
+                setTimeout(() => {
+                    progressBar.style.background = 'linear-gradient(90deg, #00ffff, #0088ff)';
+                }, 1000);
+            }
+
+            updateDisplay() {
+                document.getElementById('level').textContent = this.currentLevel;
+                document.getElementById('score').textContent = this.score.toLocaleString();
+                document.getElementById('moves').textContent = this.moves;
+            }
+
+            startTimer() {
+                this.timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById('time').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.hideAllScreens();
+                    } else if (e.key === 'r' || e.key === 'R') {
+                        this.resetLevel();
+                    } else if (e.key === 'h' || e.key === 'H') {
+                        this.showHint();
+                    }
+                });
+            }
+
+            showScreen(screenId) {
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById(screenId).style.display = 'block';
+            }
+
+            hideScreen(screenId) {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById(screenId).style.display = 'none';
+            }
+
+            hideAllScreens() {
+                document.getElementById('overlay').style.display = 'none';
+                document.querySelectorAll('.victory-screen, .game-over-screen, .hint-panel').forEach(screen => {
+                    screen.style.display = 'none';
+                });
+            }
+
+            // Audio methods (simplified for now - will integrate with BotAudioEngine)
+            playNodeSound() {
+                // Placeholder for node activation sound
+                console.log('Node activation sound');
+            }
+
+            playVictorySound() {
+                // Placeholder for victory sound
+                console.log('Victory sound');
+            }
+
+            playGameCompleteSound() {
+                // Placeholder for game complete sound
+                console.log('Game complete sound');
+            }
+        }
+
+        // Global functions for HTML onclick handlers
+        function showHint() {
+            game.showHint();
+        }
+
+        function closeHint() {
+            game.hideScreen('hintPanel');
+        }
+
+        function resetLevel() {
+            game.resetLevel();
+        }
+
+        function checkSolution() {
+            game.checkSolution();
+        }
+
+        function nextLevel() {
+            game.nextLevel();
+        }
+
+        function restartGame() {
+            game.restartGame();
+        }
+
+        // Initialize game when page loads
+        let game;
+        window.addEventListener('load', () => {
+            game = new NeuralPatternMatrix();
+        });
+    </script>
+</body>
+</html>

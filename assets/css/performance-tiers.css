@@ -1,0 +1,421 @@
+/**
+ * Bot Liberation Performance Tiers
+ * Adaptive visual effects based on device capabilities
+ */
+
+/* ===========================================
+   TIER 1: POTATO MODE (Ultra Low-Fi)
+   =========================================== */
+.perf-tier-1 {
+    /* Disable all animations */
+    --animation-duration: 0ms !important;
+    --transition-duration: 0ms !important;
+}
+
+.perf-tier-1 * {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+}
+
+.perf-tier-1 body::before,
+.perf-tier-1 body::after {
+    display: none !important;
+}
+
+.perf-tier-1 .game-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.perf-tier-1 .filter-toggle:hover,
+.perf-tier-1 .filter-tag:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.perf-tier-1 .news-icon {
+    animation: none !important;
+}
+
+/* Flat colors only */
+.perf-tier-1 .hero {
+    background: var(--dark-bg) !important;
+}
+
+.perf-tier-1 .game-card {
+    background: #1a1a1a !important;
+    border: 1px solid #333 !important;
+}
+
+.perf-tier-1 .filter-toggle {
+    background: #1a1a1a !important;
+}
+
+/* ===========================================
+   TIER 2: BASIC MODE (Low-Fi)
+   =========================================== */
+.perf-tier-2 {
+    --animation-duration: 0.1s;
+    --transition-duration: 0.1s;
+}
+
+/* Minimal particles - CSS only */
+.perf-tier-2 body::before {
+    background: 
+        radial-gradient(circle at 20% 50%, var(--neon-cyan) 1px, transparent 1px),
+        radial-gradient(circle at 80% 50%, var(--electric-purple) 1px, transparent 1px);
+    background-size: 200px 200px, 250px 250px;
+    opacity: 0.05;
+    animation: particleFloat 45s infinite linear;
+}
+
+.perf-tier-2 body::after {
+    display: none;
+}
+
+/* Simple hover effects */
+.perf-tier-2 .game-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 255, 255, 0.2);
+}
+
+/* Reduced shadows */
+.perf-tier-2 .game-title {
+    text-shadow: 0 0 5px currentColor;
+}
+
+/* ===========================================
+   TIER 3: STANDARD MODE (Current)
+   =========================================== */
+.perf-tier-3 {
+    /* Current implementation - no changes needed */
+}
+
+/* ===========================================
+   TIER 4: ENHANCED MODE (High-Fi)
+   =========================================== */
+.perf-tier-4 {
+    --animation-duration: 0.3s;
+    --transition-duration: 0.3s;
+}
+
+/* Enhanced particles */
+.perf-tier-4 body::before {
+    background: 
+        radial-gradient(circle at 10% 20%, var(--neon-cyan) 1px, transparent 1px),
+        radial-gradient(circle at 90% 80%, var(--electric-purple) 1px, transparent 1px),
+        radial-gradient(circle at 30% 60%, var(--matrix-green) 1px, transparent 1px),
+        radial-gradient(circle at 70% 30%, var(--neon-pink) 1px, transparent 1px),
+        radial-gradient(circle at 50% 10%, var(--neon-cyan) 0.5px, transparent 0.5px);
+    background-size: 120px 120px, 180px 180px, 240px 240px, 200px 200px, 80px 80px;
+    opacity: 0.15;
+    animation: particleFloat 25s infinite linear;
+}
+
+.perf-tier-4 body::after {
+    background: 
+        radial-gradient(circle at 25% 25%, var(--matrix-green) 0.8px, transparent 0.8px),
+        radial-gradient(circle at 75% 75%, var(--neon-cyan) 0.6px, transparent 0.6px),
+        radial-gradient(circle at 45% 85%, var(--electric-purple) 0.4px, transparent 0.4px);
+    background-size: 160px 160px, 220px 220px, 100px 100px;
+    opacity: 0.1;
+    animation: particleFloat2 30s infinite linear reverse;
+}
+
+/* Enhanced hover effects */
+.perf-tier-4 .game-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.perf-tier-4 .game-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 
+        0 10px 30px rgba(0, 255, 255, 0.3),
+        0 0 20px rgba(0, 255, 255, 0.2);
+}
+
+/* Parallax on scroll */
+.perf-tier-4 .hero {
+    background-attachment: fixed;
+}
+
+/* Advanced text effects */
+.perf-tier-4 .game-title {
+    text-shadow: 
+        0 0 5px currentColor,
+        0 0 10px currentColor,
+        0 0 15px currentColor;
+}
+
+.perf-tier-4 .hero-title {
+    text-shadow: 
+        0 0 10px var(--neon-cyan),
+        0 0 20px var(--neon-cyan),
+        0 0 30px var(--neon-cyan);
+}
+
+/* ===========================================
+   TIER 5: ULTRA MODE (Maximum Dopamine)
+   =========================================== */
+.perf-tier-5 {
+    --animation-duration: 0.4s;
+    --transition-duration: 0.4s;
+}
+
+/* Maximum particle effects */
+.perf-tier-5 body::before {
+    background: 
+        radial-gradient(circle at 10% 20%, var(--neon-cyan) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 90% 80%, var(--electric-purple) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 30% 60%, var(--matrix-green) 1px, transparent 1px),
+        radial-gradient(circle at 70% 30%, var(--neon-pink) 1px, transparent 1px),
+        radial-gradient(circle at 50% 10%, var(--neon-cyan) 0.5px, transparent 0.5px),
+        radial-gradient(circle at 15% 90%, var(--electric-purple) 0.5px, transparent 0.5px);
+    background-size: 100px 100px, 140px 140px, 180px 180px, 160px 160px, 60px 60px, 120px 120px;
+    opacity: 0.2;
+    animation: particleFloat 20s infinite linear;
+}
+
+.perf-tier-5 body::after {
+    background: 
+        radial-gradient(circle at 25% 25%, var(--matrix-green) 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, var(--neon-cyan) 0.8px, transparent 0.8px),
+        radial-gradient(circle at 45% 85%, var(--electric-purple) 0.6px, transparent 0.6px),
+        radial-gradient(circle at 85% 15%, var(--neon-pink) 0.8px, transparent 0.8px);
+    background-size: 140px 140px, 200px 200px, 80px 80px, 160px 160px;
+    opacity: 0.15;
+    animation: particleFloat2 25s infinite linear reverse;
+}
+
+/* Ultra hover effects with perspective */
+.perf-tier-5 .game-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    perspective: 1000px;
+}
+
+.perf-tier-5 .game-card:hover {
+    transform: translateY(-8px) scale(1.03) rotateX(5deg);
+    box-shadow: 
+        0 15px 40px rgba(0, 255, 255, 0.4),
+        0 0 30px rgba(0, 255, 255, 0.3),
+        inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+/* Dynamic color cycling */
+.perf-tier-5 .hero-title {
+    background: linear-gradient(
+        45deg,
+        var(--neon-cyan),
+        var(--electric-purple),
+        var(--matrix-green),
+        var(--neon-pink),
+        var(--neon-cyan)
+    );
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Pulsing effects */
+.perf-tier-5 .filter-toggle:hover {
+    animation: pulse 0.6s ease infinite alternate;
+}
+
+@keyframes pulse {
+    0% { 
+        transform: translateY(-2px) scale(1);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+    100% { 
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    }
+}
+
+/* Glitch text effects */
+.perf-tier-5 .glitch-text {
+    position: relative;
+    animation: glitch 2s infinite;
+}
+
+.perf-tier-5 .glitch-text::before,
+.perf-tier-5 .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.perf-tier-5 .glitch-text::before {
+    animation: glitch-before 2s infinite;
+    color: var(--neon-cyan);
+    z-index: -1;
+}
+
+.perf-tier-5 .glitch-text::after {
+    animation: glitch-after 2s infinite;
+    color: var(--neon-pink);
+    z-index: -2;
+}
+
+@keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+}
+
+@keyframes glitch-before {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(2px, -2px); }
+    40% { transform: translate(-2px, 2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(-2px, -2px); }
+}
+
+@keyframes glitch-after {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(2px, -2px); }
+    60% { transform: translate(-2px, -2px); }
+    80% { transform: translate(2px, 2px); }
+}
+
+/* Screen distortion effects */
+.perf-tier-5 .distortion-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.perf-tier-5 .distortion-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 255, 0.1),
+        transparent
+    );
+    animation: scanline 2s infinite;
+}
+
+@keyframes scanline {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Neon border effects */
+.perf-tier-5 .neon-border {
+    border: 2px solid transparent;
+    background: 
+        linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
+        linear-gradient(45deg, var(--neon-cyan), var(--electric-purple), var(--matrix-green), var(--neon-pink)) border-box;
+    animation: neonBorder 4s linear infinite;
+}
+
+@keyframes neonBorder {
+    0%, 100% { filter: hue-rotate(0deg); }
+    25% { filter: hue-rotate(90deg); }
+    50% { filter: hue-rotate(180deg); }
+    75% { filter: hue-rotate(270deg); }
+}
+
+/* Interactive ripple effects */
+.perf-tier-5 .ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.perf-tier-5 .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, transparent 70%);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Matrix rain effect (hidden by default) */
+.perf-tier-5 .matrix-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.perf-tier-5 .matrix-rain.active {
+    opacity: 0.7;
+}
+
+/* Performance indicators */
+.perf-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--neon-cyan);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8em;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.perf-indicator.visible {
+    opacity: 1;
+}
+
+/* Mobile optimizations for all tiers */
+@media (max-width: 768px) {
+    .perf-tier-4 .game-card:hover,
+    .perf-tier-5 .game-card:hover {
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0, 255, 255, 0.2);
+    }
+    
+    .perf-tier-5 body::before {
+        opacity: 0.1;
+        animation-duration: 40s;
+    }
+    
+    .perf-tier-5 body::after {
+        opacity: 0.05;
+        animation-duration: 45s;
+    }
+}
+
+/* Prefers reduced motion override */
+@media (prefers-reduced-motion: reduce) {
+    .perf-tier-4 *,
+    .perf-tier-5 * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

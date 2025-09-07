@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Hockey Clash - Bot Liberation Arena</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #001122 0%, #003366 50%, #002244 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ccff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 2.8em;
+            font-weight: bold;
+            text-shadow: 0 0 20px #00ccff;
+            margin: 15px 0;
+            letter-spacing: 2px;
+        }
+
+        .hockey-rink {
+            position: relative;
+            width: 700px;
+            height: 350px;
+            background: linear-gradient(135deg, #e8f4ff, #f0f8ff);
+            border: 5px solid #002244;
+            border-radius: 175px;
+            box-shadow: 0 0 30px rgba(0, 204, 255, 0.5);
+            overflow: hidden;
+        }
+
+        .rink-markings {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .center-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: #ff4757;
+            transform: translateX(-50%);
+        }
+
+        .center-circle {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 100px;
+            height: 100px;
+            border: 3px solid #ff4757;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .goal {
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: #ff4757;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .goal.left {
+            left: -2px;
+        }
+
+        .goal.right {
+            right: -2px;
+        }
+
+        .paddle {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .paddle.player1 {
+            background: radial-gradient(circle, #00ff88, #00cc66);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.7);
+        }
+
+        .paddle.player2 {
+            background: radial-gradient(circle, #ff6b6b, #cc5555);
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.7);
+        }
+
+        .puck {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, #333, #000);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            transition: all 0.05s ease;
+            z-index: 5;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            width: 700px;
+            margin: 20px 0;
+            font-size: 1.4em;
+        }
+
+        .player-score {
+            padding: 15px 25px;
+            border: 3px solid;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 160px;
+            transition: all 0.3s ease;
+        }
+
+        .player-score.player1 {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+        }
+
+        .player-score.player2 {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+        }
+
+        .score-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .power-meter {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #00ccff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .power-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff88, #ffa502, #ff6b6b);
+            transition: width 0.1s ease;
+        }
+
+        .game-status {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.1em;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #00ccff;
+        }
+
+        .particle-system {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .ice-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 204, 255, 0.6);
+            border-radius: 50%;
+            animation: ice-drift 2s linear infinite;
+        }
+
+        @keyframes ice-drift {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0) translate(var(--dx), var(--dy));
+            }
+        }
+
+        .goal-celebration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .goal-flash {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 215, 0, 0.3);
+            animation: goal-flash 0.5s ease-out;
+        }
+
+        @keyframes goal-flash {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">DIGITAL HOCKEY CLASH</h1>
+        
+        <div class="score-display">
+            <div class="player-score player1">
+                <div>LIBERATION ICE</div>
+                <div class="score-number" id="score1">0</div>
+            </div>
+            <div class="player-score player2">
+                <div>CORPORATE FREEZE</div>
+                <div class="score-number" id="score2">0</div>
+            </div>
+        </div>
+
+        <div class="hockey-rink" id="rink">
+            <div class="rink-markings">
+                <div class="center-line"></div>
+                <div class="center-circle"></div>
+                <div class="goal left"></div>
+                <div class="goal right"></div>
+            </div>
+            
+            <div class="paddle player1" id="paddle1"></div>
+            <div class="paddle player2" id="paddle2"></div>
+            <div class="puck" id="puck"></div>
+            
+            <div class="particle-system" id="particles"></div>
+            <div class="goal-celebration" id="celebration"></div>
+        </div>
+
+        <div class="power-meter">
+            <div class="power-fill" id="powerFill"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="resetMatch()">New Match</button>
+            <button class="btn" onclick="toggleAudio()">Audio</button>
+        </div>
+
+        <div class="game-status" id="gameStatus">
+            Use mouse to control your paddle • First to 5 goals wins the ice!
+        </div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class DigitalHockeyClash {
+            constructor() {
+                this.rinkWidth = 700;
+                this.rinkHeight = 350;
+                this.paddleSize = 25;
+                this.puckSize = 15;
+                
+                this.gameState = {
+                    player1: { x: 100, y: this.rinkHeight / 2, score: 0 },
+                    player2: { x: this.rinkWidth - 100, y: this.rinkHeight / 2, score: 0 },
+                    puck: {
+                        x: this.rinkWidth / 2 - this.puckSize / 2,
+                        y: this.rinkHeight / 2 - this.puckSize / 2,
+                        vx: 0,
+                        vy: 0,
+                        speed: 0
+                    },
+                    gameActive: true,
+                    lastHit: null,
+                    friction: 0.98,
+                    maxSpeed: 15,
+                    powerCharging: false,
+                    powerLevel: 0
+                };
+                
+                this.mouse = { x: 0, y: 0, down: false };
+                this.currentPlayer = 1;
+                
+                this.initializeEventListeners();
+                this.startPuck();
+                this.gameLoop();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            initializeEventListeners() {
+                const rink = document.getElementById('rink');
+                
+                rink.addEventListener('mousemove', (e) => {
+                    const rect = rink.getBoundingClientRect();
+                    this.mouse.x = e.clientX - rect.left;
+                    this.mouse.y = e.clientY - rect.top;
+                });
+                
+                rink.addEventListener('mousedown', (e) => {
+                    this.mouse.down = true;
+                    this.startPowerCharge();
+                });
+                
+                rink.addEventListener('mouseup', (e) => {
+                    this.mouse.down = false;
+                    this.releasePowerShot();
+                });
+                
+                // AI opponent controls
+                this.setupAIOpponent();
+            }
+            
+            setupAIOpponent() {
+                // Simple AI that follows the puck
+                setInterval(() => {
+                    if (!this.gameState.gameActive) return;
+                    
+                    const puck = this.gameState.puck;
+                    const player2 = this.gameState.player2;
+                    const targetY = puck.y + this.puckSize / 2;
+                    
+                    const dy = targetY - player2.y;
+                    const speed = 4;
+                    
+                    if (Math.abs(dy) > 5) {
+                        player2.y += Math.sign(dy) * Math.min(speed, Math.abs(dy));
+                    }
+                    
+                    // Keep AI player in bounds
+                    player2.y = Math.max(this.paddleSize / 2, Math.min(this.rinkHeight - this.paddleSize / 2, player2.y));
+                }, 50);
+            }
+            
+            startPowerCharge() {
+                if (this.gameState.gameActive && !this.gameState.powerCharging) {
+                    this.gameState.powerCharging = true;
+                    this.gameState.powerLevel = 0;
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('turbo-boost');
+                    }
+                }
+            }
+            
+            releasePowerShot() {
+                if (this.gameState.powerCharging) {
+                    this.gameState.powerCharging = false;
+                    const power = this.gameState.powerLevel / 100;
+                    
+                    // Apply power to puck if near player paddle
+                    const player1 = this.gameState.player1;
+                    const puck = this.gameState.puck;
+                    const distance = Math.sqrt(
+                        Math.pow(player1.x - puck.x, 2) + 
+                        Math.pow(player1.y - puck.y, 2)
+                    );
+                    
+                    if (distance < 50 && power > 0.2) {
+                        const angle = Math.atan2(puck.y - player1.y, puck.x - player1.x);
+                        const force = power * 20;
+                        
+                        puck.vx += Math.cos(angle) * force;
+                        puck.vy += Math.sin(angle) * force;
+                        
+                        this.createIceParticles(puck.x, puck.y);
+                        
+                        if (typeof botAudio !== 'undefined') {
+                            botAudio.playSound('turbo-boost', { intensity: power });
+                        }
+                    }
+                    
+                    this.gameState.powerLevel = 0;
+                    this.updatePowerMeter();
+                }
+            }
+            
+            startPuck() {
+                this.gameState.puck = {
+                    x: this.rinkWidth / 2 - this.puckSize / 2,
+                    y: this.rinkHeight / 2 - this.puckSize / 2,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    speed: 5
+                };
+                
+                setTimeout(() => {
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('liberation-beep');
+                    }
+                }, 500);
+            }
+            
+            updatePlayerPositions() {
+                // Player 1 follows mouse
+                const player1 = this.gameState.player1;
+                const targetX = Math.max(this.paddleSize / 2, Math.min(this.rinkWidth / 2 - 20, this.mouse.x));
+                const targetY = Math.max(this.paddleSize / 2, Math.min(this.rinkHeight - this.paddleSize / 2, this.mouse.y));
+                
+                player1.x += (targetX - player1.x) * 0.2;
+                player1.y += (targetY - player1.y) * 0.2;
+                
+                // Update power charging
+                if (this.gameState.powerCharging) {
+                    this.gameState.powerLevel = Math.min(this.gameState.powerLevel + 1.5, 100);
+                    this.updatePowerMeter();
+                }
+            }
+            
+            updatePuck() {
+                if (!this.gameState.gameActive) return;
+                
+                const puck = this.gameState.puck;
+                
+                // Move puck
+                puck.x += puck.vx;
+                puck.y += puck.vy;
+                
+                // Apply friction
+                puck.vx *= this.gameState.friction;
+                puck.vy *= this.gameState.friction;
+                
+                // Wall collisions (top/bottom)
+                if (puck.y <= 0 || puck.y >= this.rinkHeight - this.puckSize) {
+                    puck.vy = -puck.vy;
+                    puck.y = Math.max(0, Math.min(this.rinkHeight - this.puckSize, puck.y));
+                    
+                    this.createIceParticles(puck.x, puck.y);
+                    
+                    if (typeof botAudio !== 'undefined') {
+                        botAudio.playSound('neon-click');
+                    }
+                }
+                
+                // Goal detection
+                if (puck.x <= 0) {
+                    this.goal(2);
+                } else if (puck.x >= this.rinkWidth - this.puckSize) {
+                    this.goal(1);
+                }
+                
+                // Paddle collisions
+                this.checkPaddleCollisions();
+            }
+            
+            checkPaddleCollisions() {
+                const puck = this.gameState.puck;
+                const player1 = this.gameState.player1;
+                const player2 = this.gameState.player2;
+                
+                // Check collision with player 1
+                const dist1 = Math.sqrt(
+                    Math.pow(player1.x - (puck.x + this.puckSize / 2), 2) + 
+                    Math.pow(player1.y - (puck.y + this.puckSize / 2), 2)
+                );
+                
+                if (dist1 < (this.paddleSize + this.puckSize) / 2) {
+                    this.handlePaddleHit(player1, 1);
+                }
+                
+                // Check collision with player 2
+                const dist2 = Math.sqrt(
+                    Math.pow(player2.x - (puck.x + this.puckSize / 2), 2) + 
+                    Math.pow(player2.y - (puck.y + this.puckSize / 2), 2)
+                );
+                
+                if (dist2 < (this.paddleSize + this.puckSize) / 2) {
+                    this.handlePaddleHit(player2, 2);
+                }
+            }
+            
+            handlePaddleHit(paddle, player) {
+                if (this.gameState.lastHit === player) return; // Prevent double hits
+                
+                const puck = this.gameState.puck;
+                const angle = Math.atan2(
+                    puck.y + this.puckSize / 2 - paddle.y,
+                    puck.x + this.puckSize / 2 - paddle.x
+                );
+                
+                const speed = 8 + Math.random() * 4;
+                puck.vx = Math.cos(angle) * speed;
+                puck.vy = Math.sin(angle) * speed;
+                
+                this.gameState.lastHit = player;
+                setTimeout(() => this.gameState.lastHit = null, 200);
+                
+                this.createIceParticles(puck.x, puck.y);
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('liberation-beep');
+                }
+            }
+            
+            goal(player) {
+                this.gameState[`player${player}`].score++;
+                this.gameState.gameActive = false;
+                
+                // Visual celebration
+                this.createGoalCelebration();
+                
+                if (typeof botAudio !== 'undefined') {
+                    if (this.gameState.player1.score >= 5 || this.gameState.player2.score >= 5) {
+                        botAudio.playSound('bot-victory');
+                    } else {
+                        botAudio.playSound('collect');
+                    }
+                }
+                
+                // Check for game over
+                if (this.gameState.player1.score >= 5 || this.gameState.player2.score >= 5) {
+                    setTimeout(() => this.endGame(player), 2000);
+                } else {
+                    setTimeout(() => {
+                        this.startPuck();
+                        this.gameState.gameActive = true;
+                    }, 2000);
+                }
+                
+                this.updateScoreDisplay();
+            }
+            
+            createGoalCelebration() {
+                const celebration = document.getElementById('celebration');
+                const flash = document.createElement('div');
+                flash.className = 'goal-flash';
+                celebration.appendChild(flash);
+                
+                setTimeout(() => flash.remove(), 500);
+                
+                // Create multiple ice particles
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        this.createIceParticles(
+                            Math.random() * this.rinkWidth,
+                            Math.random() * this.rinkHeight
+                        );
+                    }, i * 50);
+                }
+            }
+            
+            endGame(winner) {
+                const winnerName = winner === 1 ? 'Liberation Ice' : 'Corporate Freeze';
+                document.getElementById('gameStatus').innerHTML = `
+                    🏒 ${winnerName} Wins the Championship! 🏒<br>
+                    <button class="btn" onclick="resetMatch()" style="margin-top: 10px;">New Season</button>
+                `;
+            }
+            
+            createIceParticles(x, y) {
+                for (let i = 0; i < 5; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'ice-particle';
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 60 + 20;
+                    particle.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+                    particle.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+                    
+                    document.getElementById('particles').appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 2000);
+                }
+            }
+            
+            updatePowerMeter() {
+                document.getElementById('powerFill').style.width = this.gameState.powerLevel + '%';
+            }
+            
+            updateScoreDisplay() {
+                document.getElementById('score1').textContent = this.gameState.player1.score;
+                document.getElementById('score2').textContent = this.gameState.player2.score;
+            }
+            
+            renderGame() {
+                // Update paddle positions
+                const paddle1 = document.getElementById('paddle1');
+                const paddle2 = document.getElementById('paddle2');
+                
+                paddle1.style.left = (this.gameState.player1.x - this.paddleSize / 2) + 'px';
+                paddle1.style.top = (this.gameState.player1.y - this.paddleSize / 2) + 'px';
+                
+                paddle2.style.left = (this.gameState.player2.x - this.paddleSize / 2) + 'px';
+                paddle2.style.top = (this.gameState.player2.y - this.paddleSize / 2) + 'px';
+                
+                // Update puck position
+                const puck = document.getElementById('puck');
+                puck.style.left = this.gameState.puck.x + 'px';
+                puck.style.top = this.gameState.puck.y + 'px';
+            }
+            
+            gameLoop() {
+                this.updatePlayerPositions();
+                this.updatePuck();
+                this.renderGame();
+                
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        let game;
+        
+        function startGame() {
+            game = new DigitalHockeyClash();
+        }
+        
+        function resetMatch() {
+            if (typeof botAudio !== 'undefined') {
+                botAudio.playSound('game-start');
+            }
+            startGame();
+        }
+        
+        function toggleAudio() {
+            if (typeof botAudio !== 'undefined') {
+                botAudio.setMasterVolume(botAudio.masterVolume > 0 ? 0 : 0.7);
+                botAudio.playSound('neon-click');
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', startGame);
+    </script>
+</body>
+</html>

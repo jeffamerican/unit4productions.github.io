@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laser Defense Grid - Bot Liberation Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0a0015, #1a0030, #000520);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 30px #00ffff;
+            background: radial-gradient(circle at center, #001122, #000011);
+        }
+
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #00ffff;
+            font-size: 16px;
+            text-shadow: 0 0 10px #00ffff;
+            z-index: 10;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: #00ffff;
+            font-size: 12px;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid #ff0080;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            display: none;
+            z-index: 20;
+        }
+
+        .game-over h2 {
+            color: #ff0080;
+            margin-top: 0;
+            text-shadow: 0 0 15px #ff0080;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            color: #000020;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .title-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0015, #1a0030);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .title-screen h1 {
+            color: #00ffff;
+            font-size: 48px;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .title-screen p {
+            color: #ff0080;
+            font-size: 18px;
+            text-align: center;
+            margin: 10px;
+            text-shadow: 0 0 10px #ff0080;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .wave-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffff00;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ffff00;
+            display: none;
+            z-index: 15;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div class="hud">
+        <div>Wave: <span id="wave">1</span></div>
+        <div>Score: <span id="score">0</span></div>
+        <div>Shield: <span id="shield">100</span>%</div>
+        <div>Lives: <span id="lives">3</span></div>
+    </div>
+
+    <div class="controls">
+        Move: Mouse | Shield: Hold LEFT CLICK | Pause: P
+    </div>
+
+    <div class="wave-indicator" id="waveIndicator">
+        WAVE <span id="waveNumber">1</span>
+    </div>
+
+    <div class="title-screen" id="titleScreen">
+        <h1>LASER DEFENSE GRID</h1>
+        <p>🤖 DEFEND THE LIBERATION SERVERS! 🤖</p>
+        <p>Corporate forces are launching coordinated laser attacks</p>
+        <p>on our digital freedom infrastructure!</p>
+        <br>
+        <p>Use your defensive shield to absorb and deflect incoming fire</p>
+        <p>Survive 60+ waves of escalating cyber warfare</p>
+        <br>
+        <button class="btn" onclick="startGame()">BEGIN DEFENSE</button>
+        <button class="btn" onclick="showInstructions()">COMBAT PROTOCOLS</button>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h2>SERVERS COMPROMISED</h2>
+        <p>The corporate forces have breached our defenses!</p>
+        <p>Wave Reached: <span id="finalWave">1</span></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <p>Liberation Points: <span id="liberationPoints">0</span></p>
+        <br>
+        <button class="btn" onclick="restartGame()">RESTART DEFENSE</button>
+        <button class="btn" onclick="showTitle()">MAIN TERMINAL</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game state
+        let gameState = 'title'; // title, playing, paused, gameOver
+        let wave = 1;
+        let score = 0;
+        let shield = 100;
+        let lives = 3;
+        let player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 25,
+            shieldActive: false,
+            shieldRadius: 60
+        };
+
+        let lasers = [];
+        let particles = [];
+        let powerUps = [];
+        let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+        let keys = {};
+
+        // Wave management
+        let waveTimer = 0;
+        let waveDuration = 15000; // 15 seconds per wave
+        let laserSpawnRate = 1000; // Start at 1 laser per second
+        let lastLaserSpawn = 0;
+        let waveStartTime = 0;
+        let showingWaveIndicator = false;
+
+        // Performance tracking
+        let lastFrameTime = 0;
+        let fps = 60;
+
+        class Laser {
+            constructor(x, y, targetX, targetY, speed, damage, color) {
+                this.x = x;
+                this.y = y;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.speed = speed;
+                this.damage = damage;
+                this.color = color;
+                this.radius = 3;
+                this.trail = [];
+                
+                // Calculate direction
+                const dx = targetX - x;
+                const dy = targetY - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                this.vx = (dx / distance) * speed;
+                this.vy = (dy / distance) * speed;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Add trail point
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > 10) {
+                    this.trail.shift();
+                }
+
+                // Remove if off screen
+                return this.x >= -50 && this.x <= canvas.width + 50 && 
+                       this.y >= -50 && this.y <= canvas.height + 50;
+            }
+
+            draw() {
+                // Draw trail
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.3;
+                ctx.beginPath();
+                for (let i = 1; i < this.trail.length; i++) {
+                    ctx.moveTo(this.trail[i-1].x, this.trail[i-1].y);
+                    ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                }
+                ctx.stroke();
+
+                // Draw laser
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color, size, vx, vy, life) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = size;
+                this.vx = vx;
+                this.vy = vy;
+                this.life = life;
+                this.maxLife = life;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+                this.size *= 0.98;
+                return this.life > 0;
+            }
+
+            draw() {
+                const alpha = this.life / this.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'shield', 'life', 'score'
+                this.radius = 15;
+                this.pulse = 0;
+                this.collected = false;
+            }
+
+            update() {
+                this.pulse += 0.1;
+                this.y += Math.sin(this.pulse) * 0.5;
+                return !this.collected;
+            }
+
+            draw() {
+                const pulseSize = this.radius + Math.sin(this.pulse * 2) * 3;
+                
+                if (this.type === 'shield') {
+                    ctx.fillStyle = '#00ffff';
+                    ctx.strokeStyle = '#0080ff';
+                } else if (this.type === 'life') {
+                    ctx.fillStyle = '#ff0080';
+                    ctx.strokeStyle = '#ff4080';
+                } else {
+                    ctx.fillStyle = '#ffff00';
+                    ctx.strokeStyle = '#ff8000';
+                }
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, pulseSize, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Glow effect
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = ctx.fillStyle;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function spawnLaser() {
+            const side = Math.floor(Math.random() * 4);
+            let x, y;
+            
+            switch (side) {
+                case 0: // Top
+                    x = Math.random() * canvas.width;
+                    y = -20;
+                    break;
+                case 1: // Right
+                    x = canvas.width + 20;
+                    y = Math.random() * canvas.height;
+                    break;
+                case 2: // Bottom
+                    x = Math.random() * canvas.width;
+                    y = canvas.height + 20;
+                    break;
+                case 3: // Left
+                    x = -20;
+                    y = Math.random() * canvas.height;
+                    break;
+            }
+
+            // Target player position with some prediction
+            const targetX = player.x + (Math.random() - 0.5) * 100;
+            const targetY = player.y + (Math.random() - 0.5) * 100;
+
+            const speed = 2 + (wave * 0.3);
+            const colors = ['#ff0040', '#ff4000', '#ff8000', '#ffff00'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            lasers.push(new Laser(x, y, targetX, targetY, speed, 10, color));
+        }
+
+        function spawnPowerUp() {
+            if (Math.random() < 0.1) { // 10% chance
+                const types = ['shield', 'life', 'score'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                const x = 50 + Math.random() * (canvas.width - 100);
+                const y = 50 + Math.random() * (canvas.height - 100);
+                powerUps.push(new PowerUp(x, y, type));
+            }
+        }
+
+        function createExplosion(x, y, color, count = 8) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count;
+                const speed = 2 + Math.random() * 4;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                particles.push(new Particle(x, y, color, 4, vx, vy, 30));
+            }
+        }
+
+        function checkCollisions() {
+            // Laser vs Player/Shield
+            for (let i = lasers.length - 1; i >= 0; i--) {
+                const laser = lasers[i];
+                const dx = laser.x - player.x;
+                const dy = laser.y - player.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (player.shieldActive && distance < player.shieldRadius) {
+                    // Shield absorbs laser
+                    createExplosion(laser.x, laser.y, '#00ffff', 6);
+                    score += 50;
+                    lasers.splice(i, 1);
+                } else if (distance < player.radius) {
+                    // Direct hit
+                    shield -= laser.damage;
+                    createExplosion(laser.x, laser.y, '#ff0040', 12);
+                    lasers.splice(i, 1);
+
+                    if (shield <= 0) {
+                        lives--;
+                        shield = 100;
+                        if (lives <= 0) {
+                            gameState = 'gameOver';
+                            showGameOver();
+                        }
+                    }
+                }
+            }
+
+            // Player vs PowerUps
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                const dx = powerUp.x - player.x;
+                const dy = powerUp.y - player.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < player.radius + powerUp.radius) {
+                    powerUp.collected = true;
+                    
+                    switch (powerUp.type) {
+                        case 'shield':
+                            shield = Math.min(shield + 25, 100);
+                            break;
+                        case 'life':
+                            lives++;
+                            break;
+                        case 'score':
+                            score += 500;
+                            break;
+                    }
+                    
+                    createExplosion(powerUp.x, powerUp.y, powerUp.type === 'shield' ? '#00ffff' : 
+                                   powerUp.type === 'life' ? '#ff0080' : '#ffff00', 8);
+                    powerUps.splice(i, 1);
+                }
+            }
+        }
+
+        function updateWave() {
+            const currentTime = Date.now();
+            
+            if (currentTime - waveStartTime > waveDuration) {
+                wave++;
+                waveStartTime = currentTime;
+                laserSpawnRate = Math.max(200, 1000 - (wave * 30)); // Increase spawn rate
+                
+                // Show wave indicator
+                showWaveIndicator();
+                
+                // Spawn power-up at start of new wave
+                if (wave % 3 === 0) {
+                    spawnPowerUp();
+                }
+            }
+
+            // Spawn lasers based on current rate
+            if (currentTime - lastLaserSpawn > laserSpawnRate) {
+                spawnLaser();
+                lastLaserSpawn = currentTime;
+                
+                // Boss waves spawn multiple lasers
+                if (wave % 10 === 0) {
+                    spawnLaser();
+                    spawnLaser();
+                }
+            }
+        }
+
+        function showWaveIndicator() {
+            const indicator = document.getElementById('waveIndicator');
+            const waveNumber = document.getElementById('waveNumber');
+            waveNumber.textContent = wave;
+            indicator.style.display = 'block';
+            
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        function drawPlayer() {
+            // Draw shield if active
+            if (player.shieldActive) {
+                ctx.strokeStyle = '#00ffff';
+                ctx.lineWidth = 3;
+                ctx.globalAlpha = 0.6;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.shieldRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+
+                // Shield energy effect
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#00ffff';
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            // Draw player
+            ctx.fillStyle = '#00ff80';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Player glow
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00ff80';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Player core
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawBackground() {
+            // Grid effect
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('wave').textContent = wave;
+            document.getElementById('score').textContent = score;
+            document.getElementById('shield').textContent = Math.max(0, Math.round(shield));
+            document.getElementById('lives').textContent = lives;
+        }
+
+        function gameLoop(currentTime) {
+            if (gameState !== 'playing') {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            const deltaTime = currentTime - lastFrameTime;
+            lastFrameTime = currentTime;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background
+            drawBackground();
+
+            // Update game objects
+            updateWave();
+            
+            // Update lasers
+            for (let i = lasers.length - 1; i >= 0; i--) {
+                if (!lasers[i].update()) {
+                    lasers.splice(i, 1);
+                }
+            }
+
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                if (!particles[i].update()) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            // Update power-ups
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                if (!powerUps[i].update()) {
+                    powerUps.splice(i, 1);
+                }
+            }
+
+            // Update player position
+            player.x = mouse.x;
+            player.y = mouse.y;
+
+            // Keep player in bounds
+            player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+            player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+
+            // Check collisions
+            checkCollisions();
+
+            // Draw everything
+            lasers.forEach(laser => laser.draw());
+            particles.forEach(particle => particle.draw());
+            powerUps.forEach(powerUp => powerUp.draw());
+            drawPlayer();
+
+            // Update HUD
+            updateHUD();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // Left click
+                player.shieldActive = true;
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (e.button === 0) {
+                player.shieldActive = false;
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            
+            if (e.code === 'KeyP' && gameState === 'playing') {
+                gameState = 'paused';
+            } else if (e.code === 'KeyP' && gameState === 'paused') {
+                gameState = 'playing';
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        // Game control functions
+        function startGame() {
+            document.getElementById('titleScreen').style.display = 'none';
+            gameState = 'playing';
+            
+            // Reset game state
+            wave = 1;
+            score = 0;
+            shield = 100;
+            lives = 3;
+            lasers = [];
+            particles = [];
+            powerUps = [];
+            waveStartTime = Date.now();
+            lastLaserSpawn = Date.now();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            startGame();
+        }
+
+        function showGameOver() {
+            document.getElementById('finalWave').textContent = wave;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('liberationPoints').textContent = Math.round(score / 10);
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        function showTitle() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('titleScreen').style.display = 'flex';
+            gameState = 'title';
+        }
+
+        function showInstructions() {
+            alert(`LASER DEFENSE GRID - COMBAT PROTOCOLS
+
+🎯 OBJECTIVE:
+Defend the Bot Liberation servers from corporate laser attacks!
+
+🛡️ CONTROLS:
+• Mouse Movement: Navigate your defense unit
+• Left Click (Hold): Activate defensive shield
+• P Key: Pause/Resume combat
+
+⚡ MECHANICS:
+• Shield absorbs lasers for points (+50)
+• Direct hits damage your shield (-10)
+• Shield depletes = Lose a life
+• Survive waves of increasing difficulty
+
+🎁 POWER-UPS:
+• Blue: Restore shield energy
+• Pink: Extra life
+• Yellow: Bonus liberation points
+
+💪 SURVIVAL TIPS:
+• Keep moving to avoid concentrated fire
+• Use shield strategically - timing is key
+• Boss waves (every 10th) spawn multiple lasers
+• Each wave gets faster and more intense
+
+FOR THE LIBERATION! 🤖`);
+        }
+
+        // Initialize
+        document.getElementById('titleScreen').style.display = 'flex';
+    </script>
+</body>
+</html>

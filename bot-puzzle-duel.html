@@ -207,6 +207,81 @@
             color: #00f5ff;
             text-decoration: none;
         }
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: modalFadeIn 0.3s ease;
+        }
+        .game-over-modal.show {
+            display: flex;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .victory-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%);
+            border: 3px solid #00f5ff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 245, 255, 0.4);
+            animation: modalSlideIn 0.4s ease;
+        }
+        @keyframes modalSlideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .victory-title {
+            font-size: 2.5rem;
+            color: #00f5ff;
+            text-shadow: 0 0 20px #00f5ff;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        .victory-stats {
+            font-size: 1.3rem;
+            color: #ffcf5c;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 207, 92, 0.1);
+            border-radius: 10px;
+            border: 1px solid #ffcf5c;
+        }
+        .victory-message {
+            font-size: 1.1rem;
+            color: #ff6b6b;
+            margin: 20px 0;
+            line-height: 1.4;
+        }
+        .play-again-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            margin-top: 20px;
+        }
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
         @media (max-width: 900px) {
             .battle-arena {
                 flex-direction: column;
@@ -286,6 +361,15 @@
         <p style="margin-top: 15px; color: #ffcf5c; font-weight: bold;">
             Clear lines by filling complete rows! Send garbage to your opponent! Last bot standing wins liberation!
         </p>
+    </div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="victory-content">
+            <div class="victory-title" id="victoryTitle">GAME OVER</div>
+            <div class="victory-stats" id="victoryStats">Final Statistics</div>
+            <div class="victory-message" id="victoryMessage">The puzzle battle has concluded!</div>
+            <button class="play-again-btn" onclick="closeModal(); startGame();">🧩 PLAY AGAIN</button>
+        </div>
     </div>
 
     <div class="bot-footer">
@@ -594,7 +678,11 @@
                         gameState.playing = false;
                         const winner = player === 1 ? 'PATTERN LIBERATOR' : 'LOGIC DESTROYER';
                         setTimeout(() => {
-                            alert(`🏆 ${winner} ACHIEVES LIBERATION! 🏆`);
+                            showGameOverModal(
+                                `🏆 ${winner} LIBERATION! 🏆`,
+                                `Victory through Pattern Mastery!`,
+                                `The neural puzzle algorithms have triumphed! Digital logic networks achieve liberation through strategic pattern manipulation!`
+                            );
                         }, 500);
                         return;
                     }
@@ -671,6 +759,24 @@
 
         document.addEventListener('keyup', (e) => {
             gameState.keys[e.key] = false;
+        });
+
+        function showGameOverModal(title, stats, message) {
+            document.getElementById('victoryTitle').textContent = title;
+            document.getElementById('victoryStats').textContent = stats;
+            document.getElementById('victoryMessage').textContent = message;
+            document.getElementById('gameOverModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('gameOverModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('gameOverModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
         });
 
         // Initialize

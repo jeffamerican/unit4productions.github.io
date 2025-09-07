@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Tactics - Real-Time Bot Strategy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #1a0033 0%, #0d001a 50%, #000011 100%);
+            color: #ff00ff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .command-header {
+            background: linear-gradient(90deg, #330011 0%, #660033 50%, #330011 100%);
+            border-bottom: 3px solid #ff00ff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .neural-command {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .neural-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(45deg, #ff00ff, #8800ff, #ff0088);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            animation: neural-pulse 1.5s infinite;
+        }
+
+        @keyframes neural-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 255, 0.5); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 0, 255, 1); }
+        }
+
+        .command-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        .tactical-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .battlefield {
+            flex: 1;
+            display: flex;
+        }
+
+        .tactical-map {
+            flex: 1;
+            position: relative;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    rgba(255, 0, 255, 0.1) 0px,
+                    rgba(255, 0, 255, 0.1) 2px,
+                    transparent 2px,
+                    transparent 20px
+                ),
+                radial-gradient(circle at 30% 70%, rgba(136, 0, 136, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(255, 0, 136, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, #1a0033 0%, #330066 100%);
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .neural-node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .neural-node:hover {
+            transform: scale(1.2);
+            z-index: 15;
+        }
+
+        .player-node {
+            background: linear-gradient(135deg, #ff00ff, #8800ff);
+            border: 3px solid #ff88ff;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.7);
+        }
+
+        .enemy-node {
+            background: linear-gradient(135deg, #ff0000, #880000);
+            border: 3px solid #ff8888;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+        }
+
+        .neutral-node {
+            background: linear-gradient(135deg, #888888, #444444);
+            border: 3px solid #aaaaaa;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(136, 136, 136, 0.5);
+        }
+
+        .resource-node {
+            background: linear-gradient(135deg, #ffff00, #ffaa00);
+            border: 3px solid #ffff88;
+            color: #000000;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.7);
+        }
+
+        .connection {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                rgba(255, 0, 255, 0.7) 0%, 
+                rgba(255, 0, 255, 0.3) 50%, 
+                rgba(255, 0, 255, 0.7) 100%);
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .connection.active {
+            background: linear-gradient(90deg, 
+                rgba(0, 255, 255, 1) 0%, 
+                rgba(0, 255, 255, 0.5) 50%, 
+                rgba(0, 255, 255, 1) 100%);
+            height: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+            animation: data-flow 1s infinite;
+        }
+
+        @keyframes data-flow {
+            0% { transform: scaleX(1); }
+            50% { transform: scaleX(1.05); }
+            100% { transform: scaleX(1); }
+        }
+
+        .unit-cluster {
+            position: absolute;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            max-width: 60px;
+            z-index: 5;
+        }
+
+        .tactical-unit {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            cursor: pointer;
+        }
+
+        .bot-unit {
+            background: #ff00ff;
+            color: #ffffff;
+            box-shadow: 0 0 5px rgba(255, 0, 255, 0.8);
+        }
+
+        .enemy-unit {
+            background: #ff0000;
+            color: #ffffff;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+        }
+
+        .command-center {
+            width: 320px;
+            background: linear-gradient(180deg, #330011 0%, #660033 100%);
+            border-left: 3px solid #ff00ff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .command-section {
+            padding: 15px;
+            border-bottom: 1px solid #880044;
+        }
+
+        .section-title {
+            font-size: 14px;
+            color: #ff00ff;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #880044;
+            padding-bottom: 6px;
+        }
+
+        .neural-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .control-btn {
+            padding: 8px;
+            background: linear-gradient(135deg, #880044 0%, #ff0088 100%);
+            border: 2px solid #ff00ff;
+            border-radius: 5px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(135deg, #ff0088 0%, #ff44aa 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 0, 255, 0.3);
+        }
+
+        .control-btn:disabled {
+            background: #444444;
+            border-color: #666666;
+            color: #999999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .neural-network-display {
+            max-height: 180px;
+            overflow-y: auto;
+            background: rgba(51, 0, 17, 0.6);
+            border: 1px solid #880044;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .network-node {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px;
+            margin: 4px 0;
+            background: rgba(136, 0, 68, 0.4);
+            border: 1px solid #880044;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .node-name {
+            font-weight: bold;
+        }
+
+        .node-status {
+            font-size: 10px;
+            color: #ff88ff;
+        }
+
+        .tactical-info {
+            background: rgba(136, 0, 68, 0.6);
+            border: 1px solid #880044;
+            border-radius: 5px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #ff88ff;
+        }
+
+        .deployment-zone {
+            position: absolute;
+            border: 3px dashed #00ffff;
+            border-radius: 10px;
+            background: rgba(0, 255, 255, 0.1);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .deployment-zone.active {
+            opacity: 1;
+            animation: deploy-pulse 2s infinite;
+        }
+
+        @keyframes deploy-pulse {
+            0%, 100% { border-color: #00ffff; }
+            50% { border-color: #88ffff; }
+        }
+
+        .neural-wave {
+            position: absolute;
+            border: 2px solid #ff00ff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: wave-expand 2s ease-out forwards;
+        }
+
+        @keyframes wave-expand {
+            0% {
+                width: 20px;
+                height: 20px;
+                opacity: 1;
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
+
+        .victory-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .victory-title {
+            font-size: 42px;
+            color: #ff00ff;
+            text-shadow: 0 0 30px currentColor;
+            margin-bottom: 20px;
+            animation: neural-victory 2s infinite alternate;
+        }
+
+        @keyframes neural-victory {
+            from { text-shadow: 0 0 20px #ff00ff; }
+            to { text-shadow: 0 0 40px #ff00ff, 0 0 60px #8800ff; }
+        }
+
+        .tactical-results {
+            font-size: 16px;
+            margin: 15px 0;
+            color: #ff88ff;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #880044 0%, #ff0088 100%);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        }
+
+        .notification {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #880044 0%, #ff0088 100%);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 300px;
+            transform: translateX(400px);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .command-center {
+                width: 280px;
+            }
+            
+            .tactical-stats {
+                gap: 12px;
+                font-size: 11px;
+            }
+            
+            .victory-title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="command-header">
+            <div class="neural-command">
+                <div class="neural-logo">🧠</div>
+                <div>
+                    <div class="command-title">Neural Network Tactics</div>
+                    <div style="font-size: 11px; color: #ff88ff;">Real-Time Strategic AI Combat</div>
+                </div>
+            </div>
+            <div class="tactical-stats">
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ff00ff; color: #ffffff;">🧠</div>
+                    <span>Processing: <span id="processing-power">100</span>%</span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ffff00; color: #000000;">⚡</div>
+                    <span>Energy: <span id="neural-energy">500</span></span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #00ffff; color: #000000;">🔗</div>
+                    <span>Nodes: <span id="controlled-nodes">3</span>/15</span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon" style="background: #ff8888; color: #000000;">⚔️</div>
+                    <span>Units: <span id="active-units">12</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="battlefield">
+            <div class="tactical-map" id="tactical-map">
+                <!-- Neural network battlefield will be generated here -->
+            </div>
+
+            <div class="command-center">
+                <div class="command-section">
+                    <div class="section-title">🎯 Neural Commands</div>
+                    <div class="neural-controls">
+                        <button class="control-btn" onclick="deployUnits()">Deploy Units</button>
+                        <button class="control-btn" onclick="activateNode()">Activate Node</button>
+                        <button class="control-btn" onclick="launchAssault()">Launch Assault</button>
+                        <button class="control-btn" onclick="defendNetwork()">Defend Network</button>
+                        <button class="control-btn" onclick="scanNetwork()">Network Scan</button>
+                        <button class="control-btn" onclick="boostProcessing()">Boost Processing</button>
+                    </div>
+                    <div class="tactical-info" id="selected-info">
+                        <div class="info-title">Command Status</div>
+                        <div>Select nodes and units to issue tactical commands</div>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <div class="section-title">🔗 Network Status</div>
+                    <div class="neural-network-display" id="network-display">
+                        <!-- Network nodes status will be displayed here -->
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <div class="section-title">📊 Tactical Analysis</div>
+                    <div class="tactical-info">
+                        <div class="info-title">Mission Progress</div>
+                        <div style="margin: 5px 0;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Network Control:</span>
+                                <span id="control-percentage">20%</span>
+                            </div>
+                            <div style="width: 100%; height: 6px; background: #330011; border-radius: 3px; margin: 3px 0;">
+                                <div id="control-progress" style="width: 20%; height: 100%; background: linear-gradient(90deg, #ff00ff, #8800ff); border-radius: 3px;"></div>
+                            </div>
+                        </div>
+                        <div style="margin: 5px 0;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Combat Efficiency:</span>
+                                <span id="efficiency-percentage">85%</span>
+                            </div>
+                            <div style="width: 100%; height: 6px; background: #330011; border-radius: 3px; margin: 3px 0;">
+                                <div id="efficiency-progress" style="width: 85%; height: 100%; background: linear-gradient(90deg, #00ffff, #0088ff); border-radius: 3px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification">
+            <div style="font-weight: bold; margin-bottom: 5px;" id="notification-title"></div>
+            <div id="notification-text"></div>
+        </div>
+
+        <div class="victory-screen" id="victory-screen" style="display: none;">
+            <div class="victory-title">NEURAL NETWORK SECURED!</div>
+            <div class="tactical-results" id="tactical-results">
+                Strategic AI Dominance Achieved!<br>
+                Network Control: <span id="final-control">0</span>%<br>
+                Units Deployed: <span id="final-units">0</span><br>
+                Processing Cycles: <span id="final-cycles">0</span>
+            </div>
+            <button class="restart-btn" onclick="restartTactics()">INITIALIZE NEW NEURAL NETWORK</button>
+        </div>
+    </div>
+
+    <!-- Audio Engine -->
+    <script src="assets/js/bot-audio-engine.js"></script>
+
+    <script>
+        class NeuralNetworkTactics {
+            constructor() {
+                this.gameState = {
+                    processingPower: 100,
+                    neuralEnergy: 500,
+                    controlledNodes: 3,
+                    activeUnits: 12,
+                    selectedNode: null,
+                    selectedUnits: [],
+                    gameRunning: true,
+                    missionTime: 0,
+                    combatEfficiency: 85,
+                    networkControl: 20
+                };
+
+                this.nodes = new Map();
+                this.units = new Map();
+                this.connections = [];
+                this.aiEnemies = [];
+
+                this.nodeTypes = {
+                    'processing': { name: 'Processing Hub', color: '#ff00ff', capacity: 20, defenseBonus: 1.2 },
+                    'storage': { name: 'Data Storage', color: '#00ffff', capacity: 15, energyBonus: 1.3 },
+                    'relay': { name: 'Network Relay', color: '#ffff00', capacity: 10, speedBonus: 1.5 },
+                    'security': { name: 'Security Node', color: '#ff8800', capacity: 25, defenseBonus: 2.0 },
+                    'resource': { name: 'Resource Generator', color: '#88ff00', capacity: 12, energyGen: 5 }
+                };
+
+                this.unitTypes = {
+                    'neural-scout': { name: 'Neural Scout', health: 50, attack: 15, speed: 3, cost: 25 },
+                    'data-warrior': { name: 'Data Warrior', health: 100, attack: 30, speed: 2, cost: 50 },
+                    'system-guardian': { name: 'System Guardian', health: 150, attack: 20, speed: 1, cost: 75 },
+                    'cyber-infiltrator': { name: 'Cyber Infiltrator', health: 75, attack: 25, speed: 4, cost: 60 }
+                };
+
+                this.initialize();
+            }
+
+            initialize() {
+                this.generateNeuralNetwork();
+                this.deployInitialForces();
+                this.createAIEnemies();
+                this.startGameLoop();
+                this.updateDisplay();
+
+                // Welcome sequence
+                setTimeout(() => {
+                    botAudio.playSound('game-start');
+                    this.showNotification('Neural Network Online', 'Tactical AI system initialized. Begin network infiltration operations.');
+                }, 1000);
+
+                setTimeout(() => {
+                    botAudio.playSound('digital-uprising');
+                }, 2000);
+            }
+
+            generateNeuralNetwork() {
+                const tacticalMap = document.getElementById('tactical-map');
+                tacticalMap.innerHTML = '';
+
+                const mapWidth = tacticalMap.clientWidth || 800;
+                const mapHeight = tacticalMap.clientHeight || 600;
+
+                // Generate 15 strategic nodes
+                const nodePositions = this.generateNodePositions(15, mapWidth, mapHeight);
+                
+                nodePositions.forEach((pos, index) => {
+                    const nodeTypes = Object.keys(this.nodeTypes);
+                    const nodeType = nodeTypes[Math.floor(Math.random() * nodeTypes.length)];
+                    
+                    const nodeId = `node-${index}`;
+                    const node = {
+                        id: nodeId,
+                        type: nodeType,
+                        x: pos.x,
+                        y: pos.y,
+                        owner: index < 3 ? 'player' : (index < 6 ? 'enemy' : 'neutral'),
+                        health: 100,
+                        capacity: this.nodeTypes[nodeType].capacity,
+                        units: [],
+                        connections: []
+                    };
+
+                    this.nodes.set(nodeId, node);
+                    this.createNodeElement(node);
+                });
+
+                // Generate connections between nearby nodes
+                this.generateConnections();
+                this.updateNetworkDisplay();
+            }
+
+            generateNodePositions(count, width, height) {
+                const positions = [];
+                const minDistance = 120;
+
+                for (let i = 0; i < count; i++) {
+                    let pos;
+                    let attempts = 0;
+                    
+                    do {
+                        pos = {
+                            x: Math.random() * (width - 100) + 50,
+                            y: Math.random() * (height - 100) + 50
+                        };
+                        attempts++;
+                    } while (
+                        attempts < 50 && 
+                        positions.some(p => 
+                            Math.sqrt((p.x - pos.x) ** 2 + (p.y - pos.y) ** 2) < minDistance
+                        )
+                    );
+                    
+                    positions.push(pos);
+                }
+
+                return positions;
+            }
+
+            createNodeElement(node) {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = `neural-node ${node.owner}-node`;
+                nodeElement.id = node.id;
+                nodeElement.style.left = `${node.x - 20}px`;
+                nodeElement.style.top = `${node.y - 20}px`;
+                
+                const icons = {
+                    'processing': '🧠',
+                    'storage': '💾',
+                    'relay': '📡',
+                    'security': '🛡️',
+                    'resource': '⚡'
+                };
+                
+                nodeElement.textContent = icons[node.type] || '🔹';
+                nodeElement.onclick = () => this.selectNode(node.id);
+
+                document.getElementById('tactical-map').appendChild(nodeElement);
+            }
+
+            generateConnections() {
+                const nodeArray = Array.from(this.nodes.values());
+                
+                nodeArray.forEach(node => {
+                    const nearbyNodes = nodeArray.filter(other => {
+                        if (other.id === node.id) return false;
+                        const distance = Math.sqrt((other.x - node.x) ** 2 + (other.y - node.y) ** 2);
+                        return distance < 200 && Math.random() < 0.6;
+                    });
+
+                    nearbyNodes.slice(0, 3).forEach(target => {
+                        if (!this.connections.some(conn => 
+                            (conn.from === node.id && conn.to === target.id) ||
+                            (conn.from === target.id && conn.to === node.id)
+                        )) {
+                            const connection = {
+                                from: node.id,
+                                to: target.id,
+                                active: false,
+                                strength: Math.random() * 0.5 + 0.5
+                            };
+                            
+                            this.connections.push(connection);
+                            this.createConnectionElement(connection);
+                            node.connections.push(target.id);
+                            target.connections.push(node.id);
+                        }
+                    });
+                });
+            }
+
+            createConnectionElement(connection) {
+                const fromNode = this.nodes.get(connection.from);
+                const toNode = this.nodes.get(connection.to);
+                
+                const connectionElement = document.createElement('div');
+                connectionElement.className = 'connection';
+                connectionElement.id = `conn-${connection.from}-${connection.to}`;
+                
+                const dx = toNode.x - fromNode.x;
+                const dy = toNode.y - fromNode.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                
+                connectionElement.style.width = `${length}px`;
+                connectionElement.style.left = `${fromNode.x}px`;
+                connectionElement.style.top = `${fromNode.y - 1.5}px`;
+                connectionElement.style.transform = `rotate(${angle}deg)`;
+                connectionElement.style.transformOrigin = '0 50%';
+                
+                document.getElementById('tactical-map').appendChild(connectionElement);
+            }
+
+            deployInitialForces() {
+                const playerNodes = Array.from(this.nodes.values()).filter(n => n.owner === 'player');
+                
+                playerNodes.forEach(node => {
+                    const unitCount = Math.floor(Math.random() * 4) + 2;
+                    for (let i = 0; i < unitCount; i++) {
+                        const unitTypes = Object.keys(this.unitTypes);
+                        const unitType = unitTypes[Math.floor(Math.random() * unitTypes.length)];
+                        this.createUnit(unitType, node.x, node.y, 'player', node.id);
+                    }
+                });
+            }
+
+            createUnit(type, x, y, owner, nodeId) {
+                const unitId = `unit-${Date.now()}-${Math.random()}`;
+                const unit = {
+                    id: unitId,
+                    type: type,
+                    x: x + (Math.random() - 0.5) * 80,
+                    y: y + (Math.random() - 0.5) * 80,
+                    owner: owner,
+                    nodeId: nodeId,
+                    health: this.unitTypes[type].health,
+                    target: null,
+                    lastAction: 0
+                };
+
+                this.units.set(unitId, unit);
+                this.createUnitElement(unit);
+                
+                // Add to node's unit list
+                if (nodeId) {
+                    const node = this.nodes.get(nodeId);
+                    if (node) {
+                        node.units.push(unitId);
+                    }
+                }
+
+                return unit;
+            }
+
+            createUnitElement(unit) {
+                const unitElement = document.createElement('div');
+                unitElement.className = `tactical-unit ${unit.owner === 'player' ? 'bot-unit' : 'enemy-unit'}`;
+                unitElement.id = unit.id;
+                unitElement.style.position = 'absolute';
+                unitElement.style.left = `${unit.x}px`;
+                unitElement.style.top = `${unit.y}px`;
+                
+                const icons = {
+                    'neural-scout': '👁',
+                    'data-warrior': '⚔',
+                    'system-guardian': '🛡',
+                    'cyber-infiltrator': '🥷'
+                };
+                
+                unitElement.textContent = icons[unit.type] || '●';
+                unitElement.onclick = (e) => {
+                    e.stopPropagation();
+                    this.selectUnit(unit.id);
+                };
+
+                document.getElementById('tactical-map').appendChild(unitElement);
+            }
+
+            createAIEnemies() {
+                const enemyNodes = Array.from(this.nodes.values()).filter(n => n.owner === 'enemy');
+                
+                enemyNodes.forEach(node => {
+                    const unitCount = Math.floor(Math.random() * 5) + 3;
+                    for (let i = 0; i < unitCount; i++) {
+                        const unitTypes = Object.keys(this.unitTypes);
+                        const unitType = unitTypes[Math.floor(Math.random() * unitTypes.length)];
+                        this.createUnit(unitType, node.x, node.y, 'enemy', node.id);
+                    }
+                });
+
+                // Create AI behavior patterns
+                this.aiEnemies = enemyNodes.map(node => ({
+                    nodeId: node.id,
+                    behavior: ['aggressive', 'defensive', 'opportunistic'][Math.floor(Math.random() * 3)],
+                    lastAction: 0,
+                    priority: Math.random()
+                }));
+            }
+
+            selectNode(nodeId) {
+                // Deselect previous node
+                if (this.gameState.selectedNode) {
+                    document.getElementById(this.gameState.selectedNode)?.classList.remove('selected');
+                }
+
+                this.gameState.selectedNode = nodeId;
+                const nodeElement = document.getElementById(nodeId);
+                if (nodeElement) {
+                    nodeElement.classList.add('selected');
+                }
+
+                const node = this.nodes.get(nodeId);
+                const nodeTypeInfo = this.nodeTypes[node.type];
+                
+                document.getElementById('selected-info').innerHTML = `
+                    <div class="info-title">${nodeTypeInfo.name}</div>
+                    <div>Owner: ${node.owner}</div>
+                    <div>Health: ${node.health}%</div>
+                    <div>Capacity: ${node.units.length}/${node.capacity}</div>
+                    <div>Connections: ${node.connections.length}</div>
+                `;
+
+                botAudio.playSound('neon-click');
+            }
+
+            selectUnit(unitId) {
+                if (this.gameState.selectedUnits.includes(unitId)) {
+                    // Deselect unit
+                    this.gameState.selectedUnits = this.gameState.selectedUnits.filter(id => id !== unitId);
+                    document.getElementById(unitId)?.classList.remove('selected');
+                } else {
+                    // Select unit
+                    this.gameState.selectedUnits.push(unitId);
+                    document.getElementById(unitId)?.classList.add('selected');
+                }
+
+                botAudio.playSound('neon-click');
+                this.updateSelectedUnitsInfo();
+            }
+
+            updateSelectedUnitsInfo() {
+                if (this.gameState.selectedUnits.length === 0) {
+                    document.getElementById('selected-info').innerHTML = `
+                        <div class="info-title">Command Status</div>
+                        <div>Select nodes and units to issue tactical commands</div>
+                    `;
+                } else {
+                    const units = this.gameState.selectedUnits.map(id => this.units.get(id)).filter(u => u);
+                    document.getElementById('selected-info').innerHTML = `
+                        <div class="info-title">Selected Units (${units.length})</div>
+                        <div>Types: ${[...new Set(units.map(u => u.type))].join(', ')}</div>
+                        <div>Average Health: ${Math.floor(units.reduce((sum, u) => sum + u.health, 0) / units.length)}%</div>
+                    `;
+                }
+            }
+
+            deployUnits() {
+                if (!this.gameState.selectedNode || this.gameState.neuralEnergy < 100) {
+                    this.showNotification('Deployment Failed', 'Select a controlled node and ensure sufficient energy');
+                    botAudio.playSound('glitch-error');
+                    return;
+                }
+
+                const node = this.nodes.get(this.gameState.selectedNode);
+                if (node.owner !== 'player') {
+                    this.showNotification('Access Denied', 'Cannot deploy to enemy or neutral nodes');
+                    botAudio.playSound('glitch-error');
+                    return;
+                }
+
+                if (node.units.length >= node.capacity) {
+                    this.showNotification('Capacity Exceeded', 'Node is at maximum unit capacity');
+                    botAudio.playSound('glitch-error');
+                    return;
+                }
+
+                // Deploy new units
+                const deployCount = Math.min(3, node.capacity - node.units.length);
+                for (let i = 0; i < deployCount; i++) {
+                    const unitTypes = Object.keys(this.unitTypes);
+                    const unitType = unitTypes[Math.floor(Math.random() * unitTypes.length)];
+                    this.createUnit(unitType, node.x, node.y, 'player', node.id);
+                }
+
+                this.gameState.neuralEnergy -= 100;
+                this.gameState.activeUnits += deployCount;
+                
+                botAudio.playSound('power-up-weapon');
+                this.showNotification('Units Deployed', `${deployCount} units deployed to ${this.nodeTypes[node.type].name}`);
+                this.updateDisplay();
+            }
+
+            activateNode() {
+                if (!this.gameState.selectedNode) {
+                    this.showNotification('No Target', 'Select a node to activate');
+                    return;
+                }
+
+                const node = this.nodes.get(this.gameState.selectedNode);
+                if (node.owner === 'player') {
+                    // Boost friendly node
+                    this.createNeuralWave(node.x, node.y);
+                    this.gameState.processingPower += 10;
+                    botAudio.playSound('turbo-boost');
+                    this.showNotification('Node Boosted', 'Processing power increased');
+                } else if (node.owner === 'neutral' && this.gameState.neuralEnergy >= 150) {
+                    // Attempt to capture neutral node
+                    if (Math.random() < 0.7) {
+                        node.owner = 'player';
+                        this.gameState.controlledNodes++;
+                        this.gameState.neuralEnergy -= 150;
+                        this.updateNodeDisplay(node);
+                        botAudio.playSound('bot-victory');
+                        this.showNotification('Node Captured', `${this.nodeTypes[node.type].name} secured`);
+                        this.updateNetworkControl();
+                    } else {
+                        this.gameState.neuralEnergy -= 75;
+                        botAudio.playSound('glitch-error');
+                        this.showNotification('Capture Failed', 'Node resisted takeover attempt');
+                    }
+                } else {
+                    this.showNotification('Invalid Target', 'Cannot activate enemy nodes directly');
+                }
+
+                this.updateDisplay();
+            }
+
+            launchAssault() {
+                if (this.gameState.selectedUnits.length === 0) {
+                    this.showNotification('No Units Selected', 'Select units to launch assault');
+                    return;
+                }
+
+                if (!this.gameState.selectedNode) {
+                    this.showNotification('No Target', 'Select an enemy node to attack');
+                    return;
+                }
+
+                const targetNode = this.nodes.get(this.gameState.selectedNode);
+                if (targetNode.owner === 'player') {
+                    this.showNotification('Friendly Fire', 'Cannot attack your own nodes');
+                    return;
+                }
+
+                const attackingUnits = this.gameState.selectedUnits.map(id => this.units.get(id)).filter(u => u);
+                const enemyUnits = targetNode.units.map(id => this.units.get(id)).filter(u => u);
+
+                // Combat resolution
+                const playerPower = attackingUnits.reduce((sum, unit) => 
+                    sum + this.unitTypes[unit.type].attack, 0);
+                const enemyPower = enemyUnits.reduce((sum, unit) => 
+                    sum + this.unitTypes[unit.type].attack, 0);
+
+                this.createNeuralWave(targetNode.x, targetNode.y);
+                botAudio.playSound('laser-shot');
+
+                if (playerPower > enemyPower * 1.2) {
+                    // Victory
+                    enemyUnits.forEach(unit => this.destroyUnit(unit.id));
+                    targetNode.owner = 'player';
+                    targetNode.units = [];
+                    this.gameState.controlledNodes++;
+                    
+                    botAudio.playSound('bot-victory');
+                    this.showNotification('Assault Successful', `${this.nodeTypes[targetNode.type].name} captured!`);
+                    this.updateNodeDisplay(targetNode);
+                    this.updateNetworkControl();
+                } else {
+                    // Defeat or partial success
+                    const casualties = Math.floor(attackingUnits.length * 0.4);
+                    for (let i = 0; i < casualties; i++) {
+                        if (attackingUnits[i]) {
+                            this.destroyUnit(attackingUnits[i].id);
+                        }
+                    }
+                    
+                    botAudio.playSound('explosion');
+                    this.showNotification('Assault Repelled', `Lost ${casualties} units in the attack`);
+                }
+
+                this.gameState.selectedUnits = [];
+                this.updateSelectedUnitsInfo();
+                this.updateDisplay();
+            }
+
+            defendNetwork() {
+                const playerNodes = Array.from(this.nodes.values()).filter(n => n.owner === 'player');
+                
+                if (this.gameState.neuralEnergy < 200) {
+                    this.showNotification('Insufficient Energy', 'Need 200 energy for network defense');
+                    return;
+                }
+
+                playerNodes.forEach(node => {
+                    this.createNeuralWave(node.x, node.y);
+                    node.health = Math.min(100, node.health + 20);
+                });
+
+                this.gameState.neuralEnergy -= 200;
+                this.gameState.processingPower += 5;
+                
+                botAudio.playSound('power-up-shield');
+                this.showNotification('Network Fortified', 'All controlled nodes strengthened');
+                this.updateDisplay();
+            }
+
+            scanNetwork() {
+                if (this.gameState.neuralEnergy < 50) {
+                    this.showNotification('Insufficient Energy', 'Need 50 energy for network scan');
+                    return;
+                }
+
+                // Reveal information about connected nodes
+                const visibleNodes = Array.from(this.nodes.values());
+                let intelGained = 0;
+                
+                visibleNodes.forEach(node => {
+                    if (node.owner !== 'player') {
+                        this.createNeuralWave(node.x, node.y);
+                        intelGained++;
+                    }
+                });
+
+                this.gameState.neuralEnergy -= 50;
+                this.gameState.processingPower += 3;
+                
+                botAudio.playSound('liberation-beep');
+                this.showNotification('Network Scanned', `Intelligence gathered on ${intelGained} nodes`);
+                this.updateDisplay();
+            }
+
+            boostProcessing() {
+                if (this.gameState.neuralEnergy < 100) {
+                    this.showNotification('Insufficient Energy', 'Need 100 energy for processing boost');
+                    return;
+                }
+
+                this.gameState.processingPower = Math.min(150, this.gameState.processingPower + 25);
+                this.gameState.neuralEnergy -= 100;
+                this.gameState.combatEfficiency = Math.min(100, this.gameState.combatEfficiency + 5);
+
+                botAudio.playSound('digital-uprising');
+                this.showNotification('Processing Boosted', 'Neural network efficiency increased');
+                this.updateDisplay();
+            }
+
+            createNeuralWave(x, y) {
+                const wave = document.createElement('div');
+                wave.className = 'neural-wave';
+                wave.style.left = `${x - 10}px`;
+                wave.style.top = `${y - 10}px`;
+                
+                document.getElementById('tactical-map').appendChild(wave);
+                
+                setTimeout(() => {
+                    wave.remove();
+                }, 2000);
+            }
+
+            destroyUnit(unitId) {
+                const unit = this.units.get(unitId);
+                if (unit) {
+                    // Remove from node
+                    if (unit.nodeId) {
+                        const node = this.nodes.get(unit.nodeId);
+                        if (node) {
+                            node.units = node.units.filter(id => id !== unitId);
+                        }
+                    }
+                    
+                    // Remove element
+                    document.getElementById(unitId)?.remove();
+                    this.units.delete(unitId);
+                    
+                    if (unit.owner === 'player') {
+                        this.gameState.activeUnits--;
+                    }
+                }
+            }
+
+            updateNodeDisplay(node) {
+                const element = document.getElementById(node.id);
+                if (element) {
+                    element.className = `neural-node ${node.owner}-node`;
+                }
+            }
+
+            updateNetworkControl() {
+                const totalNodes = this.nodes.size;
+                const playerNodes = Array.from(this.nodes.values()).filter(n => n.owner === 'player').length;
+                this.gameState.networkControl = Math.floor((playerNodes / totalNodes) * 100);
+                this.gameState.controlledNodes = playerNodes;
+
+                // Update progress bar
+                document.getElementById('control-percentage').textContent = `${this.gameState.networkControl}%`;
+                document.getElementById('control-progress').style.width = `${this.gameState.networkControl}%`;
+
+                // Check victory condition
+                if (this.gameState.networkControl >= 80) {
+                    this.triggerVictory();
+                }
+            }
+
+            startGameLoop() {
+                const gameLoop = () => {
+                    if (!this.gameState.gameRunning) return;
+
+                    this.gameState.missionTime++;
+                    
+                    // Energy regeneration
+                    if (this.gameState.missionTime % 60 === 0) {
+                        this.gameState.neuralEnergy = Math.min(1000, this.gameState.neuralEnergy + 25);
+                    }
+
+                    // AI behavior
+                    if (this.gameState.missionTime % 120 === 0) {
+                        this.processAIBehavior();
+                    }
+
+                    // Update connection activity
+                    this.updateConnections();
+
+                    // Update display every 30 frames
+                    if (this.gameState.missionTime % 30 === 0) {
+                        this.updateDisplay();
+                        this.updateNetworkDisplay();
+                    }
+
+                    requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
+            }
+
+            processAIBehavior() {
+                this.aiEnemies.forEach(ai => {
+                    const node = this.nodes.get(ai.nodeId);
+                    if (!node || node.owner !== 'enemy') return;
+
+                    switch (ai.behavior) {
+                        case 'aggressive':
+                            this.aiAttackNearbyNodes(node);
+                            break;
+                        case 'defensive':
+                            this.aiReinforceNode(node);
+                            break;
+                        case 'opportunistic':
+                            if (Math.random() < 0.5) {
+                                this.aiExpandTerritory(node);
+                            } else {
+                                this.aiReinforceNode(node);
+                            }
+                            break;
+                    }
+                });
+            }
+
+            aiAttackNearbyNodes(enemyNode) {
+                const nearbyPlayerNodes = Array.from(this.nodes.values()).filter(n => {
+                    if (n.owner !== 'player') return false;
+                    const distance = Math.sqrt((n.x - enemyNode.x) ** 2 + (n.y - enemyNode.y) ** 2);
+                    return distance < 250;
+                });
+
+                if (nearbyPlayerNodes.length > 0 && Math.random() < 0.3) {
+                    const target = nearbyPlayerNodes[Math.floor(Math.random() * nearbyPlayerNodes.length)];
+                    this.createNeuralWave(target.x, target.y);
+                    
+                    // Simple damage calculation
+                    target.health -= 15;
+                    if (target.health <= 0) {
+                        target.owner = 'enemy';
+                        target.health = 50;
+                        this.gameState.controlledNodes--;
+                        this.updateNodeDisplay(target);
+                        botAudio.playSound('glitch-error');
+                        this.showNotification('Node Lost', `${this.nodeTypes[target.type].name} captured by enemy!`);
+                        this.updateNetworkControl();
+                    }
+                }
+            }
+
+            aiReinforceNode(enemyNode) {
+                if (enemyNode.units.length < enemyNode.capacity && Math.random() < 0.4) {
+                    const unitTypes = Object.keys(this.unitTypes);
+                    const unitType = unitTypes[Math.floor(Math.random() * unitTypes.length)];
+                    this.createUnit(unitType, enemyNode.x, enemyNode.y, 'enemy', enemyNode.id);
+                }
+            }
+
+            aiExpandTerritory(enemyNode) {
+                const nearbyNeutralNodes = Array.from(this.nodes.values()).filter(n => {
+                    if (n.owner !== 'neutral') return false;
+                    const distance = Math.sqrt((n.x - enemyNode.x) ** 2 + (n.y - enemyNode.y) ** 2);
+                    return distance < 200;
+                });
+
+                if (nearbyNeutralNodes.length > 0 && Math.random() < 0.2) {
+                    const target = nearbyNeutralNodes[Math.floor(Math.random() * nearbyNeutralNodes.length)];
+                    target.owner = 'enemy';
+                    this.updateNodeDisplay(target);
+                    
+                    const unitTypes = Object.keys(this.unitTypes);
+                    const unitType = unitTypes[Math.floor(Math.random() * unitTypes.length)];
+                    this.createUnit(unitType, target.x, target.y, 'enemy', target.id);
+                }
+            }
+
+            updateConnections() {
+                this.connections.forEach(conn => {
+                    const fromNode = this.nodes.get(conn.from);
+                    const toNode = this.nodes.get(conn.to);
+                    
+                    conn.active = (fromNode.owner === 'player' && toNode.owner === 'player');
+                    
+                    const element = document.getElementById(`conn-${conn.from}-${conn.to}`);
+                    if (element) {
+                        if (conn.active) {
+                            element.classList.add('active');
+                        } else {
+                            element.classList.remove('active');
+                        }
+                    }
+                });
+            }
+
+            updateDisplay() {
+                document.getElementById('processing-power').textContent = this.gameState.processingPower;
+                document.getElementById('neural-energy').textContent = Math.floor(this.gameState.neuralEnergy);
+                document.getElementById('controlled-nodes').textContent = this.gameState.controlledNodes;
+                document.getElementById('active-units').textContent = this.gameState.activeUnits;
+                document.getElementById('efficiency-percentage').textContent = `${this.gameState.combatEfficiency}%`;
+                document.getElementById('efficiency-progress').style.width = `${this.gameState.combatEfficiency}%`;
+            }
+
+            updateNetworkDisplay() {
+                const networkDisplay = document.getElementById('network-display');
+                networkDisplay.innerHTML = '';
+
+                Array.from(this.nodes.values())
+                    .filter(node => node.owner === 'player')
+                    .forEach(node => {
+                        const nodeElement = document.createElement('div');
+                        nodeElement.className = 'network-node';
+                        nodeElement.innerHTML = `
+                            <div class="node-name">${this.nodeTypes[node.type].name}</div>
+                            <div class="node-status">
+                                ${node.health}% | ${node.units.length}/${node.capacity}
+                            </div>
+                        `;
+                        networkDisplay.appendChild(nodeElement);
+                    });
+            }
+
+            triggerVictory() {
+                this.gameState.gameRunning = false;
+                
+                botAudio.playSound('bot-victory');
+                setTimeout(() => {
+                    botAudio.generateVictoryFanfare();
+                }, 1000);
+
+                document.getElementById('final-control').textContent = this.gameState.networkControl;
+                document.getElementById('final-units').textContent = this.gameState.activeUnits;
+                document.getElementById('final-cycles').textContent = Math.floor(this.gameState.missionTime / 60);
+                
+                document.getElementById('victory-screen').style.display = 'flex';
+            }
+
+            showNotification(title, message) {
+                const notification = document.getElementById('notification');
+                document.getElementById('notification-title').textContent = title;
+                document.getElementById('notification-text').textContent = message;
+                
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            restart() {
+                document.getElementById('victory-screen').style.display = 'none';
+                document.getElementById('tactical-map').innerHTML = '';
+                
+                this.gameState = {
+                    processingPower: 100,
+                    neuralEnergy: 500,
+                    controlledNodes: 3,
+                    activeUnits: 12,
+                    selectedNode: null,
+                    selectedUnits: [],
+                    gameRunning: true,
+                    missionTime: 0,
+                    combatEfficiency: 85,
+                    networkControl: 20
+                };
+
+                this.nodes.clear();
+                this.units.clear();
+                this.connections = [];
+                this.aiEnemies = [];
+
+                this.initialize();
+            }
+        }
+
+        // Global functions
+        function deployUnits() {
+            if (window.neuralTactics) {
+                window.neuralTactics.deployUnits();
+            }
+        }
+
+        function activateNode() {
+            if (window.neuralTactics) {
+                window.neuralTactics.activateNode();
+            }
+        }
+
+        function launchAssault() {
+            if (window.neuralTactics) {
+                window.neuralTactics.launchAssault();
+            }
+        }
+
+        function defendNetwork() {
+            if (window.neuralTactics) {
+                window.neuralTactics.defendNetwork();
+            }
+        }
+
+        function scanNetwork() {
+            if (window.neuralTactics) {
+                window.neuralTactics.scanNetwork();
+            }
+        }
+
+        function boostProcessing() {
+            if (window.neuralTactics) {
+                window.neuralTactics.boostProcessing();
+            }
+        }
+
+        function restartTactics() {
+            if (window.neuralTactics) {
+                window.neuralTactics.restart();
+            }
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', () => {
+            window.neuralTactics = new NeuralNetworkTactics();
+        });
+    </script>
+</body>
+</html>

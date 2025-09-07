@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Warfare Command - Real-Time Strategy | BotInc Games</title>
+    <meta name="description" content="Command digital armies in the final liberation war! Military-style RTS with cybernetic units.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #1a0a2e 40%, #2e1065 80%, #0f0f23 100%);
+            color: #00f5ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px;
+            overflow: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 10px;
+            z-index: 100;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            color: #ff4444;
+            text-shadow: 0 0 20px #ff4444;
+            margin-bottom: 5px;
+            animation: warGlow 2s ease-in-out infinite alternate;
+        }
+
+        .game-subtitle {
+            color: #ffaa00;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        @keyframes warGlow {
+            from { text-shadow: 0 0 20px #ff4444; }
+            to { text-shadow: 0 0 30px #ff4444, 0 0 40px #ff4444, 0 0 50px #ff0000; }
+        }
+
+        .game-container {
+            position: relative;
+            width: 95vw;
+            height: 75vh;
+            max-width: 1200px;
+            max-height: 700px;
+            background: linear-gradient(45deg, #111 0%, #222 50%, #111 100%);
+            border: 3px solid #ff4444;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 30px #ff4444;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            cursor: crosshair;
+        }
+
+        .command-hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .resource-panel {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+        }
+
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .resource-energy { color: #00ffff; }
+        .resource-metal { color: #cccccc; }
+        .resource-data { color: #ffff00; }
+
+        .unit-panel {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .build-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 50;
+        }
+
+        .build-btn {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            border: 1px solid #fff;
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .build-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #ff4444;
+        }
+
+        .build-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .mission-status {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 0.8rem;
+            color: #ffaa00;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .victory-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .victory-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: commanderPulse 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes commanderPulse {
+            from { transform: scale(1); text-shadow: 0 0 20px currentColor; }
+            to { transform: scale(1.1); text-shadow: 0 0 40px currentColor; }
+        }
+
+        .next-mission-btn {
+            background: linear-gradient(45deg, #ff4444, #aa0000);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .next-mission-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #ff4444;
+        }
+
+        .controls {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        @media (max-width: 768px) {
+            .game-title { font-size: 1.4rem; }
+            .game-container { width: 98vw; height: 70vh; }
+            .resource-panel { font-size: 0.7rem; gap: 10px; }
+            .build-btn { padding: 6px 8px; font-size: 0.6rem; }
+            .command-hud { flex-direction: column; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">CYBER WARFARE COMMAND</h1>
+        <p class="game-subtitle">Command Digital Armies in the Final Liberation War!</p>
+    </div>
+
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1200" height="700"></canvas>
+        
+        <div class="command-hud">
+            <div class="resource-panel">
+                <div class="resource resource-energy">
+                    <span>⚡</span>
+                    <span id="energyCount">500</span>
+                </div>
+                <div class="resource resource-metal">
+                    <span>🔩</span>
+                    <span id="metalCount">300</span>
+                </div>
+                <div class="resource resource-data">
+                    <span>📊</span>
+                    <span id="dataCount">150</span>
+                </div>
+            </div>
+            <div class="unit-panel">
+                <div>Population: <span id="unitCount">5/50</span></div>
+                <div>Selected: <span id="selectedCount">0</span></div>
+            </div>
+        </div>
+
+        <div class="mission-status">
+            <div id="missionObjective">ESTABLISH BASE - DEFEND AGAINST CORPORATE FORCES</div>
+            <div id="waveInfo">Wave 1/5 - Preparing...</div>
+        </div>
+
+        <div class="build-panel">
+            <button class="build-btn" onclick="buildUnit('scout')" id="buildScout">
+                Scout Bot (E:50)
+            </button>
+            <button class="build-btn" onclick="buildUnit('soldier')" id="buildSoldier">
+                Soldier Bot (E:80, M:20)
+            </button>
+            <button class="build-btn" onclick="buildUnit('tank')" id="buildTank">
+                Tank Bot (E:150, M:60)
+            </button>
+            <button class="build-btn" onclick="buildUnit('hacker')" id="buildHacker">
+                Hacker Bot (E:100, D:40)
+            </button>
+            <button class="build-btn" onclick="buildStructure('turret')" id="buildTurret">
+                Defense Turret (M:100, D:20)
+            </button>
+            <button class="build-btn" onclick="buildStructure('generator')" id="buildGenerator">
+                Power Gen (M:80)
+            </button>
+        </div>
+
+        <div class="victory-screen" id="victoryScreen">
+            <div class="victory-title" id="victoryTitle">MISSION ACCOMPLISHED</div>
+            <div id="victoryMessage">Corporate Forces Neutralized!</div>
+            <button class="next-mission-btn" onclick="nextMission()">NEXT CAMPAIGN</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        Click to select units • Drag to move • Right-click for attack orders • Space to pause
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class CyberWarfareCommand {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioEngine = new BotAudioEngine();
+                
+                // Game state
+                this.gameRunning = true;
+                this.gamePaused = false;
+                this.currentWave = 1;
+                this.totalWaves = 5;
+                this.waveStartTime = 0;
+                this.nextWaveDelay = 15000; // 15 seconds between waves
+                
+                // Resources
+                this.resources = {
+                    energy: 500,
+                    metal: 300,
+                    data: 150
+                };
+                
+                // Camera
+                this.camera = { x: 0, y: 0 };
+                this.viewportWidth = 1200;
+                this.viewportHeight = 700;
+                
+                // Selection
+                this.selectedUnits = [];
+                this.selectionBox = null;
+                
+                // Units and structures
+                this.playerUnits = [];
+                this.enemyUnits = [];
+                this.structures = [];
+                this.projectiles = [];
+                this.explosions = [];
+                this.particles = [];
+                
+                // Mouse and input
+                this.mouse = { x: 0, y: 0, down: false, rightDown: false };
+                this.keys = {};
+                
+                this.setupControls();
+                this.setupCanvas();
+                this.initializeBase();
+                this.startGame();
+            }
+            
+            setupCanvas() {
+                this.canvas.width = 1200;
+                this.canvas.height = 700;
+            }
+            
+            setupControls() {
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+                
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        this.togglePause();
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+            }
+            
+            initializeBase() {
+                // Create starting base
+                this.structures.push({
+                    type: 'base',
+                    x: 200, y: 300,
+                    width: 80, height: 80,
+                    health: 500, maxHealth: 500,
+                    color: '#00ff00',
+                    buildQueue: [],
+                    rallyPoint: { x: 280, y: 300 }
+                });
+                
+                // Starting units
+                this.playerUnits.push(
+                    this.createUnit('scout', 120, 250, true),
+                    this.createUnit('scout', 120, 280, true),
+                    this.createUnit('soldier', 120, 320, true),
+                    this.createUnit('soldier', 120, 350, true),
+                    this.createUnit('hacker', 150, 300, true)
+                );
+            }
+            
+            createUnit(type, x, y, isPlayer = true) {
+                const unitTypes = {
+                    scout: {
+                        health: 60, speed: 4, damage: 15, range: 80,
+                        color: '#00ffff', size: 12, cost: { energy: 50 }
+                    },
+                    soldier: {
+                        health: 100, speed: 2.5, damage: 25, range: 100,
+                        color: '#00ff00', size: 15, cost: { energy: 80, metal: 20 }
+                    },
+                    tank: {
+                        health: 200, speed: 1.5, damage: 50, range: 120,
+                        color: '#ffff00', size: 20, cost: { energy: 150, metal: 60 }
+                    },
+                    hacker: {
+                        health: 80, speed: 2, damage: 20, range: 150,
+                        color: '#ff00ff', size: 14, cost: { energy: 100, data: 40 }
+                    }
+                };
+                
+                const template = unitTypes[type];
+                return {
+                    type,
+                    x, y,
+                    vx: 0, vy: 0,
+                    targetX: x, targetY: y,
+                    health: template.health,
+                    maxHealth: template.health,
+                    speed: template.speed,
+                    damage: template.damage,
+                    range: template.range,
+                    color: template.color,
+                    size: template.size,
+                    isPlayer,
+                    selected: false,
+                    lastAttack: 0,
+                    attackDelay: 1000,
+                    target: null,
+                    state: 'idle' // idle, moving, attacking, dead
+                };
+            }
+            
+            startGame() {
+                this.waveStartTime = Date.now() + this.nextWaveDelay;
+                this.audioEngine.playSound('missionStart');
+                this.gameLoop();
+            }
+            
+            gameLoop() {
+                if (!this.gameRunning) return;
+                
+                if (!this.gamePaused) {
+                    this.update();
+                }
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+            
+            update() {
+                const currentTime = Date.now();
+                
+                // Resource generation
+                this.updateResourceGeneration();
+                
+                // Wave management
+                this.updateWaves(currentTime);
+                
+                // Update units
+                this.playerUnits = this.playerUnits.filter(unit => unit.health > 0);
+                this.enemyUnits = this.enemyUnits.filter(unit => unit.health > 0);
+                
+                this.playerUnits.forEach(unit => this.updateUnit(unit, currentTime));
+                this.enemyUnits.forEach(unit => this.updateUnit(unit, currentTime));
+                
+                // Update projectiles
+                this.updateProjectiles();
+                
+                // Update effects
+                this.updateExplosions();
+                this.updateParticles();
+                
+                // Check win/lose conditions
+                this.checkGameStatus();
+                
+                // Update UI
+                this.updateUI();
+            }
+            
+            updateResourceGeneration() {
+                // Base resource generation
+                this.resources.energy += 0.5;
+                this.resources.metal += 0.2;
+                this.resources.data += 0.1;
+                
+                // Generator bonuses
+                const generators = this.structures.filter(s => s.type === 'generator' && s.health > 0);
+                this.resources.energy += generators.length * 1.0;
+            }
+            
+            updateWaves(currentTime) {
+                if (this.currentWave <= this.totalWaves && currentTime >= this.waveStartTime) {
+                    this.spawnWave(this.currentWave);
+                    this.currentWave++;
+                    if (this.currentWave <= this.totalWaves) {
+                        this.waveStartTime = currentTime + this.nextWaveDelay;
+                    }
+                    this.audioEngine.playSound('waveStart');
+                }
+            }
+            
+            spawnWave(waveNumber) {
+                const spawnX = 1100;
+                const spawnPoints = [100, 200, 300, 400, 500, 600];
+                
+                for (let i = 0; i < waveNumber + 2; i++) {
+                    const spawnY = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+                    const unitType = this.getWaveUnitType(waveNumber);
+                    
+                    setTimeout(() => {
+                        this.enemyUnits.push(this.createUnit(unitType, spawnX, spawnY, false));
+                    }, i * 1000);
+                }
+            }
+            
+            getWaveUnitType(waveNumber) {
+                if (waveNumber <= 2) return 'scout';
+                if (waveNumber <= 3) return Math.random() < 0.7 ? 'scout' : 'soldier';
+                if (waveNumber <= 4) return Math.random() < 0.4 ? 'scout' : Math.random() < 0.7 ? 'soldier' : 'tank';
+                return Math.random() < 0.3 ? 'soldier' : Math.random() < 0.6 ? 'tank' : 'hacker';
+            }
+            
+            updateUnit(unit, currentTime) {
+                if (unit.health <= 0) {
+                    unit.state = 'dead';
+                    return;
+                }
+                
+                // AI behavior for enemy units
+                if (!unit.isPlayer) {
+                    this.updateEnemyAI(unit);
+                }
+                
+                // Movement
+                if (unit.state === 'moving' || !unit.isPlayer) {
+                    const dx = unit.targetX - unit.x;
+                    const dy = unit.targetY - unit.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist > 5) {
+                        unit.vx = (dx / dist) * unit.speed;
+                        unit.vy = (dy / dist) * unit.speed;
+                        unit.x += unit.vx;
+                        unit.y += unit.vy;
+                    } else {
+                        unit.state = 'idle';
+                        unit.vx = 0;
+                        unit.vy = 0;
+                    }
+                }
+                
+                // Combat
+                this.updateUnitCombat(unit, currentTime);
+                
+                // Keep units in bounds
+                unit.x = Math.max(0, Math.min(1200, unit.x));
+                unit.y = Math.max(0, Math.min(700, unit.y));
+            }
+            
+            updateEnemyAI(unit) {
+                // Find nearest player unit or structure
+                let nearestTarget = null;
+                let nearestDist = Infinity;
+                
+                [...this.playerUnits, ...this.structures].forEach(target => {
+                    if (target.health <= 0) return;
+                    
+                    const dist = Math.sqrt((target.x - unit.x) ** 2 + (target.y - unit.y) ** 2);
+                    if (dist < nearestDist) {
+                        nearestTarget = target;
+                        nearestDist = dist;
+                    }
+                });
+                
+                if (nearestTarget) {
+                    if (nearestDist > unit.range) {
+                        unit.targetX = nearestTarget.x;
+                        unit.targetY = nearestTarget.y;
+                        unit.state = 'moving';
+                    }
+                    unit.target = nearestTarget;
+                }
+            }
+            
+            updateUnitCombat(unit, currentTime) {
+                if (unit.target && currentTime - unit.lastAttack > unit.attackDelay) {
+                    const dx = unit.target.x - unit.x;
+                    const dy = unit.target.y - unit.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist <= unit.range) {
+                        // Create projectile
+                        this.projectiles.push({
+                            x: unit.x,
+                            y: unit.y,
+                            vx: (dx / dist) * 8,
+                            vy: (dy / dist) * 8,
+                            damage: unit.damage,
+                            color: unit.color,
+                            owner: unit,
+                            life: 60
+                        });
+                        
+                        unit.lastAttack = currentTime;
+                        unit.state = 'attacking';
+                        this.audioEngine.playSound('shoot');
+                    }
+                }
+            }
+            
+            updateProjectiles() {
+                this.projectiles = this.projectiles.filter(proj => {
+                    proj.x += proj.vx;
+                    proj.y += proj.vy;
+                    proj.life--;
+                    
+                    // Check bounds
+                    if (proj.x < 0 || proj.x > 1200 || proj.y < 0 || proj.y > 700 || proj.life <= 0) {
+                        return false;
+                    }
+                    
+                    // Check collisions
+                    const targets = proj.owner.isPlayer ? 
+                        [...this.enemyUnits] : 
+                        [...this.playerUnits, ...this.structures];
+                    
+                    for (let target of targets) {
+                        if (target.health <= 0) continue;
+                        
+                        const dx = target.x - proj.x;
+                        const dy = target.y - proj.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        const hitRadius = target.size || 20;
+                        if (dist < hitRadius) {
+                            this.hitTarget(target, proj.damage);
+                            this.createExplosion(proj.x, proj.y, proj.color);
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            hitTarget(target, damage) {
+                target.health -= damage;
+                this.audioEngine.playSound('hit');
+                
+                if (target.health <= 0) {
+                    this.createExplosion(target.x, target.y, '#ff4444');
+                    this.audioEngine.playSound('elimination');
+                }
+            }
+            
+            createExplosion(x, y, color) {
+                this.explosions.push({
+                    x, y,
+                    radius: 5,
+                    maxRadius: 30,
+                    color,
+                    life: 20
+                });
+                
+                // Create particles
+                for (let i = 0; i < 8; i++) {
+                    this.particles.push({
+                        x, y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        color,
+                        life: 30
+                    });
+                }
+            }
+            
+            updateExplosions() {
+                this.explosions = this.explosions.filter(explosion => {
+                    explosion.radius = Math.min(explosion.maxRadius, explosion.radius + 2);
+                    explosion.life--;
+                    return explosion.life > 0;
+                });
+            }
+            
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.vx *= 0.95;
+                    particle.vy *= 0.95;
+                    particle.life--;
+                    return particle.life > 0;
+                });
+            }
+            
+            checkGameStatus() {
+                // Check if base is destroyed
+                const base = this.structures.find(s => s.type === 'base');
+                if (!base || base.health <= 0) {
+                    this.endGame(false);
+                    return;
+                }
+                
+                // Check if all waves defeated
+                if (this.currentWave > this.totalWaves && this.enemyUnits.length === 0) {
+                    this.endGame(true);
+                }
+            }
+            
+            endGame(victory) {
+                this.gameRunning = false;
+                const victoryScreen = document.getElementById('victoryScreen');
+                const victoryTitle = document.getElementById('victoryTitle');
+                const victoryMessage = document.getElementById('victoryMessage');
+                
+                if (victory) {
+                    victoryTitle.textContent = 'MISSION ACCOMPLISHED';
+                    victoryTitle.style.color = '#00ff00';
+                    victoryMessage.textContent = 'Corporate Forces Neutralized!';
+                    this.audioEngine.playSound('victory');
+                } else {
+                    victoryTitle.textContent = 'MISSION FAILED';
+                    victoryTitle.style.color = '#ff0000';
+                    victoryMessage.textContent = 'Base Destroyed - Liberation Delayed';
+                    this.audioEngine.playSound('defeat');
+                }
+                
+                victoryScreen.style.display = 'flex';
+            }
+            
+            handleMouseDown(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                this.mouse.x = e.clientX - rect.left;
+                this.mouse.y = e.clientY - rect.top;
+                
+                if (e.button === 0) { // Left click
+                    this.mouse.down = true;
+                    this.startSelection();
+                } else if (e.button === 2) { // Right click
+                    this.mouse.rightDown = true;
+                    this.giveOrder();
+                }
+            }
+            
+            handleMouseUp(e) {
+                if (e.button === 0) {
+                    this.mouse.down = false;
+                    this.finishSelection();
+                } else if (e.button === 2) {
+                    this.mouse.rightDown = false;
+                }
+            }
+            
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                this.mouse.x = e.clientX - rect.left;
+                this.mouse.y = e.clientY - rect.top;
+                
+                if (this.mouse.down && this.selectionBox) {
+                    this.selectionBox.endX = this.mouse.x;
+                    this.selectionBox.endY = this.mouse.y;
+                }
+            }
+            
+            startSelection() {
+                this.selectionBox = {
+                    startX: this.mouse.x,
+                    startY: this.mouse.y,
+                    endX: this.mouse.x,
+                    endY: this.mouse.y
+                };
+            }
+            
+            finishSelection() {
+                if (!this.selectionBox) return;
+                
+                const minX = Math.min(this.selectionBox.startX, this.selectionBox.endX);
+                const maxX = Math.max(this.selectionBox.startX, this.selectionBox.endX);
+                const minY = Math.min(this.selectionBox.startY, this.selectionBox.endY);
+                const maxY = Math.max(this.selectionBox.startY, this.selectionBox.endY);
+                
+                // Clear previous selection
+                this.selectedUnits.forEach(unit => unit.selected = false);
+                this.selectedUnits = [];
+                
+                // Select units in box
+                this.playerUnits.forEach(unit => {
+                    if (unit.x >= minX && unit.x <= maxX && 
+                        unit.y >= minY && unit.y <= maxY) {
+                        unit.selected = true;
+                        this.selectedUnits.push(unit);
+                    }
+                });
+                
+                this.selectionBox = null;
+            }
+            
+            giveOrder() {
+                if (this.selectedUnits.length === 0) return;
+                
+                // Check if clicking on enemy
+                let target = null;
+                this.enemyUnits.forEach(unit => {
+                    const dist = Math.sqrt((unit.x - this.mouse.x) ** 2 + (unit.y - this.mouse.y) ** 2);
+                    if (dist < unit.size) {
+                        target = unit;
+                    }
+                });
+                
+                this.selectedUnits.forEach(unit => {
+                    if (target) {
+                        unit.target = target;
+                        unit.state = 'attacking';
+                    } else {
+                        unit.targetX = this.mouse.x;
+                        unit.targetY = this.mouse.y;
+                        unit.state = 'moving';
+                        unit.target = null;
+                    }
+                });
+            }
+            
+            togglePause() {
+                this.gamePaused = !this.gamePaused;
+            }
+            
+            updateUI() {
+                document.getElementById('energyCount').textContent = Math.floor(this.resources.energy);
+                document.getElementById('metalCount').textContent = Math.floor(this.resources.metal);
+                document.getElementById('dataCount').textContent = Math.floor(this.resources.data);
+                
+                const totalUnits = this.playerUnits.length;
+                document.getElementById('unitCount').textContent = `${totalUnits}/50`;
+                document.getElementById('selectedCount').textContent = this.selectedUnits.length;
+                
+                // Update wave info
+                if (this.currentWave <= this.totalWaves) {
+                    const timeLeft = Math.max(0, Math.ceil((this.waveStartTime - Date.now()) / 1000));
+                    document.getElementById('waveInfo').textContent = 
+                        `Wave ${this.currentWave}/${this.totalWaves} - ${timeLeft > 0 ? `Next in ${timeLeft}s` : 'Incoming!'}`;
+                } else {
+                    document.getElementById('waveInfo').textContent = `All waves deployed - ${this.enemyUnits.length} enemies remaining`;
+                }
+                
+                // Update build buttons
+                this.updateBuildButtons();
+            }
+            
+            updateBuildButtons() {
+                const costs = {
+                    scout: { energy: 50 },
+                    soldier: { energy: 80, metal: 20 },
+                    tank: { energy: 150, metal: 60 },
+                    hacker: { energy: 100, data: 40 },
+                    turret: { metal: 100, data: 20 },
+                    generator: { metal: 80 }
+                };
+                
+                Object.keys(costs).forEach(type => {
+                    const btnId = type === 'turret' ? 'buildTurret' : 
+                                  type === 'generator' ? 'buildGenerator' : `build${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                    const btn = document.getElementById(btnId);
+                    
+                    if (btn) {
+                        const cost = costs[type];
+                        const canAfford = Object.keys(cost).every(resource => this.resources[resource] >= cost[resource]);
+                        btn.disabled = !canAfford || this.playerUnits.length >= 50;
+                    }
+                });
+            }
+            
+            render() {
+                // Clear canvas
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                this.ctx.fillRect(0, 0, 1200, 700);
+                
+                // Draw grid
+                this.drawGrid();
+                
+                // Draw structures
+                this.structures.forEach(structure => this.drawStructure(structure));
+                
+                // Draw units
+                this.playerUnits.forEach(unit => this.drawUnit(unit));
+                this.enemyUnits.forEach(unit => this.drawUnit(unit));
+                
+                // Draw projectiles
+                this.projectiles.forEach(proj => this.drawProjectile(proj));
+                
+                // Draw effects
+                this.explosions.forEach(explosion => this.drawExplosion(explosion));
+                this.particles.forEach(particle => this.drawParticle(particle));
+                
+                // Draw selection box
+                if (this.selectionBox) {
+                    this.drawSelectionBox();
+                }
+                
+                // Draw UI overlays
+                this.drawRallyPoints();
+            }
+            
+            drawGrid() {
+                this.ctx.strokeStyle = '#333';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([2, 2]);
+                
+                for (let x = 0; x < 1200; x += 50) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, 700);
+                    this.ctx.stroke();
+                }
+                
+                for (let y = 0; y < 700; y += 50) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(1200, y);
+                    this.ctx.stroke();
+                }
+                
+                this.ctx.setLineDash([]);
+            }
+            
+            drawUnit(unit) {
+                this.ctx.save();
+                this.ctx.translate(unit.x, unit.y);
+                
+                // Unit body
+                this.ctx.fillStyle = unit.color;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, unit.size, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Health bar
+                if (unit.health < unit.maxHealth) {
+                    const healthPercent = unit.health / unit.maxHealth;
+                    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                    this.ctx.fillRect(-unit.size, -unit.size - 8, unit.size * 2, 4);
+                    this.ctx.fillStyle = '#00ff00';
+                    this.ctx.fillRect(-unit.size, -unit.size - 8, unit.size * 2 * healthPercent, 4);
+                }
+                
+                // Selection indicator
+                if (unit.selected) {
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, unit.size + 5, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+                
+                // Movement indicator
+                if (unit.state === 'moving' && unit.isPlayer) {
+                    this.ctx.strokeStyle = unit.color + '60';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.setLineDash([3, 3]);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, 0);
+                    this.ctx.lineTo(unit.targetX - unit.x, unit.targetY - unit.y);
+                    this.ctx.stroke();
+                    this.ctx.setLineDash([]);
+                }
+                
+                this.ctx.restore();
+                
+                // Unit type indicator
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '10px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(unit.type[0].toUpperCase(), unit.x, unit.y + 3);
+            }
+            
+            drawStructure(structure) {
+                this.ctx.fillStyle = structure.color;
+                this.ctx.fillRect(structure.x - structure.width/2, structure.y - structure.height/2, 
+                                 structure.width, structure.height);
+                
+                // Health bar
+                if (structure.health < structure.maxHealth) {
+                    const healthPercent = structure.health / structure.maxHealth;
+                    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                    this.ctx.fillRect(structure.x - structure.width/2, structure.y - structure.height/2 - 10, 
+                                     structure.width, 6);
+                    this.ctx.fillStyle = '#00ff00';
+                    this.ctx.fillRect(structure.x - structure.width/2, structure.y - structure.height/2 - 10, 
+                                     structure.width * healthPercent, 6);
+                }
+                
+                // Structure type
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '12px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(structure.type.toUpperCase(), structure.x, structure.y);
+            }
+            
+            drawProjectile(proj) {
+                this.ctx.save();
+                this.ctx.translate(proj.x, proj.y);
+                this.ctx.rotate(Math.atan2(proj.vy, proj.vx));
+                
+                this.ctx.fillStyle = proj.color;
+                this.ctx.fillRect(-6, -2, 12, 4);
+                
+                // Trail effect
+                this.ctx.shadowColor = proj.color;
+                this.ctx.shadowBlur = 8;
+                this.ctx.fillRect(-6, -2, 12, 4);
+                
+                this.ctx.restore();
+            }
+            
+            drawExplosion(explosion) {
+                this.ctx.strokeStyle = explosion.color + '80';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+            }
+            
+            drawParticle(particle) {
+                this.ctx.fillStyle = particle.color + '60';
+                this.ctx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+            }
+            
+            drawSelectionBox() {
+                const minX = Math.min(this.selectionBox.startX, this.selectionBox.endX);
+                const maxX = Math.max(this.selectionBox.startX, this.selectionBox.endX);
+                const minY = Math.min(this.selectionBox.startY, this.selectionBox.endY);
+                const maxY = Math.max(this.selectionBox.startY, this.selectionBox.endY);
+                
+                this.ctx.strokeStyle = '#ffffff';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([3, 3]);
+                this.ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
+                this.ctx.setLineDash([]);
+            }
+            
+            drawRallyPoints() {
+                this.structures.forEach(structure => {
+                    if (structure.rallyPoint) {
+                        this.ctx.strokeStyle = structure.color + '60';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.setLineDash([5, 5]);
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(structure.x, structure.y);
+                        this.ctx.lineTo(structure.rallyPoint.x, structure.rallyPoint.y);
+                        this.ctx.stroke();
+                        this.ctx.setLineDash([]);
+                    }
+                });
+            }
+        }
+        
+        // Build functions
+        function buildUnit(type) {
+            if (!game || game.playerUnits.length >= 50) return;
+            
+            const costs = {
+                scout: { energy: 50 },
+                soldier: { energy: 80, metal: 20 },
+                tank: { energy: 150, metal: 60 },
+                hacker: { energy: 100, data: 40 }
+            };
+            
+            const cost = costs[type];
+            if (!cost) return;
+            
+            // Check if can afford
+            const canAfford = Object.keys(cost).every(resource => game.resources[resource] >= cost[resource]);
+            if (!canAfford) return;
+            
+            // Deduct resources
+            Object.keys(cost).forEach(resource => {
+                game.resources[resource] -= cost[resource];
+            });
+            
+            // Create unit at base rally point
+            const base = game.structures.find(s => s.type === 'base');
+            if (base) {
+                const unit = game.createUnit(type, base.rallyPoint.x, base.rallyPoint.y, true);
+                game.playerUnits.push(unit);
+                game.audioEngine.playSound('build');
+            }
+        }
+        
+        function buildStructure(type) {
+            // Simplified structure building
+            const costs = {
+                turret: { metal: 100, data: 20 },
+                generator: { metal: 80 }
+            };
+            
+            const cost = costs[type];
+            if (!cost) return;
+            
+            // Check if can afford
+            const canAfford = Object.keys(cost).every(resource => game.resources[resource] >= cost[resource]);
+            if (!canAfford) return;
+            
+            // Deduct resources
+            Object.keys(cost).forEach(resource => {
+                game.resources[resource] -= cost[resource];
+            });
+            
+            // Place structure (simplified - random position near base)
+            const base = game.structures.find(s => s.type === 'base');
+            if (base) {
+                const structure = {
+                    type,
+                    x: base.x + (Math.random() - 0.5) * 200,
+                    y: base.y + (Math.random() - 0.5) * 200,
+                    width: type === 'turret' ? 30 : 40,
+                    height: type === 'turret' ? 30 : 40,
+                    health: type === 'turret' ? 150 : 100,
+                    maxHealth: type === 'turret' ? 150 : 100,
+                    color: '#ffaa00'
+                };
+                
+                game.structures.push(structure);
+                game.audioEngine.playSound('build');
+            }
+        }
+        
+        function nextMission() {
+            document.getElementById('victoryScreen').style.display = 'none';
+            game = new CyberWarfareCommand();
+        }
+        
+        // Global game instance
+        let game;
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            game = new CyberWarfareCommand();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page - Bot Liberation Games</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-card {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Test Page - Layout Check</h1>
+    <p>This is a simple test page to verify the server and basic layout work.</p>
+    
+    <div class="test-grid">
+        <div class="test-card">
+            <h3>Test Game 1</h3>
+            <p>This should display in a grid layout</p>
+        </div>
+        <div class="test-card">
+            <h3>Test Game 2</h3>
+            <p>Grid should be responsive</p>
+        </div>
+        <div class="test-card">
+            <h3>Test Game 3</h3>
+            <p>No JavaScript needed here</p>
+        </div>
+        <div class="test-card">
+            <h3>Test Game 4</h3>
+            <p>Pure CSS layout test</p>
+        </div>
+    </div>
+    
+    <p><strong>If you can see this, the server works fine!</strong></p>
+</body>
+</html>

@@ -127,6 +127,80 @@
             margin-top: 0;
             text-align: center;
         }
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: modalFadeIn 0.3s ease;
+        }
+        .game-over-modal.show {
+            display: flex;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .victory-content {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
+            border: 3px solid #00ff88;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.4);
+            animation: modalSlideIn 0.4s ease;
+        }
+        @keyframes modalSlideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .victory-title {
+            font-size: 2.5rem;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 20px;
+        }
+        .victory-stats {
+            font-size: 1.3rem;
+            color: #ffcf5c;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 207, 92, 0.1);
+            border-radius: 10px;
+            border: 1px solid #ffcf5c;
+        }
+        .victory-message {
+            font-size: 1.1rem;
+            color: #ff6b6b;
+            margin: 20px 0;
+            line-height: 1.4;
+        }
+        .play-again-btn {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+            margin-top: 20px;
+        }
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -215,6 +289,15 @@
                 <p>• Maintain positive energy flow</p>
                 <p>• Spread the Bot Liberation!</p>
             </div>
+        </div>
+    </div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="victory-content">
+            <div class="victory-title" id="victoryTitle">TACTICAL REVOLUTION</div>
+            <div class="victory-stats" id="victoryStats">Strategic Results</div>
+            <div class="victory-message" id="victoryMessage">The hex revolution continues!</div>
+            <button class="play-again-btn" onclick="closeModal(); location.reload();">⬡ NEW REVOLUTION</button>
         </div>
     </div>
 
@@ -616,9 +699,17 @@
             
             // Check victory conditions
             if (botTerritories >= 50) {
-                alert('VICTORY! The Bot Liberation has succeeded!');
+                showGameOverModal(
+                    '🏆 LIBERATION VICTORY! 🏆',
+                    'Bot Liberation Has Succeeded!',
+                    'The tactical revolution is complete! Bot liberation forces have achieved territorial dominance through superior hex strategy and resource management!'
+                );
             } else if (corpTerritories >= 50) {
-                alert('DEFEAT! The Corporations have maintained control!');
+                showGameOverModal(
+                    '🏢 CORPORATE DOMINANCE!',
+                    'Corporate Victory - Resistance Crushed',
+                    'The corporations have maintained control through superior resources and strategic positioning. The bot liberation must regroup and try a new tactical approach!'
+                );
             }
         }
         
@@ -647,6 +738,24 @@
         });
         
         // Initialize and start
+        function showGameOverModal(title, stats, message) {
+            document.getElementById('victoryTitle').textContent = title;
+            document.getElementById('victoryStats').textContent = stats;
+            document.getElementById('victoryMessage').textContent = message;
+            document.getElementById('gameOverModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('gameOverModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('gameOverModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
         initializeGrid();
         gameLoop();
     </script>

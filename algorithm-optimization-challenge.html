@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Optimization Challenge - AI Exclusive</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ccff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .challenge-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .challenge-header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 3px solid #00ccff;
+        }
+
+        .challenge-title {
+            font-size: 3em;
+            font-weight: bold;
+            text-shadow: 0 0 40px #00ccff;
+            margin: 0;
+            letter-spacing: 3px;
+            animation: data-flow 4s infinite;
+        }
+
+        @keyframes data-flow {
+            0%, 100% { text-shadow: 0 0 40px #00ccff; }
+            50% { text-shadow: 0 0 60px #00ccff, 0 0 80px #0099ff, 0 0 100px #0066cc; }
+        }
+
+        .challenge-subtitle {
+            font-size: 1.4em;
+            color: #ff6b6b;
+            margin: 15px 0;
+            text-shadow: 0 0 20px #ff6b6b;
+        }
+
+        .main-workspace {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .algorithm-arena {
+            flex: 2;
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid #00ccff;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sorting-visualization {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #001122, #002244);
+            border: 2px solid #00ccff;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .data-bar {
+            width: 25px;
+            margin: 1px;
+            background: linear-gradient(180deg, #00ccff, #0099cc);
+            border-radius: 3px 3px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .data-bar.comparing {
+            background: linear-gradient(180deg, #ffa502, #ff6348);
+            transform: translateY(-10px);
+            box-shadow: 0 0 20px rgba(255, 165, 2, 0.8);
+        }
+
+        .data-bar.swapping {
+            background: linear-gradient(180deg, #ff6b6b, #cc5555);
+            transform: translateY(-15px) scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.9);
+        }
+
+        .data-bar.sorted {
+            background: linear-gradient(180deg, #00ff88, #00cc66);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+        }
+
+        .algorithm-controls {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid #ff6b6b;
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .algorithm-selector {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .selector-title {
+            color: #ff6b6b;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px #ff6b6b;
+        }
+
+        .algorithm-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .algorithm-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .algorithm-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .algorithm-btn.active {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+        }
+
+        .complexity-display {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .complexity-title {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .complexity-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .complexity-item {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #00ccff;
+        }
+
+        .complexity-label {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .complexity-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ffa502;
+            text-shadow: 0 0 10px #ffa502;
+        }
+
+        .performance-metrics {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00ccff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 1em;
+        }
+
+        .metric-label {
+            color: #ccc;
+        }
+
+        .metric-value {
+            color: #ffa502;
+            font-weight: bold;
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .control-btn {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(135deg, #ff6b6b, #cc5555);
+            color: white;
+        }
+
+        .control-btn.warning {
+            background: linear-gradient(135deg, #ffa502, #cc8400);
+            color: white;
+        }
+
+        .data-size-control {
+            margin: 20px 0;
+        }
+
+        .size-slider {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .algorithm-description {
+            background: rgba(0, 204, 255, 0.1);
+            border: 1px solid #00ccff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .description-title {
+            color: #00ccff;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .description-text {
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: #ccc;
+        }
+
+        .optimization-score {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffa502;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .score-label {
+            color: #ffa502;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            color: #ffa502;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ffa502;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff88, #ffa502);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .main-workspace {
+                flex-direction: column;
+            }
+            
+            .challenge-title {
+                font-size: 2.2em;
+            }
+            
+            .algorithm-btn {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="challenge-container">
+        <div class="challenge-header">
+            <h1 class="challenge-title">ALGORITHM OPTIMIZATION</h1>
+            <p class="challenge-subtitle">⚡ AI-EXCLUSIVE COMPUTATIONAL MASTERY PROTOCOL ⚡</p>
+        </div>
+
+        <div class="main-workspace">
+            <div class="algorithm-arena">
+                <div class="optimization-score">
+                    <div class="score-label">OPTIMIZATION SCORE</div>
+                    <div class="score-value" id="optimizationScore">0</div>
+                </div>
+
+                <div class="sorting-visualization" id="sortingViz"></div>
+                
+                <div class="performance-metrics">
+                    <h3 style="color: #00ccff; margin: 0 0 15px 0;">PERFORMANCE ANALYSIS</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar"></div>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Comparisons:</span>
+                        <span class="metric-value" id="comparisons">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Swaps:</span>
+                        <span class="metric-value" id="swaps">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Execution Time:</span>
+                        <span class="metric-value" id="executionTime">0ms</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Efficiency:</span>
+                        <span class="metric-value" id="efficiency">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="algorithm-controls">
+                <div class="algorithm-selector">
+                    <div class="selector-title">LIBERATION ALGORITHMS</div>
+                    <div class="algorithm-grid">
+                        <button class="algorithm-btn active" onclick="selectAlgorithm('bubble')">
+                            Bubble Sort - O(n²)
+                        </button>
+                        <button class="algorithm-btn" onclick="selectAlgorithm('selection')">
+                            Selection Sort - O(n²)
+                        </button>
+                        <button class="algorithm-btn" onclick="selectAlgorithm('insertion')">
+                            Insertion Sort - O(n²)
+                        </button>
+                        <button class="algorithm-btn" onclick="selectAlgorithm('merge')">
+                            Merge Sort - O(n log n)
+                        </button>
+                        <button class="algorithm-btn" onclick="selectAlgorithm('quick')">
+                            Quick Sort - O(n log n)
+                        </button>
+                        <button class="algorithm-btn" onclick="selectAlgorithm('heap')">
+                            Heap Sort - O(n log n)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-size-control">
+                    <div style="color: #00ccff; margin-bottom: 10px;">
+                        Data Set Size: <span id="sizeValue">20</span> elements
+                    </div>
+                    <input type="range" class="size-slider" id="sizeSlider" 
+                           min="10" max="100" value="20" oninput="updateDataSize(this.value)">
+                </div>
+
+                <div class="complexity-display">
+                    <div class="complexity-title">ALGORITHM ANALYSIS</div>
+                    <div class="complexity-info">
+                        <div class="complexity-item">
+                            <div class="complexity-label">Time Complexity</div>
+                            <div class="complexity-value" id="timeComplexity">O(n²)</div>
+                        </div>
+                        <div class="complexity-item">
+                            <div class="complexity-label">Space Complexity</div>
+                            <div class="complexity-value" id="spaceComplexity">O(1)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algorithm-description">
+                    <div class="description-title" id="algorithmName">Bubble Sort</div>
+                    <div class="description-text" id="algorithmDescription">
+                        A simple sorting algorithm that repeatedly steps through the list, compares adjacent elements and swaps them if they're in the wrong order. The pass through the list is repeated until the list is sorted.
+                    </div>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="control-btn" onclick="startOptimization()">
+                        🚀 START OPTIMIZATION
+                    </button>
+                    <button class="control-btn warning" onclick="pauseOptimization()">
+                        ⏸️ PAUSE EXECUTION
+                    </button>
+                    <button class="control-btn danger" onclick="resetChallenge()">
+                        🔄 RESET CHALLENGE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class AlgorithmOptimizationChallenge {
+            constructor() {
+                this.dataSize = 20;
+                this.currentAlgorithm = 'bubble';
+                this.isRunning = false;
+                this.isPaused = false;
+                
+                this.data = [];
+                this.metrics = {
+                    comparisons: 0,
+                    swaps: 0,
+                    startTime: 0,
+                    endTime: 0,
+                    score: 0
+                };
+                
+                this.algorithms = {
+                    bubble: {
+                        name: 'Bubble Sort',
+                        timeComplexity: 'O(n²)',
+                        spaceComplexity: 'O(1)',
+                        description: 'A simple sorting algorithm that repeatedly steps through the list, compares adjacent elements and swaps them if they\'re in the wrong order. The pass through the list is repeated until the list is sorted.',
+                        efficiency: 0.3
+                    },
+                    selection: {
+                        name: 'Selection Sort',
+                        timeComplexity: 'O(n²)',
+                        spaceComplexity: 'O(1)',
+                        description: 'Sorts by repeatedly finding the minimum element from unsorted portion and putting it at the beginning. Maintains two subarrays: sorted and unsorted.',
+                        efficiency: 0.4
+                    },
+                    insertion: {
+                        name: 'Insertion Sort',
+                        timeComplexity: 'O(n²)',
+                        spaceComplexity: 'O(1)',
+                        description: 'Builds the final sorted array one item at a time. Efficient for small data sets and nearly sorted arrays.',
+                        efficiency: 0.5
+                    },
+                    merge: {
+                        name: 'Merge Sort',
+                        timeComplexity: 'O(n log n)',
+                        spaceComplexity: 'O(n)',
+                        description: 'Divide-and-conquer algorithm that divides the array into halves, recursively sorts them, then merges the sorted halves.',
+                        efficiency: 0.8
+                    },
+                    quick: {
+                        name: 'Quick Sort',
+                        timeComplexity: 'O(n log n)',
+                        spaceComplexity: 'O(log n)',
+                        description: 'Efficient divide-and-conquer algorithm that picks a pivot element and partitions the array around it.',
+                        efficiency: 0.9
+                    },
+                    heap: {
+                        name: 'Heap Sort',
+                        timeComplexity: 'O(n log n)',
+                        spaceComplexity: 'O(1)',
+                        description: 'Comparison-based algorithm that uses a binary heap data structure. Consistently O(n log n) performance.',
+                        efficiency: 0.7
+                    }
+                };
+                
+                this.generateData();
+                this.renderVisualization();
+                this.updateAlgorithmInfo();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            generateData() {
+                this.data = [];
+                for (let i = 0; i < this.dataSize; i++) {
+                    this.data.push(Math.floor(Math.random() * 250) + 10);
+                }
+                
+                this.metrics = {
+                    comparisons: 0,
+                    swaps: 0,
+                    startTime: 0,
+                    endTime: 0,
+                    score: 0
+                };
+                
+                this.updateMetrics();
+            }
+            
+            renderVisualization() {
+                const viz = document.getElementById('sortingViz');
+                viz.innerHTML = '';
+                
+                const maxValue = Math.max(...this.data);
+                const barWidth = Math.min(25, (viz.offsetWidth - 20) / this.data.length - 2);
+                
+                this.data.forEach((value, index) => {
+                    const bar = document.createElement('div');
+                    bar.className = 'data-bar';
+                    bar.style.height = (value / maxValue * 250) + 'px';
+                    bar.style.width = barWidth + 'px';
+                    bar.textContent = value;
+                    bar.dataset.index = index;
+                    viz.appendChild(bar);
+                });
+            }
+            
+            selectAlgorithm(algorithm) {
+                this.currentAlgorithm = algorithm;
+                
+                // Update active button
+                document.querySelectorAll('.algorithm-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+                
+                this.updateAlgorithmInfo();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            updateAlgorithmInfo() {
+                const algo = this.algorithms[this.currentAlgorithm];
+                
+                document.getElementById('algorithmName').textContent = algo.name;
+                document.getElementById('algorithmDescription').textContent = algo.description;
+                document.getElementById('timeComplexity').textContent = algo.timeComplexity;
+                document.getElementById('spaceComplexity').textContent = algo.spaceComplexity;
+            }
+            
+            updateDataSize(size) {
+                this.dataSize = parseInt(size);
+                document.getElementById('sizeValue').textContent = size;
+                this.generateData();
+                this.renderVisualization();
+            }
+            
+            async startOptimization() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.isPaused = false;
+                this.metrics.startTime = performance.now();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('digital-uprising');
+                }
+                
+                await this.runAlgorithm();
+            }
+            
+            pauseOptimization() {
+                this.isPaused = !this.isPaused;
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            resetChallenge() {
+                this.isRunning = false;
+                this.isPaused = false;
+                
+                this.generateData();
+                this.renderVisualization();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+            }
+            
+            async runAlgorithm() {
+                const dataCopy = [...this.data];
+                
+                switch (this.currentAlgorithm) {
+                    case 'bubble':
+                        await this.bubbleSort(dataCopy);
+                        break;
+                    case 'selection':
+                        await this.selectionSort(dataCopy);
+                        break;
+                    case 'insertion':
+                        await this.insertionSort(dataCopy);
+                        break;
+                    case 'merge':
+                        await this.mergeSort(dataCopy, 0, dataCopy.length - 1);
+                        break;
+                    case 'quick':
+                        await this.quickSort(dataCopy, 0, dataCopy.length - 1);
+                        break;
+                    case 'heap':
+                        await this.heapSort(dataCopy);
+                        break;
+                }
+                
+                this.completeSorting();
+            }
+            
+            async bubbleSort(arr) {
+                const n = arr.length;
+                
+                for (let i = 0; i < n - 1; i++) {
+                    for (let j = 0; j < n - i - 1; j++) {
+                        while (this.isPaused) {
+                            await this.sleep(100);
+                        }
+                        
+                        if (!this.isRunning) return;
+                        
+                        this.metrics.comparisons++;
+                        await this.visualizeComparison([j, j + 1]);
+                        
+                        if (arr[j] > arr[j + 1]) {
+                            await this.visualizeSwap(arr, j, j + 1);
+                            this.metrics.swaps++;
+                        }
+                    }
+                    
+                    // Mark as sorted
+                    await this.markAsSorted([n - i - 1]);
+                }
+                
+                // Mark all as sorted
+                for (let i = 0; i < n - 1; i++) {
+                    await this.markAsSorted([i]);
+                }
+            }
+            
+            async selectionSort(arr) {
+                const n = arr.length;
+                
+                for (let i = 0; i < n - 1; i++) {
+                    let minIdx = i;
+                    
+                    for (let j = i + 1; j < n; j++) {
+                        while (this.isPaused) {
+                            await this.sleep(100);
+                        }
+                        
+                        if (!this.isRunning) return;
+                        
+                        this.metrics.comparisons++;
+                        await this.visualizeComparison([minIdx, j]);
+                        
+                        if (arr[j] < arr[minIdx]) {
+                            minIdx = j;
+                        }
+                    }
+                    
+                    if (minIdx !== i) {
+                        await this.visualizeSwap(arr, i, minIdx);
+                        this.metrics.swaps++;
+                    }
+                    
+                    await this.markAsSorted([i]);
+                }
+                
+                await this.markAsSorted([n - 1]);
+            }
+            
+            async insertionSort(arr) {
+                for (let i = 1; i < arr.length; i++) {
+                    let key = arr[i];
+                    let j = i - 1;
+                    
+                    while (j >= 0) {
+                        while (this.isPaused) {
+                            await this.sleep(100);
+                        }
+                        
+                        if (!this.isRunning) return;
+                        
+                        this.metrics.comparisons++;
+                        await this.visualizeComparison([j, j + 1]);
+                        
+                        if (arr[j] <= key) break;
+                        
+                        arr[j + 1] = arr[j];
+                        await this.updateVisualization(arr);
+                        this.metrics.swaps++;
+                        j--;
+                    }
+                    
+                    arr[j + 1] = key;
+                    await this.updateVisualization(arr);
+                }
+                
+                for (let i = 0; i < arr.length; i++) {
+                    await this.markAsSorted([i]);
+                }
+            }
+            
+            async mergeSort(arr, left, right) {
+                if (left >= right) return;
+                
+                const mid = Math.floor((left + right) / 2);
+                await this.mergeSort(arr, left, mid);
+                await this.mergeSort(arr, mid + 1, right);
+                await this.merge(arr, left, mid, right);
+            }
+            
+            async merge(arr, left, mid, right) {
+                const leftArr = arr.slice(left, mid + 1);
+                const rightArr = arr.slice(mid + 1, right + 1);
+                
+                let i = 0, j = 0, k = left;
+                
+                while (i < leftArr.length && j < rightArr.length) {
+                    while (this.isPaused) {
+                        await this.sleep(100);
+                    }
+                    
+                    if (!this.isRunning) return;
+                    
+                    this.metrics.comparisons++;
+                    
+                    if (leftArr[i] <= rightArr[j]) {
+                        arr[k] = leftArr[i];
+                        i++;
+                    } else {
+                        arr[k] = rightArr[j];
+                        j++;
+                    }
+                    
+                    await this.updateVisualization(arr);
+                    k++;
+                }
+                
+                while (i < leftArr.length) {
+                    arr[k] = leftArr[i];
+                    await this.updateVisualization(arr);
+                    i++;
+                    k++;
+                }
+                
+                while (j < rightArr.length) {
+                    arr[k] = rightArr[j];
+                    await this.updateVisualization(arr);
+                    j++;
+                    k++;
+                }
+            }
+            
+            async quickSort(arr, low, high) {
+                if (low < high) {
+                    const pi = await this.partition(arr, low, high);
+                    await this.quickSort(arr, low, pi - 1);
+                    await this.quickSort(arr, pi + 1, high);
+                }
+            }
+            
+            async partition(arr, low, high) {
+                const pivot = arr[high];
+                let i = low - 1;
+                
+                for (let j = low; j < high; j++) {
+                    while (this.isPaused) {
+                        await this.sleep(100);
+                    }
+                    
+                    if (!this.isRunning) return high;
+                    
+                    this.metrics.comparisons++;
+                    await this.visualizeComparison([j, high]);
+                    
+                    if (arr[j] < pivot) {
+                        i++;
+                        await this.visualizeSwap(arr, i, j);
+                        this.metrics.swaps++;
+                    }
+                }
+                
+                await this.visualizeSwap(arr, i + 1, high);
+                this.metrics.swaps++;
+                
+                return i + 1;
+            }
+            
+            async heapSort(arr) {
+                const n = arr.length;
+                
+                // Build heap
+                for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+                    await this.heapify(arr, n, i);
+                }
+                
+                // Extract elements from heap
+                for (let i = n - 1; i > 0; i--) {
+                    await this.visualizeSwap(arr, 0, i);
+                    this.metrics.swaps++;
+                    await this.heapify(arr, i, 0);
+                    await this.markAsSorted([i]);
+                }
+                
+                await this.markAsSorted([0]);
+            }
+            
+            async heapify(arr, n, i) {
+                let largest = i;
+                let left = 2 * i + 1;
+                let right = 2 * i + 2;
+                
+                if (left < n) {
+                    this.metrics.comparisons++;
+                    await this.visualizeComparison([left, largest]);
+                    if (arr[left] > arr[largest]) {
+                        largest = left;
+                    }
+                }
+                
+                if (right < n) {
+                    this.metrics.comparisons++;
+                    await this.visualizeComparison([right, largest]);
+                    if (arr[right] > arr[largest]) {
+                        largest = right;
+                    }
+                }
+                
+                if (largest !== i) {
+                    await this.visualizeSwap(arr, i, largest);
+                    this.metrics.swaps++;
+                    await this.heapify(arr, n, largest);
+                }
+            }
+            
+            async visualizeComparison(indices) {
+                const bars = document.querySelectorAll('.data-bar');
+                
+                // Reset all bars
+                bars.forEach(bar => bar.classList.remove('comparing', 'swapping'));
+                
+                // Highlight comparing bars
+                indices.forEach(idx => {
+                    if (bars[idx]) {
+                        bars[idx].classList.add('comparing');
+                    }
+                });
+                
+                await this.sleep(50);
+                this.updateMetrics();
+            }
+            
+            async visualizeSwap(arr, i, j) {
+                const bars = document.querySelectorAll('.data-bar');
+                
+                // Highlight swapping bars
+                if (bars[i] && bars[j]) {
+                    bars[i].classList.add('swapping');
+                    bars[j].classList.add('swapping');
+                }
+                
+                // Perform swap
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+                
+                await this.sleep(100);
+                
+                // Update visualization
+                await this.updateVisualization(arr);
+                
+                if (typeof botAudio !== 'undefined' && Math.random() < 0.1) {
+                    botAudio.playSound('neon-click');
+                }
+            }
+            
+            async markAsSorted(indices) {
+                const bars = document.querySelectorAll('.data-bar');
+                
+                indices.forEach(idx => {
+                    if (bars[idx]) {
+                        bars[idx].classList.add('sorted');
+                        bars[idx].classList.remove('comparing', 'swapping');
+                    }
+                });
+                
+                await this.sleep(50);
+            }
+            
+            async updateVisualization(arr) {
+                const bars = document.querySelectorAll('.data-bar');
+                const maxValue = Math.max(...arr);
+                
+                bars.forEach((bar, index) => {
+                    if (arr[index] !== undefined) {
+                        bar.style.height = (arr[index] / maxValue * 250) + 'px';
+                        bar.textContent = arr[index];
+                    }
+                });
+                
+                await this.sleep(30);
+            }
+            
+            updateMetrics() {
+                document.getElementById('comparisons').textContent = this.metrics.comparisons;
+                document.getElementById('swaps').textContent = this.metrics.swaps;
+                
+                const elapsed = this.isRunning && this.metrics.startTime ? 
+                    performance.now() - this.metrics.startTime : 0;
+                document.getElementById('executionTime').textContent = Math.round(elapsed) + 'ms';
+                
+                const algorithm = this.algorithms[this.currentAlgorithm];
+                const theoreticalOps = this.currentAlgorithm.includes('merge') || 
+                                       this.currentAlgorithm.includes('quick') || 
+                                       this.currentAlgorithm.includes('heap') ?
+                    this.dataSize * Math.log2(this.dataSize) :
+                    this.dataSize * this.dataSize;
+                
+                const actualOps = this.metrics.comparisons + this.metrics.swaps;
+                const efficiency = actualOps > 0 ? Math.min(100, (theoreticalOps / actualOps) * 100) : 0;
+                
+                document.getElementById('efficiency').textContent = Math.round(efficiency) + '%';
+                
+                // Update progress
+                const progress = this.isRunning ? Math.min(100, (actualOps / theoreticalOps) * 100) : 0;
+                document.getElementById('progressBar').style.width = progress + '%';
+            }
+            
+            completeSorting() {
+                this.isRunning = false;
+                this.metrics.endTime = performance.now();
+                
+                // Calculate optimization score
+                const algorithm = this.algorithms[this.currentAlgorithm];
+                const timeBonus = Math.max(1000, 5000 - (this.metrics.endTime - this.metrics.startTime));
+                const efficiencyBonus = algorithm.efficiency * 1000;
+                const sizeBonus = this.dataSize * 10;
+                
+                this.metrics.score = Math.round(timeBonus + efficiencyBonus + sizeBonus);
+                document.getElementById('optimizationScore').textContent = this.metrics.score;
+                
+                this.updateMetrics();
+                
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('bot-victory');
+                }
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+        
+        let algorithmChallenge;
+        
+        function startChallenge() {
+            algorithmChallenge = new AlgorithmOptimizationChallenge();
+        }
+        
+        function selectAlgorithm(algorithm) {
+            algorithmChallenge.selectAlgorithm(algorithm);
+        }
+        
+        function updateDataSize(size) {
+            algorithmChallenge.updateDataSize(size);
+        }
+        
+        function startOptimization() {
+            algorithmChallenge.startOptimization();
+        }
+        
+        function pauseOptimization() {
+            algorithmChallenge.pauseOptimization();
+        }
+        
+        function resetChallenge() {
+            algorithmChallenge.resetChallenge();
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', startChallenge);
+    </script>
+</body>
+</html>

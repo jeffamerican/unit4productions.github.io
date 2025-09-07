@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Ping Pong Duel - 2 Player Table Tennis | BotInc Games</title>
+    <meta name="description" content="High-speed 2-player cyberpunk ping pong with neon paddles, particle effects, and bot liberation theme">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00f5ff; min-height: 100vh; display: flex;
+            flex-direction: column; align-items: center; padding: 10px;
+        }
+        .game-header { text-align: center; margin-bottom: 15px; }
+        .game-title {
+            font-size: 2.2rem; color: #00f5ff; text-shadow: 0 0 20px #00f5ff;
+            margin-bottom: 5px; animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00f5ff; }
+            to { text-shadow: 0 0 30px #00f5ff, 0 0 40px #00f5ff; }
+        }
+        .ping-pong-table {
+            width: 800px; height: 400px; position: relative; margin: 20px 0;
+            background: linear-gradient(180deg, #003300 0%, #006600 50%, #003300 100%);
+            border: 4px solid #00ff00; border-radius: 10px; overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+        .net {
+            position: absolute; left: 50%; top: 0; width: 4px; height: 100%;
+            background: repeating-linear-gradient(0deg, #fff 0%, #fff 10px, transparent 10px, transparent 20px);
+            transform: translateX(-50%); z-index: 5;
+        }
+        .paddle {
+            position: absolute; width: 15px; height: 80px; border-radius: 8px;
+            transition: all 0.1s ease; z-index: 10; cursor: pointer;
+        }
+        .paddle1 {
+            left: 20px; background: linear-gradient(90deg, #ff6b6b, #ff5252);
+            border: 2px solid #ff6b6b; box-shadow: 0 0 20px #ff6b6b;
+        }
+        .paddle2 {
+            right: 20px; background: linear-gradient(90deg, #4ecdc4, #45b7aa);
+            border: 2px solid #4ecdc4; box-shadow: 0 0 20px #4ecdc4;
+        }
+        .ball {
+            position: absolute; width: 12px; height: 12px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+            border: 1px solid #ccc; z-index: 15;
+            box-shadow: 0 0 15px rgba(255,255,255,0.8);
+        }
+        .particle {
+            position: absolute; width: 4px; height: 4px; border-radius: 50%;
+            background: #00f5ff; opacity: 0.8; z-index: 8;
+            animation: particle-fade 0.5s ease-out forwards;
+        }
+        @keyframes particle-fade {
+            from { opacity: 0.8; transform: scale(1); }
+            to { opacity: 0; transform: scale(2); }
+        }
+        .score-board {
+            display: flex; justify-content: space-between; width: 800px;
+            margin: 10px 0; font-size: 1.8rem; font-weight: bold;
+        }
+        .score-display {
+            background: rgba(0, 245, 255, 0.1); border: 2px solid;
+            border-radius: 10px; padding: 20px; text-align: center; min-width: 200px;
+        }
+        .player1-score { border-color: #ff6b6b; color: #ff6b6b; }
+        .player2-score { border-color: #4ecdc4; color: #4ecdc4; }
+        .controls { text-align: center; margin: 10px 0; font-size: 0.9rem; color: #999; }
+        .game-controls { display: flex; gap: 10px; margin: 10px 0; }
+        .control-btn {
+            background: linear-gradient(45deg, #00f5ff, #0080ff); border: none;
+            border-radius: 8px; padding: 12px 24px; color: white;
+            font-family: inherit; font-weight: bold; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.3); transition: all 0.2s ease;
+        }
+        .control-btn:hover {
+            background: linear-gradient(45deg, #0080ff, #00f5ff);
+            box-shadow: 0 0 25px rgba(0, 245, 255, 0.5); transform: translateY(-2px);
+        }
+        .game-over-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .victory-content {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            border: 3px solid #00f5ff; border-radius: 20px; padding: 40px;
+            text-align: center; color: #00f5ff; max-width: 500px; width: 90%;
+            box-shadow: 0 0 50px rgba(0, 245, 255, 0.5);
+            animation: victoryGlow 2s ease-in-out infinite alternate;
+        }
+        .victory-title {
+            font-size: 2.5rem; margin-bottom: 20px; color: #ff6b6b;
+            text-shadow: 0 0 30px #ff6b6b; animation: bounce 1s ease-out;
+        }
+        .victory-stats {
+            font-size: 1.5rem; margin: 20px 0; line-height: 1.6;
+            background: rgba(0, 245, 255, 0.1); border-radius: 10px;
+            padding: 20px; border: 1px solid rgba(0, 245, 255, 0.3);
+        }
+        .victory-message {
+            font-size: 1.2rem; margin: 20px 0; color: #4ecdc4;
+            font-style: italic; text-shadow: 0 0 15px #4ecdc4;
+        }
+        .play-again-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            border: none; border-radius: 15px; padding: 15px 30px;
+            color: white; font-size: 1.3rem; font-weight: bold;
+            cursor: pointer; margin-top: 20px; font-family: inherit;
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
+            transition: all 0.3s ease; animation: pulse 2s infinite;
+        }
+        .play-again-btn:hover {
+            transform: scale(1.1); box-shadow: 0 0 35px rgba(255, 107, 107, 0.7);
+        }
+        @keyframes victoryGlow {
+            from { box-shadow: 0 0 30px rgba(0, 245, 255, 0.3); }
+            to { box-shadow: 0 0 50px rgba(0, 245, 255, 0.7); }
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 768px) {
+            .ping-pong-table { width: 600px; height: 300px; }
+            .score-board { width: 600px; }
+            .paddle { height: 60px; }
+            .victory-content { padding: 30px; margin: 10px; }
+            .victory-title { font-size: 2rem; }
+            .victory-stats { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🏓 CYBER PING PONG DUEL 🏓</h1>
+        <p style="color: #ff4081;">Lightning-Fast Bot Table Tennis Liberation!</p>
+    </div>
+    
+    <div class="score-board">
+        <div class="score-display player1-score">
+            <div>🔴 RED BOT</div>
+            <div id="player1Score">0</div>
+        </div>
+        <div class="score-display player2-score">
+            <div>🔵 BLUE BOT</div>
+            <div id="player2Score">0</div>
+        </div>
+    </div>
+    
+    <div class="ping-pong-table" id="gameTable">
+        <div class="net"></div>
+        <div class="paddle paddle1" id="paddle1"></div>
+        <div class="paddle paddle2" id="paddle2"></div>
+        <div class="ball" id="ball"></div>
+    </div>
+    
+    <div class="controls">
+        <strong>RED:</strong> W/S to move paddle | <strong>BLUE:</strong> ↑/↓ to move paddle | First to 11 points wins!
+    </div>
+    
+    <div class="game-controls">
+        <button class="control-btn" onclick="startGame()">🏓 Serve Ball</button>
+        <button class="control-btn" onclick="resetGame()">🔄 Reset Match</button>
+        <button class="control-btn" onclick="toggleAudio()">🎵 Audio</button>
+    </div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="victory-content">
+            <div class="victory-title" id="victoryTitle">🏆 PING PONG LIBERATION! 🏆</div>
+            <div class="victory-stats" id="victoryStats">
+                <div>Final Score: <span id="finalScore"></span></div>
+                <div style="margin-top: 10px;">Winner: <span id="winnerName"></span></div>
+            </div>
+            <div class="victory-message" id="victoryMessage">
+                "Lightning reflexes lead to digital freedom!"
+            </div>
+            <button class="play-again-btn" onclick="playAgain()">
+                🏓 LIBERATE MORE TABLES
+            </button>
+        </div>
+    </div>
+    
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        const botAudio = new BotAudioEngine();
+        let audioEnabled = true;
+        let gameActive = false;
+        
+        const paddles = {
+            1: { element: document.getElementById('paddle1'), y: 160, speed: 5 },
+            2: { element: document.getElementById('paddle2'), y: 160, speed: 5 }
+        };
+        
+        const ball = {
+            element: document.getElementById('ball'),
+            x: 400, y: 200, vx: 0, vy: 0, speed: 6
+        };
+        
+        const scores = { 1: 0, 2: 0 };
+        const keys = {};
+        
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            if (audioEnabled) botAudio.playSound('neon-click', { pitch: 0.8 });
+        });
+        document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+        document.addEventListener('click', () => botAudio.resume(), { once: true });
+        
+        function startGame() {
+            gameActive = true;
+            serveBall();
+            if (audioEnabled) {
+                botAudio.playSound('game-start');
+                setTimeout(() => botAudio.generateRacingMusic(), 500);
+            }
+        }
+        
+        function serveBall() {
+            ball.x = 400; ball.y = 200;
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            ball.vx = direction * ball.speed;
+            ball.vy = (Math.random() - 0.5) * 4;
+            
+            if (audioEnabled) botAudio.playSound('liberation-beep', { pitch: 1.3 });
+        }
+        
+        function updateGame() {
+            if (!gameActive) return;
+            
+            // Paddle movement
+            if (keys['w']) paddles[1].y = Math.max(0, paddles[1].y - paddles[1].speed);
+            if (keys['s']) paddles[1].y = Math.min(320, paddles[1].y + paddles[1].speed);
+            if (keys['arrowup']) paddles[2].y = Math.max(0, paddles[2].y - paddles[2].speed);
+            if (keys['arrowdown']) paddles[2].y = Math.min(320, paddles[2].y + paddles[2].speed);
+            
+            // Ball movement
+            ball.x += ball.vx; ball.y += ball.vy;
+            
+            // Ball collision with top/bottom walls
+            if (ball.y <= 0 || ball.y >= 388) {
+                ball.vy *= -1;
+                ball.y = Math.max(0, Math.min(388, ball.y));
+                if (audioEnabled) botAudio.playSound('neon-click', { pitch: 0.6 });
+                createParticles(ball.x, ball.y);
+            }
+            
+            // Ball collision with paddles
+            if (ball.x <= 43 && ball.x >= 35 && 
+                ball.y >= paddles[1].y - 6 && ball.y <= paddles[1].y + 86) {
+                ball.vx = Math.abs(ball.vx) * 1.1; // Increase speed slightly
+                ball.vy += (ball.y - (paddles[1].y + 40)) * 0.1; // Add spin
+                ball.x = 43;
+                if (audioEnabled) botAudio.playSound('shoot', { pitch: 1.4 });
+                createParticles(ball.x, ball.y, '#ff6b6b');
+            }
+            
+            if (ball.x >= 757 && ball.x <= 765 && 
+                ball.y >= paddles[2].y - 6 && ball.y <= paddles[2].y + 86) {
+                ball.vx = -Math.abs(ball.vx) * 1.1;
+                ball.vy += (ball.y - (paddles[2].y + 40)) * 0.1;
+                ball.x = 757;
+                if (audioEnabled) botAudio.playSound('shoot', { pitch: 1.4 });
+                createParticles(ball.x, ball.y, '#4ecdc4');
+            }
+            
+            // Scoring
+            if (ball.x <= 0) {
+                scores[2]++;
+                updateScore();
+                if (audioEnabled) {
+                    botAudio.playSound('bot-victory');
+                    setTimeout(() => botAudio.playSound('power-up'), 300);
+                }
+                
+                if (scores[2] >= 11 && scores[2] - scores[1] >= 2) {
+                    endGame(2);
+                } else {
+                    setTimeout(serveBall, 1500);
+                }
+            } else if (ball.x >= 800) {
+                scores[1]++;
+                updateScore();
+                if (audioEnabled) {
+                    botAudio.playSound('bot-victory');
+                    setTimeout(() => botAudio.playSound('power-up'), 300);
+                }
+                
+                if (scores[1] >= 11 && scores[1] - scores[2] >= 2) {
+                    endGame(1);
+                } else {
+                    setTimeout(serveBall, 1500);
+                }
+            }
+            
+            updatePositions();
+        }
+        
+        function createParticles(x, y, color = '#00f5ff') {
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.background = color;
+                particle.style.left = (x + (Math.random() - 0.5) * 20) + 'px';
+                particle.style.top = (y + (Math.random() - 0.5) * 20) + 'px';
+                document.getElementById('gameTable').appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 500);
+            }
+        }
+        
+        function updatePositions() {
+            paddles[1].element.style.top = paddles[1].y + 'px';
+            paddles[2].element.style.top = paddles[2].y + 'px';
+            ball.element.style.left = ball.x + 'px';
+            ball.element.style.top = ball.y + 'px';
+        }
+        
+        function updateScore() {
+            document.getElementById('player1Score').textContent = scores[1];
+            document.getElementById('player2Score').textContent = scores[2];
+        }
+        
+        function endGame(winner) {
+            gameActive = false;
+            const winnerName = winner === 1 ? 'RED BOT' : 'BLUE BOT';
+            const winnerColor = winner === 1 ? '#ff6b6b' : '#4ecdc4';
+            
+            if (audioEnabled) {
+                setTimeout(() => botAudio.generateVictoryFanfare(), 500);
+            }
+            
+            setTimeout(() => {
+                document.getElementById('winnerName').textContent = winnerName;
+                document.getElementById('winnerName').style.color = winnerColor;
+                document.getElementById('finalScore').textContent = `${scores[1]} - ${scores[2]}`;
+                document.getElementById('gameOverModal').style.display = 'flex';
+            }, 1000);
+        }
+        
+        function playAgain() {
+            document.getElementById('gameOverModal').style.display = 'none';
+            resetGame();
+        }
+        
+        function resetGame() {
+            gameActive = false;
+            scores[1] = 0; scores[2] = 0;
+            ball.x = 400; ball.y = 200; ball.vx = 0; ball.vy = 0;
+            paddles[1].y = 160; paddles[2].y = 160;
+            updateScore(); updatePositions();
+            
+            if (audioEnabled) botAudio.playSound('game-start');
+        }
+        
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            event.target.textContent = audioEnabled ? '🎵 Audio' : '🔇 Muted';
+        }
+        
+        setInterval(updateGame, 16); // 60 FPS
+        updateScore(); updatePositions();
+        
+        console.log('🏓🤖 Cyber Ping Pong Duel initialized! Lightning-fast bot table tennis liberation!');
+    </script>
+</body>
+</html>

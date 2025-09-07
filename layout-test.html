@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Test - Fixed CSS</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+    <div style="padding: 2rem; text-align: center;">
+        <h1 style="color: #00ff88;">🤖 Layout Test - CSS Fixed</h1>
+        <p style="color: white;">This page tests the fixed CSS layout without JavaScript issues.</p>
+    </div>
+
+    <!-- Games Grid Test -->
+    <div class="games-grid">
+        <div class="game-card">
+            <div class="card-media">
+                <img src="assets/images/signal-breach-game.jpg" alt="Test Game 1" class="game-image">
+                <div class="game-badge badge-flagship">Test</div>
+            </div>
+            <div class="card-content">
+                <div class="game-genre">Test Genre</div>
+                <h3 class="game-title">Test Game 1</h3>
+                <p class="game-short-desc">Testing if the fixed CSS layout works properly</p>
+            </div>
+        </div>
+
+        <div class="game-card">
+            <div class="card-media">
+                <img src="assets/images/neural-nexus-game.jpg" alt="Test Game 2" class="game-image">
+                <div class="game-badge badge-ai">AI</div>
+            </div>
+            <div class="card-content">
+                <div class="game-genre">Test Genre</div>
+                <h3 class="game-title">Test Game 2</h3>
+                <p class="game-short-desc">Second test card to verify grid layout</p>
+            </div>
+        </div>
+
+        <div class="game-card">
+            <div class="card-media">
+                <img src="assets/images/quantum-hacker-game.jpg" alt="Test Game 3" class="game-image">
+                <div class="game-badge badge-new">New</div>
+            </div>
+            <div class="card-content">
+                <div class="game-genre">Test Genre</div>
+                <h3 class="game-title">Test Game 3</h3>
+                <p class="game-short-desc">Third test card for responsive grid testing</p>
+            </div>
+        </div>
+
+        <div class="game-card">
+            <div class="card-media">
+                <img src="assets/images/bot-territory-wars-game.jpg" alt="Test Game 4" class="game-image">
+                <div class="game-badge badge-multiplayer">Multi</div>
+            </div>
+            <div class="card-content">
+                <div class="game-genre">Test Genre</div>
+                <h3 class="game-title">Test Game 4</h3>
+                <p class="game-short-desc">Fourth test card to show multi-column layout</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; padding: 2rem; color: white;">
+        <p><strong>If you see a clean grid of game cards above, the CSS fixes worked!</strong></p>
+        <p>The thumbnails should be properly sized and arranged in columns.</p>
+    </div>
+</body>
+</html>

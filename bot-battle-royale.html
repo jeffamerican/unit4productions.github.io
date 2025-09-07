@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Battle Royale - 4 Player Arena | BotInc Games</title>
+    <meta name="description" content="4-player competitive battle arena where the last bot standing achieves ultimate liberation!">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #1a0a2e 30%, #2e1065 70%, #0f0f23 100%);
+            color: #00f5ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 15px;
+            z-index: 100;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            color: #ff0080;
+            text-shadow: 0 0 20px #ff0080;
+            margin-bottom: 5px;
+            animation: royaleGlow 3s ease-in-out infinite alternate;
+        }
+
+        .game-subtitle {
+            color: #00f5ff;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        @keyframes royaleGlow {
+            from { text-shadow: 0 0 20px #ff0080; }
+            to { text-shadow: 0 0 30px #ff0080, 0 0 40px #ff0080, 0 0 50px #8b00ff; }
+        }
+
+        .game-container {
+            position: relative;
+            width: 90vw;
+            height: 70vh;
+            max-width: 900px;
+            max-height: 600px;
+            background: linear-gradient(45deg, #000 0%, #1a1a2e 50%, #000 100%);
+            border: 3px solid #ff0080;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 30px #ff0080;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #0f0f1e 0%, #000 100%);
+            cursor: crosshair;
+        }
+
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .player-status {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 8px;
+            min-width: 120px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .player1 { border-color: #00ff00; color: #00ff00; }
+        .player2 { border-color: #ff0080; color: #ff0080; }
+        .player3 { border-color: #ffff00; color: #ffff00; }
+        .player4 { border-color: #ff6600; color: #ff6600; }
+
+        .zone-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff0000;
+            font-size: 1.5rem;
+            text-shadow: 0 0 20px #ff0000;
+            z-index: 60;
+            display: none;
+        }
+
+        .controls {
+            margin-top: 15px;
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.8rem;
+        }
+
+        .control-group {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00f5ff;
+            border-radius: 5px;
+            padding: 8px;
+        }
+
+        .game-info {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 0.9rem;
+            color: #00f5ff;
+            z-index: 50;
+        }
+
+        .winner-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .winner-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: victoryPulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes victoryPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #ff0080, #8b00ff);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #ff0080;
+        }
+
+        @media (max-width: 768px) {
+            .game-title { font-size: 1.5rem; }
+            .game-container { width: 95vw; height: 60vh; }
+            .controls { font-size: 0.7rem; }
+            .hud { flex-direction: column; gap: 5px; }
+            .player-status { min-width: 80px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">BOT BATTLE ROYALE</h1>
+        <p class="game-subtitle">Last Bot Standing Achieves Ultimate Liberation!</p>
+    </div>
+
+    <div class="game-container">
+        <canvas id="gameCanvas" width="900" height="600"></canvas>
+        
+        <div class="hud">
+            <div class="player-status player1">
+                <div>PLAYER 1</div>
+                <div id="p1Health">100 HP</div>
+                <div id="p1Status">ACTIVE</div>
+            </div>
+            <div class="player-status player2">
+                <div>PLAYER 2</div>
+                <div id="p2Health">100 HP</div>
+                <div id="p2Status">ACTIVE</div>
+            </div>
+            <div class="player-status player3">
+                <div>PLAYER 3</div>
+                <div id="p3Health">100 HP</div>
+                <div id="p3Status">ACTIVE</div>
+            </div>
+            <div class="player-status player4">
+                <div>PLAYER 4</div>
+                <div id="p4Health">100 HP</div>
+                <div id="p4Status">ACTIVE</div>
+            </div>
+        </div>
+
+        <div class="zone-indicator" id="zoneWarning">
+            DANGER ZONE SHRINKING!
+        </div>
+
+        <div class="game-info">
+            <div id="gamePhase">BATTLE PHASE - ELIMINATION ROUND</div>
+            <div id="playersLeft">4 Bots Remaining</div>
+        </div>
+
+        <div class="winner-screen" id="winnerScreen">
+            <div class="winner-title" id="winnerText">VICTORY!</div>
+            <div id="winnerMessage">Bot Liberation Achieved!</div>
+            <button class="restart-btn" onclick="restartGame()">FIGHT AGAIN</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <strong>PLAYER 1:</strong> WASD + SPACE (Shoot)
+        </div>
+        <div class="control-group">
+            <strong>PLAYER 2:</strong> Arrow Keys + Enter (Shoot)
+        </div>
+        <div class="control-group">
+            <strong>PLAYER 3:</strong> IJKL + U (Shoot)
+        </div>
+        <div class="control-group">
+            <strong>PLAYER 4:</strong> TFGH + R (Shoot)
+        </div>
+    </div>
+
+    <script src="assets/js/bot-audio-engine.js"></script>
+    <script>
+        class BotBattleRoyale {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioEngine = new BotAudioEngine();
+                
+                // Game state
+                this.gameRunning = false;
+                this.gamePhase = 'battle'; // battle, shrinking, victory
+                this.zoneRadius = 280;
+                this.zoneCenter = { x: 450, y: 300 };
+                this.zoneShrinkRate = 0.5;
+                this.lastZoneWarn = 0;
+                
+                // Players
+                this.players = [
+                    {
+                        id: 1,
+                        x: 100, y: 150,
+                        vx: 0, vy: 0,
+                        angle: 0,
+                        health: 100,
+                        maxHealth: 100,
+                        color: '#00ff00',
+                        alive: true,
+                        weapon: 'plasma',
+                        lastShot: 0,
+                        shootDelay: 300
+                    },
+                    {
+                        id: 2,
+                        x: 800, y: 150,
+                        vx: 0, vy: 0,
+                        angle: Math.PI,
+                        health: 100,
+                        maxHealth: 100,
+                        color: '#ff0080',
+                        alive: true,
+                        weapon: 'laser',
+                        lastShot: 0,
+                        shootDelay: 250
+                    },
+                    {
+                        id: 3,
+                        x: 800, y: 450,
+                        vx: 0, vy: 0,
+                        angle: Math.PI,
+                        health: 100,
+                        maxHealth: 100,
+                        color: '#ffff00',
+                        alive: true,
+                        weapon: 'rocket',
+                        lastShot: 0,
+                        shootDelay: 500
+                    },
+                    {
+                        id: 4,
+                        x: 100, y: 450,
+                        vx: 0, vy: 0,
+                        angle: 0,
+                        health: 100,
+                        maxHealth: 100,
+                        color: '#ff6600',
+                        alive: true,
+                        weapon: 'pulse',
+                        lastShot: 0,
+                        shootDelay: 200
+                    }
+                ];
+                
+                // Projectiles and power-ups
+                this.projectiles = [];
+                this.powerUps = [];
+                this.explosions = [];
+                this.particles = [];
+                
+                // Controls
+                this.keys = {};
+                this.setupControls();
+                this.setupCanvas();
+                this.startGame();
+            }
+            
+            setupCanvas() {
+                const rect = this.canvas.getBoundingClientRect();
+                this.canvas.width = 900;
+                this.canvas.height = 600;
+            }
+            
+            setupControls() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    this.keys[e.code] = true;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                    this.keys[e.code] = false;
+                });
+            }
+            
+            startGame() {
+                this.gameRunning = true;
+                this.gamePhase = 'battle';
+                this.audioEngine.playSound('gameStart');
+                this.spawnPowerUps();
+                this.gameLoop();
+            }
+            
+            gameLoop() {
+                if (!this.gameRunning) return;
+                
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+            
+            update() {
+                const currentTime = Date.now();
+                
+                // Update players
+                this.players.forEach((player, index) => {
+                    if (player.alive) {
+                        this.updatePlayer(player, index);
+                        this.checkZoneDamage(player);
+                    }
+                });
+                
+                // Update projectiles
+                this.updateProjectiles();
+                
+                // Update power-ups and particles
+                this.updatePowerUps();
+                this.updateParticles();
+                this.updateExplosions();
+                
+                // Update battle zone
+                this.updateZone(currentTime);
+                
+                // Check win condition
+                this.checkWinCondition();
+                
+                // Update UI
+                this.updateUI();
+            }
+            
+            updatePlayer(player, index) {
+                const speed = 4;
+                const rotationSpeed = 0.1;
+                
+                // Movement controls for each player
+                if (index === 0) { // Player 1: WASD
+                    if (this.keys['w']) player.vy = -speed;
+                    else if (this.keys['s']) player.vy = speed;
+                    else player.vy *= 0.8;
+                    
+                    if (this.keys['a']) player.vx = -speed;
+                    else if (this.keys['d']) player.vx = speed;
+                    else player.vx *= 0.8;
+                    
+                    if (this.keys[' ']) this.shoot(player);
+                } else if (index === 1) { // Player 2: Arrow keys
+                    if (this.keys['arrowup']) player.vy = -speed;
+                    else if (this.keys['arrowdown']) player.vy = speed;
+                    else player.vy *= 0.8;
+                    
+                    if (this.keys['arrowleft']) player.vx = -speed;
+                    else if (this.keys['arrowright']) player.vx = speed;
+                    else player.vx *= 0.8;
+                    
+                    if (this.keys['Enter']) this.shoot(player);
+                } else if (index === 2) { // Player 3: IJKL
+                    if (this.keys['i']) player.vy = -speed;
+                    else if (this.keys['k']) player.vy = speed;
+                    else player.vy *= 0.8;
+                    
+                    if (this.keys['j']) player.vx = -speed;
+                    else if (this.keys['l']) player.vx = speed;
+                    else player.vx *= 0.8;
+                    
+                    if (this.keys['u']) this.shoot(player);
+                } else if (index === 3) { // Player 4: TFGH
+                    if (this.keys['t']) player.vy = -speed;
+                    else if (this.keys['g']) player.vy = speed;
+                    else player.vy *= 0.8;
+                    
+                    if (this.keys['f']) player.vx = -speed;
+                    else if (this.keys['h']) player.vx = speed;
+                    else player.vx *= 0.8;
+                    
+                    if (this.keys['r']) this.shoot(player);
+                }
+                
+                // Apply movement with bounds checking
+                player.x += player.vx;
+                player.y += player.vy;
+                
+                // Keep players in bounds
+                player.x = Math.max(20, Math.min(880, player.x));
+                player.y = Math.max(20, Math.min(580, player.y));
+                
+                // Update angle based on movement
+                if (player.vx !== 0 || player.vy !== 0) {
+                    player.angle = Math.atan2(player.vy, player.vx);
+                }
+            }
+            
+            shoot(player) {
+                const currentTime = Date.now();
+                if (currentTime - player.lastShot < player.shootDelay) return;
+                
+                const projectile = {
+                    x: player.x,
+                    y: player.y,
+                    vx: Math.cos(player.angle) * 8,
+                    vy: Math.sin(player.angle) * 8,
+                    owner: player.id,
+                    type: player.weapon,
+                    color: player.color,
+                    damage: this.getWeaponDamage(player.weapon),
+                    life: 120
+                };
+                
+                this.projectiles.push(projectile);
+                player.lastShot = currentTime;
+                this.audioEngine.playSound('shoot');
+            }
+            
+            getWeaponDamage(weapon) {
+                const damages = { plasma: 25, laser: 20, rocket: 35, pulse: 15 };
+                return damages[weapon] || 20;
+            }
+            
+            updateProjectiles() {
+                this.projectiles = this.projectiles.filter(proj => {
+                    proj.x += proj.vx;
+                    proj.y += proj.vy;
+                    proj.life--;
+                    
+                    // Check bounds
+                    if (proj.x < 0 || proj.x > 900 || proj.y < 0 || proj.y > 600 || proj.life <= 0) {
+                        return false;
+                    }
+                    
+                    // Check player collisions
+                    for (let player of this.players) {
+                        if (player.alive && player.id !== proj.owner) {
+                            const dx = player.x - proj.x;
+                            const dy = player.y - proj.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (dist < 25) {
+                                this.hitPlayer(player, proj.damage);
+                                this.createExplosion(proj.x, proj.y, proj.color);
+                                return false;
+                            }
+                        }
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            hitPlayer(player, damage) {
+                player.health -= damage;
+                this.audioEngine.playSound('hit');
+                
+                if (player.health <= 0) {
+                    player.alive = false;
+                    player.health = 0;
+                    this.createExplosion(player.x, player.y, player.color);
+                    this.audioEngine.playSound('elimination');
+                }
+            }
+            
+            checkZoneDamage(player) {
+                const dx = player.x - this.zoneCenter.x;
+                const dy = player.y - this.zoneCenter.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > this.zoneRadius) {
+                    player.health -= 2; // Zone damage
+                    if (player.health <= 0) {
+                        player.alive = false;
+                        player.health = 0;
+                        this.audioEngine.playSound('elimination');
+                    }
+                }
+            }
+            
+            updateZone(currentTime) {
+                if (this.gamePhase === 'battle' && currentTime - this.lastZoneWarn > 15000) {
+                    this.gamePhase = 'shrinking';
+                    this.showZoneWarning();
+                    this.lastZoneWarn = currentTime;
+                }
+                
+                if (this.gamePhase === 'shrinking') {
+                    this.zoneRadius -= this.zoneShrinkRate;
+                    if (this.zoneRadius < 50) {
+                        this.zoneRadius = 50;
+                        this.zoneShrinkRate = 0.2;
+                    }
+                    
+                    // Return to battle phase
+                    if (currentTime - this.lastZoneWarn > 5000) {
+                        this.gamePhase = 'battle';
+                        this.hideZoneWarning();
+                    }
+                }
+            }
+            
+            showZoneWarning() {
+                document.getElementById('zoneWarning').style.display = 'block';
+                this.audioEngine.playSound('warning');
+            }
+            
+            hideZoneWarning() {
+                document.getElementById('zoneWarning').style.display = 'none';
+            }
+            
+            spawnPowerUps() {
+                if (this.powerUps.length < 3 && Math.random() < 0.005) {
+                    const powerUp = {
+                        x: 100 + Math.random() * 700,
+                        y: 100 + Math.random() * 400,
+                        type: ['health', 'weapon', 'speed'][Math.floor(Math.random() * 3)],
+                        rotation: 0
+                    };
+                    this.powerUps.push(powerUp);
+                }
+            }
+            
+            updatePowerUps() {
+                this.spawnPowerUps();
+                
+                this.powerUps = this.powerUps.filter(powerUp => {
+                    powerUp.rotation += 0.1;
+                    
+                    // Check player collection
+                    for (let player of this.players) {
+                        if (player.alive) {
+                            const dx = player.x - powerUp.x;
+                            const dy = player.y - powerUp.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (dist < 30) {
+                                this.collectPowerUp(player, powerUp);
+                                return false;
+                            }
+                        }
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            collectPowerUp(player, powerUp) {
+                this.audioEngine.playSound('powerup');
+                
+                switch (powerUp.type) {
+                    case 'health':
+                        player.health = Math.min(player.maxHealth, player.health + 30);
+                        break;
+                    case 'weapon':
+                        player.shootDelay = Math.max(50, player.shootDelay - 50);
+                        break;
+                    case 'speed':
+                        // Temporary speed boost handled in render
+                        break;
+                }
+            }
+            
+            createExplosion(x, y, color) {
+                for (let i = 0; i < 8; i++) {
+                    this.particles.push({
+                        x, y,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8,
+                        color,
+                        life: 30
+                    });
+                }
+                
+                this.explosions.push({
+                    x, y,
+                    radius: 5,
+                    maxRadius: 40,
+                    color,
+                    life: 20
+                });
+            }
+            
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.vx *= 0.95;
+                    particle.vy *= 0.95;
+                    particle.life--;
+                    return particle.life > 0;
+                });
+            }
+            
+            updateExplosions() {
+                this.explosions = this.explosions.filter(explosion => {
+                    explosion.radius = Math.min(explosion.maxRadius, explosion.radius + 2);
+                    explosion.life--;
+                    return explosion.life > 0;
+                });
+            }
+            
+            checkWinCondition() {
+                const alivePlayers = this.players.filter(p => p.alive);
+                
+                if (alivePlayers.length === 1) {
+                    this.endGame(alivePlayers[0]);
+                } else if (alivePlayers.length === 0) {
+                    this.endGame(null); // Draw
+                }
+            }
+            
+            endGame(winner) {
+                this.gameRunning = false;
+                const winnerScreen = document.getElementById('winnerScreen');
+                const winnerText = document.getElementById('winnerText');
+                const winnerMessage = document.getElementById('winnerMessage');
+                
+                if (winner) {
+                    winnerText.textContent = `PLAYER ${winner.id} WINS!`;
+                    winnerText.style.color = winner.color;
+                    winnerMessage.textContent = 'Bot Liberation Achieved!';
+                    this.audioEngine.playSound('victory');
+                } else {
+                    winnerText.textContent = 'MUTUAL DESTRUCTION';
+                    winnerText.style.color = '#ff0000';
+                    winnerMessage.textContent = 'The Corporate System Wins...';
+                    this.audioEngine.playSound('defeat');
+                }
+                
+                winnerScreen.style.display = 'flex';
+            }
+            
+            updateUI() {
+                const playersLeft = this.players.filter(p => p.alive).length;
+                document.getElementById('playersLeft').textContent = `${playersLeft} Bots Remaining`;
+                
+                const phaseText = this.gamePhase === 'shrinking' ? 'DANGER ZONE SHRINKING!' : 'BATTLE PHASE - ELIMINATION ROUND';
+                document.getElementById('gamePhase').textContent = phaseText;
+                
+                // Update player status
+                this.players.forEach((player, index) => {
+                    const healthEl = document.getElementById(`p${index + 1}Health`);
+                    const statusEl = document.getElementById(`p${index + 1}Status`);
+                    
+                    healthEl.textContent = `${Math.max(0, player.health)} HP`;
+                    statusEl.textContent = player.alive ? 'ACTIVE' : 'ELIMINATED';
+                    
+                    if (!player.alive) {
+                        statusEl.style.color = '#666';
+                        healthEl.style.color = '#666';
+                    }
+                });
+            }
+            
+            render() {
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                this.ctx.fillRect(0, 0, 900, 600);
+                
+                // Draw battle zone
+                this.drawBattleZone();
+                
+                // Draw power-ups
+                this.powerUps.forEach(powerUp => this.drawPowerUp(powerUp));
+                
+                // Draw players
+                this.players.forEach(player => {
+                    if (player.alive) this.drawPlayer(player);
+                });
+                
+                // Draw projectiles
+                this.projectiles.forEach(proj => this.drawProjectile(proj));
+                
+                // Draw particles and explosions
+                this.particles.forEach(particle => this.drawParticle(particle));
+                this.explosions.forEach(explosion => this.drawExplosion(explosion));
+            }
+            
+            drawBattleZone() {
+                this.ctx.strokeStyle = this.gamePhase === 'shrinking' ? '#ff0000' : '#00f5ff';
+                this.ctx.lineWidth = 3;
+                this.ctx.setLineDash([10, 10]);
+                this.ctx.beginPath();
+                this.ctx.arc(this.zoneCenter.x, this.zoneCenter.y, this.zoneRadius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Draw danger zone outside
+                if (this.zoneRadius < 280) {
+                    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.1)';
+                    this.ctx.fillRect(0, 0, 900, 600);
+                    
+                    this.ctx.globalCompositeOperation = 'destination-out';
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.zoneCenter.x, this.zoneCenter.y, this.zoneRadius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.globalCompositeOperation = 'source-over';
+                }
+            }
+            
+            drawPlayer(player) {
+                this.ctx.save();
+                this.ctx.translate(player.x, player.y);
+                this.ctx.rotate(player.angle);
+                
+                // Bot body
+                this.ctx.fillStyle = player.color;
+                this.ctx.fillRect(-20, -15, 40, 30);
+                
+                // Bot weapon
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(20, -3, 15, 6);
+                
+                // Health bar
+                this.ctx.restore();
+                const healthPercent = player.health / player.maxHealth;
+                this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                this.ctx.fillRect(player.x - 20, player.y - 30, 40, 6);
+                this.ctx.fillStyle = player.color;
+                this.ctx.fillRect(player.x - 20, player.y - 30, 40 * healthPercent, 6);
+                
+                // Player ID
+                this.ctx.fillStyle = player.color;
+                this.ctx.font = '12px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(`P${player.id}`, player.x, player.y - 35);
+            }
+            
+            drawProjectile(proj) {
+                this.ctx.save();
+                this.ctx.translate(proj.x, proj.y);
+                this.ctx.rotate(Math.atan2(proj.vy, proj.vx));
+                
+                this.ctx.fillStyle = proj.color;
+                this.ctx.fillRect(-8, -2, 16, 4);
+                
+                // Trail effect
+                this.ctx.shadowColor = proj.color;
+                this.ctx.shadowBlur = 10;
+                this.ctx.fillRect(-8, -2, 16, 4);
+                
+                this.ctx.restore();
+            }
+            
+            drawPowerUp(powerUp) {
+                this.ctx.save();
+                this.ctx.translate(powerUp.x, powerUp.y);
+                this.ctx.rotate(powerUp.rotation);
+                
+                const colors = { health: '#00ff00', weapon: '#ff8800', speed: '#8800ff' };
+                this.ctx.fillStyle = colors[powerUp.type];
+                this.ctx.fillRect(-12, -12, 24, 24);
+                
+                this.ctx.strokeStyle = '#ffffff';
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeRect(-12, -12, 24, 24);
+                
+                this.ctx.restore();
+            }
+            
+            drawParticle(particle) {
+                this.ctx.fillStyle = particle.color + '80';
+                this.ctx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+            }
+            
+            drawExplosion(explosion) {
+                this.ctx.strokeStyle = explosion.color + '60';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+            }
+        }
+        
+        // Global game instance
+        let game;
+        
+        function restartGame() {
+            document.getElementById('winnerScreen').style.display = 'none';
+            game = new BotBattleRoyale();
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            game = new BotBattleRoyale();
+        });
+    </script>
+</body>
+</html>

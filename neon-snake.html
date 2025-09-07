@@ -412,6 +412,9 @@
         </div>
     </div>
 
+    <!-- Bot Liberation Audio Engine -->
+    <script src="assets/js/bot-audio-engine.js"></script>
+
     <script>
         class NeonSnake {
             constructor() {
@@ -450,6 +453,12 @@
                 this.loadHighScore();
                 this.initControls();
                 this.spawnFood();
+                
+                // Play game start sound
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-start');
+                }
+                
                 this.gameLoop();
             }
 
@@ -649,6 +658,9 @@
                 if (!this.powerStates.ghost.active) {
                     if (head.x < 0 || head.x >= this.boardWidth || 
                         head.y < 0 || head.y >= this.boardHeight) {
+                        if (typeof botAudio !== 'undefined') {
+                            botAudio.playSound('explosion');
+                        }
                         this.gameOver();
                         return;
                     }
@@ -663,6 +675,9 @@
                 // Self collision (unless ghost mode active)
                 if (!this.powerStates.ghost.active) {
                     if (this.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                        if (typeof botAudio !== 'undefined') {
+                            botAudio.playSound('glitch-error');
+                        }
                         this.gameOver();
                         return;
                     }
@@ -692,6 +707,17 @@
                 if (this.food.type === 'bonus') points = 20;
                 if (this.food.type === 'special') points = 50;
                 
+                // Play food collection sound
+                if (typeof botAudio !== 'undefined') {
+                    if (this.food.type === 'special') {
+                        botAudio.playSound('bot-victory');
+                    } else if (this.food.type === 'bonus') {
+                        botAudio.playSound('collect');
+                    } else {
+                        botAudio.playSound('snake-food');
+                    }
+                }
+                
                 this.score += points;
                 this.foodCount++;
                 
@@ -702,10 +728,20 @@
                 // Increase speed slightly
                 this.speed = Math.max(80, this.speed - 2);
                 
+                // Play level up sound for every 100 points
+                if (typeof botAudio !== 'undefined' && this.score % 100 === 0 && this.score > 0) {
+                    botAudio.playSound('level-up');
+                }
+                
                 this.updateDisplay();
             }
 
             collectPowerup(powerup) {
+                // Play powerup collection sound
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('power-up');
+                }
+                
                 this.createParticles(powerup.x + 10, powerup.y + 10, 'powerup');
                 
                 switch (powerup.type) {
@@ -868,6 +904,11 @@
                 this.gameRunning = false;
                 this.raceRecording = false;
                 
+                // Play game over sound
+                if (typeof botAudio !== 'undefined') {
+                    botAudio.playSound('game-over');
+                }
+                
                 const survivalTime = Math.floor((Date.now() - this.startTime) / 1000);
                 
                 // Update high score
@@ -875,6 +916,13 @@
                 if (this.score > currentHigh) {
                     localStorage.setItem('neonSnakeHighScore', this.score.toString());
                     document.getElementById('highScore').textContent = this.score;
+                    
+                    // Play new high score sound
+                    if (typeof botAudio !== 'undefined') {
+                        setTimeout(() => {
+                            botAudio.playSound('bot-victory');
+                        }, 1000);
+                    }
                 }
                 
                 // Save ghost race
