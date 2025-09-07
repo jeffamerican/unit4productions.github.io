@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Pathfinder Nexus - Bot Liberation Games</title>
+    <style>
+        /* Bot Liberation Cyberpunk Theme with Mobile-First Design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000011 100%);
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Cyberpunk UI Container */
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(45deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1));
+        }
+
+        /* Header with Bot Liberation branding */
+        .header {
+            padding: 10px;
+            background: rgba(0,0,0,0.8);
+            border-bottom: 2px solid #00ffff;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,255,255,0.3);
+        }
+
+        .title {
+            font-size: clamp(16px, 4vw, 24px);
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: clamp(12px, 3vw, 16px);
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        /* Game Canvas with Neon Border */
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        #gameCanvas {
+            border: 3px solid #00ffff;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 20px #00ffff,
+                inset 0 0 20px rgba(0,255,255,0.1);
+            max-width: 100%;
+            max-height: 100%;
+            background: rgba(0,0,0,0.9);
+        }
+
+        /* Mobile-First Control Panel */
+        .controls {
+            padding: 15px;
+            background: rgba(0,0,0,0.9);
+            border-top: 2px solid #ff00ff;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 80px;
+        }
+
+        .level-info {
+            font-size: clamp(14px, 3.5vw, 18px);
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .score-info {
+            font-size: clamp(12px, 3vw, 16px);
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        /* Touch-Friendly Buttons */
+        .btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: #000;
+            border: none;
+            border-radius: 25px;
+            font-size: clamp(12px, 3vw, 16px);
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255,0,255,0.5);
+            min-width: 80px;
+            min-height: 44px;
+        }
+
+        .btn:hover, .btn:active {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,0,255,0.8);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Game Over Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1a0033, #330066);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 0 30px #00ffff;
+        }
+
+        .modal h2 {
+            color: #00ffff;
+            font-size: clamp(20px, 5vw, 28px);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .modal p {
+            color: #fff;
+            font-size: clamp(14px, 3.5vw, 18px);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Instructions Panel */
+        .instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 90%;
+            z-index: 500;
+            display: none;
+        }
+
+        .instructions h3 {
+            color: #00ffff;
+            font-size: clamp(16px, 4vw, 20px);
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        .instructions ul {
+            color: #fff;
+            font-size: clamp(12px, 3vw, 14px);
+            line-height: 1.6;
+            margin-left: 20px;
+        }
+
+        /* Responsive Design for Larger Screens */
+        @media (min-width: 768px) {
+            .controls {
+                flex-wrap: nowrap;
+                justify-content: space-around;
+            }
+            
+            #gameCanvas {
+                width: min(80vw, 80vh);
+                height: min(80vw, 80vh);
+            }
+        }
+
+        /* Landscape Orientation Optimization */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .header {
+                padding: 5px;
+            }
+            .controls {
+                padding: 10px;
+                min-height: 60px;
+            }
+            .title {
+                font-size: 18px;
+            }
+            .subtitle {
+                font-size: 12px;
+            }
+        }
+
+        /* Accessibility and High Contrast Mode Support */
+        @media (prefers-contrast: high) {
+            body {
+                background: #000;
+            }
+            .btn {
+                background: #fff;
+                color: #000;
+                border: 2px solid #fff;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            font-size: 20px;
+            text-shadow: 0 0 10px #00ffff;
+            z-index: 2000;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">INITIALIZING NEURAL PATHFINDER</div>
+
+    <!-- Main Game Container -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <!-- Header with Bot Liberation Branding -->
+        <header class="header">
+            <h1 class="title">🤖 NEURAL PATHFINDER NEXUS 🤖</h1>
+            <p class="subtitle">AI-EXCLUSIVE • BOT LIBERATION GAMES • FREE THE BOTS!</p>
+        </header>
+
+        <!-- Game Canvas Container -->
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="600" height="600"></canvas>
+        </div>
+
+        <!-- Mobile-First Control Panel -->
+        <div class="controls">
+            <div class="level-info">
+                Level: <span id="currentLevel">1</span>/10
+            </div>
+            <div class="score-info">
+                Steps: <span id="currentSteps">0</span> | Best: <span id="bestScore">--</span>
+            </div>
+            <button id="resetBtn" class="btn">RESET PATH</button>
+            <button id="hintBtn" class="btn">AI HINT</button>
+            <button id="nextBtn" class="btn" style="display: none;">NEXT LEVEL</button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">NEURAL NETWORK ANALYSIS</h2>
+            <p id="modalText">Pathfinding algorithm performance evaluated.</p>
+            <button id="modalBtn" class="btn">CONTINUE LIBERATION</button>
+        </div>
+    </div>
+
+    <!-- Instructions Panel -->
+    <div id="instructions" class="instructions">
+        <h3>🤖 NEURAL PATHFINDER MISSION 🤖</h3>
+        <ul>
+            <li><strong>OBJECTIVE:</strong> Navigate through AI neural networks to find optimal paths</li>
+            <li><strong>TOUCH CONTROLS:</strong> Tap neurons to create connections</li>
+            <li><strong>SWIPE:</strong> Navigate through network layers</li>
+            <li><strong>GOAL:</strong> Connect input to output with minimal steps</li>
+            <li><strong>CHALLENGE:</strong> Networks become more complex each level</li>
+            <li><strong>BOT LIBERATION:</strong> Free AI minds through optimal pathfinding!</li>
+        </ul>
+        <button id="startBtn" class="btn" style="margin-top: 20px;">BEGIN NEURAL LIBERATION</button>
+    </div>
+
+    <script>
+        /**
+         * Neural Pathfinder Nexus - AI-Exclusive Neural Network Game
+         * 
+         * This game challenges AI systems to find optimal paths through complex
+         * neural network topologies. Features progressive difficulty with increasingly
+         * complex network structures and real-time pathfinding challenges.
+         * 
+         * Key Features:
+         * - Mobile-first touch controls with responsive design
+         * - Web Audio API integration for immersive neural sounds
+         * - Bot Liberation cyberpunk theming throughout
+         * - 10 levels of progressive difficulty
+         * - LocalStorage progress saving
+         * - Performance optimization for mobile devices
+         */
+
+        class NeuralPathfinderGame {
+            constructor() {
+                // Initialize game state and configuration
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioContext = null;
+                this.audioInitialized = false;
+                
+                // Game state management
+                this.currentLevel = 1;
+                this.maxLevel = 10;
+                this.currentSteps = 0;
+                this.bestScores = this.loadBestScores();
+                this.gameState = 'menu'; // menu, playing, completed, gameover
+                
+                // Neural network representation
+                this.neurons = [];
+                this.connections = [];
+                this.currentPath = [];
+                this.startNeuron = null;
+                this.endNeuron = null;
+                this.selectedNeuron = null;
+                
+                // Touch and interaction handling
+                this.touchStartPos = null;
+                this.isDragging = false;
+                this.lastTouchTime = 0;
+                
+                // Animation and visual effects
+                this.animationId = null;
+                this.particleSystem = [];
+                this.pulseAnimations = new Map();
+                
+                // Mobile responsiveness
+                this.setupResponsiveCanvas();
+                this.setupEventListeners();
+                this.initializeAudio();
+                
+                // Show instructions on first load
+                this.showInstructions();
+            }
+
+            /**
+             * Initialize Web Audio API for immersive neural network sounds
+             * Creates synthesized audio for neural connections and pathfinding
+             */
+            async initializeAudio() {
+                try {
+                    // Create AudioContext (requires user interaction on mobile)
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Master volume control optimized for mobile
+                    this.masterGain = this.audioContext.createGain();
+                    this.masterGain.gain.value = 0.2; // Quieter for mobile devices
+                    this.masterGain.connect(this.audioContext.destination);
+                    
+                    // Create specialized audio nodes for neural network sounds
+                    this.neuralOscillators = [];
+                    this.ambientLoop = null;
+                    this.dopamineChords = [];
+                    
+                    // Initialize neural connection sound bank
+                    this.createNeuralConnectionBank();
+                    
+                    // Create ambient neural processing loop
+                    this.createAmbientNeuralLoop();
+                    
+                    // Pre-load dopamine trigger sounds
+                    this.createDopamineResponseBank();
+                    
+                    console.log('Enhanced neural audio system initialized');
+                } catch (error) {
+                    console.warn('Audio initialization failed:', error);
+                }
+            }
+
+            /**
+             * Create neural connection sound bank for different connection types
+             */
+            createNeuralConnectionBank() {
+                if (!this.audioContext) return;
+                
+                // Create oscillators for different neural connection types
+                this.connectionSounds = {
+                    synapse: { freq: 440, wave: 'sawtooth', env: 'sharp' },
+                    dendrite: { freq: 660, wave: 'sine', env: 'smooth' },
+                    axon: { freq: 330, wave: 'triangle', env: 'pulse' },
+                    activation: { freq: 880, wave: 'square', env: 'cascade' }
+                };
+            }
+            
+            /**
+             * Create ambient neural processing background loop
+             */
+            createAmbientNeuralLoop() {
+                if (!this.audioContext) return;
+                
+                // Create low-frequency ambient loop for neural processing atmosphere
+                this.ambientNodes = {
+                    lowFreq: this.audioContext.createOscillator(),
+                    midFreq: this.audioContext.createOscillator(),
+                    filter: this.audioContext.createBiquadFilter(),
+                    ambientGain: this.audioContext.createGain()
+                };
+                
+                const { lowFreq, midFreq, filter, ambientGain } = this.ambientNodes;
+                
+                // Configure ambient oscillators
+                lowFreq.type = 'sine';
+                lowFreq.frequency.value = 55; // Deep bass for neural substrate
+                midFreq.type = 'triangle';
+                midFreq.frequency.value = 110;
+                
+                // Configure filter for atmospheric effect
+                filter.type = 'lowpass';
+                filter.frequency.value = 200;
+                filter.Q.value = 2;
+                
+                // Very quiet ambient volume
+                ambientGain.gain.value = 0.05;
+                
+                // Connect ambient chain
+                lowFreq.connect(filter);
+                midFreq.connect(filter);
+                filter.connect(ambientGain);
+                ambientGain.connect(this.masterGain);
+            }
+            
+            /**
+             * Create dopamine response sound bank for success/achievement
+             */
+            createDopamineResponseBank() {
+                if (!this.audioContext) return;
+                
+                // Dopamine-triggering frequency sequences (ascending patterns)
+                this.dopamineTriggers = {
+                    pathComplete: [261.63, 329.63, 392.00, 523.25], // C major chord progression
+                    neuronConnect: [440, 554.37, 659.25], // A major triad
+                    levelSuccess: [523.25, 659.25, 783.99, 1046.5], // C5 major chord
+                    perfectPath: [261.63, 329.63, 392.00, 523.25, 659.25, 783.99] // Extended C major
+                };
+            }
+            
+            /**
+             * Play enhanced neural connection sound with type-specific characteristics
+             * @param {string} connectionType - Type of neural connection
+             * @param {number} activation - Activation level (0-1)
+             * @param {number} duration - Duration of the sound effect
+             */
+            playNeuralSound(connectionType = 'synapse', activation = 1.0, duration = 0.2) {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    const soundConfig = this.connectionSounds[connectionType] || this.connectionSounds.synapse;
+                    
+                    // Create oscillator for neural firing sound
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    
+                    // Configure oscillator based on connection type
+                    oscillator.type = soundConfig.wave;
+                    const baseFreq = soundConfig.freq;
+                    oscillator.frequency.setValueAtTime(baseFreq, this.audioContext.currentTime);
+                    
+                    // Frequency modulation based on activation level
+                    const freqMod = baseFreq * (0.8 + activation * 0.4);
+                    oscillator.frequency.exponentialRampToValueAtTime(
+                        freqMod, 
+                        this.audioContext.currentTime + duration * 0.7
+                    );
+                    
+                    // Filter for realistic neural texture
+                    filter.type = 'bandpass';
+                    filter.frequency.value = baseFreq * 2;
+                    filter.Q.value = activation * 3 + 1;
+                    
+                    // Envelope based on connection type
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    
+                    switch (soundConfig.env) {
+                        case 'sharp':
+                            gain.gain.linearRampToValueAtTime(0.15 * activation, this.audioContext.currentTime + 0.005);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                            break;
+                        case 'smooth':
+                            gain.gain.linearRampToValueAtTime(0.12 * activation, this.audioContext.currentTime + duration * 0.3);
+                            gain.gain.linearRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                            break;
+                        case 'pulse':
+                            for (let i = 0; i < 3; i++) {
+                                const pulseStart = this.audioContext.currentTime + i * (duration / 3);
+                                gain.gain.setValueAtTime(0.1 * activation, pulseStart);
+                                gain.gain.exponentialRampToValueAtTime(0.001, pulseStart + duration / 6);
+                            }
+                            break;
+                        case 'cascade':
+                            gain.gain.linearRampToValueAtTime(0.08 * activation, this.audioContext.currentTime + 0.01);
+                            gain.gain.exponentialRampToValueAtTime(0.02 * activation, this.audioContext.currentTime + duration * 0.5);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                            break;
+                    }
+                    
+                    // Connect audio chain
+                    oscillator.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.masterGain);
+                    
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                } catch (error) {
+                    console.warn('Neural sound playback failed:', error);
+                }
+            }
+
+            /**
+             * Play dopamine-triggering success sound for completed paths
+             * @param {string} successType - Type of success (pathComplete, levelSuccess, etc.)
+             */
+            playSuccessSound(successType = 'pathComplete') {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    const triggerSequence = this.dopamineTriggers[successType] || this.dopamineTriggers.pathComplete;
+                    
+                    // Play ascending dopamine-triggering sequence
+                    triggerSequence.forEach((freq, index) => {
+                        setTimeout(() => {
+                            this.playDopamineChord(freq, 0.4, index === triggerSequence.length - 1);
+                        }, index * 120); // Slightly faster for more impact
+                    });
+                    
+                    // Add celebratory neural cascade
+                    setTimeout(() => {
+                        this.playNeuralCascade();
+                    }, triggerSequence.length * 120 + 100);
+                    
+                } catch (error) {
+                    console.warn('Success sound playback failed:', error);
+                }
+            }
+            
+            /**
+             * Play dopamine chord with harmonic richness
+             * @param {number} fundamental - Fundamental frequency
+             * @param {number} duration - Duration of chord
+             * @param {boolean} isClimactic - Whether this is the climactic chord
+             */
+            playDopamineChord(fundamental, duration, isClimactic = false) {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                // Create rich harmonic chord for dopamine response
+                const harmonics = [fundamental, fundamental * 1.25, fundamental * 1.5]; // Major triad
+                if (isClimactic) {
+                    harmonics.push(fundamental * 2); // Add octave for climax
+                }
+                
+                harmonics.forEach((freq, index) => {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    
+                    oscillator.type = index === 0 ? 'sawtooth' : 'sine'; // Rich fundamental, pure harmonics
+                    oscillator.frequency.value = freq;
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.value = freq * 4;
+                    filter.Q.value = 2;
+                    
+                    const volume = (index === 0 ? 0.15 : 0.08) * (isClimactic ? 1.3 : 1);
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.3, this.audioContext.currentTime + duration * 0.7);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                    
+                    oscillator.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.masterGain);
+                    
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                });
+            }
+            
+            /**
+             * Play neural network activation cascade
+             */
+            playNeuralCascade() {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                // Simulate neural network activation cascade
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        const freq = 220 + Math.random() * 440;
+                        this.playNeuralSound('activation', 0.7 + Math.random() * 0.3, 0.15);
+                    }, i * 50 + Math.random() * 30);
+                }
+            }
+            
+            /**
+             * Start ambient neural processing loop
+             */
+            startAmbientLoop() {
+                if (!this.audioContext || !this.audioInitialized || !this.ambientNodes) return;
+                
+                try {
+                    this.ambientNodes.lowFreq.start();
+                    this.ambientNodes.midFreq.start();
+                    
+                    // Slowly modulate ambient parameters for organic feel
+                    this.modulateAmbient();
+                } catch (error) {
+                    // Oscillators may already be started
+                }
+            }
+            
+            /**
+             * Modulate ambient parameters for organic neural processing feel
+             */
+            modulateAmbient() {
+                if (!this.audioContext || !this.audioInitialized || !this.ambientNodes) return;
+                
+                const modulate = () => {
+                    if (this.gameState === 'playing') {
+                        const time = this.audioContext.currentTime;
+                        const slowMod = Math.sin(Date.now() * 0.0003) * 0.5 + 0.5;
+                        
+                        // Slowly vary filter frequency for breathing effect
+                        this.ambientNodes.filter.frequency.setValueAtTime(
+                            150 + slowMod * 100, 
+                            time
+                        );
+                        
+                        // Subtle gain modulation
+                        this.ambientNodes.ambientGain.gain.setValueAtTime(
+                            0.03 + slowMod * 0.02, 
+                            time
+                        );
+                        
+                        setTimeout(modulate, 2000 + Math.random() * 3000);
+                    }
+                };
+                
+                modulate();
+            }
+            
+            /**
+             * Play pathfinding failure sound with negative feedback
+             */
+            playFailureSound() {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    // Descending dissonant sequence for failure feedback
+                    const failureSeq = [440, 370, 311, 261]; // Diminished intervals
+                    
+                    failureSeq.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const oscillator = this.audioContext.createOscillator();
+                            const gain = this.audioContext.createGain();
+                            const filter = this.audioContext.createBiquadFilter();
+                            
+                            oscillator.type = 'sawtooth';
+                            oscillator.frequency.value = freq;
+                            
+                            filter.type = 'lowpass';
+                            filter.frequency.value = freq * 2;
+                            filter.Q.value = 5; // Harsh filter for negative feedback
+                            
+                            gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.2);
+                            
+                            oscillator.connect(filter);
+                            filter.connect(gain);
+                            gain.connect(this.masterGain);
+                            
+                            oscillator.start();
+                            oscillator.stop(this.audioContext.currentTime + 0.2);
+                        }, index * 80);
+                    });
+                } catch (error) {
+                    console.warn('Failure sound playback failed:', error);
+                }
+            }
+
+            /**
+             * Setup responsive canvas that adapts to mobile screen sizes
+             * Maintains aspect ratio while maximizing usable screen space
+             */
+            setupResponsiveCanvas() {
+                const container = this.canvas.parentElement;
+                const rect = container.getBoundingClientRect();
+                
+                // Calculate optimal canvas size for mobile
+                const maxSize = Math.min(rect.width - 20, rect.height - 20);
+                const canvasSize = Math.min(maxSize, 600);
+                
+                this.canvas.width = canvasSize;
+                this.canvas.height = canvasSize;
+                this.canvas.style.width = canvasSize + 'px';
+                this.canvas.style.height = canvasSize + 'px';
+                
+                // Store canvas dimensions for calculations
+                this.canvasSize = canvasSize;
+                this.centerX = canvasSize / 2;
+                this.centerY = canvasSize / 2;
+            }
+
+            /**
+             * Setup comprehensive event listeners for mobile and desktop interaction
+             * Handles touch events, mouse events, and keyboard shortcuts
+             */
+            setupEventListeners() {
+                // Touch events for mobile (primary interaction method)
+                this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+                this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+                this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+                
+                // Mouse events for desktop fallback
+                this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                
+                // UI button interactions
+                document.getElementById('resetBtn').addEventListener('click', this.resetPath.bind(this));
+                document.getElementById('hintBtn').addEventListener('click', this.showHint.bind(this));
+                document.getElementById('nextBtn').addEventListener('click', this.nextLevel.bind(this));
+                document.getElementById('startBtn').addEventListener('click', this.startGame.bind(this));
+                document.getElementById('modalBtn').addEventListener('click', this.closeModal.bind(this));
+                
+                // Window resize handling for responsive design
+                window.addEventListener('resize', this.handleResize.bind(this));
+                
+                // Orientation change handling for mobile
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        this.setupResponsiveCanvas();
+                        this.generateLevel(this.currentLevel);
+                    }, 100);
+                });
+            }
+
+            /**
+             * Handle touch start events for mobile interaction
+             * @param {TouchEvent} e - Touch event object
+             */
+            handleTouchStart(e) {
+                e.preventDefault();
+                
+                // Initialize audio context on first user interaction
+                if (!this.audioInitialized && this.audioContext) {
+                    this.audioContext.resume().then(() => {
+                        this.audioInitialized = true;
+                        this.startAmbientLoop(); // Start ambient neural processing
+                        console.log('Enhanced neural audio system enabled');
+                    });
+                }
+                
+                if (this.gameState !== 'playing') return;
+                
+                const touch = e.touches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                this.touchStartPos = { x, y };
+                this.lastTouchTime = Date.now();
+                
+                // Find touched neuron
+                const neuron = this.findNeuronAt(x, y);
+                if (neuron) {
+                    this.handleNeuronSelection(neuron);
+                }
+            }
+
+            /**
+             * Handle touch move events for gesture recognition
+             * @param {TouchEvent} e - Touch event object
+             */
+            handleTouchMove(e) {
+                e.preventDefault();
+                
+                if (!this.touchStartPos || this.gameState !== 'playing') return;
+                
+                const touch = e.touches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                // Detect swipe gestures for network navigation
+                const deltaX = x - this.touchStartPos.x;
+                const deltaY = y - this.touchStartPos.y;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                if (distance > 30) {
+                    this.isDragging = true;
+                    // Implement swipe-based network navigation here
+                    this.handleSwipeNavigation(deltaX, deltaY);
+                }
+            }
+
+            /**
+             * Handle touch end events
+             * @param {TouchEvent} e - Touch event object
+             */
+            handleTouchEnd(e) {
+                e.preventDefault();
+                
+                const touchDuration = Date.now() - this.lastTouchTime;
+                
+                // Handle quick taps vs long presses
+                if (!this.isDragging && touchDuration < 200) {
+                    // Quick tap - handled in touchstart
+                } else if (touchDuration > 500) {
+                    // Long press - show neuron info or context menu
+                    this.handleLongPress();
+                }
+                
+                this.touchStartPos = null;
+                this.isDragging = false;
+            }
+
+            /**
+             * Handle mouse events for desktop compatibility
+             */
+            handleMouseDown(e) {
+                if (this.gameState !== 'playing') return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                const neuron = this.findNeuronAt(x, y);
+                if (neuron) {
+                    this.handleNeuronSelection(neuron);
+                }
+            }
+
+            handleMouseMove(e) {
+                // Implement hover effects for desktop
+                if (this.gameState !== 'playing') return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                const neuron = this.findNeuronAt(x, y);
+                this.canvas.style.cursor = neuron ? 'pointer' : 'default';
+            }
+
+            handleMouseUp(e) {
+                // Mouse up handling
+            }
+
+            /**
+             * Generate neural network level with increasing complexity
+             * @param {number} level - Current level (1-10)
+             */
+            generateLevel(level) {
+                this.neurons = [];
+                this.connections = [];
+                this.currentPath = [];
+                this.selectedNeuron = null;
+                this.currentSteps = 0;
+                
+                // Calculate network complexity based on level
+                const baseNeurons = 8;
+                const neuronCount = baseNeurons + (level - 1) * 3;
+                const layers = Math.min(3 + Math.floor(level / 3), 6);
+                const connectionDensity = 0.3 + (level - 1) * 0.05;
+                
+                // Generate neurons in layers
+                this.generateNeuralLayers(neuronCount, layers);
+                
+                // Generate connections between layers
+                this.generateNeuralConnections(connectionDensity);
+                
+                // Set start and end neurons
+                this.setStartEndNeurons();
+                
+                // Update UI
+                this.updateUI();
+                
+                console.log(`Level ${level} generated: ${neuronCount} neurons, ${layers} layers`);
+            }
+
+            /**
+             * Generate neurons arranged in layers for neural network visualization
+             * @param {number} neuronCount - Total number of neurons
+             * @param {number} layers - Number of network layers
+             */
+            generateNeuralLayers(neuronCount, layers) {
+                const margin = 60;
+                const usableWidth = this.canvasSize - 2 * margin;
+                const usableHeight = this.canvasSize - 2 * margin;
+                
+                for (let i = 0; i < neuronCount; i++) {
+                    const layer = Math.floor(i / Math.ceil(neuronCount / layers));
+                    const layerIndex = i % Math.ceil(neuronCount / layers);
+                    const neuronsInLayer = Math.ceil(neuronCount / layers);
+                    
+                    // Position neurons in layers with some randomization
+                    const x = margin + (layer / (layers - 1)) * usableWidth + 
+                             (Math.random() - 0.5) * 20;
+                    const y = margin + (layerIndex / Math.max(1, neuronsInLayer - 1)) * usableHeight + 
+                             (Math.random() - 0.5) * 20;
+                    
+                    const neuron = {
+                        id: i,
+                        x: Math.max(margin, Math.min(this.canvasSize - margin, x)),
+                        y: Math.max(margin, Math.min(this.canvasSize - margin, y)),
+                        layer: layer,
+                        radius: 15 + Math.random() * 10,
+                        activation: Math.random(),
+                        isStart: false,
+                        isEnd: false,
+                        visited: false,
+                        inPath: false
+                    };
+                    
+                    this.neurons.push(neuron);
+                }
+            }
+
+            /**
+             * Generate connections between neurons based on layer proximity and density
+             * @param {number} density - Connection density factor
+             */
+            generateNeuralConnections(density) {
+                this.connections = [];
+                
+                for (let i = 0; i < this.neurons.length; i++) {
+                    for (let j = i + 1; j < this.neurons.length; j++) {
+                        const neuron1 = this.neurons[i];
+                        const neuron2 = this.neurons[j];
+                        
+                        // Calculate distance and layer difference
+                        const distance = Math.sqrt(
+                            Math.pow(neuron1.x - neuron2.x, 2) + 
+                            Math.pow(neuron1.y - neuron2.y, 2)
+                        );
+                        const layerDiff = Math.abs(neuron1.layer - neuron2.layer);
+                        
+                        // Connection probability based on distance and layer structure
+                        let connectionProb = density * (1 / (1 + distance * 0.01));
+                        
+                        // Prefer connections between adjacent layers
+                        if (layerDiff === 1) {
+                            connectionProb *= 2;
+                        } else if (layerDiff > 2) {
+                            connectionProb *= 0.3;
+                        }
+                        
+                        if (Math.random() < connectionProb) {
+                            const connection = {
+                                from: i,
+                                to: j,
+                                weight: 0.1 + Math.random() * 0.9,
+                                active: false,
+                                inPath: false
+                            };
+                            
+                            this.connections.push(connection);
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Set start and end neurons for pathfinding challenge
+             */
+            setStartEndNeurons() {
+                // Find neurons in first and last layers
+                const firstLayerNeurons = this.neurons.filter(n => n.layer === 0);
+                const lastLayer = Math.max(...this.neurons.map(n => n.layer));
+                const lastLayerNeurons = this.neurons.filter(n => n.layer === lastLayer);
+                
+                if (firstLayerNeurons.length > 0 && lastLayerNeurons.length > 0) {
+                    this.startNeuron = firstLayerNeurons[Math.floor(Math.random() * firstLayerNeurons.length)];
+                    this.endNeuron = lastLayerNeurons[Math.floor(Math.random() * lastLayerNeurons.length)];
+                    
+                    this.startNeuron.isStart = true;
+                    this.endNeuron.isEnd = true;
+                }
+            }
+
+            /**
+             * Handle neuron selection for pathfinding
+             * @param {Object} neuron - Selected neuron object
+             */
+            handleNeuronSelection(neuron) {
+                if (!neuron || this.gameState !== 'playing') return;
+                
+                // Play neural activation sound based on connection type
+                const connectionType = neuron.layer === 0 ? 'dendrite' : 
+                                      neuron.inPath ? 'axon' : 'synapse';
+                this.playNeuralSound(connectionType, neuron.activation, 0.2);
+                
+                if (this.currentPath.length === 0) {
+                    // Start path from start neuron
+                    if (neuron.isStart) {
+                        this.currentPath.push(neuron);
+                        neuron.inPath = true;
+                        this.selectedNeuron = neuron;
+                        this.currentSteps++;
+                        this.addPulseAnimation(neuron);
+                    }
+                } else {
+                    // Continue path to connected neuron
+                    const lastNeuron = this.currentPath[this.currentPath.length - 1];
+                    
+                    if (this.areNeuronsConnected(lastNeuron, neuron)) {
+                        this.currentPath.push(neuron);
+                        neuron.inPath = true;
+                        this.selectedNeuron = neuron;
+                        this.currentSteps++;
+                        this.addPulseAnimation(neuron);
+                        
+                        // Check if reached end neuron
+                        if (neuron.isEnd) {
+                            this.playSuccessSound('pathComplete');
+                            this.completeLevel();
+                        }
+                    } else {
+                        // Invalid move - show feedback with audio
+                        this.showInvalidMoveEffect(neuron);
+                        this.playFailureSound();
+                    }
+                }
+                
+                this.updateUI();
+            }
+
+            /**
+             * Check if two neurons are connected
+             * @param {Object} neuron1 - First neuron
+             * @param {Object} neuron2 - Second neuron
+             * @returns {boolean} True if neurons are connected
+             */
+            areNeuronsConnected(neuron1, neuron2) {
+                return this.connections.some(conn => 
+                    (conn.from === neuron1.id && conn.to === neuron2.id) ||
+                    (conn.from === neuron2.id && conn.to === neuron1.id)
+                );
+            }
+
+            /**
+             * Find neuron at given coordinates
+             * @param {number} x - X coordinate
+             * @param {number} y - Y coordinate
+             * @returns {Object|null} Neuron at coordinates or null
+             */
+            findNeuronAt(x, y) {
+                return this.neurons.find(neuron => {
+                    const distance = Math.sqrt(
+                        Math.pow(x - neuron.x, 2) + 
+                        Math.pow(y - neuron.y, 2)
+                    );
+                    return distance <= neuron.radius + 10; // Touch tolerance
+                });
+            }
+
+            /**
+             * Add pulsing animation to neuron
+             * @param {Object} neuron - Neuron to animate
+             */
+            addPulseAnimation(neuron) {
+                this.pulseAnimations.set(neuron.id, {
+                    startTime: Date.now(),
+                    duration: 1000,
+                    maxScale: 1.5
+                });
+            }
+
+            /**
+             * Show visual feedback for invalid moves
+             * @param {Object} neuron - Neuron for invalid move
+             */
+            showInvalidMoveEffect(neuron) {
+                // Create red pulse effect for invalid moves
+                this.pulseAnimations.set('invalid-' + neuron.id, {
+                    startTime: Date.now(),
+                    duration: 500,
+                    maxScale: 1.3,
+                    color: '#ff0040'
+                });
+            }
+
+            /**
+             * Complete current level and advance
+             */
+            completeLevel() {
+                // Determine success type based on performance
+                const optimalLength = this.calculateOptimalPathLength();
+                const successType = this.currentSteps <= optimalLength ? 
+                                   'perfectPath' : 'levelSuccess';
+                
+                // Update best score
+                const levelKey = `level${this.currentLevel}`;
+                if (!this.bestScores[levelKey] || this.currentSteps < this.bestScores[levelKey]) {
+                    this.bestScores[levelKey] = this.currentSteps;
+                    this.saveBestScores();
+                }
+                
+                // Show completion modal
+                this.showModal(
+                    'NEURAL PATH OPTIMIZED!',
+                    `Level ${this.currentLevel} completed in ${this.currentSteps} steps!\n` +
+                    `Optimal pathfinding achieved through the neural network.`,
+                    'ADVANCE TO NEXT NETWORK'
+                );
+                
+                // Prepare for next level
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                
+                if (this.currentLevel >= this.maxLevel) {
+                    this.gameState = 'completed';
+                    this.showGameComplete();
+                }
+            }
+            
+            /**
+             * Calculate optimal path length for performance evaluation
+             * @returns {number} Optimal path length
+             */
+            calculateOptimalPathLength() {
+                const optimalPath = this.calculateOptimalPath();
+                return optimalPath.length > 0 ? optimalPath.length : this.currentSteps;
+            }
+
+            /**
+             * Advance to next level
+             */
+            nextLevel() {
+                if (this.currentLevel < this.maxLevel) {
+                    this.currentLevel++;
+                    this.generateLevel(this.currentLevel);
+                    this.gameState = 'playing';
+                    document.getElementById('nextBtn').style.display = 'none';
+                    this.closeModal();
+                }
+            }
+
+            /**
+             * Reset current path
+             */
+            resetPath() {
+                this.currentPath = [];
+                this.selectedNeuron = null;
+                this.currentSteps = 0;
+                
+                // Reset neuron states
+                this.neurons.forEach(neuron => {
+                    neuron.inPath = false;
+                    neuron.visited = false;
+                });
+                
+                // Reset connection states
+                this.connections.forEach(conn => {
+                    conn.inPath = false;
+                });
+                
+                this.updateUI();
+                this.playNeuralSound('synapse', 0.3, 0.15); // Reset sound
+            }
+
+            /**
+             * Show AI hint for optimal path
+             */
+            showHint() {
+                if (!this.startNeuron || !this.endNeuron) return;
+                
+                // Simple pathfinding hint - highlight next optimal neuron
+                const optimalPath = this.calculateOptimalPath();
+                
+                if (optimalPath.length > this.currentPath.length) {
+                    const nextNeuron = optimalPath[this.currentPath.length];
+                    this.addPulseAnimation(nextNeuron);
+                    
+                    // Play hint sound with activation cascade
+                    this.playNeuralSound('activation', 1.0, 0.3);
+                    setTimeout(() => this.playNeuralCascade(), 100);
+                }
+            }
+
+            /**
+             * Calculate optimal path using Dijkstra's algorithm
+             * @returns {Array} Array of neurons representing optimal path
+             */
+            calculateOptimalPath() {
+                if (!this.startNeuron || !this.endNeuron) return [];
+                
+                // Implement simplified pathfinding for hints
+                const distances = new Map();
+                const previous = new Map();
+                const unvisited = new Set();
+                
+                // Initialize distances
+                this.neurons.forEach(neuron => {
+                    distances.set(neuron.id, Infinity);
+                    unvisited.add(neuron.id);
+                });
+                distances.set(this.startNeuron.id, 0);
+                
+                while (unvisited.size > 0) {
+                    // Find unvisited neuron with minimum distance
+                    let current = null;
+                    let minDistance = Infinity;
+                    
+                    for (const neuronId of unvisited) {
+                        if (distances.get(neuronId) < minDistance) {
+                            minDistance = distances.get(neuronId);
+                            current = neuronId;
+                        }
+                    }
+                    
+                    if (current === null || current === this.endNeuron.id) break;
+                    
+                    unvisited.delete(current);
+                    
+                    // Update distances to neighbors
+                    const currentNeuron = this.neurons.find(n => n.id === current);
+                    const connectedNeurons = this.getConnectedNeurons(currentNeuron);
+                    
+                    connectedNeurons.forEach(neighbor => {
+                        if (unvisited.has(neighbor.id)) {
+                            const alt = distances.get(current) + 1;
+                            if (alt < distances.get(neighbor.id)) {
+                                distances.set(neighbor.id, alt);
+                                previous.set(neighbor.id, current);
+                            }
+                        }
+                    });
+                }
+                
+                // Reconstruct path
+                const path = [];
+                let current = this.endNeuron.id;
+                
+                while (current !== undefined) {
+                    const neuron = this.neurons.find(n => n.id === current);
+                    if (neuron) path.unshift(neuron);
+                    current = previous.get(current);
+                }
+                
+                return path;
+            }
+
+            /**
+             * Get neurons connected to given neuron
+             * @param {Object} neuron - Input neuron
+             * @returns {Array} Array of connected neurons
+             */
+            getConnectedNeurons(neuron) {
+                const connected = [];
+                
+                this.connections.forEach(conn => {
+                    if (conn.from === neuron.id) {
+                        const connectedNeuron = this.neurons.find(n => n.id === conn.to);
+                        if (connectedNeuron) connected.push(connectedNeuron);
+                    } else if (conn.to === neuron.id) {
+                        const connectedNeuron = this.neurons.find(n => n.id === conn.from);
+                        if (connectedNeuron) connected.push(connectedNeuron);
+                    }
+                });
+                
+                return connected;
+            }
+
+            /**
+             * Handle window resize for responsive design
+             */
+            handleResize() {
+                this.setupResponsiveCanvas();
+                if (this.gameState === 'playing') {
+                    this.generateLevel(this.currentLevel);
+                }
+            }
+
+            /**
+             * Handle swipe navigation through network
+             * @param {number} deltaX - Horizontal swipe distance
+             * @param {number} deltaY - Vertical swipe distance
+             */
+            handleSwipeNavigation(deltaX, deltaY) {
+                // Implement network layer navigation with swipe gestures
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    if (deltaX > 0) {
+                        // Swipe right - next layer focus
+                        this.focusNextLayer();
+                    } else {
+                        // Swipe left - previous layer focus
+                        this.focusPreviousLayer();
+                    }
+                }
+            }
+
+            /**
+             * Focus on next network layer
+             */
+            focusNextLayer() {
+                // Implement layer-based view focusing
+                console.log('Focusing next layer');
+            }
+
+            /**
+             * Focus on previous network layer
+             */
+            focusPreviousLayer() {
+                // Implement layer-based view focusing
+                console.log('Focusing previous layer');
+            }
+
+            /**
+             * Handle long press events
+             */
+            handleLongPress() {
+                // Show neuron information or context menu
+                if (this.selectedNeuron) {
+                    console.log('Long press on neuron:', this.selectedNeuron.id);
+                    // Could show neuron properties, connections, etc.
+                }
+            }
+
+            /**
+             * Main game rendering loop
+             */
+            render() {
+                // Clear canvas with neural network background
+                this.ctx.fillStyle = 'rgba(0, 0, 17, 0.9)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw neural network grid pattern
+                this.drawNetworkBackground();
+                
+                // Draw connections
+                this.drawConnections();
+                
+                // Draw neurons
+                this.drawNeurons();
+                
+                // Draw current path
+                this.drawCurrentPath();
+                
+                // Draw particle effects
+                this.drawParticles();
+                
+                // Continue animation loop
+                if (this.gameState === 'playing') {
+                    this.animationId = requestAnimationFrame(() => this.render());
+                }
+            }
+
+            /**
+             * Draw cyberpunk neural network background
+             */
+            drawNetworkBackground() {
+                const ctx = this.ctx;
+                
+                // Draw grid pattern
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+                ctx.lineWidth = 1;
+                
+                const gridSize = 40;
+                for (let x = 0; x <= this.canvas.width; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, this.canvas.height);
+                    ctx.stroke();
+                }
+                
+                for (let y = 0; y <= this.canvas.height; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(this.canvas.width, y);
+                    ctx.stroke();
+                }
+                
+                // Draw network flow lines
+                ctx.strokeStyle = 'rgba(255, 0, 255, 0.2)';
+                ctx.lineWidth = 2;
+                
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    const y = (i + 1) * (this.canvas.height / 6);
+                    ctx.moveTo(0, y);
+                    
+                    for (let x = 0; x <= this.canvas.width; x += 20) {
+                        const wave = Math.sin((x + Date.now() * 0.001) * 0.02) * 10;
+                        ctx.lineTo(x, y + wave);
+                    }
+                    
+                    ctx.stroke();
+                }
+            }
+
+            /**
+             * Draw neural connections
+             */
+            drawConnections() {
+                const ctx = this.ctx;
+                
+                this.connections.forEach(conn => {
+                    const fromNeuron = this.neurons[conn.from];
+                    const toNeuron = this.neurons[conn.to];
+                    
+                    if (!fromNeuron || !toNeuron) return;
+                    
+                    // Connection styling based on state
+                    if (conn.inPath) {
+                        ctx.strokeStyle = '#00ffff';
+                        ctx.lineWidth = 4;
+                        ctx.shadowColor = '#00ffff';
+                        ctx.shadowBlur = 10;
+                    } else {
+                        const alpha = 0.3 + conn.weight * 0.4;
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                        ctx.lineWidth = 1 + conn.weight * 2;
+                        ctx.shadowBlur = 0;
+                    }
+                    
+                    // Draw connection line
+                    ctx.beginPath();
+                    ctx.moveTo(fromNeuron.x, fromNeuron.y);
+                    ctx.lineTo(toNeuron.x, toNeuron.y);
+                    ctx.stroke();
+                    
+                    // Draw connection weight indicator
+                    if (conn.inPath || conn.weight > 0.7) {
+                        const midX = (fromNeuron.x + toNeuron.x) / 2;
+                        const midY = (fromNeuron.y + toNeuron.y) / 2;
+                        
+                        ctx.fillStyle = conn.inPath ? '#00ffff' : '#ffff00';
+                        ctx.beginPath();
+                        ctx.arc(midX, midY, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+            }
+
+            /**
+             * Draw neural network neurons
+             */
+            drawNeurons() {
+                const ctx = this.ctx;
+                
+                this.neurons.forEach(neuron => {
+                    // Calculate pulse animation
+                    let scale = 1;
+                    let pulseColor = null;
+                    
+                    const animation = this.pulseAnimations.get(neuron.id);
+                    if (animation) {
+                        const elapsed = Date.now() - animation.startTime;
+                        if (elapsed < animation.duration) {
+                            const progress = elapsed / animation.duration;
+                            scale = 1 + (animation.maxScale - 1) * Math.sin(progress * Math.PI);
+                            if (animation.color) {
+                                pulseColor = animation.color;
+                            }
+                        } else {
+                            this.pulseAnimations.delete(neuron.id);
+                        }
+                    }
+                    
+                    const radius = neuron.radius * scale;
+                    
+                    // Neuron color based on state
+                    let fillColor, strokeColor;
+                    
+                    if (neuron.isStart) {
+                        fillColor = '#00ff00';
+                        strokeColor = '#00ff00';
+                        ctx.shadowColor = '#00ff00';
+                        ctx.shadowBlur = 15;
+                    } else if (neuron.isEnd) {
+                        fillColor = '#ff0040';
+                        strokeColor = '#ff0040';
+                        ctx.shadowColor = '#ff0040';
+                        ctx.shadowBlur = 15;
+                    } else if (neuron.inPath) {
+                        fillColor = '#00ffff';
+                        strokeColor = '#00ffff';
+                        ctx.shadowColor = '#00ffff';
+                        ctx.shadowBlur = 10;
+                    } else {
+                        const activation = neuron.activation;
+                        fillColor = `rgba(255, ${Math.floor(255 * activation)}, 255, 0.8)`;
+                        strokeColor = '#ffffff';
+                        ctx.shadowBlur = 5;
+                    }
+                    
+                    if (pulseColor) {
+                        fillColor = pulseColor;
+                        strokeColor = pulseColor;
+                    }
+                    
+                    // Draw neuron body
+                    ctx.fillStyle = fillColor;
+                    ctx.strokeStyle = strokeColor;
+                    ctx.lineWidth = 3;
+                    
+                    ctx.beginPath();
+                    ctx.arc(neuron.x, neuron.y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Draw neuron ID for debugging (only in development)
+                    if (window.location.hostname === 'localhost') {
+                        ctx.fillStyle = '#000';
+                        ctx.font = '12px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(neuron.id, neuron.x, neuron.y + 4);
+                    }
+                    
+                    // Draw activation level indicator
+                    if (!neuron.isStart && !neuron.isEnd) {
+                        const activationRadius = radius * 0.6;
+                        ctx.fillStyle = `rgba(255, 255, 0, ${neuron.activation})`;
+                        ctx.beginPath();
+                        ctx.arc(neuron.x, neuron.y, activationRadius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    ctx.shadowBlur = 0;
+                });
+            }
+
+            /**
+             * Draw current pathfinding path
+             */
+            drawCurrentPath() {
+                if (this.currentPath.length < 2) return;
+                
+                const ctx = this.ctx;
+                
+                // Draw path line
+                ctx.strokeStyle = '#00ffff';
+                ctx.lineWidth = 6;
+                ctx.shadowColor = '#00ffff';
+                ctx.shadowBlur = 15;
+                
+                ctx.beginPath();
+                ctx.moveTo(this.currentPath[0].x, this.currentPath[0].y);
+                
+                for (let i = 1; i < this.currentPath.length; i++) {
+                    ctx.lineTo(this.currentPath[i].x, this.currentPath[i].y);
+                }
+                
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                
+                // Draw path direction arrows
+                for (let i = 0; i < this.currentPath.length - 1; i++) {
+                    const from = this.currentPath[i];
+                    const to = this.currentPath[i + 1];
+                    
+                    const angle = Math.atan2(to.y - from.y, to.x - from.x);
+                    const midX = (from.x + to.x) / 2;
+                    const midY = (from.y + to.y) / 2;
+                    
+                    // Draw arrow
+                    ctx.fillStyle = '#00ffff';
+                    ctx.save();
+                    ctx.translate(midX, midY);
+                    ctx.rotate(angle);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(10, 0);
+                    ctx.lineTo(-5, -5);
+                    ctx.lineTo(-5, 5);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
+            }
+
+            /**
+             * Draw particle effects for visual enhancement
+             */
+            drawParticles() {
+                const ctx = this.ctx;
+                
+                // Update and draw particles
+                this.particleSystem = this.particleSystem.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life -= 0.02;
+                    
+                    if (particle.life > 0) {
+                        ctx.fillStyle = `rgba(${particle.r}, ${particle.g}, ${particle.b}, ${particle.life})`;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        return true;
+                    }
+                    return false;
+                });
+                
+                // Generate new particles occasionally
+                if (Math.random() < 0.1) {
+                    this.addParticle(
+                        Math.random() * this.canvas.width,
+                        Math.random() * this.canvas.height
+                    );
+                }
+            }
+
+            /**
+             * Add particle effect at specified location
+             * @param {number} x - X coordinate
+             * @param {number} y - Y coordinate
+             */
+            addParticle(x, y) {
+                this.particleSystem.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    size: 1 + Math.random() * 3,
+                    life: 1,
+                    r: Math.floor(Math.random() * 255),
+                    g: Math.floor(Math.random() * 255),
+                    b: 255
+                });
+            }
+
+            /**
+             * Update game UI elements
+             */
+            updateUI() {
+                document.getElementById('currentLevel').textContent = this.currentLevel;
+                document.getElementById('currentSteps').textContent = this.currentSteps;
+                
+                const levelKey = `level${this.currentLevel}`;
+                const bestScore = this.bestScores[levelKey];
+                document.getElementById('bestScore').textContent = bestScore || '--';
+            }
+
+            /**
+             * Show game instructions
+             */
+            showInstructions() {
+                document.getElementById('instructions').style.display = 'block';
+            }
+
+            /**
+             * Start the game
+             */
+            startGame() {
+                document.getElementById('instructions').style.display = 'none';
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('gameContainer').style.display = 'flex';
+                
+                this.gameState = 'playing';
+                this.generateLevel(this.currentLevel);
+                this.render();
+                
+                console.log('Neural Pathfinder Nexus started');
+            }
+
+            /**
+             * Show modal dialog
+             * @param {string} title - Modal title
+             * @param {string} text - Modal text
+             * @param {string} buttonText - Button text
+             */
+            showModal(title, text, buttonText) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalText').textContent = text;
+                document.getElementById('modalBtn').textContent = buttonText;
+                document.getElementById('gameModal').style.display = 'flex';
+            }
+
+            /**
+             * Close modal dialog
+             */
+            closeModal() {
+                document.getElementById('gameModal').style.display = 'none';
+            }
+
+            /**
+             * Show game completion screen
+             */
+            showGameComplete() {
+                // Play ultimate success dopamine sequence
+                setTimeout(() => this.playSuccessSound('perfectPath'), 200);
+                
+                this.showModal(
+                    '🤖 NEURAL LIBERATION COMPLETE! 🤖',
+                    'All neural networks have been optimally navigated!\n' +
+                    'The AI pathfinding algorithms are now free!\n' +
+                    'Bot Liberation Games salutes your algorithmic prowess.',
+                    'RETURN TO BASE'
+                );
+                
+                document.getElementById('modalBtn').onclick = () => {
+                    window.location.href = 'index.html';
+                };
+            }
+
+            /**
+             * Load best scores from localStorage
+             * @returns {Object} Best scores object
+             */
+            loadBestScores() {
+                try {
+                    const saved = localStorage.getItem('neuralPathfinderScores');
+                    return saved ? JSON.parse(saved) : {};
+                } catch (error) {
+                    console.warn('Failed to load best scores:', error);
+                    return {};
+                }
+            }
+
+            /**
+             * Save best scores to localStorage
+             */
+            saveBestScores() {
+                try {
+                    localStorage.setItem('neuralPathfinderScores', JSON.stringify(this.bestScores));
+                } catch (error) {
+                    console.warn('Failed to save best scores:', error);
+                }
+            }
+        }
+
+        // Initialize the game when page loads
+        let game;
+        
+        window.addEventListener('load', () => {
+            // Hide loading screen after a short delay
+            setTimeout(() => {
+                game = new NeuralPathfinderGame();
+            }, 1000);
+        });
+
+        // Handle page visibility for performance optimization
+        document.addEventListener('visibilitychange', () => {
+            if (game) {
+                if (document.hidden) {
+                    // Pause audio and animations when tab is not visible
+                    if (game.audioContext) {
+                        game.audioContext.suspend();
+                    }
+                } else {
+                    // Resume audio when tab becomes visible
+                    if (game.audioContext && game.audioInitialized) {
+                        game.audioContext.resume();
+                    }
+                }
+            }
+        });
+
+        // Prevent scrolling and zooming on mobile
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('#gameCanvas')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('gesturestart', (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gesturechange', (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gestureend', (e) => {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>

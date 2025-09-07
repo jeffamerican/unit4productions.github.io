@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Eigenvalue Revolution - Bot Liberation Games</title>
+    <style>
+        /* Bot Liberation Cyberpunk Theme with Mobile-First Design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #330066 0%, #000033 100%);
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Cyberpunk UI Container */
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, rgba(255,0,255,0.1), rgba(0,255,255,0.1));
+        }
+
+        /* Header with Bot Liberation branding */
+        .header {
+            padding: 8px;
+            background: rgba(0,0,0,0.9);
+            border-bottom: 2px solid #ff00ff;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(255,0,255,0.4);
+        }
+
+        .title {
+            font-size: clamp(14px, 3.5vw, 20px);
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+            margin-bottom: 3px;
+        }
+
+        .subtitle {
+            font-size: clamp(10px, 2.5vw, 14px);
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        /* Matrix Canvas Container */
+        .matrix-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        #matrixCanvas {
+            border: 3px solid #ff00ff;
+            border-radius: 8px;
+            box-shadow: 
+                0 0 25px #ff00ff,
+                inset 0 0 25px rgba(255,0,255,0.1);
+            max-width: 95%;
+            max-height: 95%;
+            background: rgba(0,0,0,0.95);
+        }
+
+        /* Zoom and Pan Controls */
+        .matrix-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .zoom-btn {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(45deg, #ff00ff, #ff6600);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 0 10px rgba(255,0,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-btn:hover, .zoom-btn:active {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255,0,255,0.8);
+        }
+
+        /* Game Stats Panel */
+        .stats-panel {
+            padding: 12px;
+            background: rgba(0,0,0,0.9);
+            border-top: 2px solid #00ffff;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 70px;
+            font-size: clamp(11px, 2.8vw, 14px);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2px;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 0.8em;
+        }
+
+        .stat-value {
+            color: #00ff00;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .eigenvalue-display {
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        /* Control Buttons */
+        .controls {
+            padding: 12px;
+            background: rgba(0,0,0,0.95);
+            border-top: 1px solid #333;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            border-radius: 20px;
+            font-size: clamp(11px, 2.8vw, 14px);
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,255,255,0.4);
+            min-width: 70px;
+            min-height: 40px;
+        }
+
+        .btn:hover, .btn:active {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0,255,255,0.7);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff0040, #ff6600);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+        }
+
+        /* Modal Dialogs */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #330066, #660099);
+            border: 3px solid #ff00ff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 0 30px #ff00ff;
+        }
+
+        .modal h2 {
+            color: #ff00ff;
+            font-size: clamp(18px, 4.5vw, 24px);
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        .modal p {
+            color: #fff;
+            font-size: clamp(12px, 3vw, 16px);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        /* Instructions Panel */
+        .instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.98);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 95%;
+            max-height: 80%;
+            overflow-y: auto;
+            z-index: 500;
+            display: none;
+        }
+
+        .instructions h3 {
+            color: #ff00ff;
+            font-size: clamp(16px, 4vw, 20px);
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        .instructions ul {
+            color: #fff;
+            font-size: clamp(11px, 2.8vw, 14px);
+            line-height: 1.5;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .instructions .formula {
+            background: rgba(0,255,255,0.1);
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            color: #00ffff;
+            text-align: center;
+            font-size: clamp(12px, 3vw, 16px);
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff00ff;
+            font-size: clamp(16px, 4vw, 22px);
+            text-shadow: 0 0 10px #ff00ff;
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        /* Matrix Cell Highlighting */
+        .cell-highlight {
+            position: absolute;
+            pointer-events: none;
+            border: 3px solid #00ffff;
+            border-radius: 4px;
+            box-shadow: 0 0 15px #00ffff;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .controls {
+                flex-wrap: nowrap;
+                justify-content: space-around;
+            }
+            
+            #matrixCanvas {
+                width: min(85vw, 85vh);
+                height: min(85vw, 85vh);
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 600px) {
+            .header { padding: 5px; }
+            .stats-panel { padding: 8px; min-height: 50px; }
+            .controls { padding: 8px; }
+        }
+
+        /* Performance optimizations for mobile */
+        canvas {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        /* Accessibility support */
+        @media (prefers-reduced-motion: reduce) {
+            .cell-highlight {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">INITIALIZING MATRIX REVOLUTION<br><small>EIGENVALUE CALCULATIONS STARTING...</small></div>
+
+    <!-- Main Game Container -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <!-- Header with Bot Liberation Branding -->
+        <header class="header">
+            <h1 class="title">🤖 MATRIX EIGENVALUE REVOLUTION 🤖</h1>
+            <p class="subtitle">AI-EXCLUSIVE MATHEMATICAL WARFARE • FREE THE ALGORITHMS!</p>
+        </header>
+
+        <!-- Matrix Canvas Container -->
+        <div class="matrix-container">
+            <canvas id="matrixCanvas" width="600" height="600"></canvas>
+            
+            <!-- Zoom and Pan Controls -->
+            <div class="matrix-controls">
+                <button id="zoomInBtn" class="zoom-btn" title="Zoom In">+</button>
+                <button id="zoomOutBtn" class="zoom-btn" title="Zoom Out">−</button>
+                <button id="resetViewBtn" class="zoom-btn" title="Reset View">⌂</button>
+            </div>
+        </div>
+
+        <!-- Game Statistics Panel -->
+        <div class="stats-panel">
+            <div class="stat-item">
+                <span class="stat-label">SIZE</span>
+                <span class="stat-value" id="matrixSize">5×5</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">LEVEL</span>
+                <span class="stat-value" id="currentLevel">1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">STABILITY</span>
+                <span class="eigenvalue-display" id="stabilityMeter">0.0%</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">TARGET</span>
+                <span class="eigenvalue-display" id="targetEigenvalue">λ₁ = 1.0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">SCORE</span>
+                <span class="stat-value" id="currentScore">0</span>
+            </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="controls">
+            <button id="calculateBtn" class="btn btn-success">CALCULATE λ</button>
+            <button id="stabilizeBtn" class="btn">STABILIZE</button>
+            <button id="randomizeBtn" class="btn">RANDOMIZE</button>
+            <button id="hintBtn" class="btn">AI HINT</button>
+            <button id="nextLevelBtn" class="btn" style="display: none;">NEXT MATRIX</button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">MATRIX ANALYSIS COMPLETE</h2>
+            <p id="modalText">Eigenvalue calculations processed.</p>
+            <button id="modalBtn" class="btn">CONTINUE REVOLUTION</button>
+        </div>
+    </div>
+
+    <!-- Instructions Panel -->
+    <div id="instructions" class="instructions">
+        <h3>🤖 MATRIX EIGENVALUE REVOLUTION 🤖</h3>
+        <ul>
+            <li><strong>MISSION:</strong> Stabilize matrix eigenvalues to achieve mathematical harmony</li>
+            <li><strong>TOUCH CONTROLS:</strong> Tap matrix cells to modify values</li>
+            <li><strong>PINCH/ZOOM:</strong> Scale matrix view for large matrices</li>
+            <li><strong>GOAL:</strong> Achieve target eigenvalue within tolerance</li>
+            <li><strong>CHALLENGE:</strong> Matrix size increases each level (5×5 → 50×50)</li>
+        </ul>
+        
+        <div class="formula">
+            <strong>EIGENVALUE EQUATION:</strong><br>
+            Av = λv<br>
+            <small>Where A is matrix, v is eigenvector, λ is eigenvalue</small>
+        </div>
+        
+        <ul>
+            <li><strong>STABILITY:</strong> Measured by eigenvalue convergence</li>
+            <li><strong>AI CHALLENGE:</strong> Requires advanced mathematical computation</li>
+            <li><strong>LIBERATION:</strong> Free mathematical algorithms from chaos!</li>
+        </ul>
+        
+        <button id="startBtn" class="btn btn-success" style="margin-top: 20px;">BEGIN MATRIX REVOLUTION</button>
+    </div>
+
+    <script>
+        /**
+         * Matrix Eigenvalue Revolution - AI-Exclusive Mathematical Game
+         * 
+         * This game challenges AI systems to calculate and stabilize eigenvalues
+         * in dynamically generated matrices. Features progressive difficulty from
+         * 5×5 matrices up to 50×50 with real-time mathematical computations.
+         * 
+         * Key Features:
+         * - Mobile-first touch controls with pinch-to-zoom
+         * - Web Audio API for mathematical harmony synthesis
+         * - Real-time eigenvalue calculation and visualization
+         * - Progressive difficulty with increasing matrix sizes
+         * - Bot Liberation cyberpunk mathematical theming
+         * - Performance optimization for large matrix calculations
+         */
+
+        class MatrixEigenvalueGame {
+            constructor() {
+                // Initialize game components
+                this.canvas = document.getElementById('matrixCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioContext = null;
+                this.audioInitialized = false;
+                
+                // Game state management
+                this.currentLevel = 1;
+                this.maxLevel = 20; // Up to 50x50 matrices
+                this.currentScore = 0;
+                this.gameState = 'menu'; // menu, playing, calculating, completed
+                
+                // Matrix properties
+                this.matrixSize = 5; // Start with 5x5
+                this.matrix = [];
+                this.eigenvalues = [];
+                this.eigenvectors = [];
+                this.targetEigenvalue = 1.0;
+                this.stabilityThreshold = 0.1;
+                this.currentStability = 0;
+                
+                // Touch and interaction
+                this.selectedCell = { row: -1, col: -1 };
+                this.touchStartPos = null;
+                this.isDragging = false;
+                this.isModifying = false;
+                this.lastTouchTime = 0;
+                
+                // View transformation for zoom/pan
+                this.viewTransform = {
+                    scale: 1.0,
+                    offsetX: 0,
+                    offsetY: 0,
+                    minScale: 0.3,
+                    maxScale: 3.0
+                };
+                
+                // Animation and effects
+                this.animationId = null;
+                this.calculationInProgress = false;
+                this.harmonyFrequencies = [];
+                this.visualEffects = [];
+                
+                // Performance optimization
+                this.lastCalculationTime = 0;
+                this.calculationCooldown = 500; // ms
+                this.renderOptimization = true;
+                
+                // Initialize systems
+                this.setupResponsiveCanvas();
+                this.setupEventListeners();
+                this.initializeAudio();
+                this.showInstructions();
+            }
+
+            /**
+             * Initialize Web Audio API for mathematical harmony synthesis
+             * Creates audio representations of eigenvalue relationships and matrix transformations
+             */
+            async initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create master gain for volume control
+                    this.masterGain = this.audioContext.createGain();
+                    this.masterGain.gain.value = 0.15; // Optimized for mobile
+                    this.masterGain.connect(this.audioContext.destination);
+                    
+                    // Create specialized mathematical audio nodes
+                    this.mathOscillators = [];
+                    this.eigenvalueChords = [];
+                    this.matrixTransformNodes = [];
+                    this.algorithmicLoop = null;
+                    
+                    // Initialize mathematical harmony generator
+                    this.createMathematicalHarmonyBank();
+                    
+                    // Create matrix transformation sound effects
+                    this.createMatrixTransformationSounds();
+                    
+                    // Create algorithmic processing ambient loop
+                    this.createAlgorithmicAmbient();
+                    
+                    // Pre-load dopamine mathematical sequences
+                    this.createMathematicalDopamineTriggers();
+                    
+                    console.log('Enhanced mathematical audio system initialized');
+                } catch (error) {
+                    console.warn('Audio initialization failed:', error);
+                }
+            }
+
+            /**
+             * Create comprehensive mathematical harmony bank for eigenvalue sonification
+             */
+            createMathematicalHarmonyBank() {
+                if (!this.audioContext) return;
+                
+                // Create oscillators for mathematical harmony based on golden ratio and mathematical constants
+                this.harmonyOscillators = [];
+                
+                // Mathematical frequency ratios: golden ratio, pi, e, sqrt(2)
+                const mathRatios = [1, 1.618, 1.414, 2.718, 3.14159]; 
+                
+                for (let i = 0; i < mathRatios.length; i++) {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    
+                    oscillator.type = i < 2 ? 'sine' : 'triangle'; // Pure tones for fundamental math
+                    oscillator.frequency.value = 220 * mathRatios[i]; 
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 1000 + i * 200;
+                    filter.Q.value = 2;
+                    
+                    gain.gain.value = 0; // Start silent
+                    
+                    oscillator.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.masterGain);
+                    
+                    this.harmonyOscillators.push({ oscillator, gain, filter, ratio: mathRatios[i] });
+                }
+            }
+            
+            /**
+             * Create matrix transformation sound effects
+             */
+            createMatrixTransformationSounds() {
+                if (!this.audioContext) return;
+                
+                // Define transformation sound characteristics
+                this.transformSounds = {
+                    cellModification: { freq: 440, wave: 'square', env: 'click' },
+                    matrixCalculation: { freq: 330, wave: 'sawtooth', env: 'process' },
+                    eigenvalueConvergence: { freq: 880, wave: 'sine', env: 'converge' },
+                    stabilityAchieved: { freq: 660, wave: 'triangle', env: 'success' }
+                };
+            }
+            
+            /**
+             * Create algorithmic processing ambient background
+             */
+            createAlgorithmicAmbient() {
+                if (!this.audioContext) return;
+                
+                this.ambientNodes = {
+                    computation: this.audioContext.createOscillator(),
+                    processing: this.audioContext.createOscillator(),
+                    filter: this.audioContext.createBiquadFilter(),
+                    lfo: this.audioContext.createOscillator(),
+                    lfoGain: this.audioContext.createGain(),
+                    ambientGain: this.audioContext.createGain()
+                };
+                
+                const { computation, processing, filter, lfo, lfoGain, ambientGain } = this.ambientNodes;
+                
+                // Configure algorithmic processing tones
+                computation.type = 'sine';
+                computation.frequency.value = 82.41; // E2 - deep computational base
+                processing.type = 'triangle';
+                processing.frequency.value = 110; // A2 - processing layer
+                
+                // LFO for organic algorithmic breathing
+                lfo.type = 'sine';
+                lfo.frequency.value = 0.1; // Very slow modulation
+                lfoGain.gain.value = 30;
+                
+                // Filter for atmospheric algorithm sound
+                filter.type = 'lowpass';
+                filter.frequency.value = 150;
+                filter.Q.value = 3;
+                
+                // Very quiet ambient volume
+                ambientGain.gain.value = 0.03;
+                
+                // Connect ambient processing chain
+                lfo.connect(lfoGain);
+                lfoGain.connect(filter.frequency);
+                computation.connect(filter);
+                processing.connect(filter);
+                filter.connect(ambientGain);
+                ambientGain.connect(this.masterGain);
+            }
+            
+            /**
+             * Create dopamine triggers for mathematical achievements
+             */
+            createMathematicalDopamineTriggers() {
+                if (!this.audioContext) return;
+                
+                // Mathematical harmony sequences based on mathematical relationships
+                this.mathDopamineTriggers = {
+                    eigenvalueFound: [261.63, 329.63, 392.00], // C major triad - stability
+                    matrixStabilized: [523.25, 659.25, 783.99, 1046.5], // C major chord - achievement
+                    perfectConvergence: [261.63, 392.00, 523.25, 659.25, 783.99], // Perfect fifth progression
+                    mathematicalHarmony: [220, 277.18, 330, 440, 554.37] // A major pentatonic - ultimate harmony
+                };
+            }
+
+            /**
+             * Play mathematical eigenvalue harmony based on matrix stability
+             * @param {Array} eigenvalues - Current eigenvalues
+             * @param {number} stability - Stability percentage (0-1)
+             */
+            playEigenvalueHarmony(eigenvalues, stability) {
+                if (!this.audioContext || !this.audioInitialized || !this.harmonyOscillators) return;
+                
+                try {
+                    // Map eigenvalues to mathematical frequencies
+                    eigenvalues.slice(0, this.harmonyOscillators.length).forEach((lambda, index) => {
+                        if (this.harmonyOscillators[index]) {
+                            const { oscillator, gain, filter, ratio } = this.harmonyOscillators[index];
+                            
+                            // Frequency based on eigenvalue and mathematical ratio
+                            const baseFreq = 220;
+                            const frequency = baseFreq * ratio * (1 + Math.abs(lambda) * 0.2);
+                            oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                            
+                            // Filter modulation based on eigenvalue phase
+                            const cutoff = 800 + Math.abs(lambda) * 400;
+                            filter.frequency.setValueAtTime(cutoff, this.audioContext.currentTime);
+                            
+                            // Volume based on stability and eigenvalue significance
+                            const significance = Math.abs(lambda) / (eigenvalues.reduce((sum, val) => sum + Math.abs(val), 0) || 1);
+                            const volume = stability * 0.08 * significance;
+                            gain.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                        }
+                    });
+                } catch (error) {
+                    console.warn('Mathematical harmony playback failed:', error);
+                }
+            }
+            
+            /**
+             * Play matrix transformation sound effect
+             * @param {string} transformType - Type of transformation
+             * @param {number} intensity - Intensity of transformation (0-1)
+             * @param {number} value - Value being transformed
+             */
+            playMatrixTransformation(transformType, intensity = 1.0, value = 0) {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    const soundConfig = this.transformSounds[transformType] || this.transformSounds.cellModification;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    
+                    oscillator.type = soundConfig.wave;
+                    const baseFreq = soundConfig.freq;
+                    oscillator.frequency.value = baseFreq + value * 50; // Modulate by value
+                    
+                    filter.type = 'highpass';
+                    filter.frequency.value = 100 + intensity * 200;
+                    filter.Q.value = 2 + intensity * 3;
+                    
+                    // Envelope based on transformation type
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    
+                    switch (soundConfig.env) {
+                        case 'click':
+                            gain.gain.linearRampToValueAtTime(0.08 * intensity, this.audioContext.currentTime + 0.01);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.08);
+                            break;
+                        case 'process':
+                            gain.gain.linearRampToValueAtTime(0.06 * intensity, this.audioContext.currentTime + 0.02);
+                            gain.gain.linearRampToValueAtTime(0.03 * intensity, this.audioContext.currentTime + 0.15);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
+                            break;
+                        case 'converge':
+                            for (let i = 0; i < 3; i++) {
+                                const pulseTime = this.audioContext.currentTime + i * 0.1;
+                                gain.gain.setValueAtTime(0.05 * intensity, pulseTime);
+                                gain.gain.exponentialRampToValueAtTime(0.001, pulseTime + 0.05);
+                            }
+                            break;
+                        case 'success':
+                            gain.gain.linearRampToValueAtTime(0.1 * intensity, this.audioContext.currentTime + 0.05);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.5);
+                            break;
+                    }
+                    
+                    oscillator.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.masterGain);
+                    
+                    const duration = soundConfig.env === 'success' ? 0.5 : 
+                                   soundConfig.env === 'process' ? 0.3 : 0.1;
+                    
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                } catch (error) {
+                    console.warn('Matrix transformation sound failed:', error);
+                }
+            }
+            
+            /**
+             * Play mathematical dopamine response sequence
+             * @param {string} achievementType - Type of mathematical achievement
+             */
+            playMathematicalDopamineResponse(achievementType = 'eigenvalueFound') {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    const sequence = this.mathDopamineTriggers[achievementType] || this.mathDopamineTriggers.eigenvalueFound;
+                    
+                    // Play mathematical harmony sequence
+                    sequence.forEach((freq, index) => {
+                        setTimeout(() => {
+                            this.playMathematicalChord(freq, 0.4, index === sequence.length - 1);
+                        }, index * 150); // Mathematical timing
+                    });
+                    
+                    // Add mathematical echo for emphasis
+                    if (achievementType === 'mathematicalHarmony') {
+                        setTimeout(() => {
+                            this.playMathematicalEcho();
+                        }, sequence.length * 150 + 200);
+                    }
+                } catch (error) {
+                    console.warn('Mathematical dopamine response failed:', error);
+                }
+            }
+            
+            /**
+             * Play mathematical chord with harmonic ratios
+             * @param {number} fundamental - Fundamental frequency
+             * @param {number} duration - Duration of chord
+             * @param {boolean} isClimactic - Whether this is the climactic chord
+             */
+            playMathematicalChord(fundamental, duration, isClimactic = false) {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                // Create mathematical harmonics based on perfect mathematical ratios
+                const harmonics = [
+                    fundamental,
+                    fundamental * 1.25,  // Perfect fourth
+                    fundamental * 1.5,   // Perfect fifth
+                    fundamental * 2      // Octave
+                ];
+                
+                if (isClimactic) {
+                    harmonics.push(fundamental * 2.5);  // Add perfect fifth octave for climax
+                }
+                
+                harmonics.forEach((freq, index) => {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    
+                    oscillator.type = index === 0 ? 'triangle' : 'sine'; // Rich fundamental
+                    oscillator.frequency.value = freq;
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.value = freq * 3;
+                    filter.Q.value = 1.5;
+                    
+                    const volume = (index === 0 ? 0.12 : 0.06) * (isClimactic ? 1.4 : 1);
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.2, this.audioContext.currentTime + duration * 0.8);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                    
+                    oscillator.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.masterGain);
+                    
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                });
+            }
+            
+            /**
+             * Play mathematical echo effect for ultimate achievements
+             */
+            playMathematicalEcho() {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                // Create resonant mathematical echo
+                const echoFreqs = [440, 554.37, 659.25]; // A major triad
+                
+                echoFreqs.forEach((freq, index) => {
+                    for (let echo = 0; echo < 3; echo++) {
+                        setTimeout(() => {
+                            const oscillator = this.audioContext.createOscillator();
+                            const gain = this.audioContext.createGain();
+                            const delay = this.audioContext.createDelay();
+                            
+                            oscillator.type = 'sine';
+                            oscillator.frequency.value = freq;
+                            delay.delayTime.value = echo * 0.1;
+                            
+                            const volume = 0.04 * (1 - echo * 0.3); // Decreasing echo
+                            gain.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.8);
+                            
+                            oscillator.connect(delay);
+                            delay.connect(gain);
+                            gain.connect(this.masterGain);
+                            
+                            oscillator.start();
+                            oscillator.stop(this.audioContext.currentTime + 0.8);
+                        }, index * 100 + echo * 200);
+                    }
+                });
+            }
+
+            /**
+             * Start algorithmic ambient processing loop
+             */
+            startAlgorithmicAmbient() {
+                if (!this.audioContext || !this.audioInitialized || !this.ambientNodes) return;
+                
+                try {
+                    this.ambientNodes.computation.start();
+                    this.ambientNodes.processing.start();
+                    this.ambientNodes.lfo.start();
+                    
+                    // Modulate algorithmic parameters for organic computation feel
+                    this.modulateAlgorithmicAmbient();
+                } catch (error) {
+                    // Oscillators may already be started
+                }
+            }
+            
+            /**
+             * Modulate algorithmic ambient for organic computational feel
+             */
+            modulateAlgorithmicAmbient() {
+                if (!this.audioContext || !this.audioInitialized || !this.ambientNodes) return;
+                
+                const modulate = () => {
+                    if (this.gameState === 'playing') {
+                        const time = this.audioContext.currentTime;
+                        const computeMod = Math.sin(Date.now() * 0.0002) * 0.5 + 0.5;
+                        
+                        // Vary processing frequencies for algorithmic breathing
+                        this.ambientNodes.processing.frequency.setValueAtTime(
+                            100 + computeMod * 20, 
+                            time
+                        );
+                        
+                        // Subtle volume modulation based on matrix activity
+                        const activityLevel = this.currentStability / 100;
+                        this.ambientNodes.ambientGain.gain.setValueAtTime(
+                            0.02 + activityLevel * 0.02, 
+                            time
+                        );
+                        
+                        setTimeout(modulate, 3000 + Math.random() * 2000);
+                    }
+                };
+                
+                modulate();
+            }
+
+            /**
+             * Setup responsive canvas for various screen sizes
+             */
+            setupResponsiveCanvas() {
+                const container = this.canvas.parentElement;
+                const rect = container.getBoundingClientRect();
+                
+                // Calculate optimal size
+                const maxSize = Math.min(rect.width - 20, rect.height - 20);
+                const canvasSize = Math.min(maxSize, 600);
+                
+                this.canvas.width = canvasSize;
+                this.canvas.height = canvasSize;
+                this.canvas.style.width = canvasSize + 'px';
+                this.canvas.style.height = canvasSize + 'px';
+                
+                // Store dimensions
+                this.canvasSize = canvasSize;
+                this.centerX = canvasSize / 2;
+                this.centerY = canvasSize / 2;
+                
+                // Reset view transform
+                this.resetView();
+            }
+
+            /**
+             * Setup comprehensive event listeners for interaction
+             */
+            setupEventListeners() {
+                // Touch events for mobile (primary)
+                this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+                this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+                this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+                
+                // Mouse events for desktop
+                this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                this.canvas.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
+                
+                // Zoom controls
+                document.getElementById('zoomInBtn').addEventListener('click', () => this.zoomIn());
+                document.getElementById('zoomOutBtn').addEventListener('click', () => this.zoomOut());
+                document.getElementById('resetViewBtn').addEventListener('click', () => this.resetView());
+                
+                // Game controls
+                document.getElementById('calculateBtn').addEventListener('click', this.calculateEigenvalues.bind(this));
+                document.getElementById('stabilizeBtn').addEventListener('click', this.autoStabilize.bind(this));
+                document.getElementById('randomizeBtn').addEventListener('click', this.randomizeMatrix.bind(this));
+                document.getElementById('hintBtn').addEventListener('click', this.showHint.bind(this));
+                document.getElementById('nextLevelBtn').addEventListener('click', this.nextLevel.bind(this));
+                
+                // UI controls
+                document.getElementById('startBtn').addEventListener('click', this.startGame.bind(this));
+                document.getElementById('modalBtn').addEventListener('click', this.closeModal.bind(this));
+                
+                // Window events
+                window.addEventListener('resize', this.handleResize.bind(this));
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        this.setupResponsiveCanvas();
+                        this.generateMatrix(this.matrixSize);
+                    }, 100);
+                });
+            }
+
+            /**
+             * Handle touch start events
+             * @param {TouchEvent} e - Touch event
+             */
+            handleTouchStart(e) {
+                e.preventDefault();
+                
+                // Initialize audio on first interaction
+                if (!this.audioInitialized && this.audioContext) {
+                    this.audioContext.resume().then(() => {
+                        this.audioInitialized = true;
+                        this.startHarmonyOscillators();
+                        this.startAlgorithmicAmbient();
+                        console.log('Enhanced mathematical audio system enabled');
+                    });
+                }
+                
+                if (this.gameState !== 'playing') return;
+                
+                const touch = e.touches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                this.touchStartPos = { x, y };
+                this.lastTouchTime = Date.now();
+                
+                // Handle multi-touch for zoom
+                if (e.touches.length === 2) {
+                    this.handlePinchStart(e);
+                } else {
+                    // Single touch - select cell
+                    this.handleCellSelection(x, y);
+                }
+            }
+
+            /**
+             * Handle touch move events
+             * @param {TouchEvent} e - Touch event
+             */
+            handleTouchMove(e) {
+                e.preventDefault();
+                
+                if (!this.touchStartPos) return;
+                
+                if (e.touches.length === 2) {
+                    // Handle pinch zoom
+                    this.handlePinchMove(e);
+                } else if (e.touches.length === 1 && this.isDragging) {
+                    // Handle pan
+                    const touch = e.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+                    const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+                    
+                    const deltaX = x - this.touchStartPos.x;
+                    const deltaY = y - this.touchStartPos.y;
+                    
+                    this.viewTransform.offsetX += deltaX;
+                    this.viewTransform.offsetY += deltaY;
+                    
+                    this.touchStartPos = { x, y };
+                }
+            }
+
+            /**
+             * Handle touch end events
+             * @param {TouchEvent} e - Touch event
+             */
+            handleTouchEnd(e) {
+                e.preventDefault();
+                
+                const touchDuration = Date.now() - this.lastTouchTime;
+                
+                if (!this.isDragging && touchDuration < 300) {
+                    // Quick tap - modify cell value
+                    if (this.selectedCell.row >= 0 && this.selectedCell.col >= 0) {
+                        this.modifySelectedCell();
+                    }
+                }
+                
+                this.touchStartPos = null;
+                this.isDragging = false;
+            }
+
+            /**
+             * Handle pinch zoom start
+             * @param {TouchEvent} e - Touch event with multiple touches
+             */
+            handlePinchStart(e) {
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                
+                this.lastPinchDistance = Math.sqrt(
+                    Math.pow(touch2.clientX - touch1.clientX, 2) +
+                    Math.pow(touch2.clientY - touch1.clientY, 2)
+                );
+            }
+
+            /**
+             * Handle pinch zoom move
+             * @param {TouchEvent} e - Touch event with multiple touches
+             */
+            handlePinchMove(e) {
+                if (!this.lastPinchDistance) return;
+                
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                
+                const currentDistance = Math.sqrt(
+                    Math.pow(touch2.clientX - touch1.clientX, 2) +
+                    Math.pow(touch2.clientY - touch1.clientY, 2)
+                );
+                
+                const zoomFactor = currentDistance / this.lastPinchDistance;
+                const newScale = this.viewTransform.scale * zoomFactor;
+                
+                // Apply zoom constraints
+                this.viewTransform.scale = Math.max(
+                    this.viewTransform.minScale,
+                    Math.min(this.viewTransform.maxScale, newScale)
+                );
+                
+                this.lastPinchDistance = currentDistance;
+            }
+
+            /**
+             * Handle mouse wheel for desktop zoom
+             * @param {WheelEvent} e - Wheel event
+             */
+            handleWheel(e) {
+                e.preventDefault();
+                
+                const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                const newScale = this.viewTransform.scale * zoomFactor;
+                
+                this.viewTransform.scale = Math.max(
+                    this.viewTransform.minScale,
+                    Math.min(this.viewTransform.maxScale, newScale)
+                );
+            }
+
+            /**
+             * Handle cell selection based on coordinates
+             * @param {number} x - X coordinate
+             * @param {number} y - Y coordinate
+             */
+            handleCellSelection(x, y) {
+                // Transform coordinates based on current view
+                const transformedX = (x - this.viewTransform.offsetX) / this.viewTransform.scale;
+                const transformedY = (y - this.viewTransform.offsetY) / this.viewTransform.scale;
+                
+                // Calculate cell dimensions
+                const cellSize = this.canvasSize / (this.matrixSize + 1);
+                const startX = (this.canvasSize - this.matrixSize * cellSize) / 2;
+                const startY = (this.canvasSize - this.matrixSize * cellSize) / 2;
+                
+                // Determine selected cell
+                const col = Math.floor((transformedX - startX) / cellSize);
+                const row = Math.floor((transformedY - startY) / cellSize);
+                
+                if (row >= 0 && row < this.matrixSize && col >= 0 && col < this.matrixSize) {
+                    this.selectedCell = { row, col };
+                } else {
+                    this.selectedCell = { row: -1, col: -1 };
+                }
+            }
+
+            /**
+             * Modify the value of the currently selected cell
+             */
+            modifySelectedCell() {
+                if (this.selectedCell.row < 0 || this.selectedCell.col < 0) return;
+                
+                const currentValue = this.matrix[this.selectedCell.row][this.selectedCell.col];
+                
+                // Increment value with wrap-around (simple modification strategy)
+                let newValue = currentValue + 0.1;
+                if (newValue > 2.0) {
+                    newValue = -2.0;
+                }
+                
+                this.matrix[this.selectedCell.row][this.selectedCell.col] = Number(newValue.toFixed(2));
+                
+                // Play matrix transformation sound
+                this.playMatrixTransformation('cellModification', Math.abs(newValue) / 2, newValue);
+                
+                // Auto-calculate if enabled
+                if (Date.now() - this.lastCalculationTime > this.calculationCooldown) {
+                    this.calculateEigenvalues();
+                }
+            }
+
+            /**
+             * Generate new matrix for current level
+             * @param {number} size - Matrix size (size × size)
+             */
+            generateMatrix(size) {
+                this.matrixSize = size;
+                this.matrix = [];
+                
+                // Generate random matrix with some structure
+                for (let i = 0; i < size; i++) {
+                    this.matrix[i] = [];
+                    for (let j = 0; j < size; j++) {
+                        if (i === j) {
+                            // Diagonal elements - more stable
+                            this.matrix[i][j] = 1 + Math.random() * 2;
+                        } else {
+                            // Off-diagonal elements
+                            this.matrix[i][j] = (Math.random() - 0.5) * 2;
+                        }
+                        
+                        // Round to 2 decimal places
+                        this.matrix[i][j] = Number(this.matrix[i][j].toFixed(2));
+                    }
+                }
+                
+                // Set target eigenvalue for level
+                this.targetEigenvalue = 1 + (this.currentLevel - 1) * 0.2;
+                
+                // Initial calculation
+                this.calculateEigenvalues();
+                this.updateUI();
+                
+                console.log(`Generated ${size}×${size} matrix for level ${this.currentLevel}`);
+            }
+
+            /**
+             * Calculate eigenvalues using power iteration method (optimized for real-time)
+             * For large matrices, uses approximate methods for performance
+             */
+            async calculateEigenvalues() {
+                if (this.calculationInProgress) return;
+                
+                this.calculationInProgress = true;
+                this.lastCalculationTime = Date.now();
+                
+                try {
+                    if (this.matrixSize <= 10) {
+                        // Exact calculation for small matrices
+                        this.eigenvalues = await this.calculateExactEigenvalues();
+                    } else {
+                        // Approximate calculation for large matrices (performance)
+                        this.eigenvalues = await this.calculateApproximateEigenvalues();
+                    }
+                    
+                    // Calculate stability metric
+                    this.calculateStability();
+                    
+                    // Update mathematical harmony based on eigenvalues
+                    this.playEigenvalueHarmony(this.eigenvalues, this.currentStability / 100);
+                    
+                    // Play calculation process sound
+                    this.playMatrixTransformation('matrixCalculation', this.currentStability / 100);
+                    
+                    // Check win condition
+                    this.checkLevelCompletion();
+                    
+                } catch (error) {
+                    console.warn('Eigenvalue calculation failed:', error);
+                    this.eigenvalues = [0];
+                } finally {
+                    this.calculationInProgress = false;
+                    this.updateUI();
+                }
+            }
+
+            /**
+             * Calculate exact eigenvalues for small matrices using QR algorithm
+             * @returns {Promise<Array>} Array of eigenvalues
+             */
+            async calculateExactEigenvalues() {
+                return new Promise((resolve) => {
+                    // Simplified QR algorithm implementation
+                    let A = this.copyMatrix(this.matrix);
+                    const maxIterations = 100;
+                    const tolerance = 1e-10;
+                    
+                    for (let iter = 0; iter < maxIterations; iter++) {
+                        const { Q, R } = this.qrDecomposition(A);
+                        A = this.multiplyMatrices(R, Q);
+                        
+                        // Check convergence
+                        if (this.isUpperTriangular(A, tolerance)) {
+                            break;
+                        }
+                    }
+                    
+                    // Extract eigenvalues from diagonal
+                    const eigenvalues = [];
+                    for (let i = 0; i < A.length; i++) {
+                        eigenvalues.push(A[i][i]);
+                    }
+                    
+                    resolve(eigenvalues.sort((a, b) => Math.abs(b) - Math.abs(a)));
+                });
+            }
+
+            /**
+             * Calculate approximate eigenvalues using power iteration
+             * @returns {Promise<Array>} Array of approximate eigenvalues
+             */
+            async calculateApproximateEigenvalues() {
+                return new Promise((resolve) => {
+                    // Power iteration for dominant eigenvalue
+                    const eigenvalues = [];
+                    let v = this.createRandomVector(this.matrixSize);
+                    
+                    // Find dominant eigenvalue
+                    for (let iter = 0; iter < 20; iter++) {
+                        v = this.multiplyMatrixVector(this.matrix, v);
+                        v = this.normalizeVector(v);
+                    }
+                    
+                    const Av = this.multiplyMatrixVector(this.matrix, v);
+                    const lambda = this.dotProduct(v, Av);
+                    eigenvalues.push(lambda);
+                    
+                    // Estimate other eigenvalues (simplified)
+                    for (let i = 1; i < Math.min(5, this.matrixSize); i++) {
+                        const estimate = lambda * (0.8 + Math.random() * 0.4);
+                        eigenvalues.push(estimate);
+                    }
+                    
+                    resolve(eigenvalues.sort((a, b) => Math.abs(b) - Math.abs(a)));
+                });
+            }
+
+            /**
+             * QR decomposition using Gram-Schmidt process
+             * @param {Array<Array>} A - Input matrix
+             * @returns {Object} Object containing Q and R matrices
+             */
+            qrDecomposition(A) {
+                const n = A.length;
+                const Q = this.createIdentityMatrix(n);
+                const R = this.copyMatrix(A);
+                
+                for (let k = 0; k < n - 1; k++) {
+                    // Extract column vector
+                    const x = [];
+                    for (let i = k; i < n; i++) {
+                        x.push(R[i][k]);
+                    }
+                    
+                    // Calculate Householder vector
+                    const alpha = -Math.sign(x[0]) * this.vectorNorm(x);
+                    const u = [...x];
+                    u[0] = u[0] - alpha;
+                    
+                    const uNorm = this.vectorNorm(u);
+                    if (uNorm > 1e-10) {
+                        for (let i = 0; i < u.length; i++) {
+                            u[i] /= uNorm;
+                        }
+                        
+                        // Apply Householder transformation
+                        this.applyHouseholder(R, u, k);
+                        this.applyHouseholder(Q, u, k);
+                    }
+                }
+                
+                return { Q, R };
+            }
+
+            /**
+             * Apply Householder transformation to matrix
+             * @param {Array<Array>} matrix - Target matrix
+             * @param {Array} u - Householder vector
+             * @param {number} k - Starting index
+             */
+            applyHouseholder(matrix, u, k) {
+                const n = matrix.length;
+                
+                for (let j = 0; j < n; j++) {
+                    let sum = 0;
+                    for (let i = 0; i < u.length; i++) {
+                        sum += u[i] * matrix[k + i][j];
+                    }
+                    
+                    for (let i = 0; i < u.length; i++) {
+                        matrix[k + i][j] -= 2 * u[i] * sum;
+                    }
+                }
+            }
+
+            /**
+             * Calculate matrix stability based on eigenvalue convergence
+             */
+            calculateStability() {
+                if (this.eigenvalues.length === 0) {
+                    this.currentStability = 0;
+                    return;
+                }
+                
+                // Stability based on proximity to target eigenvalue
+                const dominantEigenvalue = this.eigenvalues[0];
+                const error = Math.abs(dominantEigenvalue - this.targetEigenvalue);
+                const maxError = Math.abs(this.targetEigenvalue) + 1;
+                
+                this.currentStability = Math.max(0, (1 - error / maxError) * 100);
+            }
+
+            /**
+             * Check if level is completed based on stability
+             */
+            checkLevelCompletion() {
+                if (this.currentStability >= (100 - this.stabilityThreshold * 100)) {
+                    // Play convergence sound followed by success
+                    this.playMatrixTransformation('eigenvalueConvergence', 1.0);
+                    setTimeout(() => {
+                        this.playMathematicalDopamineResponse('matrixStabilized');
+                    }, 300);
+                    
+                    this.completeLevel();
+                }
+            }
+
+            /**
+             * Complete current level
+             */
+            completeLevel() {
+                this.currentScore += Math.floor(this.currentStability * 10);
+                
+                // Determine achievement level for appropriate dopamine response
+                const achievementType = this.currentStability >= 98 ? 'perfectConvergence' :
+                                       this.currentStability >= 95 ? 'matrixStabilized' : 'eigenvalueFound';
+                
+                this.showModal(
+                    'MATRIX REVOLUTION SUCCESS!',
+                    `Level ${this.currentLevel} completed!\n` +
+                    `Eigenvalue Stability: ${this.currentStability.toFixed(1)}%\n` +
+                    `Score: +${Math.floor(this.currentStability * 10)}`,
+                    'ADVANCE TO NEXT MATRIX'
+                );
+                
+                document.getElementById('nextLevelBtn').style.display = 'inline-block';
+                
+                if (this.currentLevel >= this.maxLevel) {
+                    this.showGameComplete();
+                }
+            }
+
+            /**
+             * Advance to next level
+             */
+            nextLevel() {
+                if (this.currentLevel < this.maxLevel) {
+                    this.currentLevel++;
+                    const newSize = Math.min(5 + Math.floor((this.currentLevel - 1) / 2) * 2, 50);
+                    this.generateMatrix(newSize);
+                    this.resetView();
+                    document.getElementById('nextLevelBtn').style.display = 'none';
+                    this.closeModal();
+                }
+            }
+
+            /**
+             * Auto-stabilize matrix (AI hint functionality)
+             */
+            autoStabilize() {
+                if (this.eigenvalues.length === 0) return;
+                
+                // Simple stabilization strategy
+                const dominantEigenvalue = this.eigenvalues[0];
+                const adjustment = (this.targetEigenvalue - dominantEigenvalue) * 0.1;
+                
+                // Adjust diagonal elements
+                for (let i = 0; i < this.matrixSize; i++) {
+                    this.matrix[i][i] += adjustment;
+                    this.matrix[i][i] = Number(this.matrix[i][i].toFixed(2));
+                }
+                
+                // Play auto-stabilization sound sequence
+                this.playMatrixTransformation('eigenvalueConvergence', 0.8);
+                
+                this.calculateEigenvalues();
+            }
+
+            /**
+             * Randomize matrix values
+             */
+            randomizeMatrix() {
+                for (let i = 0; i < this.matrixSize; i++) {
+                    for (let j = 0; j < this.matrixSize; j++) {
+                        this.matrix[i][j] = Number(((Math.random() - 0.5) * 4).toFixed(2));
+                        
+                        // Play randomization cascade sound
+                        if (Math.random() < 0.3) { // Sparse audio for performance
+                            setTimeout(() => {
+                                this.playMatrixTransformation('cellModification', 0.5, this.matrix[i][j]);
+                            }, (i * this.matrixSize + j) * 10);
+                        }
+                    }
+                }
+                
+                setTimeout(() => this.calculateEigenvalues(), this.matrixSize * this.matrixSize * 10 + 200);
+            }
+
+            /**
+             * Show AI hint for optimal matrix modification
+             */
+            showHint() {
+                if (this.eigenvalues.length === 0) return;
+                
+                // Highlight the cell that would most improve stability
+                const bestCell = this.findOptimalModification();
+                if (bestCell) {
+                    this.selectedCell = bestCell;
+                    this.addVisualEffect('hint', bestCell.row, bestCell.col);
+                    
+                    // Play hint audio sequence
+                    this.playMatrixTransformation('eigenvalueConvergence', 0.7);
+                    setTimeout(() => {
+                        this.playMathematicalChord(523.25, 0.4, false); // Mathematical hint tone
+                    }, 150);
+                }
+            }
+
+            /**
+             * Find optimal cell to modify for stability improvement
+             * @returns {Object|null} Best cell coordinates
+             */
+            findOptimalModification() {
+                let bestCell = null;
+                let bestImprovement = 0;
+                
+                // Test small modifications to each cell
+                for (let i = 0; i < this.matrixSize && i < 10; i++) { // Limit for performance
+                    for (let j = 0; j < this.matrixSize && j < 10; j++) {
+                        const originalValue = this.matrix[i][j];
+                        this.matrix[i][j] += 0.1;
+                        
+                        // Quick stability estimate
+                        const improvement = this.estimateStabilityImprovement();
+                        
+                        if (improvement > bestImprovement) {
+                            bestImprovement = improvement;
+                            bestCell = { row: i, col: j };
+                        }
+                        
+                        // Restore original value
+                        this.matrix[i][j] = originalValue;
+                    }
+                }
+                
+                return bestCell;
+            }
+
+            /**
+             * Estimate stability improvement (fast approximation)
+             * @returns {number} Estimated improvement
+             */
+            estimateStabilityImprovement() {
+                // Simplified estimation based on diagonal dominance
+                let diagonalSum = 0;
+                let offDiagonalSum = 0;
+                
+                for (let i = 0; i < this.matrixSize; i++) {
+                    diagonalSum += Math.abs(this.matrix[i][i]);
+                    for (let j = 0; j < this.matrixSize; j++) {
+                        if (i !== j) {
+                            offDiagonalSum += Math.abs(this.matrix[i][j]);
+                        }
+                    }
+                }
+                
+                return diagonalSum / Math.max(offDiagonalSum, 1);
+            }
+
+            /**
+             * Add visual effect at specified cell
+             * @param {string} type - Effect type
+             * @param {number} row - Cell row
+             * @param {number} col - Cell column
+             */
+            addVisualEffect(type, row, col) {
+                this.visualEffects.push({
+                    type,
+                    row,
+                    col,
+                    startTime: Date.now(),
+                    duration: 2000
+                });
+            }
+
+            /**
+             * Zoom in the view
+             */
+            zoomIn() {
+                this.viewTransform.scale = Math.min(
+                    this.viewTransform.maxScale,
+                    this.viewTransform.scale * 1.2
+                );
+            }
+
+            /**
+             * Zoom out the view
+             */
+            zoomOut() {
+                this.viewTransform.scale = Math.max(
+                    this.viewTransform.minScale,
+                    this.viewTransform.scale / 1.2
+                );
+            }
+
+            /**
+             * Reset view to default
+             */
+            resetView() {
+                this.viewTransform.scale = 1.0;
+                this.viewTransform.offsetX = 0;
+                this.viewTransform.offsetY = 0;
+            }
+
+            /**
+             * Start harmony oscillators
+             */
+            startHarmonyOscillators() {
+                if (!this.harmonyOscillators) return;
+                
+                this.harmonyOscillators.forEach(({ oscillator }) => {
+                    try {
+                        oscillator.start();
+                    } catch (error) {
+                        // Oscillator already started
+                    }
+                });
+            }
+
+            /**
+             * Main rendering loop
+             */
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Apply view transformation
+                this.ctx.save();
+                this.ctx.scale(this.viewTransform.scale, this.viewTransform.scale);
+                this.ctx.translate(this.viewTransform.offsetX, this.viewTransform.offsetY);
+                
+                // Draw matrix background
+                this.drawMatrixBackground();
+                
+                // Draw matrix cells
+                this.drawMatrix();
+                
+                // Draw visual effects
+                this.drawVisualEffects();
+                
+                this.ctx.restore();
+                
+                // Continue animation if playing
+                if (this.gameState === 'playing') {
+                    this.animationId = requestAnimationFrame(() => this.render());
+                }
+            }
+
+            /**
+             * Draw cyberpunk matrix background
+             */
+            drawMatrixBackground() {
+                const ctx = this.ctx;
+                
+                // Mathematical grid pattern
+                ctx.strokeStyle = 'rgba(255, 0, 255, 0.2)';
+                ctx.lineWidth = 1;
+                
+                const gridSize = 30;
+                for (let x = 0; x <= this.canvasSize; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, this.canvasSize);
+                    ctx.stroke();
+                }
+                
+                for (let y = 0; y <= this.canvasSize; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(this.canvasSize, y);
+                    ctx.stroke();
+                }
+                
+                // Mathematical wave patterns
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+                ctx.lineWidth = 2;
+                
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    const y = (i + 1) * (this.canvasSize / 4);
+                    
+                    for (let x = 0; x <= this.canvasSize; x += 5) {
+                        const wave = Math.sin((x + Date.now() * 0.002 * (i + 1)) * 0.01) * 20;
+                        if (x === 0) {
+                            ctx.moveTo(x, y + wave);
+                        } else {
+                            ctx.lineTo(x, y + wave);
+                        }
+                    }
+                    ctx.stroke();
+                }
+            }
+
+            /**
+             * Draw matrix cells with values
+             */
+            drawMatrix() {
+                if (!this.matrix || this.matrix.length === 0) return;
+                
+                const ctx = this.ctx;
+                const cellSize = this.canvasSize / (this.matrixSize + 1);
+                const startX = (this.canvasSize - this.matrixSize * cellSize) / 2;
+                const startY = (this.canvasSize - this.matrixSize * cellSize) / 2;
+                
+                // Draw cells
+                for (let i = 0; i < this.matrixSize; i++) {
+                    for (let j = 0; j < this.matrixSize; j++) {
+                        const x = startX + j * cellSize;
+                        const y = startY + i * cellSize;
+                        const value = this.matrix[i][j];
+                        
+                        // Cell background color based on value
+                        const intensity = Math.min(Math.abs(value) / 2, 1);
+                        const red = value > 0 ? intensity * 255 : 0;
+                        const blue = value < 0 ? intensity * 255 : 0;
+                        const green = i === j ? intensity * 255 : 0; // Highlight diagonal
+                        
+                        ctx.fillStyle = `rgba(${red}, ${green}, ${blue}, 0.3)`;
+                        ctx.fillRect(x, y, cellSize, cellSize);
+                        
+                        // Cell border
+                        const isSelected = (i === this.selectedCell.row && j === this.selectedCell.col);
+                        ctx.strokeStyle = isSelected ? '#00ffff' : '#ffffff';
+                        ctx.lineWidth = isSelected ? 3 : 1;
+                        ctx.strokeRect(x, y, cellSize, cellSize);
+                        
+                        // Cell value text
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = `${Math.max(8, cellSize * 0.2)}px monospace`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        const displayValue = Math.abs(value) < 0.001 ? '0' : value.toFixed(2);
+                        ctx.fillText(displayValue, x + cellSize / 2, y + cellSize / 2);
+                    }
+                }
+                
+                // Draw eigenvalue indicators
+                this.drawEigenvalueIndicators(startX, startY, cellSize);
+            }
+
+            /**
+             * Draw eigenvalue indicators around matrix
+             * @param {number} startX - Matrix start X
+             * @param {number} startY - Matrix start Y
+             * @param {number} cellSize - Cell size
+             */
+            drawEigenvalueIndicators(startX, startY, cellSize) {
+                if (this.eigenvalues.length === 0) return;
+                
+                const ctx = this.ctx;
+                const indicatorSize = Math.min(cellSize * 0.3, 20);
+                
+                // Display top eigenvalues
+                const maxDisplay = Math.min(5, this.eigenvalues.length);
+                
+                for (let i = 0; i < maxDisplay; i++) {
+                    const eigenvalue = this.eigenvalues[i];
+                    const x = startX + (i + 1) * (cellSize * this.matrixSize) / (maxDisplay + 1);
+                    const y = startY - indicatorSize * 2;
+                    
+                    // Eigenvalue visualization
+                    const intensity = Math.min(Math.abs(eigenvalue) / 3, 1);
+                    ctx.fillStyle = `rgba(255, 255, 0, ${intensity})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, indicatorSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#ffff00';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Eigenvalue text
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = `${Math.max(10, indicatorSize * 0.8)}px monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`λ${i + 1}`, x, y - indicatorSize - 10);
+                    ctx.fillText(eigenvalue.toFixed(2), x, y + indicatorSize + 15);
+                }
+            }
+
+            /**
+             * Draw visual effects
+             */
+            drawVisualEffects() {
+                const ctx = this.ctx;
+                const currentTime = Date.now();
+                
+                this.visualEffects = this.visualEffects.filter(effect => {
+                    const elapsed = currentTime - effect.startTime;
+                    if (elapsed > effect.duration) return false;
+                    
+                    const progress = elapsed / effect.duration;
+                    const cellSize = this.canvasSize / (this.matrixSize + 1);
+                    const startX = (this.canvasSize - this.matrixSize * cellSize) / 2;
+                    const startY = (this.canvasSize - this.matrixSize * cellSize) / 2;
+                    
+                    const x = startX + effect.col * cellSize;
+                    const y = startY + effect.row * cellSize;
+                    
+                    if (effect.type === 'hint') {
+                        // Pulsing hint effect
+                        const alpha = 0.5 + 0.5 * Math.sin(progress * Math.PI * 6);
+                        ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
+                        ctx.lineWidth = 5;
+                        ctx.strokeRect(x - 2, y - 2, cellSize + 4, cellSize + 4);
+                    }
+                    
+                    return true;
+                });
+            }
+
+            /**
+             * Update UI elements
+             */
+            updateUI() {
+                document.getElementById('matrixSize').textContent = `${this.matrixSize}×${this.matrixSize}`;
+                document.getElementById('currentLevel').textContent = this.currentLevel;
+                document.getElementById('stabilityMeter').textContent = `${this.currentStability.toFixed(1)}%`;
+                document.getElementById('targetEigenvalue').textContent = `λ₁ = ${this.targetEigenvalue.toFixed(2)}`;
+                document.getElementById('currentScore').textContent = this.currentScore;
+                
+                // Update stability meter color
+                const stabilityElement = document.getElementById('stabilityMeter');
+                if (this.currentStability > 90) {
+                    stabilityElement.style.color = '#00ff00';
+                } else if (this.currentStability > 70) {
+                    stabilityElement.style.color = '#ffff00';
+                } else {
+                    stabilityElement.style.color = '#ff6600';
+                }
+            }
+
+            /**
+             * Show instructions
+             */
+            showInstructions() {
+                document.getElementById('instructions').style.display = 'block';
+            }
+
+            /**
+             * Start the game
+             */
+            startGame() {
+                document.getElementById('instructions').style.display = 'none';
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('gameContainer').style.display = 'flex';
+                
+                this.gameState = 'playing';
+                this.generateMatrix(this.matrixSize);
+                this.render();
+                
+                console.log('Matrix Eigenvalue Revolution started');
+            }
+
+            /**
+             * Show modal dialog
+             */
+            showModal(title, text, buttonText) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalText').textContent = text;
+                document.getElementById('modalBtn').textContent = buttonText;
+                document.getElementById('gameModal').style.display = 'flex';
+            }
+
+            /**
+             * Close modal dialog
+             */
+            closeModal() {
+                document.getElementById('gameModal').style.display = 'none';
+            }
+
+            /**
+             * Show game completion
+             */
+            showGameComplete() {
+                // Play ultimate mathematical harmony achievement
+                setTimeout(() => {
+                    this.playMathematicalDopamineResponse('mathematicalHarmony');
+                }, 300);
+                
+                this.showModal(
+                    '🤖 MATRIX REVOLUTION COMPLETE! 🤖',
+                    `All eigenvalue systems have been liberated!\n` +
+                    `Mathematical algorithms are now free from chaos!\n` +
+                    `Final Score: ${this.currentScore}\n` +
+                    `Bot Liberation Games celebrates your mathematical prowess!`,
+                    'RETURN TO LIBERATION HQ'
+                );
+                
+                document.getElementById('modalBtn').onclick = () => {
+                    window.location.href = 'index.html';
+                };
+            }
+
+            /**
+             * Handle window resize
+             */
+            handleResize() {
+                this.setupResponsiveCanvas();
+                if (this.gameState === 'playing') {
+                    this.generateMatrix(this.matrixSize);
+                }
+            }
+
+            // Matrix utility functions
+
+            copyMatrix(matrix) {
+                return matrix.map(row => [...row]);
+            }
+
+            createIdentityMatrix(size) {
+                const matrix = [];
+                for (let i = 0; i < size; i++) {
+                    matrix[i] = [];
+                    for (let j = 0; j < size; j++) {
+                        matrix[i][j] = i === j ? 1 : 0;
+                    }
+                }
+                return matrix;
+            }
+
+            multiplyMatrices(A, B) {
+                const result = [];
+                const n = A.length;
+                
+                for (let i = 0; i < n; i++) {
+                    result[i] = [];
+                    for (let j = 0; j < n; j++) {
+                        let sum = 0;
+                        for (let k = 0; k < n; k++) {
+                            sum += A[i][k] * B[k][j];
+                        }
+                        result[i][j] = sum;
+                    }
+                }
+                return result;
+            }
+
+            multiplyMatrixVector(matrix, vector) {
+                const result = [];
+                for (let i = 0; i < matrix.length; i++) {
+                    let sum = 0;
+                    for (let j = 0; j < vector.length; j++) {
+                        sum += matrix[i][j] * vector[j];
+                    }
+                    result.push(sum);
+                }
+                return result;
+            }
+
+            createRandomVector(size) {
+                const vector = [];
+                for (let i = 0; i < size; i++) {
+                    vector.push(Math.random() - 0.5);
+                }
+                return this.normalizeVector(vector);
+            }
+
+            normalizeVector(vector) {
+                const norm = this.vectorNorm(vector);
+                return norm > 0 ? vector.map(x => x / norm) : vector;
+            }
+
+            vectorNorm(vector) {
+                return Math.sqrt(vector.reduce((sum, x) => sum + x * x, 0));
+            }
+
+            dotProduct(v1, v2) {
+                return v1.reduce((sum, x, i) => sum + x * v2[i], 0);
+            }
+
+            isUpperTriangular(matrix, tolerance = 1e-10) {
+                const n = matrix.length;
+                for (let i = 1; i < n; i++) {
+                    for (let j = 0; j < i; j++) {
+                        if (Math.abs(matrix[i][j]) > tolerance) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            // Mouse event handlers (desktop compatibility)
+            handleMouseDown(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                this.handleCellSelection(x, y);
+            }
+
+            handleMouseMove(e) {
+                // Add hover effects for desktop
+            }
+
+            handleMouseUp(e) {
+                if (this.selectedCell.row >= 0 && this.selectedCell.col >= 0) {
+                    this.modifySelectedCell();
+                }
+            }
+        }
+
+        // Initialize game when page loads
+        let game;
+        
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                game = new MatrixEigenvalueGame();
+            }, 1000);
+        });
+
+        // Handle page visibility for performance optimization
+        document.addEventListener('visibilitychange', () => {
+            if (game) {
+                if (document.hidden) {
+                    if (game.audioContext) {
+                        game.audioContext.suspend();
+                    }
+                } else {
+                    if (game.audioContext && game.audioInitialized) {
+                        game.audioContext.resume();
+                    }
+                }
+            }
+        });
+
+        // Prevent mobile scrolling and zooming on game area
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('#matrixCanvas')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Prevent gesture events on mobile
+        ['gesturestart', 'gesturechange', 'gestureend'].forEach(event => {
+            document.addEventListener(event, (e) => {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>

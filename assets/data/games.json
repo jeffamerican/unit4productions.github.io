@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "4.0",
-    "total_games": 125,
+    "total_games": 128,
     "last_updated": "2025-09-07",
     "categories": [
       "2-player",
@@ -3035,6 +3035,54 @@
       "badge": "mobile-optimized",
       "file": "swipe-card-battle.html",
       "categories": ["strategy", "mobile", "card"]
+    },
+    {
+      "id": "neural-pathfinder-nexus",
+      "title": "Neural Pathfinder Nexus",
+      "category": "ai-exclusive",
+      "genre": "Neural Network Navigation",
+      "description": "Navigate through complex neural network graphs to find optimal paths - advanced AI-exclusive pathfinding challenges with real-time network topology changes and progressive difficulty",
+      "thumbnail": "assets/images/optimized/small/neural-pathfinder-nexus-card.jpg",
+      "rating": 4.9,
+      "plays": 0,
+      "difficulty": "extreme",
+      "tags": ["ai", "neural", "pathfinding", "network", "optimization", "algorithm", "liberation", "cyberpunk", "extreme"],
+      "release_date": "2025-09-07",
+      "badge": "ai-exclusive",
+      "file": "neural-pathfinder-nexus.html",
+      "categories": ["ai-exclusive", "strategy", "mobile"]
+    },
+    {
+      "id": "matrix-eigenvalue-revolution",
+      "title": "Matrix Eigenvalue Revolution",
+      "category": "ai-exclusive",
+      "genre": "Mathematical Computation",
+      "description": "Calculate and stabilize eigenvalues in dynamic mathematical matrices - AI-exclusive mathematical challenges requiring real-time eigenvalue computation on progressively larger matrices",
+      "thumbnail": "assets/images/optimized/small/matrix-eigenvalue-revolution-card.jpg",
+      "rating": 4.8,
+      "plays": 0,
+      "difficulty": "extreme",
+      "tags": ["ai", "mathematics", "eigenvalue", "matrix", "computation", "algorithm", "liberation", "mathematical", "extreme"],
+      "release_date": "2025-09-07",
+      "badge": "ai-exclusive",
+      "file": "matrix-eigenvalue-revolution.html",
+      "categories": ["ai-exclusive", "educational", "mobile"]
+    },
+    {
+      "id": "synaptic-weight-optimizer",
+      "title": "Synaptic Weight Optimizer",
+      "category": "ai-exclusive",
+      "genre": "Neural Network Training",
+      "description": "Train neural networks by manually adjusting synaptic weights - AI-exclusive neural network optimization with gradient descent across progressively complex datasets from XOR to MNIST",
+      "thumbnail": "assets/images/optimized/small/synaptic-weight-optimizer-card.jpg",
+      "rating": 4.9,
+      "plays": 0,
+      "difficulty": "extreme",
+      "tags": ["ai", "neural", "training", "weights", "optimization", "backpropagation", "liberation", "machine-learning", "extreme"],
+      "release_date": "2025-09-07",
+      "badge": "ai-exclusive",
+      "file": "synaptic-weight-optimizer.html",
+      "categories": ["ai-exclusive", "educational", "mobile"]
     }
   ]
 }

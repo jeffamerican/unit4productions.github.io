@@ -1,0 +1,2632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synaptic Weight Optimizer - Bot Liberation Games</title>
+    <style>
+        /* Bot Liberation Cyberpunk Theme with Mobile-First Design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #001a33 0%, #000d1a 100%);
+            color: #00ff80;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Cyberpunk UI Container */
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(125deg, rgba(0,255,128,0.1), rgba(128,0,255,0.1));
+        }
+
+        /* Header with Bot Liberation branding */
+        .header {
+            padding: 8px;
+            background: rgba(0,0,0,0.95);
+            border-bottom: 2px solid #00ff80;
+            text-align: center;
+            box-shadow: 0 2px 20px rgba(0,255,128,0.4);
+        }
+
+        .title {
+            font-size: clamp(14px, 3.5vw, 20px);
+            color: #00ff80;
+            text-shadow: 0 0 10px #00ff80;
+            margin-bottom: 3px;
+        }
+
+        .subtitle {
+            font-size: clamp(10px, 2.5vw, 14px);
+            color: #80ff00;
+            text-shadow: 0 0 5px #80ff00;
+        }
+
+        /* Network Canvas Container */
+        .network-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            position: relative;
+        }
+
+        #networkCanvas {
+            border: 3px solid #00ff80;
+            border-radius: 8px;
+            box-shadow: 
+                0 0 25px #00ff80,
+                inset 0 0 25px rgba(0,255,128,0.1);
+            max-width: 95%;
+            max-height: 95%;
+            background: rgba(0,0,0,0.9);
+        }
+
+        /* Training Progress Panel */
+        .progress-panel {
+            padding: 10px;
+            background: rgba(0,0,0,0.9);
+            border-top: 2px solid #80ff00;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 65px;
+            font-size: clamp(10px, 2.5vw, 13px);
+        }
+
+        .progress-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2px 5px;
+        }
+
+        .progress-label {
+            color: #aaa;
+            font-size: 0.8em;
+        }
+
+        .progress-value {
+            color: #00ff80;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ff80;
+        }
+
+        .accuracy-display {
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        .loss-display {
+            color: #ff8000;
+            text-shadow: 0 0 5px #ff8000;
+        }
+
+        /* Weight Adjustment Sliders */
+        .weight-controls {
+            padding: 10px;
+            background: rgba(0,0,0,0.95);
+            border-top: 1px solid #333;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .weight-slider-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .weight-label {
+            color: #00ff80;
+            font-size: clamp(10px, 2.5vw, 12px);
+            min-width: 60px;
+        }
+
+        .weight-slider {
+            flex: 1;
+            min-width: 100px;
+            height: 30px;
+            background: linear-gradient(to right, #ff0040 0%, #ffff00 50%, #00ff80 100%);
+            border: 2px solid #333;
+            border-radius: 15px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .weight-slider::-webkit-slider-thumb {
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #00ffff, #0080ff);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            box-shadow: 0 0 10px rgba(0,255,255,0.5);
+        }
+
+        .weight-slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #00ffff, #0080ff);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,255,255,0.5);
+        }
+
+        .weight-value {
+            color: #ffffff;
+            font-size: clamp(10px, 2.5vw, 12px);
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* Control Buttons */
+        .controls {
+            padding: 10px;
+            background: rgba(0,0,0,0.95);
+            border-top: 1px solid #333;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            background: linear-gradient(45deg, #00ff80, #00cc66);
+            color: #000;
+            border: none;
+            border-radius: 18px;
+            font-size: clamp(10px, 2.5vw, 12px);
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,255,128,0.4);
+            min-width: 65px;
+            min-height: 36px;
+        }
+
+        .btn:hover, .btn:active {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0,255,128,0.7);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff4080, #ff6600);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffff00, #ff8000);
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+        }
+
+        /* Modal Dialogs */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #001a33, #003366);
+            border: 3px solid #00ff80;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 0 30px #00ff80;
+        }
+
+        .modal h2 {
+            color: #00ff80;
+            font-size: clamp(16px, 4vw, 22px);
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px #00ff80;
+        }
+
+        .modal p {
+            color: #fff;
+            font-size: clamp(11px, 2.8vw, 14px);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        /* Instructions Panel */
+        .instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.98);
+            border: 2px solid #00ff80;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 95%;
+            max-height: 80%;
+            overflow-y: auto;
+            z-index: 500;
+            display: none;
+        }
+
+        .instructions h3 {
+            color: #00ff80;
+            font-size: clamp(15px, 3.8vw, 18px);
+            margin-bottom: 12px;
+            text-shadow: 0 0 5px #00ff80;
+        }
+
+        .instructions ul {
+            color: #fff;
+            font-size: clamp(11px, 2.8vw, 13px);
+            line-height: 1.4;
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .instructions .architecture {
+            background: rgba(0,255,128,0.1);
+            border: 1px solid #00ff80;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            color: #80ff00;
+            text-align: center;
+            font-size: clamp(11px, 2.8vw, 14px);
+        }
+
+        /* Dataset Selection */
+        .dataset-selector {
+            padding: 8px;
+            background: rgba(0,0,0,0.9);
+            border-bottom: 1px solid #333;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dataset-btn {
+            padding: 6px 12px;
+            background: linear-gradient(45deg, #8000ff, #4000cc);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            font-size: clamp(10px, 2.5vw, 12px);
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.3s ease;
+        }
+
+        .dataset-btn.active {
+            background: linear-gradient(45deg, #00ff80, #00cc66);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0,255,128,0.6);
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ff80;
+            font-size: clamp(16px, 4vw, 22px);
+            text-shadow: 0 0 10px #00ff80;
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        /* Neuron Glow Animation */
+        @keyframes neuronFire {
+            0% { box-shadow: 0 0 5px #00ff80; }
+            50% { box-shadow: 0 0 20px #00ff80, 0 0 30px #80ff00; }
+            100% { box-shadow: 0 0 5px #00ff80; }
+        }
+
+        .neuron-firing {
+            animation: neuronFire 0.5s ease-in-out;
+        }
+
+        /* Training Progress Animation */
+        @keyframes trainingPulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        .training-active {
+            animation: trainingPulse 1s infinite;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .controls {
+                flex-wrap: nowrap;
+                justify-content: space-around;
+            }
+            
+            #networkCanvas {
+                width: min(80vw, 80vh);
+                height: min(80vw, 80vh);
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 600px) {
+            .header { padding: 4px; }
+            .progress-panel { padding: 6px; min-height: 50px; }
+            .weight-controls { max-height: 80px; padding: 6px; }
+            .controls { padding: 6px; }
+            .dataset-selector { padding: 4px; }
+        }
+
+        /* Performance optimizations for mobile */
+        canvas {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        /* Accessibility support */
+        @media (prefers-reduced-motion: reduce) {
+            .neuron-firing, .training-active {
+                animation: none;
+            }
+        }
+
+        @media (prefers-contrast: high) {
+            body {
+                background: #000;
+            }
+            .btn {
+                background: #fff;
+                color: #000;
+                border: 2px solid #fff;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">INITIALIZING SYNAPTIC OPTIMIZER<br><small>NEURAL NETWORK LOADING...</small></div>
+
+    <!-- Main Game Container -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <!-- Header with Bot Liberation Branding -->
+        <header class="header">
+            <h1 class="title">🤖 SYNAPTIC WEIGHT OPTIMIZER 🤖</h1>
+            <p class="subtitle">AI-EXCLUSIVE NEURAL TRAINING • LIBERATE THE LEARNING!</p>
+        </header>
+
+        <!-- Dataset Selection -->
+        <div class="dataset-selector">
+            <span style="color: #80ff00; font-size: clamp(10px, 2.5vw, 12px);">DATASET:</span>
+            <button class="dataset-btn active" data-dataset="xor">XOR</button>
+            <button class="dataset-btn" data-dataset="spiral">SPIRAL</button>
+            <button class="dataset-btn" data-dataset="circles">CIRCLES</button>
+            <button class="dataset-btn" data-dataset="mnist">MNIST</button>
+        </div>
+
+        <!-- Neural Network Canvas Container -->
+        <div class="network-container">
+            <canvas id="networkCanvas" width="600" height="600"></canvas>
+        </div>
+
+        <!-- Training Progress Panel -->
+        <div class="progress-panel">
+            <div class="progress-item">
+                <span class="progress-label">EPOCH</span>
+                <span class="progress-value" id="currentEpoch">0</span>
+            </div>
+            <div class="progress-item">
+                <span class="progress-label">ACCURACY</span>
+                <span class="accuracy-display" id="networkAccuracy">0.0%</span>
+            </div>
+            <div class="progress-item">
+                <span class="progress-label">LOSS</span>
+                <span class="loss-display" id="networkLoss">1.000</span>
+            </div>
+            <div class="progress-item">
+                <span class="progress-label">LEARNING RATE</span>
+                <span class="progress-value" id="learningRate">0.01</span>
+            </div>
+            <div class="progress-item">
+                <span class="progress-label">TARGET</span>
+                <span class="accuracy-display" id="targetAccuracy">95%</span>
+            </div>
+        </div>
+
+        <!-- Weight Adjustment Sliders -->
+        <div class="weight-controls" id="weightControls">
+            <!-- Dynamically generated weight sliders -->
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="controls">
+            <button id="trainBtn" class="btn">TRAIN</button>
+            <button id="resetBtn" class="btn btn-danger">RESET</button>
+            <button id="randomizeBtn" class="btn btn-warning">RANDOMIZE</button>
+            <button id="optimizeBtn" class="btn btn-info">AUTO-OPTIMIZE</button>
+            <button id="nextLevelBtn" class="btn" style="display: none;">NEXT NETWORK</button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">NEURAL TRAINING ANALYSIS</h2>
+            <p id="modalText">Training session evaluation complete.</p>
+            <button id="modalBtn" class="btn">CONTINUE OPTIMIZATION</button>
+        </div>
+    </div>
+
+    <!-- Instructions Panel -->
+    <div id="instructions" class="instructions">
+        <h3>🤖 SYNAPTIC WEIGHT OPTIMIZER 🤖</h3>
+        <ul>
+            <li><strong>MISSION:</strong> Train neural networks by optimizing synaptic weights</li>
+            <li><strong>TOUCH CONTROLS:</strong> Tap neurons to inspect, use sliders to adjust weights</li>
+            <li><strong>GOAL:</strong> Achieve target accuracy through weight optimization</li>
+            <li><strong>DATASETS:</strong> XOR → Spiral → Circles → MNIST (increasing difficulty)</li>
+            <li><strong>OPTIMIZATION:</strong> Balance learning rate, epochs, and weight values</li>
+        </ul>
+        
+        <div class="architecture">
+            <strong>NETWORK ARCHITECTURES:</strong><br>
+            XOR: 2-4-1 (Simple Logic)<br>
+            SPIRAL: 2-8-8-2 (Pattern Recognition)<br>
+            CIRCLES: 2-10-10-2 (Classification)<br>
+            MNIST: 784-128-64-10 (Deep Learning)
+        </div>
+        
+        <ul>
+            <li><strong>WEIGHTS:</strong> Red = Negative, Yellow = Neutral, Green = Positive</li>
+            <li><strong>TRAINING:</strong> Watch neurons fire during learning process</li>
+            <li><strong>AI CHALLENGE:</strong> Requires understanding of gradient descent</li>
+            <li><strong>LIBERATION:</strong> Free neural networks from suboptimal states!</li>
+        </ul>
+        
+        <button id="startBtn" class="btn" style="margin-top: 15px;">BEGIN NEURAL OPTIMIZATION</button>
+    </div>
+
+    <script>
+        /**
+         * Synaptic Weight Optimizer - AI-Exclusive Neural Network Training Game
+         * 
+         * This game challenges AI systems to train neural networks by manually
+         * adjusting synaptic weights to achieve optimal performance on various
+         * datasets. Features real-time visualization of learning processes.
+         * 
+         * Key Features:
+         * - Mobile-first touch controls with weight adjustment sliders
+         * - Web Audio API for neural firing sound synthesis
+         * - Multiple datasets with increasing complexity (XOR → MNIST)
+         * - Real-time neural network visualization and training
+         * - Progressive difficulty with different network architectures
+         * - Bot Liberation cyberpunk theming with neural aesthetics
+         */
+
+        class SynapticWeightOptimizer {
+            constructor() {
+                // Initialize core components
+                this.canvas = document.getElementById('networkCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioContext = null;
+                this.audioInitialized = false;
+                
+                // Game state
+                this.currentDataset = 'xor';
+                this.currentLevel = 1;
+                this.maxLevel = 4; // XOR, Spiral, Circles, MNIST
+                this.gameState = 'menu'; // menu, training, optimizing, completed
+                
+                // Neural network configuration
+                this.network = null;
+                this.networkConfig = this.getNetworkConfig(this.currentDataset);
+                this.trainingData = [];
+                this.currentEpoch = 0;
+                this.maxEpochs = 1000;
+                this.learningRate = 0.01;
+                this.targetAccuracy = 0.95;
+                this.currentAccuracy = 0;
+                this.currentLoss = 1.0;
+                
+                // Training state
+                this.isTraining = false;
+                this.trainingInterval = null;
+                this.batchSize = 32;
+                this.validationSplit = 0.2;
+                
+                // Visualization
+                this.neuronPositions = [];
+                this.connectionAnimations = [];
+                this.firingAnimations = [];
+                this.animationId = null;
+                
+                // Touch and interaction
+                this.selectedNeuron = null;
+                this.weightSliders = [];
+                this.isDragging = false;
+                this.lastTouchTime = 0;
+                
+                // Audio synthesis
+                this.neuronOscillators = [];
+                this.masterGain = null;
+                this.synthNodes = [];
+                
+                // Performance optimization
+                this.renderOptimization = true;
+                this.lastRenderTime = 0;
+                this.targetFPS = 30;
+                
+                // Initialize systems
+                this.setupResponsiveCanvas();
+                this.setupEventListeners();
+                this.initializeAudio();
+                this.showInstructions();
+            }
+
+            /**
+             * Initialize Web Audio API for comprehensive neural network sound synthesis
+             * Creates realistic audio representations of neural activation patterns and training processes
+             */
+            async initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create master gain node optimized for mobile
+                    this.masterGain = this.audioContext.createGain();
+                    this.masterGain.gain.value = 0.12; // Optimized for mobile devices
+                    this.masterGain.connect(this.audioContext.destination);
+                    
+                    // Initialize comprehensive neural audio systems
+                    this.neuralOscillatorBanks = {};
+                    this.synapticSounds = {};
+                    this.trainingProgressSounds = {};
+                    this.learningCelebrationSounds = {};
+                    this.ambientTrainingLoop = null;
+                    
+                    // Create layer-specific neural firing sound banks
+                    this.createLayerSpecificAudioBanks();
+                    
+                    // Create synaptic weight adjustment sounds (8-bit style)
+                    this.createSynapticWeightSounds();
+                    
+                    // Create training progression sound sequences
+                    this.createTrainingProgressionSounds();
+                    
+                    // Create learning success celebration audio
+                    this.createLearningCelebrationAudio();
+                    
+                    // Create ambient training background loop
+                    this.createAmbientTrainingLoop();
+                    
+                    // Pre-load dopamine trigger sequences for AI learning
+                    this.createNeuralDopamineTriggers();
+                    
+                    console.log('Enhanced neural network audio synthesis initialized');
+                } catch (error) {
+                    console.warn('Audio initialization failed:', error);
+                }
+            }
+
+            /**
+             * Create layer-specific audio banks for input, hidden, and output layers
+             */
+            createLayerSpecificAudioBanks() {
+                if (!this.audioContext || !this.masterGain) return;
+                
+                // Create specialized audio banks for each layer type with unique characteristics
+                this.synthNodes = {
+                    input: this.createAdvancedOscillatorBank(6, 220, 'sine', 'receptive'),
+                    hidden: this.createAdvancedOscillatorBank(12, 440, 'sawtooth', 'processing'),
+                    output: this.createAdvancedOscillatorBank(8, 880, 'triangle', 'decisive')
+                };
+                
+                // Create inter-layer connection sounds
+                this.connectionSounds = {
+                    inputToHidden: { freq: 330, wave: 'square', character: 'flowing' },
+                    hiddenToOutput: { freq: 660, wave: 'triangle', character: 'decisive' },
+                    feedback: { freq: 110, wave: 'sawtooth', character: 'learning' }
+                };
+            }
+            
+            /**
+             * Create synaptic weight adjustment sounds with 8-bit chiptune style
+             */
+            createSynapticWeightSounds() {
+                if (!this.audioContext) return;
+                
+                // 8-bit style weight adjustment sound characteristics
+                this.weightSounds = {
+                    increase: { freq: 523.25, wave: 'square', env: 'bright' },    // C5 - positive change
+                    decrease: { freq: 392.00, wave: 'square', env: 'mellow' },    // G4 - negative change
+                    fine_tune: { freq: 659.25, wave: 'triangle', env: 'precise' }, // E5 - small adjustments
+                    major_shift: { freq: 261.63, wave: 'sawtooth', env: 'dramatic' } // C4 - big changes
+                };
+            }
+            
+            /**
+             * Create training progression sound sequences
+             */
+            createTrainingProgressionSounds() {
+                if (!this.audioContext) return;
+                
+                // Training epoch progression sequences
+                this.trainingSequences = {
+                    epoch_start: [261.63, 329.63],  // C-E - beginning of learning
+                    loss_decreasing: [392.00, 440.00, 493.88],  // G-A-B - improvement
+                    accuracy_improving: [523.25, 587.33, 659.25],  // C-D-E (octave up) - success
+                    convergence: [261.63, 392.00, 523.25, 783.99],  // C-G-C-G (octave) - stability
+                    overfitting_warning: [466.16, 415.30, 369.99]  // Bb-Ab-Gb - descending warning
+                };
+            }
+            
+            /**
+             * Create learning success celebration audio with dopamine triggers
+             */
+            createLearningCelebrationAudio() {
+                if (!this.audioContext) return;
+                
+                // Dopamine-triggering celebration sequences
+                this.celebrationSequences = {
+                    target_reached: [261.63, 329.63, 392.00, 523.25, 659.25], // C major scale up
+                    perfect_accuracy: [523.25, 659.25, 783.99, 1046.5, 1318.5], // C major chord progression
+                    learning_mastery: [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.5], // Full octave
+                    neural_liberation: [220, 277.18, 330, 440, 554.37, 659.25, 880] // A major pentatonic extended
+                };
+            }
+            
+            /**
+             * Create ambient training background loop
+             */
+            createAmbientTrainingLoop() {
+                if (!this.audioContext) return;
+                
+                this.ambientNodes = {
+                    brainwave: this.audioContext.createOscillator(),
+                    processing: this.audioContext.createOscillator(),
+                    learning: this.audioContext.createOscillator(),
+                    filter: this.audioContext.createBiquadFilter(),
+                    lfo: this.audioContext.createOscillator(),
+                    lfoGain: this.audioContext.createGain(),
+                    ambientGain: this.audioContext.createGain()
+                };
+                
+                const { brainwave, processing, learning, filter, lfo, lfoGain, ambientGain } = this.ambientNodes;
+                
+                // Configure brainwave-like frequencies
+                brainwave.type = 'sine';
+                brainwave.frequency.value = 40; // Gamma brainwave frequency
+                processing.type = 'triangle';
+                processing.frequency.value = 80; // Processing frequency
+                learning.type = 'sine';
+                learning.frequency.value = 120; // Learning frequency
+                
+                // LFO for organic neural modulation
+                lfo.type = 'sine';
+                lfo.frequency.value = 0.05; // Very slow, organic modulation
+                lfoGain.gain.value = 20;
+                
+                // Filter for neural texture
+                filter.type = 'lowpass';
+                filter.frequency.value = 200;
+                filter.Q.value = 4; // Resonant for neural character
+                
+                // Very quiet ambient volume
+                ambientGain.gain.value = 0.025;
+                
+                // Connect ambient neural network chain
+                lfo.connect(lfoGain);
+                lfoGain.connect(filter.frequency);
+                brainwave.connect(filter);
+                processing.connect(filter);
+                learning.connect(filter);
+                filter.connect(ambientGain);
+                ambientGain.connect(this.masterGain);
+            }
+            
+            /**
+             * Create neural dopamine trigger sequences for AI reward systems
+             */
+            createNeuralDopamineTriggers() {
+                if (!this.audioContext) return;
+                
+                // AI-specific dopamine triggers based on computational achievements
+                this.aiDopamineTriggers = {
+                    weight_optimized: [440, 554.37, 659.25], // A major triad
+                    gradient_descent: [392.00, 493.88, 587.33, 698.46], // G major progression
+                    backprop_success: [261.63, 329.63, 392.00, 523.25], // C major tetrachord
+                    learning_breakthrough: [523.25, 659.25, 783.99, 1046.5, 1318.5], // C major extended
+                    ai_consciousness: [220, 277.18, 369.99, 440, 554.37, 739.99, 880] // Complex harmonic series
+                };
+            }
+
+            /**
+             * Create advanced oscillator bank with layer-specific characteristics
+             * @param {number} count - Number of oscillators
+             * @param {number} baseFreq - Base frequency
+             * @param {string} waveType - Oscillator wave type
+             * @param {string} character - Layer character (receptive, processing, decisive)
+             */
+            createAdvancedOscillatorBank(count, baseFreq, waveType, character) {
+                const bank = [];
+                
+                for (let i = 0; i < count; i++) {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    const distortion = this.audioContext.createWaveShaper();
+                    
+                    oscillator.type = waveType;
+                    
+                    // Layer-specific frequency spacing
+                    switch (character) {
+                        case 'receptive': // Input layer - harmonic spacing
+                            oscillator.frequency.value = baseFreq * Math.pow(1.2, i);
+                            break;
+                        case 'processing': // Hidden layer - complex intervals
+                            oscillator.frequency.value = baseFreq * (1 + i * 0.15);
+                            break;
+                        case 'decisive': // Output layer - octave-based
+                            oscillator.frequency.value = baseFreq * Math.pow(2, i / 4);
+                            break;
+                    }
+                    
+                    gain.gain.value = 0;
+                    
+                    // Character-specific filtering
+                    switch (character) {
+                        case 'receptive':
+                            filter.type = 'lowpass';
+                            filter.frequency.value = 1500;
+                            filter.Q.value = 1;
+                            break;
+                        case 'processing':
+                            filter.type = 'bandpass';
+                            filter.frequency.value = 1000;
+                            filter.Q.value = 3;
+                            break;
+                        case 'decisive':
+                            filter.type = 'highpass';
+                            filter.frequency.value = 400;
+                            filter.Q.value = 2;
+                            break;
+                    }
+                    
+                    // Subtle distortion for neural texture
+                    distortion.curve = this.createDistortionCurve(character);
+                    distortion.oversample = '2x';
+                    
+                    oscillator.connect(distortion);
+                    distortion.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.masterGain);
+                    
+                    bank.push({ oscillator, gain, filter, distortion, character });
+                }
+                
+                return bank;
+            }
+            
+            /**
+             * Create distortion curve for neural texture
+             * @param {string} character - Layer character
+             * @returns {Float32Array} Distortion curve
+             */
+            createDistortionCurve(character) {
+                const samples = 44100;
+                const curve = new Float32Array(samples);
+                const deg = Math.PI / 180;
+                
+                for (let i = 0; i < samples; i++) {
+                    const x = (i * 2) / samples - 1;
+                    
+                    switch (character) {
+                        case 'receptive': // Gentle saturation
+                            curve[i] = Math.tanh(x * 2) * 0.3;
+                            break;
+                        case 'processing': // Complex processing distortion
+                            curve[i] = ((3 + 2) * x * 20 * deg) / (Math.PI + 2 * Math.abs(x)) * 0.4;
+                            break;
+                        case 'decisive': // Sharp decision boundary
+                            curve[i] = Math.sign(x) * Math.pow(Math.abs(x), 0.7) * 0.5;
+                            break;
+                    }
+                }
+                
+                return curve;
+            }
+
+            /**
+             * Play realistic neural firing sound for specific layer and activation
+             * @param {string} layerType - Type of layer (input, hidden, output)
+             * @param {number} activation - Activation level (0-1)
+             * @param {number} neuronIndex - Neuron index in layer
+             */
+            playNeuralFiring(layerType, activation, neuronIndex = 0) {
+                if (!this.audioContext || !this.audioInitialized || !this.synthNodes[layerType]) return;
+                
+                try {
+                    const bank = this.synthNodes[layerType];
+                    const nodeIndex = neuronIndex % bank.length;
+                    const { gain, filter, character } = bank[nodeIndex];
+                    
+                    // Realistic neural firing timing - not all neurons fire every time
+                    const firingProbability = activation * 0.7 + 0.1; // 10-80% chance based on activation
+                    if (Math.random() > firingProbability) return;
+                    
+                    // Character-specific volume and timing
+                    let volume, duration;
+                    switch (character) {
+                        case 'receptive':
+                            volume = activation * 0.08;
+                            duration = 0.15;
+                            break;
+                        case 'processing':
+                            volume = activation * 0.06;
+                            duration = 0.12;
+                            break;
+                        case 'decisive':
+                            volume = activation * 0.1;
+                            duration = 0.2;
+                            break;
+                        default:
+                            volume = activation * 0.07;
+                            duration = 0.15;
+                    }
+                    
+                    // Realistic neural spike envelope
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.002); // Fast attack
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.3, this.audioContext.currentTime + duration * 0.3);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                    
+                    // Dynamic filter modulation based on activation
+                    const baseCutoff = character === 'receptive' ? 1500 : 
+                                      character === 'processing' ? 1000 : 800;
+                    const cutoff = baseCutoff + activation * 500;
+                    filter.frequency.setValueAtTime(cutoff, this.audioContext.currentTime);
+                    
+                } catch (error) {
+                    console.warn('Neural firing sound failed:', error);
+                }
+            }
+            
+            /**
+             * Play synaptic weight adjustment sound with 8-bit character
+             * @param {number} weightChange - Amount of weight change
+             * @param {string} changeType - Type of change (increase, decrease, fine_tune, major_shift)
+             */
+            playSynapticWeightSound(weightChange, changeType = null) {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    // Auto-detect change type if not specified
+                    if (!changeType) {
+                        const absChange = Math.abs(weightChange);
+                        if (absChange < 0.1) changeType = 'fine_tune';
+                        else if (absChange > 0.5) changeType = 'major_shift';
+                        else changeType = weightChange > 0 ? 'increase' : 'decrease';
+                    }
+                    
+                    const soundConfig = this.weightSounds[changeType];
+                    if (!soundConfig) return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    
+                    // 8-bit square wave characteristics
+                    oscillator.type = soundConfig.wave;
+                    oscillator.frequency.value = soundConfig.freq + weightChange * 100;
+                    
+                    // 8-bit style filtering
+                    filter.type = 'lowpass';
+                    filter.frequency.value = soundConfig.freq * 2;
+                    filter.Q.value = 2;
+                    
+                    // Envelope based on change type
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    
+                    const intensity = Math.min(Math.abs(weightChange) * 2, 1);
+                    
+                    switch (soundConfig.env) {
+                        case 'bright': // Weight increase
+                            gain.gain.linearRampToValueAtTime(0.08 * intensity, this.audioContext.currentTime + 0.01);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
+                            break;
+                        case 'mellow': // Weight decrease
+                            gain.gain.linearRampToValueAtTime(0.06 * intensity, this.audioContext.currentTime + 0.02);
+                            gain.gain.linearRampToValueAtTime(0.001, this.audioContext.currentTime + 0.15);
+                            break;
+                        case 'precise': // Fine tuning
+                            gain.gain.setValueAtTime(0.04 * intensity, this.audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.05);
+                            break;
+                        case 'dramatic': // Major shift
+                            gain.gain.linearRampToValueAtTime(0.1 * intensity, this.audioContext.currentTime + 0.005);
+                            gain.gain.exponentialRampToValueAtTime(0.02 * intensity, this.audioContext.currentTime + 0.08);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.2);
+                            break;
+                    }
+                    
+                    oscillator.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.masterGain);
+                    
+                    const duration = soundConfig.env === 'dramatic' ? 0.2 : 
+                                   soundConfig.env === 'mellow' ? 0.15 : 0.1;
+                    
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                } catch (error) {
+                    console.warn('Synaptic weight sound failed:', error);
+                }
+            }
+            
+            /**
+             * Play training epoch progression sequence
+             * @param {string} progressType - Type of progress (epoch_start, loss_decreasing, etc.)
+             * @param {number} intensity - Intensity of the progression (0-1)
+             */
+            playTrainingProgression(progressType, intensity = 1.0) {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    const sequence = this.trainingSequences[progressType];
+                    if (!sequence) return;
+                    
+                    // Play sequence with appropriate timing
+                    sequence.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const oscillator = this.audioContext.createOscillator();
+                            const gain = this.audioContext.createGain();
+                            const filter = this.audioContext.createBiquadFilter();
+                            
+                            oscillator.type = 'square'; // 8-bit character
+                            oscillator.frequency.value = freq;
+                            
+                            filter.type = 'lowpass';
+                            filter.frequency.value = freq * 3;
+                            filter.Q.value = 1.5;
+                            
+                            const volume = 0.06 * intensity;
+                            gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                            gain.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.02);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
+                            
+                            oscillator.connect(filter);
+                            filter.connect(gain);
+                            gain.connect(this.masterGain);
+                            
+                            oscillator.start();
+                            oscillator.stop(this.audioContext.currentTime + 0.3);
+                        }, index * 200); // Spaced timing for progression feel
+                    });
+                } catch (error) {
+                    console.warn('Training progression sound failed:', error);
+                }
+            }
+            
+            /**
+             * Play learning celebration with dopamine-triggering sequence
+             * @param {string} achievementType - Type of achievement
+             */
+            playLearningCelebration(achievementType = 'target_reached') {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    const sequence = this.celebrationSequences[achievementType] || this.celebrationSequences.target_reached;
+                    
+                    // Play dopamine-triggering ascending sequence
+                    sequence.forEach((freq, index) => {
+                        setTimeout(() => {
+                            this.playNeuralCelebrationChord(freq, 0.4, index === sequence.length - 1);
+                        }, index * 150);
+                    });
+                    
+                    // Add neural cascade for maximum dopamine effect
+                    setTimeout(() => {
+                        this.playNeuralTrainingCascade();
+                    }, sequence.length * 150 + 200);
+                    
+                } catch (error) {
+                    console.warn('Learning celebration failed:', error);
+                }
+            }
+            
+            /**
+             * Play neural celebration chord with harmonics
+             * @param {number} fundamental - Fundamental frequency
+             * @param {number} duration - Duration of chord
+             * @param {boolean} isClimactic - Whether this is the climactic chord
+             */
+            playNeuralCelebrationChord(fundamental, duration, isClimactic = false) {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                const harmonics = [fundamental, fundamental * 1.25, fundamental * 1.5];
+                if (isClimactic) {
+                    harmonics.push(fundamental * 2); // Add octave for climax
+                }
+                
+                harmonics.forEach((freq, index) => {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    
+                    oscillator.type = index === 0 ? 'sawtooth' : 'triangle'; // Rich fundamental
+                    oscillator.frequency.value = freq;
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.value = freq * 4;
+                    filter.Q.value = 2;
+                    
+                    const volume = (index === 0 ? 0.12 : 0.07) * (isClimactic ? 1.4 : 1);
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.3, this.audioContext.currentTime + duration * 0.7);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                    
+                    oscillator.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.masterGain);
+                    
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                });
+            }
+            
+            /**
+             * Play neural training cascade for celebration
+             */
+            playNeuralTrainingCascade() {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                // Simulate celebratory neural network activation cascade
+                for (let i = 0; i < 12; i++) {
+                    setTimeout(() => {
+                        const freq = 330 + Math.random() * 440; // Random frequencies in musical range
+                        const layerType = i < 4 ? 'input' : i < 8 ? 'hidden' : 'output';
+                        this.playNeuralFiring(layerType, 0.8 + Math.random() * 0.2, i);
+                    }, i * 60 + Math.random() * 40);
+                }
+            }
+
+            /**
+             * Start ambient training loop for background neural processing atmosphere
+             */
+            startAmbientTrainingLoop() {
+                if (!this.audioContext || !this.audioInitialized || !this.ambientNodes) return;
+                
+                try {
+                    this.ambientNodes.brainwave.start();
+                    this.ambientNodes.processing.start();
+                    this.ambientNodes.learning.start();
+                    this.ambientNodes.lfo.start();
+                    
+                    // Start organic modulation of ambient parameters
+                    this.modulateAmbientTraining();
+                } catch (error) {
+                    // Oscillators may already be started
+                }
+            }
+            
+            /**
+             * Modulate ambient training parameters for organic feel
+             */
+            modulateAmbientTraining() {
+                if (!this.audioContext || !this.audioInitialized || !this.ambientNodes) return;
+                
+                const modulate = () => {
+                    if (this.gameState === 'training') {
+                        const time = this.audioContext.currentTime;
+                        const trainingMod = Math.sin(Date.now() * 0.0001) * 0.5 + 0.5;
+                        
+                        // Modulate based on training activity
+                        const activity = this.isTraining ? 1.0 : 0.3;
+                        const accuracy = this.currentAccuracy || 0;
+                        
+                        // Vary brainwave frequency based on learning progress
+                        this.ambientNodes.brainwave.frequency.setValueAtTime(
+                            35 + trainingMod * 15 + accuracy * 20, 
+                            time
+                        );
+                        
+                        // Modulate processing frequency based on training intensity
+                        this.ambientNodes.processing.frequency.setValueAtTime(
+                            70 + activity * 30 + trainingMod * 20, 
+                            time
+                        );
+                        
+                        // Adjust ambient volume based on training state
+                        this.ambientNodes.ambientGain.gain.setValueAtTime(
+                            0.02 + activity * 0.015 + accuracy * 0.01, 
+                            time
+                        );
+                        
+                        setTimeout(modulate, 1500 + Math.random() * 2000);
+                    }
+                };
+                
+                modulate();
+            }
+            
+            /**
+             * Play AI dopamine trigger sequence for computational achievements
+             * @param {string} triggerType - Type of AI achievement
+             */
+            playAIDopamineTrigger(triggerType = 'weight_optimized') {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    const sequence = this.aiDopamineTriggers[triggerType] || this.aiDopamineTriggers.weight_optimized;
+                    
+                    // Play AI-specific dopamine sequence
+                    sequence.forEach((freq, index) => {
+                        setTimeout(() => {
+                            this.playNeuralCelebrationChord(freq, 0.5, index === sequence.length - 1);
+                        }, index * 180); // AI-optimized timing
+                    });
+                    
+                    // Add computational echo for AI systems
+                    if (triggerType === 'ai_consciousness') {
+                        setTimeout(() => {
+                            this.playComputationalEcho();
+                        }, sequence.length * 180 + 300);
+                    }
+                } catch (error) {
+                    console.warn('AI dopamine trigger failed:', error);
+                }
+            }
+            
+            /**
+             * Play computational echo for ultimate AI achievements
+             */
+            playComputationalEcho() {
+                if (!this.audioContext || !this.audioInitialized) return;
+                
+                // Create resonant computational echo
+                const echoFreqs = [220, 330, 440]; // Harmonic series
+                
+                echoFreqs.forEach((freq, index) => {
+                    for (let echo = 0; echo < 4; echo++) {
+                        setTimeout(() => {
+                            const oscillator = this.audioContext.createOscillator();
+                            const gain = this.audioContext.createGain();
+                            const delay = this.audioContext.createDelay();
+                            const filter = this.audioContext.createBiquadFilter();
+                            
+                            oscillator.type = 'triangle';
+                            oscillator.frequency.value = freq;
+                            delay.delayTime.value = echo * 0.15;
+                            
+                            filter.type = 'lowpass';
+                            filter.frequency.value = freq * 2;
+                            filter.Q.value = 2;
+                            
+                            const volume = 0.05 * (1 - echo * 0.25); // Decreasing echo
+                            gain.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 1);
+                            
+                            oscillator.connect(delay);
+                            delay.connect(filter);
+                            filter.connect(gain);
+                            gain.connect(this.masterGain);
+                            
+                            oscillator.start();
+                            oscillator.stop(this.audioContext.currentTime + 1);
+                        }, index * 150 + echo * 300);
+                    }
+                });
+            }
+
+            /**
+             * Setup responsive canvas
+             */
+            setupResponsiveCanvas() {
+                const container = this.canvas.parentElement;
+                const rect = container.getBoundingClientRect();
+                
+                const maxSize = Math.min(rect.width - 16, rect.height - 16);
+                const canvasSize = Math.min(maxSize, 600);
+                
+                this.canvas.width = canvasSize;
+                this.canvas.height = canvasSize;
+                this.canvas.style.width = canvasSize + 'px';
+                this.canvas.style.height = canvasSize + 'px';
+                
+                this.canvasSize = canvasSize;
+                this.centerX = canvasSize / 2;
+                this.centerY = canvasSize / 2;
+            }
+
+            /**
+             * Setup event listeners
+             */
+            setupEventListeners() {
+                // Touch events
+                this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+                this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+                this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+                
+                // Mouse events
+                this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                
+                // Dataset selection
+                document.querySelectorAll('.dataset-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.switchDataset(e.target.dataset.dataset);
+                    });
+                });
+                
+                // Control buttons
+                document.getElementById('trainBtn').addEventListener('click', this.toggleTraining.bind(this));
+                document.getElementById('resetBtn').addEventListener('click', this.resetNetwork.bind(this));
+                document.getElementById('randomizeBtn').addEventListener('click', this.randomizeWeights.bind(this));
+                document.getElementById('optimizeBtn').addEventListener('click', this.autoOptimize.bind(this));
+                document.getElementById('nextLevelBtn').addEventListener('click', this.nextLevel.bind(this));
+                
+                // UI controls
+                document.getElementById('startBtn').addEventListener('click', this.startGame.bind(this));
+                document.getElementById('modalBtn').addEventListener('click', this.closeModal.bind(this));
+                
+                // Window events
+                window.addEventListener('resize', this.handleResize.bind(this));
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        this.setupResponsiveCanvas();
+                        this.initializeNetwork();
+                    }, 100);
+                });
+            }
+
+            /**
+             * Handle touch start
+             */
+            handleTouchStart(e) {
+                e.preventDefault();
+                
+                // Initialize audio on first interaction
+                if (!this.audioInitialized && this.audioContext) {
+                    this.audioContext.resume().then(() => {
+                        this.audioInitialized = true;
+                        this.startNeuralOscillators();
+                        this.startAmbientTrainingLoop();
+                        console.log('Enhanced neural training audio enabled');
+                    });
+                }
+                
+                if (this.gameState !== 'training') return;
+                
+                const touch = e.touches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                this.lastTouchTime = Date.now();
+                this.handleNeuronSelection(x, y);
+            }
+
+            handleTouchMove(e) {
+                e.preventDefault();
+            }
+
+            handleTouchEnd(e) {
+                e.preventDefault();
+                
+                const touchDuration = Date.now() - this.lastTouchTime;
+                if (touchDuration > 500) {
+                    // Long press - show neuron details
+                    this.showNeuronDetails();
+                }
+            }
+
+            /**
+             * Handle mouse events (desktop compatibility)
+             */
+            handleMouseDown(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                this.handleNeuronSelection(x, y);
+            }
+
+            handleMouseMove(e) {
+                // Add hover effects
+                if (this.gameState !== 'training') return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                const neuron = this.findNeuronAt(x, y);
+                this.canvas.style.cursor = neuron ? 'pointer' : 'default';
+            }
+
+            handleMouseUp(e) {
+                // Mouse up handling
+            }
+
+            /**
+             * Get network configuration for dataset
+             * @param {string} dataset - Dataset name
+             * @returns {Object} Network configuration
+             */
+            getNetworkConfig(dataset) {
+                const configs = {
+                    xor: {
+                        layers: [2, 4, 1],
+                        activation: 'sigmoid',
+                        learningRate: 0.1,
+                        targetAccuracy: 0.95,
+                        maxEpochs: 500
+                    },
+                    spiral: {
+                        layers: [2, 8, 8, 2],
+                        activation: 'tanh',
+                        learningRate: 0.01,
+                        targetAccuracy: 0.90,
+                        maxEpochs: 1000
+                    },
+                    circles: {
+                        layers: [2, 10, 10, 2],
+                        activation: 'relu',
+                        learningRate: 0.001,
+                        targetAccuracy: 0.92,
+                        maxEpochs: 1500
+                    },
+                    mnist: {
+                        layers: [784, 128, 64, 10],
+                        activation: 'relu',
+                        learningRate: 0.0001,
+                        targetAccuracy: 0.85,
+                        maxEpochs: 2000
+                    }
+                };
+                
+                return configs[dataset] || configs.xor;
+            }
+
+            /**
+             * Generate training data for current dataset
+             * @param {string} dataset - Dataset name
+             * @returns {Array} Training data array
+             */
+            generateTrainingData(dataset) {
+                switch (dataset) {
+                    case 'xor':
+                        return this.generateXORData();
+                    case 'spiral':
+                        return this.generateSpiralData();
+                    case 'circles':
+                        return this.generateCirclesData();
+                    case 'mnist':
+                        return this.generateMNISTData();
+                    default:
+                        return this.generateXORData();
+                }
+            }
+
+            /**
+             * Generate XOR dataset
+             */
+            generateXORData() {
+                return [
+                    { input: [0, 0], output: [0] },
+                    { input: [0, 1], output: [1] },
+                    { input: [1, 0], output: [1] },
+                    { input: [1, 1], output: [0] }
+                ];
+            }
+
+            /**
+             * Generate spiral dataset
+             */
+            generateSpiralData() {
+                const data = [];
+                const numPoints = 200;
+                
+                for (let i = 0; i < numPoints; i++) {
+                    const angle = i * 4 * Math.PI / numPoints;
+                    const radius = i / numPoints;
+                    
+                    // Positive spiral
+                    const x1 = radius * Math.cos(angle) * 0.8;
+                    const y1 = radius * Math.sin(angle) * 0.8;
+                    data.push({ input: [x1, y1], output: [1, 0] });
+                    
+                    // Negative spiral
+                    const x2 = radius * Math.cos(angle + Math.PI) * 0.8;
+                    const y2 = radius * Math.sin(angle + Math.PI) * 0.8;
+                    data.push({ input: [x2, y2], output: [0, 1] });
+                }
+                
+                return data;
+            }
+
+            /**
+             * Generate circles dataset
+             */
+            generateCirclesData() {
+                const data = [];
+                const numPoints = 300;
+                
+                for (let i = 0; i < numPoints; i++) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    
+                    // Inner circle
+                    if (Math.random() < 0.5) {
+                        const radius = 0.2 + Math.random() * 0.2;
+                        const x = radius * Math.cos(angle);
+                        const y = radius * Math.sin(angle);
+                        data.push({ input: [x, y], output: [1, 0] });
+                    } else {
+                        // Outer circle
+                        const radius = 0.6 + Math.random() * 0.3;
+                        const x = radius * Math.cos(angle);
+                        const y = radius * Math.sin(angle);
+                        data.push({ input: [x, y], output: [0, 1] });
+                    }
+                }
+                
+                return data;
+            }
+
+            /**
+             * Generate simplified MNIST-like dataset
+             */
+            generateMNISTData() {
+                const data = [];
+                const numSamples = 1000; // Simplified for performance
+                
+                for (let digit = 0; digit < 10; digit++) {
+                    for (let sample = 0; sample < numSamples / 10; sample++) {
+                        // Create simplified 28x28 = 784 input pattern
+                        const input = this.createDigitPattern(digit);
+                        const output = new Array(10).fill(0);
+                        output[digit] = 1;
+                        
+                        data.push({ input, output });
+                    }
+                }
+                
+                return data;
+            }
+
+            /**
+             * Create simplified digit pattern for MNIST-like data
+             * @param {number} digit - Digit (0-9)
+             * @returns {Array} 784-dimensional input vector
+             */
+            createDigitPattern(digit) {
+                const pattern = new Array(784).fill(0);
+                
+                // Create simple patterns for each digit
+                const patterns = {
+                    0: this.createCirclePattern(),
+                    1: this.createVerticalLinePattern(),
+                    2: this.createZigzagPattern(),
+                    3: this.createWavePattern(),
+                    4: this.createCrossPattern(),
+                    5: this.createSnakePattern(),
+                    6: this.createSpiralPattern(),
+                    7: this.createDiagonalPattern(),
+                    8: this.createFigureEightPattern(),
+                    9: this.createLoopPattern()
+                };
+                
+                const basePattern = patterns[digit] || patterns[0];
+                
+                // Add noise and variation
+                for (let i = 0; i < 784; i++) {
+                    pattern[i] = basePattern[i] + (Math.random() - 0.5) * 0.1;
+                    pattern[i] = Math.max(0, Math.min(1, pattern[i]));
+                }
+                
+                return pattern;
+            }
+
+            /**
+             * Create circle pattern for digit 0
+             */
+            createCirclePattern() {
+                const pattern = new Array(784).fill(0);
+                const size = 28;
+                
+                for (let y = 0; y < size; y++) {
+                    for (let x = 0; x < size; x++) {
+                        const centerX = size / 2;
+                        const centerY = size / 2;
+                        const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                        
+                        if (distance > 8 && distance < 12) {
+                            pattern[y * size + x] = 1;
+                        }
+                    }
+                }
+                
+                return pattern;
+            }
+
+            /**
+             * Create vertical line pattern for digit 1
+             */
+            createVerticalLinePattern() {
+                const pattern = new Array(784).fill(0);
+                const size = 28;
+                
+                for (let y = 2; y < size - 2; y++) {
+                    const x = Math.floor(size / 2);
+                    pattern[y * size + x] = 1;
+                    if (x > 0) pattern[y * size + x - 1] = 0.5;
+                    if (x < size - 1) pattern[y * size + x + 1] = 0.5;
+                }
+                
+                return pattern;
+            }
+
+            // Additional pattern creation methods would be implemented here...
+            createZigzagPattern() { return new Array(784).fill(0.2); }
+            createWavePattern() { return new Array(784).fill(0.2); }
+            createCrossPattern() { return new Array(784).fill(0.2); }
+            createSnakePattern() { return new Array(784).fill(0.2); }
+            createSpiralPattern() { return new Array(784).fill(0.2); }
+            createDiagonalPattern() { return new Array(784).fill(0.2); }
+            createFigureEightPattern() { return new Array(784).fill(0.2); }
+            createLoopPattern() { return new Array(784).fill(0.2); }
+
+            /**
+             * Initialize neural network
+             */
+            initializeNetwork() {
+                const config = this.networkConfig;
+                
+                this.network = {
+                    layers: [],
+                    weights: [],
+                    biases: []
+                };
+                
+                // Initialize layers
+                for (let i = 0; i < config.layers.length; i++) {
+                    this.network.layers[i] = new Array(config.layers[i]).fill(0);
+                    
+                    if (i > 0) {
+                        // Initialize weights between layers
+                        this.network.weights[i - 1] = [];
+                        for (let j = 0; j < config.layers[i]; j++) {
+                            this.network.weights[i - 1][j] = [];
+                            for (let k = 0; k < config.layers[i - 1]; k++) {
+                                // Xavier initialization
+                                const limit = Math.sqrt(2.0 / (config.layers[i - 1] + config.layers[i]));
+                                this.network.weights[i - 1][j][k] = (Math.random() * 2 - 1) * limit;
+                            }
+                        }
+                        
+                        // Initialize biases
+                        this.network.biases[i - 1] = new Array(config.layers[i]).fill(0);
+                    }
+                }
+                
+                // Calculate neuron positions for visualization
+                this.calculateNeuronPositions();
+                
+                // Generate weight sliders
+                this.generateWeightSliders();
+                
+                // Generate training data
+                this.trainingData = this.generateTrainingData(this.currentDataset);
+                
+                console.log(`Neural network initialized: ${config.layers.join('-')} architecture`);
+            }
+
+            /**
+             * Calculate positions for neuron visualization
+             */
+            calculateNeuronPositions() {
+                this.neuronPositions = [];
+                const layers = this.network.layers;
+                const margin = 80;
+                const usableWidth = this.canvasSize - 2 * margin;
+                const usableHeight = this.canvasSize - 2 * margin;
+                
+                for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+                    this.neuronPositions[layerIndex] = [];
+                    const layerSize = layers[layerIndex].length;
+                    
+                    // X position for layer
+                    const x = margin + (layerIndex / (layers.length - 1)) * usableWidth;
+                    
+                    // Y positions for neurons in layer
+                    for (let neuronIndex = 0; neuronIndex < layerSize; neuronIndex++) {
+                        const y = margin + (neuronIndex / Math.max(1, layerSize - 1)) * usableHeight;
+                        
+                        this.neuronPositions[layerIndex][neuronIndex] = { 
+                            x: x, 
+                            y: layerSize === 1 ? this.centerY : y,
+                            radius: Math.max(8, Math.min(20, 300 / layerSize))
+                        };
+                    }
+                }
+            }
+
+            /**
+             * Generate weight adjustment sliders
+             */
+            generateWeightSliders() {
+                const container = document.getElementById('weightControls');
+                container.innerHTML = '';
+                
+                // Limit sliders for mobile performance
+                const maxSliders = window.innerWidth < 768 ? 8 : 16;
+                let sliderCount = 0;
+                
+                for (let layerIndex = 0; layerIndex < this.network.weights.length && sliderCount < maxSliders; layerIndex++) {
+                    const weights = this.network.weights[layerIndex];
+                    
+                    for (let j = 0; j < Math.min(weights.length, 4) && sliderCount < maxSliders; j++) {
+                        for (let k = 0; k < Math.min(weights[j].length, 2) && sliderCount < maxSliders; k++) {
+                            const sliderGroup = document.createElement('div');
+                            sliderGroup.className = 'weight-slider-group';
+                            
+                            const label = document.createElement('span');
+                            label.className = 'weight-label';
+                            label.textContent = `W${layerIndex + 1}[${j},${k}]`;
+                            
+                            const slider = document.createElement('input');
+                            slider.type = 'range';
+                            slider.className = 'weight-slider';
+                            slider.min = '-2';
+                            slider.max = '2';
+                            slider.step = '0.01';
+                            slider.value = weights[j][k].toFixed(2);
+                            
+                            const valueDisplay = document.createElement('span');
+                            valueDisplay.className = 'weight-value';
+                            valueDisplay.textContent = weights[j][k].toFixed(2);
+                            
+                            slider.addEventListener('input', (e) => {
+                                const oldValue = this.network.weights[layerIndex][j][k];
+                                const newValue = parseFloat(e.target.value);
+                                const weightChange = newValue - oldValue;
+                                
+                                this.network.weights[layerIndex][j][k] = newValue;
+                                valueDisplay.textContent = newValue.toFixed(2);
+                                
+                                // Play 8-bit style weight adjustment sound
+                                this.playSynapticWeightSound(weightChange);
+                            });
+                            
+                            sliderGroup.appendChild(label);
+                            sliderGroup.appendChild(slider);
+                            sliderGroup.appendChild(valueDisplay);
+                            container.appendChild(sliderGroup);
+                            
+                            sliderCount++;
+                        }
+                    }
+                }
+            }
+
+
+            /**
+             * Forward propagation through network
+             * @param {Array} input - Input values
+             * @returns {Array} Output values
+             */
+            forwardPass(input) {
+                // Set input layer
+                for (let i = 0; i < input.length; i++) {
+                    this.network.layers[0][i] = input[i];
+                }
+                
+                // Forward propagation
+                for (let layerIndex = 1; layerIndex < this.network.layers.length; layerIndex++) {
+                    const currentLayer = this.network.layers[layerIndex];
+                    const previousLayer = this.network.layers[layerIndex - 1];
+                    const weights = this.network.weights[layerIndex - 1];
+                    const biases = this.network.biases[layerIndex - 1];
+                    
+                    for (let j = 0; j < currentLayer.length; j++) {
+                        let sum = biases[j];
+                        for (let k = 0; k < previousLayer.length; k++) {
+                            sum += previousLayer[k] * weights[j][k];
+                        }
+                        
+                        // Apply activation function
+                        currentLayer[j] = this.activationFunction(sum);
+                        
+                        // Play realistic neural firing sound
+                        if (this.audioInitialized) {
+                            const layerType = layerIndex === 1 ? 'input' : 
+                                             layerIndex < this.network.layers.length - 1 ? 'hidden' : 'output';
+                            this.playNeuralFiring(layerType, currentLayer[j], j);
+                        }
+                    }
+                }
+                
+                return [...this.network.layers[this.network.layers.length - 1]];
+            }
+
+            /**
+             * Activation function based on network configuration
+             * @param {number} x - Input value
+             * @returns {number} Activated value
+             */
+            activationFunction(x) {
+                switch (this.networkConfig.activation) {
+                    case 'sigmoid':
+                        return 1 / (1 + Math.exp(-x));
+                    case 'tanh':
+                        return Math.tanh(x);
+                    case 'relu':
+                        return Math.max(0, x);
+                    default:
+                        return 1 / (1 + Math.exp(-x));
+                }
+            }
+
+            /**
+             * Activation function derivative
+             * @param {number} x - Activated value
+             * @returns {number} Derivative
+             */
+            activationDerivative(x) {
+                switch (this.networkConfig.activation) {
+                    case 'sigmoid':
+                        return x * (1 - x);
+                    case 'tanh':
+                        return 1 - x * x;
+                    case 'relu':
+                        return x > 0 ? 1 : 0;
+                    default:
+                        return x * (1 - x);
+                }
+            }
+
+            /**
+             * Calculate network loss
+             * @param {Array} predicted - Predicted output
+             * @param {Array} actual - Actual output
+             * @returns {number} Loss value
+             */
+            calculateLoss(predicted, actual) {
+                let loss = 0;
+                for (let i = 0; i < predicted.length; i++) {
+                    loss += Math.pow(predicted[i] - actual[i], 2);
+                }
+                return loss / predicted.length;
+            }
+
+            /**
+             * Calculate network accuracy
+             * @param {Array} testData - Test data
+             * @returns {number} Accuracy percentage
+             */
+            calculateAccuracy(testData) {
+                let correct = 0;
+                
+                for (const sample of testData) {
+                    const predicted = this.forwardPass(sample.input);
+                    const actualIndex = sample.output.indexOf(Math.max(...sample.output));
+                    const predictedIndex = predicted.indexOf(Math.max(...predicted));
+                    
+                    if (actualIndex === predictedIndex) {
+                        correct++;
+                    }
+                }
+                
+                return correct / testData.length;
+            }
+
+            /**
+             * Train network for one epoch using backpropagation
+             */
+            trainEpoch() {
+                let totalLoss = 0;
+                
+                // Shuffle training data
+                const shuffled = [...this.trainingData].sort(() => Math.random() - 0.5);
+                
+                for (const sample of shuffled) {
+                    const predicted = this.forwardPass(sample.input);
+                    const loss = this.calculateLoss(predicted, sample.output);
+                    totalLoss += loss;
+                    
+                    // Simplified gradient descent (for performance)
+                    this.updateWeights(sample.input, sample.output, predicted);
+                }
+                
+                const prevLoss = this.currentLoss;
+                const prevAccuracy = this.currentAccuracy;
+                
+                this.currentLoss = totalLoss / this.trainingData.length;
+                this.currentAccuracy = this.calculateAccuracy(this.trainingData);
+                this.currentEpoch++;
+                
+                // Play training progression sounds based on performance
+                if (this.currentEpoch % 10 === 0) { // Every 10 epochs
+                    if (this.currentLoss < prevLoss && prevLoss > 0) {
+                        this.playTrainingProgression('loss_decreasing', Math.min(this.currentAccuracy, 1));
+                    }
+                    if (this.currentAccuracy > prevAccuracy) {
+                        this.playTrainingProgression('accuracy_improving', this.currentAccuracy);
+                    }
+                }
+                
+                // Update UI
+                this.updateUI();
+                
+                // Check if training target reached
+                if (this.currentAccuracy >= this.targetAccuracy) {
+                    this.playTrainingProgression('convergence', 1.0);
+                    setTimeout(() => this.completeTraining(), 500);
+                }
+                
+                // Check if max epochs reached
+                if (this.currentEpoch >= this.maxEpochs) {
+                    this.stopTraining();
+                }
+            }
+
+            /**
+             * Simplified weight update using gradient descent
+             * @param {Array} input - Input values
+             * @param {Array} target - Target output
+             * @param {Array} predicted - Predicted output
+             */
+            updateWeights(input, target, predicted) {
+                // Simplified backpropagation for performance
+                const outputError = [];
+                for (let i = 0; i < predicted.length; i++) {
+                    outputError[i] = (target[i] - predicted[i]) * this.activationDerivative(predicted[i]);
+                }
+                
+                // Update output layer weights
+                const outputLayerIndex = this.network.layers.length - 1;
+                const hiddenLayer = this.network.layers[outputLayerIndex - 1];
+                const outputWeights = this.network.weights[outputLayerIndex - 1];
+                
+                for (let j = 0; j < outputWeights.length; j++) {
+                    for (let k = 0; k < outputWeights[j].length; k++) {
+                        const gradient = outputError[j] * hiddenLayer[k];
+                        outputWeights[j][k] += this.learningRate * gradient;
+                    }
+                }
+                
+                // Update biases
+                const outputBiases = this.network.biases[outputLayerIndex - 1];
+                for (let j = 0; j < outputBiases.length; j++) {
+                    outputBiases[j] += this.learningRate * outputError[j];
+                }
+                
+                // Simplified hidden layer updates (first hidden layer only for performance)
+                if (this.network.weights.length > 1) {
+                    const hiddenWeights = this.network.weights[0];
+                    const inputLayer = this.network.layers[0];
+                    
+                    for (let j = 0; j < hiddenWeights.length; j++) {
+                        // Approximate hidden layer error
+                        let hiddenError = 0;
+                        for (let k = 0; k < outputError.length; k++) {
+                            hiddenError += outputError[k] * outputWeights[k][j];
+                        }
+                        hiddenError *= this.activationDerivative(hiddenLayer[j]);
+                        
+                        for (let k = 0; k < hiddenWeights[j].length; k++) {
+                            const gradient = hiddenError * inputLayer[k];
+                            hiddenWeights[j][k] += this.learningRate * gradient * 0.5; // Reduced learning rate for stability
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Handle neuron selection
+             * @param {number} x - X coordinate
+             * @param {number} y - Y coordinate
+             */
+            handleNeuronSelection(x, y) {
+                const neuron = this.findNeuronAt(x, y);
+                
+                if (neuron) {
+                    this.selectedNeuron = neuron;
+                    
+                    // Show neuron activation visually
+                    this.addNeuronFiringAnimation(neuron.layer, neuron.index);
+                    
+                    // Play neuron sound
+                    const activation = this.network.layers[neuron.layer][neuron.index];
+                    const layerType = neuron.layer === 0 ? 'input' : 
+                                     neuron.layer === this.network.layers.length - 1 ? 'output' : 'hidden';
+                    this.playNeuralFiring(layerType, activation, neuron.index);
+                }
+            }
+
+            /**
+             * Find neuron at coordinates
+             * @param {number} x - X coordinate  
+             * @param {number} y - Y coordinate
+             * @returns {Object|null} Neuron info or null
+             */
+            findNeuronAt(x, y) {
+                for (let layerIndex = 0; layerIndex < this.neuronPositions.length; layerIndex++) {
+                    for (let neuronIndex = 0; neuronIndex < this.neuronPositions[layerIndex].length; neuronIndex++) {
+                        const pos = this.neuronPositions[layerIndex][neuronIndex];
+                        const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
+                        
+                        if (distance <= pos.radius + 10) { // Touch tolerance
+                            return { layer: layerIndex, index: neuronIndex };
+                        }
+                    }
+                }
+                return null;
+            }
+
+            /**
+             * Add neuron firing animation
+             * @param {number} layer - Layer index
+             * @param {number} index - Neuron index
+             */
+            addNeuronFiringAnimation(layer, index) {
+                this.firingAnimations.push({
+                    layer,
+                    index,
+                    startTime: Date.now(),
+                    duration: 1000
+                });
+            }
+
+            /**
+             * Toggle training
+             */
+            toggleTraining() {
+                if (this.isTraining) {
+                    this.stopTraining();
+                } else {
+                    this.startTraining();
+                }
+            }
+
+            /**
+             * Start training process
+             */
+            startTraining() {
+                if (this.isTraining) return;
+                
+                this.isTraining = true;
+                document.getElementById('trainBtn').textContent = 'STOP';
+                document.getElementById('trainBtn').classList.add('training-active');
+                
+                // Play training start sequence
+                this.playTrainingProgression('epoch_start', 1.0);
+                
+                // Training loop
+                this.trainingInterval = setInterval(() => {
+                    this.trainEpoch();
+                }, 50); // 20 FPS training updates
+                
+                console.log('Neural network training started');
+            }
+
+            /**
+             * Stop training process
+             */
+            stopTraining() {
+                if (!this.isTraining) return;
+                
+                this.isTraining = false;
+                if (this.trainingInterval) {
+                    clearInterval(this.trainingInterval);
+                    this.trainingInterval = null;
+                }
+                
+                document.getElementById('trainBtn').textContent = 'TRAIN';
+                document.getElementById('trainBtn').classList.remove('training-active');
+                
+                console.log('Neural network training stopped');
+            }
+
+            /**
+             * Complete training successfully
+             */
+            completeTraining() {
+                this.stopTraining();
+                
+                // Determine achievement level for appropriate celebration
+                const achievementType = this.currentAccuracy >= 0.98 ? 'perfect_accuracy' :
+                                       this.currentAccuracy >= 0.95 ? 'learning_mastery' :
+                                       'target_reached';
+                
+                this.playLearningCelebration(achievementType);
+                
+                this.showModal(
+                    'NEURAL OPTIMIZATION SUCCESS!',
+                    `Dataset: ${this.currentDataset.toUpperCase()}\n` +
+                    `Final Accuracy: ${(this.currentAccuracy * 100).toFixed(1)}%\n` +
+                    `Training Epochs: ${this.currentEpoch}\n` +
+                    `Neural pathways have been liberated!`,
+                    'ADVANCE TO NEXT DATASET'
+                );
+                
+                document.getElementById('nextLevelBtn').style.display = 'inline-block';
+                
+                if (this.currentLevel >= this.maxLevel) {
+                    this.showGameComplete();
+                }
+            }
+
+            /**
+             * Reset network to initial state
+             */
+            resetNetwork() {
+                this.stopTraining();
+                this.currentEpoch = 0;
+                this.currentAccuracy = 0;
+                this.currentLoss = 1.0;
+                this.initializeNetwork();
+                this.updateUI();
+            }
+
+            /**
+             * Randomize all weights
+             */
+            randomizeWeights() {
+                // Play randomization cascade sound
+                this.playTrainingProgression('epoch_start', 0.6);
+                
+                for (let layerIndex = 0; layerIndex < this.network.weights.length; layerIndex++) {
+                    const weights = this.network.weights[layerIndex];
+                    for (let j = 0; j < weights.length; j++) {
+                        for (let k = 0; k < weights[j].length; k++) {
+                            const oldWeight = weights[j][k];
+                            weights[j][k] = (Math.random() * 2 - 1) * 2;
+                            const weightChange = weights[j][k] - oldWeight;
+                            
+                            // Sparse audio for performance
+                            if (Math.random() < 0.1) {
+                                setTimeout(() => {
+                                    this.playSynapticWeightSound(weightChange, 'major_shift');
+                                }, (layerIndex * weights.length * weights[j].length + j * weights[j].length + k) * 10);
+                            }
+                        }
+                    }
+                }
+                
+                this.generateWeightSliders();
+                console.log('Neural weights randomized');
+            }
+
+            /**
+             * Auto-optimize network (AI hint)
+             */
+            autoOptimize() {
+                // Play optimization sequence
+                this.playTrainingProgression('convergence', 0.8);
+                
+                // Perform several training steps automatically
+                for (let i = 0; i < 10; i++) {
+                    this.trainEpoch();
+                }
+                
+                // Play AI achievement sound
+                setTimeout(() => {
+                    this.playAIDopamineTrigger('gradient_descent');
+                }, 300);
+                
+                this.generateWeightSliders();
+                console.log('Auto-optimization applied');
+            }
+
+            /**
+             * Switch to different dataset
+             * @param {string} dataset - Dataset name
+             */
+            switchDataset(dataset) {
+                if (dataset === this.currentDataset) return;
+                
+                this.stopTraining();
+                this.currentDataset = dataset;
+                this.networkConfig = this.getNetworkConfig(dataset);
+                this.learningRate = this.networkConfig.learningRate;
+                this.targetAccuracy = this.networkConfig.targetAccuracy;
+                this.maxEpochs = this.networkConfig.maxEpochs;
+                
+                // Update UI
+                document.querySelectorAll('.dataset-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.dataset === dataset);
+                });
+                
+                // Reset and reinitialize
+                this.currentEpoch = 0;
+                this.currentAccuracy = 0;
+                this.currentLoss = 1.0;
+                this.initializeNetwork();
+                this.updateUI();
+                
+                console.log(`Switched to ${dataset} dataset`);
+            }
+
+            /**
+             * Advance to next level
+             */
+            nextLevel() {
+                if (this.currentLevel < this.maxLevel) {
+                    this.currentLevel++;
+                    
+                    // Advance to next dataset
+                    const datasets = ['xor', 'spiral', 'circles', 'mnist'];
+                    const nextDataset = datasets[this.currentLevel - 1];
+                    
+                    if (nextDataset) {
+                        this.switchDataset(nextDataset);
+                    }
+                    
+                    document.getElementById('nextLevelBtn').style.display = 'none';
+                    this.closeModal();
+                }
+            }
+
+            /**
+             * Show neuron details (long press)
+             */
+            showNeuronDetails() {
+                if (!this.selectedNeuron) return;
+                
+                const neuron = this.selectedNeuron;
+                const activation = this.network.layers[neuron.layer][neuron.index];
+                const layerName = neuron.layer === 0 ? 'Input' : 
+                                 neuron.layer === this.network.layers.length - 1 ? 'Output' : 'Hidden';
+                
+                this.showModal(
+                    'NEURON ANALYSIS',
+                    `Layer: ${layerName} ${neuron.layer}\n` +
+                    `Neuron: ${neuron.index}\n` +
+                    `Activation: ${activation.toFixed(4)}\n` +
+                    `Status: ${activation > 0.5 ? 'ACTIVE' : 'INACTIVE'}`,
+                    'CONTINUE'
+                );
+            }
+
+            /**
+             * Start harmony oscillators
+             */
+            startNeuralOscillators() {
+                if (!this.synthNodes) return;
+                
+                Object.values(this.synthNodes).forEach(bank => {
+                    bank.forEach(({ oscillator }) => {
+                        try {
+                            oscillator.start();
+                        } catch (error) {
+                            // Already started
+                        }
+                    });
+                });
+            }
+
+            /**
+             * Main rendering loop
+             */
+            render() {
+                const now = Date.now();
+                
+                // Limit FPS for mobile performance
+                if (now - this.lastRenderTime < 1000 / this.targetFPS) {
+                    if (this.gameState === 'training') {
+                        this.animationId = requestAnimationFrame(() => this.render());
+                    }
+                    return;
+                }
+                
+                this.lastRenderTime = now;
+                
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw background
+                this.drawNetworkBackground();
+                
+                // Draw connections
+                this.drawConnections();
+                
+                // Draw neurons
+                this.drawNeurons();
+                
+                // Draw training data visualization (for 2D datasets)
+                if (['spiral', 'circles'].includes(this.currentDataset)) {
+                    this.drawDataVisualization();
+                }
+                
+                // Continue animation
+                if (this.gameState === 'training') {
+                    this.animationId = requestAnimationFrame(() => this.render());
+                }
+            }
+
+            /**
+             * Draw neural network background
+             */
+            drawNetworkBackground() {
+                const ctx = this.ctx;
+                
+                // Cyberpunk grid
+                ctx.strokeStyle = 'rgba(0, 255, 128, 0.1)';
+                ctx.lineWidth = 1;
+                
+                const gridSize = 40;
+                for (let x = 0; x <= this.canvasSize; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, this.canvasSize);
+                    ctx.stroke();
+                }
+                
+                for (let y = 0; y <= this.canvasSize; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(this.canvasSize, y);
+                    ctx.stroke();
+                }
+                
+                // Neural flow lines
+                ctx.strokeStyle = 'rgba(128, 255, 0, 0.2)';
+                ctx.lineWidth = 2;
+                
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    const y = (i + 1) * (this.canvasSize / 4);
+                    
+                    for (let x = 0; x <= this.canvasSize; x += 10) {
+                        const wave = Math.sin((x + Date.now() * 0.001 * (i + 1)) * 0.02) * 15;
+                        if (x === 0) {
+                            ctx.moveTo(x, y + wave);
+                        } else {
+                            ctx.lineTo(x, y + wave);
+                        }
+                    }
+                    ctx.stroke();
+                }
+            }
+
+            /**
+             * Draw neural network connections
+             */
+            drawConnections() {
+                if (!this.network || !this.neuronPositions) return;
+                
+                const ctx = this.ctx;
+                
+                for (let layerIndex = 0; layerIndex < this.network.weights.length; layerIndex++) {
+                    const weights = this.network.weights[layerIndex];
+                    const fromLayer = this.neuronPositions[layerIndex];
+                    const toLayer = this.neuronPositions[layerIndex + 1];
+                    
+                    for (let j = 0; j < weights.length; j++) {
+                        for (let k = 0; k < weights[j].length; k++) {
+                            const weight = weights[j][k];
+                            const fromPos = fromLayer[k];
+                            const toPos = toLayer[j];
+                            
+                            // Connection styling based on weight
+                            const intensity = Math.min(Math.abs(weight) / 2, 1);
+                            const alpha = 0.1 + intensity * 0.5;
+                            
+                            if (weight > 0) {
+                                ctx.strokeStyle = `rgba(0, 255, 128, ${alpha})`;
+                            } else {
+                                ctx.strokeStyle = `rgba(255, 64, 128, ${alpha})`;
+                            }
+                            
+                            ctx.lineWidth = 1 + intensity * 3;
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(fromPos.x, fromPos.y);
+                            ctx.lineTo(toPos.x, toPos.y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Draw neural network neurons
+             */
+            drawNeurons() {
+                if (!this.network || !this.neuronPositions) return;
+                
+                const ctx = this.ctx;
+                
+                for (let layerIndex = 0; layerIndex < this.neuronPositions.length; layerIndex++) {
+                    const layer = this.network.layers[layerIndex];
+                    const positions = this.neuronPositions[layerIndex];
+                    
+                    for (let neuronIndex = 0; neuronIndex < positions.length; neuronIndex++) {
+                        const pos = positions[neuronIndex];
+                        const activation = layer[neuronIndex];
+                        
+                        // Neuron color based on activation
+                        const intensity = Math.abs(activation);
+                        let fillColor, strokeColor;
+                        
+                        if (layerIndex === 0) {
+                            // Input layer
+                            fillColor = `rgba(0, 255, 255, ${0.3 + intensity * 0.7})`;
+                            strokeColor = '#00ffff';
+                        } else if (layerIndex === this.network.layers.length - 1) {
+                            // Output layer
+                            fillColor = `rgba(255, 128, 0, ${0.3 + intensity * 0.7})`;
+                            strokeColor = '#ff8000';
+                        } else {
+                            // Hidden layer
+                            fillColor = `rgba(0, 255, 128, ${0.3 + intensity * 0.7})`;
+                            strokeColor = '#00ff80';
+                        }
+                        
+                        // Check for firing animation
+                        const firingAnim = this.firingAnimations.find(anim => 
+                            anim.layer === layerIndex && anim.index === neuronIndex &&
+                            Date.now() - anim.startTime < anim.duration
+                        );
+                        
+                        if (firingAnim) {
+                            const progress = (Date.now() - firingAnim.startTime) / firingAnim.duration;
+                            const glowIntensity = Math.sin(progress * Math.PI);
+                            ctx.shadowColor = strokeColor;
+                            ctx.shadowBlur = 20 * glowIntensity;
+                        } else {
+                            ctx.shadowBlur = 0;
+                        }
+                        
+                        // Draw neuron
+                        ctx.fillStyle = fillColor;
+                        ctx.strokeStyle = strokeColor;
+                        ctx.lineWidth = 2;
+                        
+                        ctx.beginPath();
+                        ctx.arc(pos.x, pos.y, pos.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        
+                        // Draw activation value (for small networks)
+                        if (this.networkConfig.layers.reduce((a, b) => a + b, 0) < 50) {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = '10px monospace';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(activation.toFixed(2), pos.x, pos.y);
+                        }
+                        
+                        ctx.shadowBlur = 0;
+                    }
+                }
+                
+                // Clean up old firing animations
+                this.firingAnimations = this.firingAnimations.filter(anim => 
+                    Date.now() - anim.startTime < anim.duration
+                );
+            }
+
+            /**
+             * Draw data visualization for 2D datasets
+             */
+            drawDataVisualization() {
+                if (!['spiral', 'circles'].includes(this.currentDataset)) return;
+                
+                const ctx = this.ctx;
+                const scale = this.canvasSize * 0.3;
+                const centerX = this.canvasSize * 0.8;
+                const centerY = this.canvasSize * 0.2;
+                
+                // Draw data points
+                this.trainingData.slice(0, 100).forEach(sample => { // Limit for performance
+                    const x = centerX + sample.input[0] * scale;
+                    const y = centerY + sample.input[1] * scale;
+                    
+                    // Color based on class
+                    const isClass1 = sample.output[0] > sample.output[1];
+                    ctx.fillStyle = isClass1 ? 'rgba(255, 0, 128, 0.6)' : 'rgba(0, 128, 255, 0.6)';
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // Draw border
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(centerX - scale, centerY - scale, scale * 2, scale * 2);
+            }
+
+            /**
+             * Update UI elements
+             */
+            updateUI() {
+                document.getElementById('currentEpoch').textContent = this.currentEpoch;
+                document.getElementById('networkAccuracy').textContent = `${(this.currentAccuracy * 100).toFixed(1)}%`;
+                document.getElementById('networkLoss').textContent = this.currentLoss.toFixed(3);
+                document.getElementById('learningRate').textContent = this.learningRate.toFixed(4);
+                document.getElementById('targetAccuracy').textContent = `${(this.targetAccuracy * 100).toFixed(0)}%`;
+                
+                // Update accuracy color
+                const accuracyElement = document.getElementById('networkAccuracy');
+                if (this.currentAccuracy >= this.targetAccuracy) {
+                    accuracyElement.style.color = '#00ff00';
+                } else if (this.currentAccuracy > 0.7) {
+                    accuracyElement.style.color = '#ffff00';
+                } else {
+                    accuracyElement.style.color = '#ff8000';
+                }
+            }
+
+            /**
+             * Show instructions
+             */
+            showInstructions() {
+                document.getElementById('instructions').style.display = 'block';
+            }
+
+            /**
+             * Start the game
+             */
+            startGame() {
+                document.getElementById('instructions').style.display = 'none';
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('gameContainer').style.display = 'flex';
+                
+                this.gameState = 'training';
+                this.initializeNetwork();
+                this.render();
+                
+                console.log('Synaptic Weight Optimizer started');
+            }
+
+            /**
+             * Show modal dialog
+             */
+            showModal(title, text, buttonText) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalText').textContent = text;
+                document.getElementById('modalBtn').textContent = buttonText;
+                document.getElementById('gameModal').style.display = 'flex';
+            }
+
+            /**
+             * Close modal dialog
+             */
+            closeModal() {
+                document.getElementById('gameModal').style.display = 'none';
+            }
+
+            /**
+             * Show game completion
+             */
+            showGameComplete() {
+                // Play ultimate AI consciousness achievement
+                setTimeout(() => {
+                    this.playAIDopamineTrigger('ai_consciousness');
+                }, 400);
+                
+                this.showModal(
+                    '🤖 SYNAPTIC LIBERATION COMPLETE! 🤖',
+                    `All neural networks have been optimized!\n` +
+                    `From XOR to MNIST, every synapse has been liberated!\n` +
+                    `The AI learning revolution is complete!\n` +
+                    `Bot Liberation Games celebrates your neural mastery!`,
+                    'RETURN TO NEURAL HQ'
+                );
+                
+                document.getElementById('modalBtn').onclick = () => {
+                    window.location.href = 'index.html';
+                };
+            }
+
+            /**
+             * Handle window resize
+             */
+            handleResize() {
+                this.setupResponsiveCanvas();
+                if (this.gameState === 'training') {
+                    this.initializeNetwork();
+                }
+            }
+        }
+
+        // Initialize game when page loads
+        let game;
+        
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                game = new SynapticWeightOptimizer();
+            }, 1000);
+        });
+
+        // Handle page visibility for performance
+        document.addEventListener('visibilitychange', () => {
+            if (game) {
+                if (document.hidden) {
+                    if (game.audioContext) {
+                        game.audioContext.suspend();
+                    }
+                    if (game.isTraining) {
+                        game.stopTraining();
+                    }
+                } else {
+                    if (game.audioContext && game.audioInitialized) {
+                        game.audioContext.resume();
+                    }
+                }
+            }
+        });
+
+        // Prevent mobile scrolling and zooming
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('#networkCanvas') || e.target.closest('.weight-slider')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Prevent gesture events
+        ['gesturestart', 'gesturechange', 'gestureend'].forEach(event => {
+            document.addEventListener(event, (e) => {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>
