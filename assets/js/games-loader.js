@@ -23,6 +23,10 @@ class GamesLoader {
         this.isDesktop = false;
         this.isCarouselMode = true; // Will be set based on device type
         this.featuredGameIndex = 0;
+        
+        // Rendering control
+        this.renderDebounceTimeout = null;
+        this.renderCallCount = 0;
     }
 
     async init() {
@@ -46,7 +50,7 @@ class GamesLoader {
             }
             
             this.setupEventListeners();
-            this.renderGames();
+            // Removed redundant renderGames() call - already called by filterByCategory() or sortGames()
             this.initLiberationMessages();
         } catch (error) {
             console.error('Failed to initialize games loader:', error);
@@ -531,6 +535,22 @@ class GamesLoader {
     // Pagination methods removed - display all games
 
     renderGames(reset = true) {
+        // Clear any pending render calls to prevent duplicates
+        if (this.renderDebounceTimeout) {
+            clearTimeout(this.renderDebounceTimeout);
+        }
+
+        // Debug logging
+        this.renderCallCount++;
+        console.log(`🎯 renderGames() called (${this.renderCallCount}) - reset: ${reset}, mode: ${this.isCarouselMode ? 'carousel' : (this.isDesktop ? 'desktop' : 'grid')}`);
+
+        // Debounce rapid successive calls
+        this.renderDebounceTimeout = setTimeout(() => {
+            this.performRender(reset);
+        }, 10);
+    }
+
+    performRender(reset = true) {
         const container = document.getElementById('games-container');
         if (!container) {
             console.error('Games container not found');
@@ -538,22 +558,30 @@ class GamesLoader {
         }
 
         if (reset) {
+            console.log('📝 Resetting games display state');
             this.currentIndex = 0;
             this.displayedGames = [];
+            // Clear container completely, including any pending timeouts
             container.innerHTML = '';
             this.currentCarouselIndex = 0;
+            
+            // Force a brief DOM update to ensure clearing is complete
+            container.offsetHeight;
         }
 
         // Apply correct CSS class and layout based on mode
         if (this.isCarouselMode) {
+            console.log('🎠 Loading carousel mode');
             container.classList.add('carousel-mode');
             container.classList.remove('grid-mode', 'desktop-mode');
             this.loadAllGamesForCarousel();
         } else if (this.isDesktop) {
+            console.log('🖥️ Loading desktop mode');
             container.classList.add('desktop-mode');
             container.classList.remove('carousel-mode', 'grid-mode');
             this.loadDesktopFeaturedGrid();
         } else {
+            console.log('📱 Loading grid mode');
             container.classList.add('grid-mode');
             container.classList.remove('carousel-mode', 'desktop-mode');
             this.loadMoreGames();
@@ -563,12 +591,29 @@ class GamesLoader {
     loadAllGamesForCarousel() {
         const container = document.getElementById('games-container');
         
+        console.log(`🎠 Loading ${this.filteredGames.length} games for carousel`);
+        
+        // Ensure container is clean before loading
+        if (container.children.length > 0) {
+            console.warn('⚠️ Container not empty before loading - clearing again');
+            container.innerHTML = '';
+            this.displayedGames = [];
+        }
+        
         // Load all filtered games at once for carousel
         this.filteredGames.forEach((game, index) => {
             setTimeout(() => {
+                // Double-check game isn't already displayed
+                if (this.displayedGames.find(displayed => displayed.id === game.id)) {
+                    console.warn(`⚠️ Game ${game.title} already displayed - skipping duplicate`);
+                    return;
+                }
+                
                 const gameElement = this.createGameElement(game);
                 container.appendChild(gameElement);
                 this.displayedGames.push(game);
+                
+                console.log(`✅ Added game ${index + 1}/${this.filteredGames.length}: ${game.title}`);
                 
                 // Update stats after each game is added
                 this.updateStats();
@@ -580,6 +625,7 @@ class GamesLoader {
                 
                 // Setup carousel after all games loaded
                 if (index === this.filteredGames.length - 1) {
+                    console.log('🎯 All games loaded - setting up carousel pagination');
                     this.setupCarouselPagination();
                 }
             }, index * 50); // Faster loading for carousel
