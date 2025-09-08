@@ -310,36 +310,12 @@ class GamesLoader {
     setupTouchNavigation(container) {
         let startX = 0;
         let startY = 0;
-        let endX = 0;
-        let endY = 0;
         let isDragging = false;
-        let startTime = 0;
-        
-        // Enhanced touch handling with game card tap prioritization
-        let tapStartTarget = null;
-        let tapStartTime = 0;
         
         container.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
-            tapStartTarget = e.target;
-            tapStartTime = Date.now();
-            
-            // Check if touch started on a game card link
-            const gameCard = e.target.closest('.game-card');
-            const interactiveElement = e.target.closest('.mobile-actions-separator, .rating-interact, .bug-report-mobile');
-            
-            if (gameCard && !interactiveElement) {
-                // This looks like a game card tap - be conservative about drag detection
-                isDragging = false;
-                console.log('🎮 Touch started on game card:', gameCard.dataset.gameId);
-            } else {
-                // Normal carousel area - enable drag detection
-                isDragging = true;
-                console.log('📱 Touch started on carousel area - enabling swipe detection');
-            }
-            
-            startTime = Date.now();
+            isDragging = false;
         }, { passive: true });
         
         container.addEventListener('touchmove', (e) => {
@@ -347,114 +323,39 @@ class GamesLoader {
             const currentY = e.touches[0].clientY;
             const diffX = Math.abs(currentX - startX);
             const diffY = Math.abs(currentY - startY);
-            const timeElapsed = Date.now() - tapStartTime;
             
-            // Improved gesture recognition with tap protection
-            const isHorizontalSwipe = diffX > diffY && diffX > 25;
-            const isQuickMovement = timeElapsed < 150 && diffX > 15;
-            const gameCard = tapStartTarget?.closest('.game-card');
-            
-            if (gameCard && (diffX < 20 && diffY < 20)) {
-                // Small movement on game card - likely still a tap intention
-                console.log('🎯 Small movement detected - preserving tap intention');
-                return;
-            }
-            
-            if (isHorizontalSwipe || isQuickMovement) {
-                // Clear swipe gesture detected - enable carousel navigation
+            // Simple horizontal swipe detection
+            if (diffX > 30 && diffX > diffY) {
                 isDragging = true;
-                console.log('👆 Swipe gesture detected - enabling carousel navigation');
-                
-                // Cancel any pending game card tap
-                if (gameCard) {
-                    gameCard.classList.remove('touch-active');
-                }
-                
-                // Prevent default scrolling
-                if (diffX > 30) {
-                    e.preventDefault();
-                }
             }
-        }, { passive: false });
+        }, { passive: true });
         
         container.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            
             const endX = e.changedTouches[0].clientX;
-            const endY = e.changedTouches[0].clientY;
             const deltaX = startX - endX;
-            const deltaY = Math.abs(startY - endY);
-            const deltaTime = Date.now() - tapStartTime;
-            const totalDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const minSwipeDistance = 50;
             
-            const gameCard = tapStartTarget?.closest('.game-card');
-            const interactiveElement = tapStartTarget?.closest('.mobile-actions-separator, .rating-interact, .bug-report-mobile');
-            
-            // Tap detection for game cards
-            if (gameCard && !interactiveElement && !isDragging && totalDistance < 25 && deltaTime < 500) {
-                console.log('🎮 Clean tap detected on game card - allowing navigation');
-                
-                // Add enhanced visual feedback for successful tap
-                gameCard.classList.add('tap-success');
-                
-                // Add haptic feedback for successful tap
+            if (Math.abs(deltaX) > minSwipeDistance) {
+                // Add haptic feedback
                 if ('vibrate' in navigator) {
-                    navigator.vibrate(25); // Short success vibration
+                    navigator.vibrate(10);
                 }
                 
-                // Show loading state briefly
-                const originalText = gameCard.querySelector('.game-title').textContent;
-                const titleElement = gameCard.querySelector('.game-title');
-                titleElement.textContent = 'Loading...';
-                
-                setTimeout(() => {
-                    gameCard.classList.remove('tap-success');
-                    titleElement.textContent = originalText;
-                }, 200);
-                
-                // Let the browser handle the <a> tag navigation naturally
-                isDragging = false;
-                tapStartTarget = null;
-                return;
-            }
-            
-            // Carousel navigation for clear swipe gestures
-            if (isDragging) {
-                const minSwipeDistance = window.innerWidth < 480 ? 30 : 50;
-                const maxVerticalDrift = 100;
-                
-                if (Math.abs(deltaX) > minSwipeDistance && 
-                    deltaY < maxVerticalDrift &&
-                    deltaTime < 500) {
-                    
-                    console.log('👆 Processing carousel swipe:', deltaX > 0 ? 'next' : 'previous');
-                    
-                    // Add haptic feedback on supported devices
-                    if ('vibrate' in navigator) {
-                        navigator.vibrate(10);
-                    }
-                    
-                    if (deltaX > 0) {
-                        this.nextPage(); // Swipe left to go next
-                    } else {
-                        this.prevPage(); // Swipe right to go previous
-                    }
+                if (deltaX > 0) {
+                    this.nextPage(); // Swipe left to go next
+                } else {
+                    this.prevPage(); // Swipe right to go previous
                 }
             }
             
             isDragging = false;
-            tapStartTarget = null;
-        });
+        }, { passive: true });
         
-        // Handle touch cancel events
         container.addEventListener('touchcancel', () => {
-            console.log('🚫 Touch cancelled - resetting state');
             isDragging = false;
-            tapStartTarget = null;
-            
-            // Clear any active touch states
-            container.querySelectorAll('.touch-active').forEach(el => {
-                el.classList.remove('touch-active');
-            });
-        });
+        }, { passive: true });
     }
 
     nextPage() {
@@ -847,65 +748,25 @@ class GamesLoader {
     }
     
     createMobileGameElement(game) {
-        const element = document.createElement('a');
-        element.href = game.file;
+        const element = document.createElement('div');
         element.className = 'game-card game-card-entry mobile-optimized';
         element.dataset.gameId = game.id;
         element.innerHTML = this.createMobileGameCard(game);
         
-        let longPressTimer = null;
-        let touchStartTime = 0;
-        
-        // Enhanced mobile touch handling with action prevention
+        // Simple touch feedback and modal opening
         element.addEventListener('touchstart', (e) => {
-            touchStartTime = Date.now();
             element.classList.add('touch-active');
-            
-            // Set timer for showing mobile actions after long press
-            longPressTimer = setTimeout(() => {
-                if (!element.classList.contains('show-actions')) {
-                    element.classList.add('show-actions');
-                    console.log('🔎 Long press detected - showing mobile actions for:', game.title);
-                    
-                    // Add haptic feedback for long press
-                    if ('vibrate' in navigator) {
-                        navigator.vibrate(50);
-                    }
-                }
-            }, 800); // 800ms long press threshold
-        });
+        }, { passive: true });
         
         element.addEventListener('touchend', (e) => {
-            const touchDuration = Date.now() - touchStartTime;
             element.classList.remove('touch-active');
-            
-            // Clear long press timer
-            if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-            }
-            
-            // If actions are showing and it was a quick tap, hide them and prevent navigation
-            if (element.classList.contains('show-actions') && touchDuration < 300) {
-                element.classList.remove('show-actions');
-                e.preventDefault();
-                console.log('🙅 Actions visible - hiding actions instead of navigating');
-                return false;
-            }
-        });
+            // Open the game preview modal
+            this.openGamePreviewModal(game);
+        }, { passive: true });
         
         element.addEventListener('touchcancel', (e) => {
             element.classList.remove('touch-active');
-            if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-            }
-        });
-        
-        // Hide actions when touching outside
-        element.addEventListener('blur', () => {
-            element.classList.remove('show-actions');
-        });
+        }, { passive: true });
         
         return element;
     }
@@ -957,14 +818,6 @@ class GamesLoader {
                         <span class="rating-text">${this.getDisplayRating(game)}</span>
                     </div>
                     <div class="difficulty">${difficultyIcon}</div>
-                </div>
-            </div>
-            <div class="mobile-actions-separator">
-                <div class="rating-interact" onclick="event.stopPropagation(); BotIncMobile.showRatingModal('${game.id}', '${game.title}');">
-                    ⭐ Rate
-                </div>
-                <div class="bug-report-mobile" onclick="event.stopPropagation(); BotIncMobile.showBugReportModal('${game.id}', '${game.title}', '${game.file}');">
-                    🐛 Bug
                 </div>
             </div>
         `;
@@ -1418,6 +1271,223 @@ class GamesLoader {
         
         // Set up global touch event cleanup
         this.setupGlobalTouchCleanup();
+        
+        // Initialize modal functionality
+        this.initModalHandlers();
+    }
+    
+    // Initialize mobile game preview modal
+    initModalHandlers() {
+        const modal = document.getElementById('game-preview-modal');
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const modalClose = document.getElementById('modal-close');
+        const playBtn = document.getElementById('modal-play-btn');
+        const rateBtn = document.getElementById('modal-rate-btn');
+        const bugBtn = document.getElementById('modal-bug-btn');
+        
+        if (!modal) return;
+        
+        // Close modal handlers
+        const closeModal = () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+        
+        if (modalBackdrop) {
+            modalBackdrop.addEventListener('click', closeModal);
+        }
+        
+        if (modalClose) {
+            modalClose.addEventListener('click', closeModal);
+        }
+        
+        // Escape key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+        
+        // Modal action handlers
+        if (playBtn) {
+            playBtn.addEventListener('click', () => {
+                const gameFile = playBtn.dataset.gameFile;
+                if (gameFile) {
+                    // Add haptic feedback
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate([50, 100, 50]);
+                    }
+                    
+                    // Show loading state
+                    playBtn.textContent = '🚀 Launching...';
+                    
+                    // Navigate to game after short delay for feedback
+                    setTimeout(() => {
+                        window.location.href = gameFile;
+                    }, 500);
+                }
+            });
+        }
+        
+        if (rateBtn) {
+            rateBtn.addEventListener('click', () => {
+                const gameId = rateBtn.dataset.gameId;
+                const gameTitle = rateBtn.dataset.gameTitle;
+                
+                if (gameId && gameTitle) {
+                    closeModal();
+                    this.showRatingModal(gameId, gameTitle);
+                }
+            });
+        }
+        
+        if (bugBtn) {
+            bugBtn.addEventListener('click', () => {
+                const gameId = bugBtn.dataset.gameId;
+                const gameTitle = bugBtn.dataset.gameTitle;
+                const gameFile = bugBtn.dataset.gameFile;
+                
+                if (gameId && gameTitle && gameFile) {
+                    closeModal();
+                    this.showBugReportModal(gameId, gameTitle, gameFile);
+                }
+            });
+        }
+    }
+    
+    // Open the game preview modal with game data
+    openGamePreviewModal(game) {
+        const modal = document.getElementById('game-preview-modal');
+        if (!modal) return;
+        
+        // Populate modal with game data
+        const modalImage = document.getElementById('modal-game-image');
+        const modalBadge = document.getElementById('modal-game-badge');
+        const modalTitle = document.getElementById('modal-game-title');
+        const modalGenre = document.getElementById('modal-game-genre');
+        const modalDescription = document.getElementById('modal-game-description');
+        const modalStars = document.getElementById('modal-game-stars');
+        const modalRating = document.getElementById('modal-game-rating');
+        const modalDifficulty = document.getElementById('modal-game-difficulty');
+        const playBtn = document.getElementById('modal-play-btn');
+        const rateBtn = document.getElementById('modal-rate-btn');
+        const bugBtn = document.getElementById('modal-bug-btn');
+        
+        if (modalImage) {
+            modalImage.src = game.thumbnail_large || game.thumbnail;
+            modalImage.alt = game.title;
+        }
+        
+        if (modalBadge && this.shouldShowBadge(game)) {
+            modalBadge.textContent = '✨ NEW';
+            modalBadge.style.display = 'block';
+        } else if (modalBadge) {
+            modalBadge.style.display = 'none';
+        }
+        
+        if (modalTitle) modalTitle.textContent = game.title;
+        if (modalGenre) modalGenre.textContent = game.genre;
+        if (modalDescription) modalDescription.textContent = game.description;
+        if (modalStars) modalStars.innerHTML = this.generateDisplayStars(game);
+        if (modalRating) modalRating.textContent = this.getDisplayRating(game);
+        if (modalDifficulty) modalDifficulty.textContent = this.getDifficultyIcon(game.difficulty);
+        
+        // Set button data attributes
+        if (playBtn) {
+            playBtn.dataset.gameFile = game.file;
+            playBtn.textContent = '🎮 PLAY GAME';
+        }
+        
+        if (rateBtn) {
+            rateBtn.dataset.gameId = game.id;
+            rateBtn.dataset.gameTitle = game.title;
+        }
+        
+        if (bugBtn) {
+            bugBtn.dataset.gameId = game.id;
+            bugBtn.dataset.gameTitle = game.title;
+            bugBtn.dataset.gameFile = game.file;
+        }
+        
+        // Show modal
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Trigger animation after DOM update
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 10);
+        
+        // Add haptic feedback for modal open
+        if ('vibrate' in navigator) {
+            navigator.vibrate(25);
+        }
+        
+        console.log('🎮 Opening game preview modal for:', game.title);
+    }
+    
+    // Rating modal functionality
+    showRatingModal(gameId, gameTitle) {
+        const rating = prompt(`Rate "${gameTitle}" (1-5 stars):`);
+        const numRating = parseInt(rating);
+        if (numRating >= 1 && numRating <= 5) {
+            if (window.BotIncRatingSystem) {
+                const success = window.BotIncRatingSystem.rateGame(gameId, numRating);
+                if (success) {
+                    // Success haptic feedback
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate([50, 100, 50]);
+                    }
+                    alert(`Thanks for rating "${gameTitle}" ${numRating} star${numRating !== 1 ? 's' : ''}!`);
+                    // Update the display for this game
+                    this.updateGameRatingDisplay(gameId);
+                }
+            }
+        } else if (rating !== null) {
+            alert('Please enter a rating between 1 and 5.');
+        }
+    }
+    
+    // Bug report modal functionality
+    showBugReportModal(gameId, gameTitle, gameFile) {
+        const bugDescription = prompt(`Report a bug for "${gameTitle}":\nDescribe the issue:`);
+        if (bugDescription && bugDescription.trim()) {
+            // Store in localStorage for later processing
+            const bugReport = {
+                gameId,
+                gameTitle,
+                gameFile,
+                description: bugDescription.trim(),
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            };
+            
+            // Get existing reports
+            let reports = [];
+            try {
+                const stored = localStorage.getItem('botinc-bug-reports');
+                if (stored) reports = JSON.parse(stored);
+            } catch (e) {
+                console.warn('Failed to load existing bug reports');
+            }
+            
+            // Add new report
+            reports.push(bugReport);
+            
+            // Store updated reports
+            try {
+                localStorage.setItem('botinc-bug-reports', JSON.stringify(reports));
+                // Success haptic feedback
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                alert(`Bug report submitted for "${gameTitle}".\nThank you for helping improve our games!`);
+                console.log('🐛 Bug Report Submitted:', bugReport);
+            } catch (e) {
+                alert('Failed to save bug report. Please try again.');
+            }
+        }
     }
     
     // Initialize mobile utilities for separated interactions

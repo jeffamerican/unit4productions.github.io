@@ -523,5 +523,48 @@
             });
         });
     </script>
+
+    <!-- Mobile Game Preview Modal -->
+    <div id="game-preview-modal" class="game-preview-modal" style="display: none;">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" id="modal-close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="game-preview-image">
+                    <img id="modal-game-image" src="" alt="" class="preview-image">
+                    <div class="game-preview-badge" id="modal-game-badge" style="display: none;"></div>
+                </div>
+                
+                <div class="game-preview-info">
+                    <h3 class="preview-title" id="modal-game-title"></h3>
+                    <p class="preview-genre" id="modal-game-genre"></p>
+                    <p class="preview-description" id="modal-game-description"></p>
+                    
+                    <div class="preview-meta">
+                        <div class="preview-rating">
+                            <span class="preview-stars" id="modal-game-stars"></span>
+                            <span class="preview-rating-text" id="modal-game-rating"></span>
+                        </div>
+                        <div class="preview-difficulty" id="modal-game-difficulty"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="action-btn primary" id="modal-play-btn">
+                    🎮 PLAY GAME
+                </button>
+                <button class="action-btn secondary" id="modal-rate-btn">
+                    ⭐ Rate Game
+                </button>
+                <button class="action-btn secondary" id="modal-bug-btn">
+                    🐛 Report Bug
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -5436,3 +5436,314 @@ a:hover {
     }
 }
 
+/* ============================================
+   MOBILE GAME PREVIEW MODAL - App Store Style
+   ============================================ */
+
+.game-preview-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.game-preview-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.game-preview-modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 20px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.modal-close {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.modal-close:active {
+    transform: scale(0.95);
+}
+
+.modal-body {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 24px;
+}
+
+.game-preview-image {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    aspect-ratio: 16/9;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.game-preview-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(45deg, var(--neon-cyan), var(--electric-purple));
+    color: var(--dark-bg);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-shadow: none;
+    letter-spacing: 0.5px;
+}
+
+.game-preview-info {
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.preview-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px currentColor;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.preview-genre {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-family: 'Share Tech Mono', monospace;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.preview-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    opacity: 0.9;
+    margin: 0;
+    max-width: 350px;
+}
+
+.preview-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 8px 0;
+}
+
+.preview-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.preview-stars {
+    font-size: 16px;
+    color: #ffd700;
+    text-shadow: 0 0 5px currentColor;
+}
+
+.preview-rating-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.preview-difficulty {
+    font-size: 16px;
+}
+
+.modal-actions {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.action-btn {
+    height: 56px;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn.primary {
+    background: linear-gradient(45deg, var(--neon-cyan), var(--electric-purple));
+    color: var(--dark-bg);
+    box-shadow: 0 8px 24px rgba(0, 255, 255, 0.3);
+    text-shadow: none;
+}
+
+.action-btn.primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.action-btn.primary:hover::before {
+    left: 100%;
+}
+
+.action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 255, 255, 0.4);
+}
+
+.action-btn.primary:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba(0, 255, 255, 0.3);
+}
+
+.action-btn.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.action-btn.secondary:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: var(--neon-cyan);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0, 255, 255, 0.2);
+}
+
+.action-btn.secondary:active {
+    transform: translateY(0);
+}
+
+/* Enhanced animations for modal */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    .modal-body {
+        padding: 20px 16px;
+        gap: 20px;
+    }
+    
+    .game-preview-image {
+        max-width: 280px;
+    }
+    
+    .preview-title {
+        font-size: 24px;
+    }
+    
+    .modal-actions {
+        padding: 16px;
+        gap: 10px;
+    }
+    
+    .action-btn {
+        height: 52px;
+        font-size: 15px;
+    }
+}
+
+/* Show modal only on mobile devices */
+@media (min-width: 769px) {
+    .game-preview-modal {
+        display: none !important;
+    }
+}
+
