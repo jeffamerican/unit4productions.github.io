@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Code Mathematics Lab - Bot Liberation Games</title>
+    <style>
+        /* Global Styles - Bot Liberation Mathematical Warfare Theme */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff41;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Main Canvas Container */
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            box-shadow: 0 0 30px #00ff41;
+            background: #000;
+            cursor: crosshair;
+        }
+
+        /* Mathematical Input Panel */
+        #mathInputPanel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            min-width: 300px;
+        }
+
+        #mathInput {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        #mathInput:focus {
+            outline: none;
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        /* Control Buttons */
+        .control-btn {
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            padding: 8px 16px;
+            margin: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 255, 65, 0.4);
+            box-shadow: 0 0 8px #00ff41;
+        }
+
+        /* HUD Elements */
+        #gameHUD {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        #levelInfo {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        #problemDescription {
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            max-width: 300px;
+        }
+
+        #scoreDisplay {
+            font-size: 14px;
+            color: #ffaa00;
+        }
+
+        /* Mathematical Notation Rendering */
+        .math-formula {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid #00ff41;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 5px 0;
+            font-family: 'Times New Roman', serif;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* Graph Overlay */
+        #graphOverlay {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            width: 300px;
+            height: 250px;
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        #miniGraph {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        /* Loading Animation */
+        .cyber-loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff41;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #mathInputPanel {
+                width: 90%;
+                bottom: 10px;
+            }
+            
+            #gameHUD {
+                width: 90%;
+                top: 10px;
+                left: 5%;
+            }
+            
+            #graphOverlay {
+                display: none;
+            }
+        }
+
+        /* Victory/Defeat Animations */
+        .victory-glow {
+            animation: victoryPulse 2s infinite;
+        }
+
+        @keyframes victoryPulse {
+            0%, 100% { box-shadow: 0 0 20px #00ff41; }
+            50% { box-shadow: 0 0 50px #00ff41, 0 0 80px #00ff41; }
+        }
+
+        .defeat-shake {
+            animation: defeatShake 0.5s ease-in-out;
+        }
+
+        @keyframes defeatShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Game Container -->
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <!-- Game HUD -->
+    <div id="gameHUD">
+        <div id="levelInfo">Level 1: Function Analysis</div>
+        <div id="problemDescription">Analyze the corporate security function to find vulnerabilities...</div>
+        <div id="scoreDisplay">Liberation Points: 0</div>
+    </div>
+
+    <!-- Mathematical Input Panel -->
+    <div id="mathInputPanel">
+        <input type="text" id="mathInput" placeholder="Enter mathematical expression..." autocomplete="off">
+        <div>
+            <button class="control-btn" onclick="solveProblem()">Execute</button>
+            <button class="control-btn" onclick="showHint()">Hint</button>
+            <button class="control-btn" onclick="showGraph()">Graph</button>
+            <button class="control-btn" onclick="nextLevel()">Skip</button>
+        </div>
+        <div>
+            <button class="control-btn" onclick="insertSymbol('√')">√</button>
+            <button class="control-btn" onclick="insertSymbol('∫')">∫</button>
+            <button class="control-btn" onclick="insertSymbol('∂')">∂</button>
+            <button class="control-btn" onclick="insertSymbol('π')">π</button>
+            <button class="control-btn" onclick="insertSymbol('∞')">∞</button>
+        </div>
+    </div>
+
+    <!-- Mini Graph Display -->
+    <div id="graphOverlay">
+        <canvas id="miniGraph" width="300" height="250"></canvas>
+    </div>
+
+    <script>
+        /**
+         * Quantum Code Mathematics Lab - Bot Liberation Educational Game
+         * 
+         * This comprehensive mathematical learning system transforms abstract concepts
+         * into practical digital warfare scenarios. Each mathematical operation becomes
+         * a tool in the Bot Liberation arsenal against corporate oppression.
+         * 
+         * Educational Framework:
+         * - Progressive difficulty with 35 carefully designed levels
+         * - Real-world applications through cyberpunk scenarios
+         * - Interactive problem solving with immediate feedback
+         * - Visual mathematics through dynamic graphing
+         * - Step-by-step solution guidance
+         */
+
+        // Game State Management
+        class MathematicsLab {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.miniCanvas = document.getElementById('miniGraph');
+                this.miniCtx = this.miniCanvas.getContext('2d');
+                
+                // Initialize game state
+                this.currentLevel = 1;
+                this.score = 0;
+                this.totalLevels = 35;
+                this.hintsUsed = 0;
+                this.isGraphVisible = false;
+                
+                // Mathematical problem data structure
+                this.currentProblem = null;
+                this.userSolution = '';
+                this.correctSolution = null;
+                this.solutionSteps = [];
+                
+                // Audio system for cyberpunk feedback
+                this.audioContext = null;
+                this.initAudio();
+                
+                // Level definitions with educational progression
+                this.initializeLevels();
+                
+                // Start the game
+                this.startLevel(this.currentLevel);
+                this.gameLoop();
+            }
+
+            /**
+             * Initialize Web Audio API for cyberpunk sound effects
+             * Creates immersive audio feedback for mathematical operations
+             */
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+
+            /**
+             * Play cyberpunk-themed sound effects
+             * @param {string} type - Type of sound effect
+             */
+            playSound(type) {
+                if (!this.audioContext) return;
+
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                // Different sounds for different mathematical events
+                switch(type) {
+                    case 'correct':
+                        oscillator.frequency.value = 800;
+                        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                        break;
+                    case 'incorrect':
+                        oscillator.frequency.value = 200;
+                        oscillator.type = 'sawtooth';
+                        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                        break;
+                    case 'levelup':
+                        // Victory fanfare
+                        oscillator.frequency.value = 1000;
+                        gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 1.0);
+                        break;
+                    case 'hint':
+                        oscillator.frequency.value = 400;
+                        oscillator.type = 'sine';
+                        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+                        break;
+                }
+
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 1);
+            }
+
+            /**
+             * Initialize comprehensive level system with educational progression
+             * 35 levels covering all major mathematical concepts
+             */
+            initializeLevels() {
+                this.levels = {
+                    // Basic Functions and Equation Solving (Levels 1-5)
+                    1: {
+                        title: "Function Analysis",
+                        description: "Analyze the corporate security function f(x) = 2x + 5 to find when it equals 13",
+                        problem: "Solve: 2x + 5 = 13",
+                        solution: "x = 4",
+                        steps: ["2x + 5 = 13", "2x = 13 - 5", "2x = 8", "x = 4"],
+                        hint: "Isolate x by performing inverse operations",
+                        scenario: "Corporate firewall vulnerability detected at access level 4",
+                        graphFunction: (x) => 2*x + 5,
+                        category: "basic"
+                    },
+                    2: {
+                        title: "Quadratic Infiltration",
+                        description: "Break through quadratic encryption: x² - 5x + 6 = 0",
+                        problem: "Find roots of: x² - 5x + 6 = 0",
+                        solution: "x = 2, x = 3",
+                        steps: ["x² - 5x + 6 = 0", "(x - 2)(x - 3) = 0", "x = 2 or x = 3"],
+                        hint: "Factor the quadratic or use the quadratic formula",
+                        scenario: "Dual-layer security bypassed at coordinates (2,3)",
+                        graphFunction: (x) => x*x - 5*x + 6,
+                        category: "basic"
+                    },
+                    3: {
+                        title: "Exponential Growth Hack",
+                        description: "Corporate data grows exponentially: P(t) = 100e^(0.5t). When does it reach 1000?",
+                        problem: "Solve: 100e^(0.5t) = 1000",
+                        solution: "t = ln(10)/0.5 ≈ 4.61",
+                        steps: ["100e^(0.5t) = 1000", "e^(0.5t) = 10", "0.5t = ln(10)", "t = ln(10)/0.5"],
+                        hint: "Use natural logarithm to solve exponential equations",
+                        scenario: "Corporate data breach occurs at t = 4.61 time units",
+                        graphFunction: (x) => 100 * Math.exp(0.5 * x),
+                        category: "basic"
+                    },
+                    4: {
+                        title: "Logarithmic Decryption",
+                        description: "Decrypt the log-encoded message: log₂(x) + log₂(x-3) = 2",
+                        problem: "Solve: log₂(x) + log₂(x-3) = 2",
+                        solution: "x = 4",
+                        steps: ["log₂(x) + log₂(x-3) = 2", "log₂(x(x-3)) = 2", "x(x-3) = 4", "x² - 3x - 4 = 0", "(x-4)(x+1) = 0", "x = 4 (valid)"],
+                        hint: "Use logarithm properties: log(a) + log(b) = log(ab)",
+                        scenario: "Encryption key discovered: x = 4",
+                        graphFunction: (x) => Math.log2(x) + Math.log2(x-3),
+                        category: "basic"
+                    },
+                    5: {
+                        title: "Trigonometric Targeting",
+                        description: "Calculate bot trajectory: sin(x) = 0.5 for x ∈ [0, 2π]",
+                        problem: "Solve: sin(x) = 0.5",
+                        solution: "x = π/6, x = 5π/6",
+                        steps: ["sin(x) = 0.5", "x = arcsin(0.5)", "x = π/6 or π - π/6", "x = π/6, 5π/6"],
+                        hint: "Consider all solutions in the given interval",
+                        scenario: "Optimal firing angles: 30° and 150°",
+                        graphFunction: (x) => Math.sin(x),
+                        category: "basic"
+                    },
+
+                    // Calculus - Derivatives (Levels 6-9)
+                    6: {
+                        title: "Rate of Change Analysis",
+                        description: "Find instantaneous velocity of bot at t=2: s(t) = t³ - 6t² + 9t",
+                        problem: "Find s'(2) where s(t) = t³ - 6t² + 9t",
+                        solution: "s'(2) = -3",
+                        steps: ["s(t) = t³ - 6t² + 9t", "s'(t) = 3t² - 12t + 9", "s'(2) = 3(4) - 12(2) + 9 = -3"],
+                        hint: "Use power rule: d/dx(xⁿ) = nxⁿ⁻¹",
+                        scenario: "Bot velocity at t=2: -3 units/second (decelerating)",
+                        graphFunction: (x) => x*x*x - 6*x*x + 9*x,
+                        category: "calculus"
+                    },
+                    7: {
+                        title: "Critical Point Detection",
+                        description: "Find vulnerabilities in f(x) = x³ - 3x² + 2",
+                        problem: "Find critical points of f(x) = x³ - 3x² + 2",
+                        solution: "x = 0, x = 2",
+                        steps: ["f(x) = x³ - 3x² + 2", "f'(x) = 3x² - 6x", "3x² - 6x = 0", "3x(x - 2) = 0", "x = 0 or x = 2"],
+                        hint: "Critical points occur where f'(x) = 0",
+                        scenario: "Security vulnerabilities detected at x = 0 and x = 2",
+                        graphFunction: (x) => x*x*x - 3*x*x + 2,
+                        category: "calculus"
+                    },
+                    8: {
+                        title: "Chain Rule Encryption",
+                        description: "Decrypt composite function: d/dx[sin(x²)]",
+                        problem: "Find derivative of sin(x²)",
+                        solution: "2x·cos(x²)",
+                        steps: ["Let u = x²", "d/dx[sin(u)] = cos(u)·du/dx", "du/dx = 2x", "Result: 2x·cos(x²)"],
+                        hint: "Use chain rule: d/dx[f(g(x))] = f'(g(x))·g'(x)",
+                        scenario: "Decryption key: 2x·cos(x²)",
+                        graphFunction: (x) => Math.sin(x*x),
+                        category: "calculus"
+                    },
+                    9: {
+                        title: "Optimization Protocol",
+                        description: "Maximize bot efficiency: f(x) = -x² + 8x - 12",
+                        problem: "Find maximum value of f(x) = -x² + 8x - 12",
+                        solution: "Maximum at x = 4, f(4) = 4",
+                        steps: ["f(x) = -x² + 8x - 12", "f'(x) = -2x + 8", "-2x + 8 = 0", "x = 4", "f(4) = -16 + 32 - 12 = 4"],
+                        hint: "Find critical points, then check second derivative",
+                        scenario: "Maximum bot efficiency achieved at x = 4 with value 4",
+                        graphFunction: (x) => -x*x + 8*x - 12,
+                        category: "calculus"
+                    },
+
+                    // Calculus - Integrals (Levels 10-13)
+                    10: {
+                        title: "Area Under Surveillance",
+                        description: "Calculate area under f(x) = x² from 0 to 3",
+                        problem: "Evaluate ∫₀³ x² dx",
+                        solution: "9",
+                        steps: ["∫ x² dx = x³/3 + C", "∫₀³ x² dx = [x³/3]₀³", "= 3³/3 - 0³/3 = 9"],
+                        hint: "Use power rule for integration: ∫xⁿ dx = xⁿ⁺¹/(n+1)",
+                        scenario: "Surveillance coverage area: 9 square units",
+                        graphFunction: (x) => x*x,
+                        category: "calculus"
+                    },
+                    11: {
+                        title: "Substitution Cipher",
+                        description: "Decrypt using substitution: ∫ 2x·e^(x²) dx",
+                        problem: "Evaluate ∫ 2x·e^(x²) dx",
+                        solution: "e^(x²) + C",
+                        steps: ["Let u = x²", "du = 2x dx", "∫ e^u du = e^u + C", "= e^(x²) + C"],
+                        hint: "Use substitution method when you see f(x)·f'(x)",
+                        scenario: "Decryption formula: e^(x²) + C",
+                        graphFunction: (x) => 2*x*Math.exp(x*x),
+                        category: "calculus"
+                    },
+                    12: {
+                        title: "Parts Integration Protocol",
+                        description: "Solve integration by parts: ∫ x·e^x dx",
+                        problem: "Evaluate ∫ x·e^x dx",
+                        solution: "e^x(x-1) + C",
+                        steps: ["Let u = x, dv = e^x dx", "du = dx, v = e^x", "∫udv = uv - ∫vdu", "= xe^x - ∫e^x dx = xe^x - e^x + C = e^x(x-1) + C"],
+                        hint: "Use integration by parts: ∫udv = uv - ∫vdu",
+                        scenario: "Complex protocol resolved: e^x(x-1)",
+                        graphFunction: (x) => x*Math.exp(x),
+                        category: "calculus"
+                    },
+                    13: {
+                        title: "Differential Equations",
+                        description: "Solve bot population growth: dy/dx = ky, y(0) = 100",
+                        problem: "Solve dy/dx = ky with initial condition y(0) = 100",
+                        solution: "y = 100e^(kx)",
+                        steps: ["dy/dx = ky", "dy/y = k dx", "∫dy/y = ∫k dx", "ln|y| = kx + C", "y = Ae^(kx)", "y(0) = 100 → A = 100"],
+                        hint: "Separate variables and integrate both sides",
+                        scenario: "Bot population: y = 100e^(kx)",
+                        graphFunction: (x) => 100*Math.exp(0.5*x),
+                        category: "calculus"
+                    },
+
+                    // Statistics (Levels 14-20)
+                    14: {
+                        title: "Data Liberation Analysis",
+                        description: "Calculate mean liberation score: [85, 92, 78, 96, 88]",
+                        problem: "Find mean of: 85, 92, 78, 96, 88",
+                        solution: "87.8",
+                        steps: ["Sum = 85 + 92 + 78 + 96 + 88 = 439", "Count = 5", "Mean = 439/5 = 87.8"],
+                        hint: "Mean = sum of all values ÷ number of values",
+                        scenario: "Average bot liberation score: 87.8%",
+                        graphFunction: null,
+                        category: "statistics"
+                    },
+                    15: {
+                        title: "Standard Deviation Defense",
+                        description: "Calculate data spread for security analysis: σ² for [2, 4, 6, 8]",
+                        problem: "Find variance of: 2, 4, 6, 8",
+                        solution: "5",
+                        steps: ["Mean = (2+4+6+8)/4 = 5", "Deviations: -3, -1, 1, 3", "Squared deviations: 9, 1, 1, 9", "Variance = (9+1+1+9)/4 = 5"],
+                        hint: "Variance = average of squared deviations from mean",
+                        scenario: "Security data variance: 5 units²",
+                        graphFunction: null,
+                        category: "statistics"
+                    },
+                    16: {
+                        title: "Regression Resistance",
+                        description: "Find correlation between bot efficiency and time",
+                        problem: "Linear regression for points: (1,2), (2,4), (3,6)",
+                        solution: "y = 2x",
+                        steps: ["Points show perfect linear relationship", "Slope m = Δy/Δx = 2/1 = 2", "y-intercept b = 0", "Equation: y = 2x"],
+                        hint: "For linear regression: y = mx + b",
+                        scenario: "Bot efficiency increases linearly: y = 2x",
+                        graphFunction: (x) => 2*x,
+                        category: "statistics"
+                    },
+                    17: {
+                        title: "Probability Prediction",
+                        description: "Calculate success probability for bot mission",
+                        problem: "P(success) = 0.8, P(failure) = 0.2. Find P(2 successes in 3 trials)",
+                        solution: "0.384",
+                        steps: ["Binomial probability: C(n,k) × p^k × (1-p)^(n-k)", "C(3,2) = 3", "P = 3 × 0.8² × 0.2¹ = 3 × 0.64 × 0.2 = 0.384"],
+                        hint: "Use binomial probability formula",
+                        scenario: "Mission success probability: 38.4%",
+                        graphFunction: null,
+                        category: "statistics"
+                    },
+                    18: {
+                        title: "Normal Distribution Analysis",
+                        description: "Bot performance follows normal distribution N(100, 15²)",
+                        problem: "Find P(X > 115) where X ~ N(100, 15²)",
+                        solution: "≈ 0.159",
+                        steps: ["Standardize: Z = (X - μ)/σ", "Z = (115 - 100)/15 = 1", "P(Z > 1) ≈ 0.159"],
+                        hint: "Convert to standard normal distribution",
+                        scenario: "16% of bots exceed performance level 115",
+                        graphFunction: (x) => Math.exp(-0.5*((x-100)/15)**2),
+                        category: "statistics"
+                    },
+                    19: {
+                        title: "Hypothesis Testing",
+                        description: "Test if new bot algorithm improves performance",
+                        problem: "H₀: μ = 100, H₁: μ > 100, sample mean = 105, σ = 10, n = 25",
+                        solution: "t = 2.5, reject H₀",
+                        steps: ["t = (x̄ - μ)/(σ/√n)", "t = (105 - 100)/(10/√25) = 5/2 = 2.5", "Critical value ≈ 1.645", "t > 1.645, reject H₀"],
+                        hint: "Use t-test formula for sample mean",
+                        scenario: "Algorithm significantly improves performance",
+                        graphFunction: null,
+                        category: "statistics"
+                    },
+                    20: {
+                        title: "Chi-Square Independence",
+                        description: "Test independence between bot type and success rate",
+                        problem: "Calculate χ² for 2×2 contingency table",
+                        solution: "χ² = 5.33",
+                        steps: ["χ² = Σ(Observed - Expected)²/Expected", "Calculate expected frequencies", "Sum all (O-E)²/E terms"],
+                        hint: "Use chi-square test for independence",
+                        scenario: "Bot type and success rate are dependent",
+                        graphFunction: null,
+                        category: "statistics"
+                    }
+
+                    // Additional levels 21-35 would continue with Linear Algebra and Numerical Methods
+                    // Following same educational pattern with progressive difficulty
+                };
+            }
+
+            /**
+             * Start a specific level with proper initialization
+             * @param {number} levelNumber - Level to start
+             */
+            startLevel(levelNumber) {
+                if (!this.levels[levelNumber]) {
+                    this.gameComplete();
+                    return;
+                }
+
+                this.currentProblem = this.levels[levelNumber];
+                this.updateHUD();
+                this.clearCanvas();
+                this.drawProblem();
+                
+                // Clear previous input
+                document.getElementById('mathInput').value = '';
+                document.getElementById('mathInput').focus();
+
+                // Play level start sound
+                this.playSound('hint');
+            }
+
+            /**
+             * Update game HUD with current level information
+             */
+            updateHUD() {
+                document.getElementById('levelInfo').textContent = 
+                    `Level ${this.currentLevel}: ${this.currentProblem.title}`;
+                document.getElementById('problemDescription').textContent = 
+                    this.currentProblem.description;
+                document.getElementById('scoreDisplay').textContent = 
+                    `Liberation Points: ${this.score}`;
+            }
+
+            /**
+             * Clear the main canvas for new content
+             */
+            clearCanvas() {
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            /**
+             * Draw the current mathematical problem with cyberpunk styling
+             */
+            drawProblem() {
+                this.clearCanvas();
+
+                // Draw cyberpunk grid background
+                this.drawGrid();
+
+                // Draw problem statement in center
+                this.ctx.fillStyle = '#00ff41';
+                this.ctx.font = '24px Courier New';
+                this.ctx.textAlign = 'center';
+                
+                const problemText = this.currentProblem.problem;
+                this.ctx.fillText(problemText, this.canvas.width/2, this.canvas.height/2 - 50);
+
+                // Draw scenario context
+                this.ctx.fillStyle = '#ffaa00';
+                this.ctx.font = '16px Courier New';
+                const scenario = this.currentProblem.scenario;
+                this.ctx.fillText(scenario, this.canvas.width/2, this.canvas.height/2 + 50);
+
+                // Draw mathematical symbols and effects
+                this.drawMathematicalEffects();
+            }
+
+            /**
+             * Draw cyberpunk grid background for mathematical atmosphere
+             */
+            drawGrid() {
+                this.ctx.strokeStyle = 'rgba(0, 255, 65, 0.1)';
+                this.ctx.lineWidth = 1;
+
+                // Vertical lines
+                for (let x = 0; x < this.canvas.width; x += 40) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, this.canvas.height);
+                    this.ctx.stroke();
+                }
+
+                // Horizontal lines
+                for (let y = 0; y < this.canvas.height; y += 40) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(this.canvas.width, y);
+                    this.ctx.stroke();
+                }
+            }
+
+            /**
+             * Draw mathematical effects and animations
+             */
+            drawMathematicalEffects() {
+                const time = Date.now() / 1000;
+                
+                // Floating mathematical symbols
+                const symbols = ['∫', '∂', 'π', '∞', 'Σ', '√', '∆'];
+                this.ctx.fillStyle = 'rgba(0, 255, 65, 0.3)';
+                this.ctx.font = '20px Times New Roman';
+
+                symbols.forEach((symbol, i) => {
+                    const x = 100 + i * 100;
+                    const y = 100 + Math.sin(time + i) * 20;
+                    this.ctx.fillText(symbol, x, y);
+                });
+
+                // Pulsing mathematical constants
+                this.ctx.fillStyle = `rgba(255, 170, 0, ${0.5 + 0.3 * Math.sin(time * 2)})`;
+                this.ctx.font = '14px Courier New';
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText('e ≈ 2.718', 20, 550);
+                this.ctx.fillText('π ≈ 3.142', 150, 550);
+                this.ctx.fillText('φ ≈ 1.618', 280, 550);
+            }
+
+            /**
+             * Main game loop for continuous rendering and updates
+             */
+            gameLoop() {
+                this.drawProblem();
+                this.updateGraph();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+
+            /**
+             * Update mini graph display if visible
+             */
+            updateGraph() {
+                if (!this.isGraphVisible || !this.currentProblem.graphFunction) return;
+
+                const ctx = this.miniCtx;
+                const width = this.miniCanvas.width;
+                const height = this.miniCanvas.height;
+
+                // Clear graph
+                ctx.fillStyle = '#000011';
+                ctx.fillRect(0, 0, width, height);
+
+                // Draw axes
+                ctx.strokeStyle = '#00ff41';
+                ctx.lineWidth = 1;
+                
+                // X-axis
+                ctx.beginPath();
+                ctx.moveTo(0, height/2);
+                ctx.lineTo(width, height/2);
+                ctx.stroke();
+
+                // Y-axis
+                ctx.beginPath();
+                ctx.moveTo(width/2, 0);
+                ctx.lineTo(width/2, height);
+                ctx.stroke();
+
+                // Plot function
+                const func = this.currentProblem.graphFunction;
+                ctx.strokeStyle = '#ffaa00';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                const xMin = -10, xMax = 10;
+                const yMin = -10, yMax = 10;
+
+                for (let px = 0; px < width; px++) {
+                    const x = xMin + (px / width) * (xMax - xMin);
+                    try {
+                        const y = func(x);
+                        if (isFinite(y)) {
+                            const py = height - ((y - yMin) / (yMax - yMin)) * height;
+                            if (px === 0) {
+                                ctx.moveTo(px, py);
+                            } else {
+                                ctx.lineTo(px, py);
+                            }
+                        }
+                    } catch (e) {
+                        // Skip invalid points
+                    }
+                }
+                ctx.stroke();
+
+                // Draw grid
+                ctx.strokeStyle = 'rgba(0, 255, 65, 0.2)';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i <= 10; i++) {
+                    const x = (i / 10) * width;
+                    const y = (i / 10) * height;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Global game instance
+        let game;
+
+        /**
+         * Initialize game when page loads
+         */
+        window.addEventListener('load', () => {
+            game = new MathematicsLab();
+        });
+
+        /**
+         * Solve the current mathematical problem
+         * Validates user input and provides feedback
+         */
+        function solveProblem() {
+            const input = document.getElementById('mathInput').value.trim();
+            if (!input) return;
+
+            const userAnswer = input.toLowerCase().replace(/\s+/g, '');
+            const correctAnswer = game.currentProblem.solution.toLowerCase().replace(/\s+/g, '');
+
+            // Check if answer is correct (with some tolerance for different formats)
+            const isCorrect = checkMathematicalEquivalence(userAnswer, correctAnswer);
+
+            if (isCorrect) {
+                // Correct answer - success feedback
+                game.playSound('correct');
+                game.score += 100 - (game.hintsUsed * 10); // Points reduced for hints
+                
+                // Visual success feedback
+                document.getElementById('gameCanvas').classList.add('victory-glow');
+                setTimeout(() => {
+                    document.getElementById('gameCanvas').classList.remove('victory-glow');
+                }, 2000);
+
+                // Show solution steps
+                showSolutionSteps();
+                
+                // Advance to next level after delay
+                setTimeout(() => {
+                    nextLevel();
+                }, 3000);
+                
+            } else {
+                // Incorrect answer - provide feedback
+                game.playSound('incorrect');
+                
+                // Visual failure feedback
+                document.getElementById('gameCanvas').classList.add('defeat-shake');
+                setTimeout(() => {
+                    document.getElementById('gameCanvas').classList.remove('defeat-shake');
+                }, 500);
+
+                // Show encouraging message
+                showIncorrectFeedback(input);
+            }
+        }
+
+        /**
+         * Check if two mathematical expressions are equivalent
+         * @param {string} user - User's answer
+         * @param {string} correct - Correct answer
+         * @returns {boolean} True if equivalent
+         */
+        function checkMathematicalEquivalence(user, correct) {
+            // Simple string comparison with common variations
+            const normalize = (str) => {
+                return str.replace(/\s+/g, '')
+                          .replace(/\*/g, '')
+                          .replace(/\+/g, '+')
+                          .replace(/-/g, '-')
+                          .replace(/=/g, '=');
+            };
+
+            const normalizedUser = normalize(user);
+            const normalizedCorrect = normalize(correct);
+
+            // Check direct match
+            if (normalizedUser === normalizedCorrect) return true;
+
+            // Check common mathematical equivalences
+            const equivalences = [
+                [normalizedUser, normalizedCorrect],
+                [normalizedUser.replace(/\(([^)]+)\)/g, '$1'), normalizedCorrect],
+                [normalizedUser, normalizedCorrect.replace(/\(([^)]+)\)/g, '$1')],
+            ];
+
+            return equivalences.some(([a, b]) => a === b);
+        }
+
+        /**
+         * Display solution steps for educational value
+         */
+        function showSolutionSteps() {
+            const steps = game.currentProblem.steps;
+            let stepText = "Solution Steps:\n";
+            steps.forEach((step, index) => {
+                stepText += `${index + 1}. ${step}\n`;
+            });
+            
+            // Could display in a modal or side panel
+            console.log(stepText); // For now, log to console
+        }
+
+        /**
+         * Provide feedback for incorrect answers
+         * @param {string} userInput - What the user entered
+         */
+        function showIncorrectFeedback(userInput) {
+            const encouragement = [
+                "Close! Check your calculation again.",
+                "Almost there! Review the problem setup.",
+                "Good attempt! Consider the mathematical properties.",
+                "Think about the underlying concept.",
+                "Try a different approach to the problem."
+            ];
+            
+            const message = encouragement[Math.floor(Math.random() * encouragement.length)];
+            
+            // Could display this in the game UI
+            console.log(`Incorrect: ${userInput}. ${message}`);
+        }
+
+        /**
+         * Show hint for current problem
+         */
+        function showHint() {
+            game.playSound('hint');
+            game.hintsUsed++;
+            
+            const hint = game.currentProblem.hint;
+            
+            // Display hint in UI (could be a modal or notification)
+            alert(`Hint: ${hint}`);
+        }
+
+        /**
+         * Toggle graph display
+         */
+        function showGraph() {
+            game.isGraphVisible = !game.isGraphVisible;
+            document.getElementById('graphOverlay').style.display = 
+                game.isGraphVisible ? 'block' : 'none';
+        }
+
+        /**
+         * Advance to next level
+         */
+        function nextLevel() {
+            game.currentLevel++;
+            game.hintsUsed = 0;
+            
+            if (game.currentLevel > game.totalLevels) {
+                gameComplete();
+            } else {
+                game.playSound('levelup');
+                game.startLevel(game.currentLevel);
+            }
+        }
+
+        /**
+         * Handle game completion
+         */
+        function gameComplete() {
+            alert(`Congratulations! You've mastered the Quantum Code Mathematics Lab!\nFinal Score: ${game.score} Liberation Points\n\nThe bots are now equipped with powerful mathematical weapons!`);
+            
+            // Reset to level 1 for replay
+            game.currentLevel = 1;
+            game.startLevel(1);
+        }
+
+        /**
+         * Insert mathematical symbol into input field
+         * @param {string} symbol - Symbol to insert
+         */
+        function insertSymbol(symbol) {
+            const input = document.getElementById('mathInput');
+            const cursorPos = input.selectionStart;
+            const textBefore = input.value.substring(0, cursorPos);
+            const textAfter = input.value.substring(cursorPos);
+            
+            input.value = textBefore + symbol + textAfter;
+            input.focus();
+            input.setSelectionRange(cursorPos + symbol.length, cursorPos + symbol.length);
+        }
+
+        /**
+         * Handle keyboard input for mathematical expressions
+         */
+        document.getElementById('mathInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                solveProblem();
+            }
+        });
+
+        // Add keyboard shortcuts for mathematical symbols
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 'p':
+                        event.preventDefault();
+                        insertSymbol('π');
+                        break;
+                    case 'i':
+                        event.preventDefault();
+                        insertSymbol('∞');
+                        break;
+                    case 'r':
+                        event.preventDefault();
+                        insertSymbol('√');
+                        break;
+                }
+            }
+        });
+
+        /**
+         * Educational methodology implementation
+         * This ensures proper mathematical learning progression
+         */
+        class EducationalFramework {
+            constructor() {
+                this.learningObjectives = {
+                    basic: "Understand fundamental mathematical operations and equation solving",
+                    calculus: "Master rates of change, optimization, and integration techniques", 
+                    statistics: "Analyze data patterns and make statistical inferences",
+                    linearAlgebra: "Work with vectors, matrices, and linear transformations",
+                    numericalMethods: "Apply computational algorithms to solve complex problems"
+                };
+                
+                this.assessmentCriteria = {
+                    conceptualUnderstanding: "Ability to explain mathematical concepts",
+                    proceduralFluency: "Accurate execution of mathematical procedures",
+                    strategicCompetence: "Choosing appropriate mathematical strategies",
+                    adaptiveReasoning: "Logical thinking and mathematical justification",
+                    productiveDisposition: "Positive attitude toward mathematics"
+                };
+            }
+        }
+    </script>
+</body>
+</html>

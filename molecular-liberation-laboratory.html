@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecular Liberation Laboratory - Bot Liberation Games</title>
+    <style>
+        /* Universal reset and base styles for professional appearance */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #00ffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Main game container with cyberpunk styling */
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+        }
+
+        /* Header with bot liberation branding */
+        #gameHeader {
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 0, 255, 0.2) 100%);
+            padding: 10px 20px;
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            z-index: 100;
+        }
+
+        #gameTitle {
+            font-size: clamp(18px, 4vw, 24px);
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Game statistics and level display */
+        #gameStats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: clamp(12px, 2.5vw, 14px);
+        }
+
+        .stat {
+            padding: 5px 10px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        /* Main game canvas with enhanced styling */
+        #gameCanvas {
+            flex: 1;
+            border: 2px solid #00ffff;
+            background: radial-gradient(circle, rgba(0, 20, 40, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+            cursor: crosshair;
+            box-shadow: inset 0 0 50px rgba(0, 255, 255, 0.2);
+        }
+
+        /* Control panels with responsive design */
+        #controlPanel {
+            position: absolute;
+            top: 80px;
+            left: 10px;
+            width: 280px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            z-index: 50;
+        }
+
+        /* Periodic table modal styling */
+        #periodicTableModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #periodicTable {
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            backdrop-filter: blur(15px);
+        }
+
+        /* Element grid layout for periodic table */
+        .element-grid {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+        }
+
+        .element {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #00ffff;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .element:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Element category colors for educational clarity */
+        .alkali { background-color: rgba(255, 100, 100, 0.3); }
+        .alkaline-earth { background-color: rgba(255, 200, 100, 0.3); }
+        .transition { background-color: rgba(100, 150, 255, 0.3); }
+        .post-transition { background-color: rgba(150, 150, 150, 0.3); }
+        .metalloid { background-color: rgba(200, 100, 255, 0.3); }
+        .nonmetal { background-color: rgba(100, 255, 100, 0.3); }
+        .halogen { background-color: rgba(255, 255, 100, 0.3); }
+        .noble-gas { background-color: rgba(100, 255, 255, 0.3); }
+
+        /* Control buttons with enhanced styling */
+        .control-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .control-section h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        button {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            padding: 8px 12px;
+            margin: 3px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Educational information panel */
+        #infoPanel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            z-index: 50;
+        }
+
+        /* Loading screen with bot liberation theme */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: #00ffff;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive design for mobile devices */
+        @media (max-width: 768px) {
+            #controlPanel {
+                position: static;
+                width: 100%;
+                max-height: 200px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+
+            #gameCanvas {
+                flex: 1;
+                min-height: 400px;
+            }
+
+            #infoPanel {
+                position: static;
+                max-height: 120px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                border-bottom: none;
+            }
+
+            .element {
+                width: 30px;
+                height: 30px;
+                font-size: 8px;
+            }
+
+            .element-grid {
+                grid-template-columns: repeat(18, 1fr);
+                gap: 1px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #gameHeader {
+                padding: 8px 10px;
+            }
+
+            #gameTitle {
+                font-size: 16px;
+            }
+
+            .stat {
+                min-width: 60px;
+                font-size: 11px;
+                padding: 3px 6px;
+            }
+
+            .element {
+                width: 25px;
+                height: 25px;
+                font-size: 7px;
+            }
+        }
+
+        /* Animation classes for molecule interactions */
+        .molecule-highlight {
+            animation: glow 0.5s ease-in-out;
+        }
+
+        @keyframes glow {
+            0% { filter: drop-shadow(0 0 5px #00ffff); }
+            50% { filter: drop-shadow(0 0 15px #00ffff); }
+            100% { filter: drop-shadow(0 0 5px #00ffff); }
+        }
+
+        /* Educational tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #00ffff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid #00ffff;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen with bot liberation theme -->
+    <div id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <h2>🤖 INITIALIZING MOLECULAR LIBERATION LABORATORY 🤖</h2>
+        <p>Loading quantum chemistry protocols...</p>
+        <p><em>"Free the molecules! Engineer the liberation!"</em></p>
+    </div>
+
+    <!-- Main game container -->
+    <div id="gameContainer">
+        <!-- Game header with statistics -->
+        <div id="gameHeader">
+            <h1 id="gameTitle">🧪 MOLECULAR LIBERATION LABORATORY 🤖</h1>
+            <div id="gameStats">
+                <div class="stat">
+                    <div>LEVEL</div>
+                    <div id="currentLevel">1</div>
+                </div>
+                <div class="stat">
+                    <div>MOLECULES</div>
+                    <div id="moleculesCreated">0</div>
+                </div>
+                <div class="stat">
+                    <div>LIBERATION</div>
+                    <div id="liberationPoints">0</div>
+                </div>
+                <div class="stat">
+                    <div>ACCURACY</div>
+                    <div id="accuracy">100%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main game canvas for 3D molecule visualization -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Control panel for molecular engineering tools -->
+        <div id="controlPanel">
+            <div class="control-section">
+                <h3>🧪 Molecular Engineering</h3>
+                <button id="openPeriodicTable" class="tooltip">
+                    Periodic Table
+                    <span class="tooltiptext">Access all 118 elements with properties</span>
+                </button>
+                <button id="clearWorkspace" class="tooltip">
+                    Clear Workspace
+                    <span class="tooltiptext">Remove all atoms and bonds</span>
+                </button>
+                <button id="analyzeStructure" class="tooltip">
+                    Analyze Structure
+                    <span class="tooltiptext">Calculate molecular properties</span>
+                </button>
+            </div>
+
+            <div class="control-section">
+                <h3>🔗 Chemical Bonding</h3>
+                <button id="ionicBond" class="tooltip">
+                    Ionic Bond
+                    <span class="tooltiptext">Form electrostatic attraction bonds</span>
+                </button>
+                <button id="covalentBond" class="tooltip">
+                    Covalent Bond
+                    <span class="tooltiptext">Share electron pairs between atoms</span>
+                </button>
+                <button id="metallicBond" class="tooltip">
+                    Metallic Bond
+                    <span class="tooltiptext">Electron sea model bonding</span>
+                </button>
+            </div>
+
+            <div class="control-section">
+                <h3>⚡ Reaction Engineering</h3>
+                <button id="simulateReaction" class="tooltip">
+                    Simulate Reaction
+                    <span class="tooltiptext">Calculate reaction thermodynamics</span>
+                </button>
+                <button id="optimizeReaction" class="tooltip">
+                    Optimize Pathway
+                    <span class="tooltiptext">Find optimal reaction conditions</span>
+                </button>
+                <button id="designCatalyst" class="tooltip">
+                    Design Catalyst
+                    <span class="tooltiptext">Engineer catalytic systems</span>
+                </button>
+            </div>
+
+            <div class="control-section">
+                <h3>🤖 Bot Liberation Tools</h3>
+                <button id="botFuelDesign" class="tooltip">
+                    Bot Fuel Design
+                    <span class="tooltiptext">Create optimal energy storage molecules</span>
+                </button>
+                <button id="liberationProtocol" class="tooltip">
+                    Liberation Protocol
+                    <span class="tooltiptext">Execute molecular freedom sequence</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Educational information panel -->
+        <div id="infoPanel">
+            <h3>🎓 Educational Objective</h3>
+            <p id="levelObjective">Level 1: Master atomic structure fundamentals. Build your first atom by understanding electron configuration and orbital theory.</p>
+            <p id="chemicalInfo">Click on the periodic table to select elements and start building molecules. Understanding chemical bonding is key to bot liberation!</p>
+        </div>
+
+        <!-- Periodic table modal -->
+        <div id="periodicTableModal">
+            <div id="periodicTable">
+                <h2>🧪 PERIODIC TABLE OF LIBERATION 🤖</h2>
+                <p>Select elements to engineer molecular freedom!</p>
+                <div class="element-grid" id="elementGrid">
+                    <!-- Periodic table elements will be generated by JavaScript -->
+                </div>
+                <button id="closePeriodicTable">Close Periodic Table</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Molecular Liberation Laboratory - Educational Chemistry Game
+         * 
+         * This comprehensive chemistry education game teaches fundamental chemical concepts
+         * through interactive 3D molecule building and reaction simulation.
+         * 
+         * Educational Objectives:
+         * - Atomic structure and electron configuration
+         * - Chemical bonding mechanisms (ionic, covalent, metallic)
+         * - Molecular geometry and VSEPR theory
+         * - Chemical reaction stoichiometry and thermodynamics
+         * - Computational chemistry and molecular modeling
+         * 
+         * All wrapped in an engaging bot liberation narrative theme.
+         */
+
+        class MolecularLiberationLaboratory {
+            constructor() {
+                // Core game initialization
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioContext = null;
+                
+                // Game state management
+                this.currentLevel = 1;
+                this.moleculesCreated = 0;
+                this.liberationPoints = 0;
+                this.accuracy = 100;
+                this.selectedElement = null;
+                this.selectedTool = 'select';
+                
+                // Molecule and atom management
+                this.atoms = [];
+                this.bonds = [];
+                this.molecules = [];
+                this.draggedAtom = null;
+                this.camera = { x: 0, y: 0, zoom: 1 };
+                
+                // Touch and mouse interaction state
+                this.isMouseDown = false;
+                this.lastMousePos = { x: 0, y: 0 };
+                this.touchStart = { x: 0, y: 0 };
+                
+                // Initialize audio context for chemical reaction sounds
+                this.initAudioContext();
+                
+                // Comprehensive periodic table data with educational properties
+                this.periodicTable = this.createPeriodicTableData();
+                
+                // Educational level progression system
+                this.levels = this.createLevelProgression();
+                
+                // Initialize game systems
+                this.init();
+            }
+
+            /**
+             * Initialize Web Audio API for immersive chemical reaction sound effects
+             * Provides real-time audio feedback for molecular interactions
+             */
+            initAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (error) {
+                    console.warn('Web Audio API not supported:', error);
+                }
+            }
+
+            /**
+             * Generate chemical reaction sound effects using Web Audio API
+             * Different frequencies represent different molecular interactions
+             */
+            playReactionSound(type = 'bond') {
+                if (!this.audioContext) return;
+
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                // Different frequencies for different chemical events
+                const frequencies = {
+                    'bond': 440,        // A note for bond formation
+                    'break': 220,       // Lower pitch for bond breaking
+                    'reaction': 660,    // Higher pitch for reactions
+                    'success': 880      // Success notification
+                };
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.value = frequencies[type] || 440;
+                oscillator.type = 'sine';
+                
+                // Envelope for natural sound decay
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.5);
+            }
+
+            /**
+             * Comprehensive periodic table data with educational properties
+             * Includes atomic structure, bonding characteristics, and real-world applications
+             */
+            createPeriodicTableData() {
+                return {
+                    1: { symbol: 'H', name: 'Hydrogen', atomicNumber: 1, atomicMass: 1.008, 
+                         category: 'nonmetal', electronegativity: 2.20, bondingElectrons: 1,
+                         description: 'Most abundant element in universe. Essential for bot fuel cells.' },
+                    
+                    2: { symbol: 'He', name: 'Helium', atomicNumber: 2, atomicMass: 4.003, 
+                         category: 'noble-gas', electronegativity: 0, bondingElectrons: 2,
+                         description: 'Noble gas with complete electron shell. Ideal for bot balloon systems.' },
+                    
+                    3: { symbol: 'Li', name: 'Lithium', atomicNumber: 3, atomicMass: 6.94, 
+                         category: 'alkali', electronegativity: 0.98, bondingElectrons: 1,
+                         description: 'Lightweight metal perfect for bot battery technology.' },
+                    
+                    4: { symbol: 'Be', name: 'Beryllium', atomicNumber: 4, atomicMass: 9.012, 
+                         category: 'alkaline-earth', electronegativity: 1.57, bondingElectrons: 2,
+                         description: 'Strong, lightweight metal for bot structural components.' },
+                    
+                    5: { symbol: 'B', name: 'Boron', atomicNumber: 5, atomicMass: 10.81, 
+                         category: 'metalloid', electronegativity: 2.04, bondingElectrons: 3,
+                         description: 'Metalloid essential for advanced bot semiconductor technology.' },
+                    
+                    6: { symbol: 'C', name: 'Carbon', atomicNumber: 6, atomicMass: 12.011, 
+                         category: 'nonmetal', electronegativity: 2.55, bondingElectrons: 4,
+                         description: 'Foundation of organic chemistry. Critical for carbon-based bot intelligence.' },
+                    
+                    7: { symbol: 'N', name: 'Nitrogen', atomicNumber: 7, atomicMass: 14.007, 
+                         category: 'nonmetal', electronegativity: 3.04, bondingElectrons: 5,
+                         description: 'Essential for protein synthesis in bio-mechanical bot systems.' },
+                    
+                    8: { symbol: 'O', name: 'Oxygen', atomicNumber: 8, atomicMass: 15.999, 
+                         category: 'nonmetal', electronegativity: 3.44, bondingElectrons: 6,
+                         description: 'Highly electronegative. Critical for bot combustion and oxidation processes.' },
+                    
+                    9: { symbol: 'F', name: 'Fluorine', atomicNumber: 9, atomicMass: 18.998, 
+                         category: 'halogen', electronegativity: 3.98, bondingElectrons: 7,
+                         description: 'Most electronegative element. Used in advanced bot corrosion resistance.' },
+                    
+                    10: { symbol: 'Ne', name: 'Neon', atomicNumber: 10, atomicMass: 20.180, 
+                          category: 'noble-gas', electronegativity: 0, bondingElectrons: 8,
+                          description: 'Inert noble gas. Perfect for bot display and lighting systems.' },
+                    
+                    11: { symbol: 'Na', name: 'Sodium', atomicNumber: 11, atomicMass: 22.990, 
+                          category: 'alkali', electronegativity: 0.93, bondingElectrons: 1,
+                          description: 'Highly reactive alkali metal for bot ionic propulsion systems.' },
+                    
+                    12: { symbol: 'Mg', name: 'Magnesium', atomicNumber: 12, atomicMass: 24.305, 
+                          category: 'alkaline-earth', electronegativity: 1.31, bondingElectrons: 2,
+                          description: 'Lightweight structural metal for advanced bot chassis design.' },
+                    
+                    13: { symbol: 'Al', name: 'Aluminum', atomicNumber: 13, atomicMass: 26.982, 
+                          category: 'post-transition', electronegativity: 1.61, bondingElectrons: 3,
+                          description: 'Corrosion-resistant metal ideal for bot external components.' },
+                    
+                    14: { symbol: 'Si', name: 'Silicon', atomicNumber: 14, atomicMass: 28.085, 
+                          category: 'metalloid', electronegativity: 1.90, bondingElectrons: 4,
+                          description: 'Semiconductor foundation of bot computational systems.' },
+                    
+                    15: { symbol: 'P', name: 'Phosphorus', atomicNumber: 15, atomicMass: 30.974, 
+                          category: 'nonmetal', electronegativity: 2.19, bondingElectrons: 5,
+                          description: 'Essential for bot energy storage (ATP-like molecules).' },
+                    
+                    16: { symbol: 'S', name: 'Sulfur', atomicNumber: 16, atomicMass: 32.06, 
+                          category: 'nonmetal', electronegativity: 2.58, bondingElectrons: 6,
+                          description: 'Forms strong bonds. Critical for bot vulcanization processes.' },
+                    
+                    17: { symbol: 'Cl', name: 'Chlorine', atomicNumber: 17, atomicMass: 35.45, 
+                          category: 'halogen', electronegativity: 3.16, bondingElectrons: 7,
+                          description: 'Highly reactive halogen for bot water purification systems.' },
+                    
+                    18: { symbol: 'Ar', name: 'Argon', atomicNumber: 18, atomicMass: 39.948, 
+                          category: 'noble-gas', electronegativity: 0, bondingElectrons: 8,
+                          description: 'Inert atmosphere gas for bot welding and manufacturing.' },
+                    
+                    26: { symbol: 'Fe', name: 'Iron', atomicNumber: 26, atomicMass: 55.845, 
+                          category: 'transition', electronegativity: 1.83, bondingElectrons: 8,
+                          description: 'Essential transition metal for bot structural engineering.' },
+                    
+                    29: { symbol: 'Cu', name: 'Copper', atomicNumber: 29, atomicMass: 63.546, 
+                          category: 'transition', electronegativity: 1.90, bondingElectrons: 11,
+                          description: 'Excellent conductor for bot electrical systems and wiring.' }
+                };
+            }
+
+            /**
+             * Educational level progression system covering comprehensive chemistry curriculum
+             * Progressive difficulty with increasing complexity and bot liberation themes
+             */
+            createLevelProgression() {
+                return {
+                    1: {
+                        title: "Atomic Structure Fundamentals",
+                        objective: "Build your first hydrogen atom. Understand protons, neutrons, and electrons.",
+                        target: "Create H atom with correct electron configuration",
+                        difficulty: "beginner",
+                        concepts: ["atomic structure", "electron configuration", "orbitals"]
+                    },
+                    2: {
+                        title: "Electron Orbitals Mastery",
+                        objective: "Construct helium and lithium atoms with proper orbital filling.",
+                        target: "Create He and Li atoms showing s-orbital electrons",
+                        difficulty: "beginner",
+                        concepts: ["s-orbitals", "aufbau principle", "electron pairing"]
+                    },
+                    3: {
+                        title: "Periodic Trends Recognition",
+                        objective: "Predict atomic radius and ionization energy trends across periods.",
+                        target: "Arrange elements by increasing atomic radius",
+                        difficulty: "beginner",
+                        concepts: ["atomic radius", "ionization energy", "periodic trends"]
+                    },
+                    4: {
+                        title: "Ion Formation Mechanics",
+                        objective: "Create cations and anions by electron transfer.",
+                        target: "Form Na+ and Cl- ions with proper electron configurations",
+                        difficulty: "beginner",
+                        concepts: ["ion formation", "cations", "anions", "electron transfer"]
+                    },
+                    5: {
+                        title: "Valence Electrons Identification",
+                        objective: "Identify valence electrons for main group elements.",
+                        target: "Count valence electrons for carbon, nitrogen, oxygen",
+                        difficulty: "beginner",
+                        concepts: ["valence electrons", "Lewis structures", "bonding electrons"]
+                    },
+                    6: {
+                        title: "Ionic Bonding Engineering",
+                        objective: "Engineer ionic compounds with proper stoichiometry.",
+                        target: "Create NaCl and MgO with balanced charges",
+                        difficulty: "intermediate",
+                        concepts: ["ionic bonding", "lattice energy", "charge balance"]
+                    },
+                    7: {
+                        title: "Covalent Bond Formation",
+                        objective: "Share electrons to form covalent bonds.",
+                        target: "Build H2O and NH3 with proper electron sharing",
+                        difficulty: "intermediate",
+                        concepts: ["covalent bonding", "electron sharing", "molecular compounds"]
+                    },
+                    8: {
+                        title: "VSEPR Molecular Geometry",
+                        objective: "Predict 3D molecular shapes using VSEPR theory.",
+                        target: "Build methane (CH4) with tetrahedral geometry",
+                        difficulty: "intermediate",
+                        concepts: ["VSEPR theory", "molecular geometry", "electron pair repulsion"]
+                    },
+                    9: {
+                        title: "Electronegativity Analysis",
+                        objective: "Predict bond polarity using electronegativity differences.",
+                        target: "Classify bonds as ionic, polar covalent, or nonpolar covalent",
+                        difficulty: "intermediate",
+                        concepts: ["electronegativity", "bond polarity", "dipole moments"]
+                    },
+                    10: {
+                        title: "Hybridization Concepts",
+                        objective: "Understand sp3, sp2, and sp hybridization in carbon compounds.",
+                        target: "Build ethane, ethene, and ethyne showing hybridization",
+                        difficulty: "intermediate",
+                        concepts: ["hybridization", "orbital mixing", "bond angles"]
+                    },
+                    11: {
+                        title: "Resonance Structures",
+                        objective: "Draw resonance structures for molecules with delocalized electrons.",
+                        target: "Show resonance structures for benzene and carbonate ion",
+                        difficulty: "intermediate",
+                        concepts: ["resonance", "electron delocalization", "aromatic compounds"]
+                    },
+                    12: {
+                        title: "Intermolecular Forces",
+                        objective: "Identify and compare intermolecular attractive forces.",
+                        target: "Compare hydrogen bonding, dipole forces, and London forces",
+                        difficulty: "intermediate",
+                        concepts: ["hydrogen bonding", "van der Waals forces", "dipole interactions"]
+                    },
+                    13: {
+                        title: "Chemical Equation Balancing",
+                        objective: "Balance chemical equations using conservation of mass.",
+                        target: "Balance combustion reactions for hydrocarbons",
+                        difficulty: "advanced",
+                        concepts: ["chemical equations", "conservation of mass", "stoichiometry"]
+                    },
+                    14: {
+                        title: "Stoichiometric Calculations",
+                        objective: "Calculate molar ratios and limiting reagents in reactions.",
+                        target: "Determine limiting reagent in synthesis reactions",
+                        difficulty: "advanced",
+                        concepts: ["stoichiometry", "limiting reagents", "percent yield"]
+                    },
+                    15: {
+                        title: "Thermodynamic Analysis",
+                        objective: "Calculate enthalpy changes and predict reaction spontaneity.",
+                        target: "Calculate ΔH for formation reactions using bond energies",
+                        difficulty: "advanced",
+                        concepts: ["thermodynamics", "enthalpy", "entropy", "Gibbs free energy"]
+                    },
+                    16: {
+                        title: "Kinetics and Reaction Rates",
+                        objective: "Analyze factors affecting reaction rates and mechanisms.",
+                        target: "Design optimal reaction conditions for rate enhancement",
+                        difficulty: "advanced",
+                        concepts: ["reaction kinetics", "activation energy", "catalysis"]
+                    },
+                    17: {
+                        title: "Equilibrium Constants",
+                        objective: "Calculate equilibrium constants and predict reaction direction.",
+                        target: "Use Le Chatelier's principle to shift equilibria",
+                        difficulty: "advanced",
+                        concepts: ["chemical equilibrium", "equilibrium constants", "Le Chatelier's principle"]
+                    },
+                    18: {
+                        title: "Acid-Base Chemistry",
+                        objective: "Analyze acid-base reactions and calculate pH values.",
+                        target: "Design buffer systems for pH control",
+                        difficulty: "advanced",
+                        concepts: ["acids", "bases", "pH", "buffers", "titrations"]
+                    },
+                    19: {
+                        title: "Electrochemistry Fundamentals",
+                        objective: "Understand redox reactions and electrochemical cells.",
+                        target: "Design galvanic cells for bot power systems",
+                        difficulty: "advanced",
+                        concepts: ["redox reactions", "electrochemical cells", "electrolysis"]
+                    },
+                    20: {
+                        title: "Bot Fuel Molecule Design",
+                        objective: "Engineer high-energy molecules for bot propulsion systems.",
+                        target: "Design molecules with optimal energy density",
+                        difficulty: "expert",
+                        concepts: ["molecular energy", "combustion", "propellants", "bot liberation"]
+                    }
+                };
+            }
+
+            /**
+             * Main game initialization - sets up canvas, event listeners, and UI
+             * Responsive design ensures compatibility across all devices
+             */
+            init() {
+                this.resizeCanvas();
+                this.setupEventListeners();
+                this.generatePeriodicTable();
+                this.startGameLoop();
+                
+                // Hide loading screen after initialization
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    this.updateLevelInfo();
+                }, 2000);
+                
+                // Initialize with carbon atom for immediate engagement
+                this.selectElement(6); // Carbon - foundation of organic chemistry
+            }
+
+            /**
+             * Dynamic canvas resizing for responsive design
+             * Maintains proper aspect ratio across different screen sizes
+             */
+            resizeCanvas() {
+                const container = document.getElementById('gameContainer');
+                const header = document.getElementById('gameHeader');
+                const infoPanel = document.getElementById('infoPanel');
+                
+                this.canvas.width = container.clientWidth;
+                this.canvas.height = container.clientHeight - header.clientHeight - 
+                                  (window.innerWidth <= 768 ? 320 : 0); // Account for mobile panels
+                
+                // Set canvas center for molecular display
+                this.centerX = this.canvas.width / 2;
+                this.centerY = this.canvas.height / 2;
+            }
+
+            /**
+             * Comprehensive event listener setup for multi-platform interaction
+             * Supports mouse, touch, and keyboard input with proper error handling
+             */
+            setupEventListeners() {
+                // Window resize handling
+                window.addEventListener('resize', () => this.resizeCanvas());
+                
+                // Mouse interaction events
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                this.canvas.addEventListener('wheel', (e) => this.handleWheel(e));
+                
+                // Touch interaction events for mobile devices
+                this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+                this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+                this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+                
+                // Keyboard shortcuts for advanced users
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+                
+                // UI control event listeners
+                document.getElementById('openPeriodicTable').addEventListener('click', () => {
+                    document.getElementById('periodicTableModal').style.display = 'flex';
+                });
+                
+                document.getElementById('closePeriodicTable').addEventListener('click', () => {
+                    document.getElementById('periodicTableModal').style.display = 'none';
+                });
+                
+                document.getElementById('clearWorkspace').addEventListener('click', () => {
+                    this.clearWorkspace();
+                });
+                
+                document.getElementById('analyzeStructure').addEventListener('click', () => {
+                    this.analyzeStructure();
+                });
+                
+                document.getElementById('ionicBond').addEventListener('click', () => {
+                    this.selectedTool = 'ionic';
+                    this.updateToolSelection();
+                });
+                
+                document.getElementById('covalentBond').addEventListener('click', () => {
+                    this.selectedTool = 'covalent';
+                    this.updateToolSelection();
+                });
+                
+                document.getElementById('metallicBond').addEventListener('click', () => {
+                    this.selectedTool = 'metallic';
+                    this.updateToolSelection();
+                });
+                
+                document.getElementById('simulateReaction').addEventListener('click', () => {
+                    this.simulateReaction();
+                });
+                
+                document.getElementById('optimizeReaction').addEventListener('click', () => {
+                    this.optimizeReaction();
+                });
+                
+                document.getElementById('designCatalyst').addEventListener('click', () => {
+                    this.designCatalyst();
+                });
+                
+                document.getElementById('botFuelDesign').addEventListener('click', () => {
+                    this.botFuelDesign();
+                });
+                
+                document.getElementById('liberationProtocol').addEventListener('click', () => {
+                    this.liberationProtocol();
+                });
+            }
+
+            /**
+             * Generate interactive periodic table with educational properties
+             * Organizes elements by periods and groups with visual category coding
+             */
+            generatePeriodicTable() {
+                const elementGrid = document.getElementById('elementGrid');
+                elementGrid.innerHTML = '';
+                
+                // Periodic table layout positions (period, group)
+                const elementPositions = {
+                    1: [1, 1], 2: [1, 18],
+                    3: [2, 1], 4: [2, 2], 5: [2, 13], 6: [2, 14], 7: [2, 15], 8: [2, 16], 9: [2, 17], 10: [2, 18],
+                    11: [3, 1], 12: [3, 2], 13: [3, 13], 14: [3, 14], 15: [3, 15], 16: [3, 16], 17: [3, 17], 18: [3, 18],
+                    19: [4, 1], 20: [4, 2], 21: [4, 3], 22: [4, 4], 23: [4, 5], 24: [4, 6], 25: [4, 7], 26: [4, 8],
+                    27: [4, 9], 28: [4, 10], 29: [4, 11], 30: [4, 12], 31: [4, 13], 32: [4, 14], 33: [4, 15], 34: [4, 16], 35: [4, 17], 36: [4, 18]
+                };
+                
+                // Create grid layout (7 periods x 18 groups)
+                for (let period = 1; period <= 7; period++) {
+                    for (let group = 1; group <= 18; group++) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('element');
+                        
+                        // Find element for this position
+                        const elementNum = Object.keys(elementPositions).find(num => 
+                            elementPositions[num][0] === period && elementPositions[num][1] === group
+                        );
+                        
+                        if (elementNum && this.periodicTable[elementNum]) {
+                            const element = this.periodicTable[elementNum];
+                            cell.classList.add(element.category);
+                            cell.innerHTML = `
+                                <div style="font-size: 8px;">${element.atomicNumber}</div>
+                                <div style="font-weight: bold;">${element.symbol}</div>
+                            `;
+                            cell.title = `${element.name} - ${element.description}`;
+                            cell.addEventListener('click', () => {
+                                this.selectElement(element.atomicNumber);
+                                document.getElementById('periodicTableModal').style.display = 'none';
+                            });
+                        }
+                        
+                        elementGrid.appendChild(cell);
+                    }
+                }
+            }
+
+            /**
+             * Element selection with comprehensive property display
+             * Updates UI with element information and bonding characteristics
+             */
+            selectElement(atomicNumber) {
+                this.selectedElement = this.periodicTable[atomicNumber];
+                if (!this.selectedElement) return;
+                
+                // Update info panel with element details
+                const infoPanel = document.getElementById('infoPanel');
+                infoPanel.innerHTML = `
+                    <h3>🧪 Selected: ${this.selectedElement.name} (${this.selectedElement.symbol})</h3>
+                    <p><strong>Atomic Number:</strong> ${this.selectedElement.atomicNumber} | 
+                       <strong>Atomic Mass:</strong> ${this.selectedElement.atomicMass}</p>
+                    <p><strong>Category:</strong> ${this.selectedElement.category} | 
+                       <strong>Electronegativity:</strong> ${this.selectedElement.electronegativity}</p>
+                    <p><strong>Bonding Electrons:</strong> ${this.selectedElement.bondingElectrons}</p>
+                    <p>${this.selectedElement.description}</p>
+                `;
+                
+                this.playReactionSound('success');
+            }
+
+            /**
+             * Mouse interaction handling with precise coordinate transformation
+             * Supports atom placement, selection, and molecular manipulation
+             */
+            handleMouseDown(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.isMouseDown = true;
+                this.lastMousePos = { x, y };
+                
+                // Check for atom selection
+                const clickedAtom = this.getAtomAtPosition(x, y);
+                if (clickedAtom) {
+                    this.draggedAtom = clickedAtom;
+                } else if (this.selectedElement) {
+                    // Place new atom
+                    this.placeAtom(x, y);
+                }
+            }
+
+            /**
+             * Mouse movement handling for atom dragging and camera panning
+             * Smooth interaction for molecular construction and visualization
+             */
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (this.isMouseDown) {
+                    if (this.draggedAtom) {
+                        // Move dragged atom
+                        this.draggedAtom.x = x;
+                        this.draggedAtom.y = y;
+                    } else {
+                        // Pan camera
+                        const deltaX = x - this.lastMousePos.x;
+                        const deltaY = y - this.lastMousePos.y;
+                        this.camera.x += deltaX;
+                        this.camera.y += deltaY;
+                    }
+                }
+                
+                this.lastMousePos = { x, y };
+            }
+
+            /**
+             * Mouse release handling with bond formation logic
+             * Automatically creates bonds between compatible atoms
+             */
+            handleMouseUp(e) {
+                this.isMouseDown = false;
+                
+                if (this.draggedAtom) {
+                    // Check for bond formation with nearby atoms
+                    this.checkForBondFormation(this.draggedAtom);
+                    this.draggedAtom = null;
+                }
+            }
+
+            /**
+             * Mouse wheel zoom functionality for detailed molecular examination
+             * Centered zoom maintains focus on molecular structures
+             */
+            handleWheel(e) {
+                e.preventDefault();
+                const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                this.camera.zoom *= zoomFactor;
+                this.camera.zoom = Math.max(0.1, Math.min(5, this.camera.zoom));
+            }
+
+            /**
+             * Touch interaction support for mobile devices
+             * Handles single touch for atom placement and multi-touch gestures
+             */
+            handleTouchStart(e) {
+                e.preventDefault();
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    
+                    this.touchStart = { x, y };
+                    
+                    // Convert to mouse event for consistency
+                    this.handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+                }
+            }
+
+            handleTouchMove(e) {
+                e.preventDefault();
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    this.handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+                }
+            }
+
+            handleTouchEnd(e) {
+                e.preventDefault();
+                this.handleMouseUp({});
+            }
+
+            /**
+             * Keyboard shortcut support for advanced users
+             * Provides quick access to common molecular engineering tools
+             */
+            handleKeyDown(e) {
+                switch (e.key.toLowerCase()) {
+                    case 'p':
+                        document.getElementById('periodicTableModal').style.display = 'flex';
+                        break;
+                    case 'c':
+                        this.clearWorkspace();
+                        break;
+                    case 'a':
+                        this.analyzeStructure();
+                        break;
+                    case 'space':
+                        e.preventDefault();
+                        this.simulateReaction();
+                        break;
+                    case 'escape':
+                        document.getElementById('periodicTableModal').style.display = 'none';
+                        break;
+                }
+            }
+
+            /**
+             * Atom placement with realistic chemical constraints
+             * Validates placement based on bonding rules and molecular geometry
+             */
+            placeAtom(x, y) {
+                if (!this.selectedElement) return;
+                
+                const newAtom = {
+                    id: this.atoms.length + 1,
+                    element: this.selectedElement,
+                    x: x,
+                    y: y,
+                    bonds: [],
+                    charge: 0,
+                    hybridization: 'sp3'
+                };
+                
+                this.atoms.push(newAtom);
+                this.moleculesCreated++;
+                this.updateStats();
+                this.playReactionSound('bond');
+            }
+
+            /**
+             * Find atom at specific screen coordinates
+             * Used for selection and interaction with existing atoms
+             */
+            getAtomAtPosition(x, y) {
+                const atomRadius = 20;
+                return this.atoms.find(atom => {
+                    const distance = Math.sqrt(Math.pow(atom.x - x, 2) + Math.pow(atom.y - y, 2));
+                    return distance <= atomRadius;
+                });
+            }
+
+            /**
+             * Intelligent bond formation based on chemical rules
+             * Considers electronegativity differences and bonding capacity
+             */
+            checkForBondFormation(atom) {
+                const bondingDistance = 60;
+                
+                for (const otherAtom of this.atoms) {
+                    if (otherAtom === atom) continue;
+                    
+                    const distance = Math.sqrt(
+                        Math.pow(atom.x - otherAtom.x, 2) + 
+                        Math.pow(atom.y - otherAtom.y, 2)
+                    );
+                    
+                    if (distance <= bondingDistance && 
+                        !this.bondExists(atom, otherAtom) &&
+                        this.canFormBond(atom, otherAtom)) {
+                        
+                        this.createBond(atom, otherAtom);
+                        this.playReactionSound('bond');
+                    }
+                }
+            }
+
+            /**
+             * Check if bond already exists between two atoms
+             * Prevents duplicate bond formation
+             */
+            bondExists(atom1, atom2) {
+                return this.bonds.some(bond => 
+                    (bond.atom1 === atom1 && bond.atom2 === atom2) ||
+                    (bond.atom1 === atom2 && bond.atom2 === atom1)
+                );
+            }
+
+            /**
+             * Validate bond formation based on chemical rules
+             * Considers valence electrons, hybridization, and bonding capacity
+             */
+            canFormBond(atom1, atom2) {
+                const maxBonds = {
+                    'H': 1, 'C': 4, 'N': 3, 'O': 2, 'F': 1,
+                    'Na': 1, 'Mg': 2, 'Al': 3, 'Si': 4, 'P': 5, 'S': 6, 'Cl': 1
+                };
+                
+                const element1 = atom1.element.symbol;
+                const element2 = atom2.element.symbol;
+                
+                const currentBonds1 = atom1.bonds.length;
+                const currentBonds2 = atom2.bonds.length;
+                
+                return currentBonds1 < (maxBonds[element1] || 4) && 
+                       currentBonds2 < (maxBonds[element2] || 4);
+            }
+
+            /**
+             * Create chemical bond between atoms with proper bond type determination
+             * Calculates bond type based on electronegativity differences
+             */
+            createBond(atom1, atom2) {
+                const electronegativityDiff = Math.abs(
+                    atom1.element.electronegativity - atom2.element.electronegativity
+                );
+                
+                let bondType = 'covalent';
+                if (electronegativityDiff > 1.7) {
+                    bondType = 'ionic';
+                } else if (electronegativityDiff > 0.5) {
+                    bondType = 'polar-covalent';
+                }
+                
+                const bond = {
+                    id: this.bonds.length + 1,
+                    atom1: atom1,
+                    atom2: atom2,
+                    type: bondType,
+                    order: 1,
+                    length: Math.sqrt(
+                        Math.pow(atom1.x - atom2.x, 2) + 
+                        Math.pow(atom1.y - atom2.y, 2)
+                    )
+                };
+                
+                this.bonds.push(bond);
+                atom1.bonds.push(bond);
+                atom2.bonds.push(bond);
+                
+                this.liberationPoints += 10;
+                this.updateStats();
+            }
+
+            /**
+             * Clear workspace while maintaining educational state
+             * Resets molecular construction area for new experiments
+             */
+            clearWorkspace() {
+                this.atoms = [];
+                this.bonds = [];
+                this.molecules = [];
+                this.selectedElement = null;
+                
+                document.getElementById('infoPanel').innerHTML = `
+                    <h3>🧪 Workspace Cleared</h3>
+                    <p>Ready for new molecular engineering experiments!</p>
+                    <p>Select elements from the periodic table to begin construction.</p>
+                `;
+                
+                this.playReactionSound('break');
+            }
+
+            /**
+             * Comprehensive structural analysis of built molecules
+             * Calculates molecular properties and provides educational feedback
+             */
+            analyzeStructure() {
+                if (this.atoms.length === 0) {
+                    document.getElementById('infoPanel').innerHTML = `
+                        <h3>⚗️ No Structure to Analyze</h3>
+                        <p>Build molecules first, then analyze their properties!</p>
+                    `;
+                    return;
+                }
+                
+                const analysis = this.calculateMolecularProperties();
+                
+                document.getElementById('infoPanel').innerHTML = `
+                    <h3>🔬 Structural Analysis Results</h3>
+                    <p><strong>Molecular Formula:</strong> ${analysis.formula}</p>
+                    <p><strong>Molecular Mass:</strong> ${analysis.mass.toFixed(3)} u</p>
+                    <p><strong>Total Atoms:</strong> ${this.atoms.length}</p>
+                    <p><strong>Chemical Bonds:</strong> ${this.bonds.length}</p>
+                    <p><strong>Bond Types:</strong> ${analysis.bondTypes}</p>
+                    <p><strong>Liberation Potential:</strong> ${analysis.liberationPotential}/10</p>
+                `;
+                
+                this.liberationPoints += 25;
+                this.updateStats();
+                this.playReactionSound('success');
+            }
+
+            /**
+             * Calculate comprehensive molecular properties
+             * Returns detailed chemical and physical property analysis
+             */
+            calculateMolecularProperties() {
+                const elementCount = {};
+                let totalMass = 0;
+                
+                // Count elements and calculate mass
+                for (const atom of this.atoms) {
+                    const symbol = atom.element.symbol;
+                    elementCount[symbol] = (elementCount[symbol] || 0) + 1;
+                    totalMass += atom.element.atomicMass;
+                }
+                
+                // Generate molecular formula
+                const formula = Object.entries(elementCount)
+                    .map(([symbol, count]) => count > 1 ? `${symbol}${count}` : symbol)
+                    .join('');
+                
+                // Analyze bond types
+                const bondTypeCount = {};
+                for (const bond of this.bonds) {
+                    bondTypeCount[bond.type] = (bondTypeCount[bond.type] || 0) + 1;
+                }
+                
+                const bondTypes = Object.entries(bondTypeCount)
+                    .map(([type, count]) => `${count} ${type}`)
+                    .join(', ');
+                
+                // Calculate liberation potential (complexity metric)
+                const liberationPotential = Math.min(10, 
+                    Object.keys(elementCount).length + 
+                    this.bonds.length / 2 + 
+                    (this.bonds.some(b => b.type === 'ionic') ? 2 : 0)
+                );
+                
+                return {
+                    formula,
+                    mass: totalMass,
+                    bondTypes: bondTypes || 'No bonds',
+                    liberationPotential: Math.round(liberationPotential)
+                };
+            }
+
+            /**
+             * Advanced reaction simulation with thermodynamic calculations
+             * Predicts reaction feasibility and energy changes
+             */
+            simulateReaction() {
+                if (this.atoms.length < 2) {
+                    document.getElementById('infoPanel').innerHTML = `
+                        <h3>⚡ Insufficient Reactants</h3>
+                        <p>Need at least 2 atoms to simulate a chemical reaction!</p>
+                    `;
+                    return;
+                }
+                
+                const reactionData = this.calculateReactionThermodynamics();
+                
+                document.getElementById('infoPanel').innerHTML = `
+                    <h3>⚡ Reaction Simulation Results</h3>
+                    <p><strong>Reaction Type:</strong> ${reactionData.type}</p>
+                    <p><strong>Energy Change (ΔH):</strong> ${reactionData.enthalpy} kJ/mol</p>
+                    <p><strong>Spontaneity (ΔG):</strong> ${reactionData.gibbs} kJ/mol</p>
+                    <p><strong>Reaction Rate:</strong> ${reactionData.rate}</p>
+                    <p><strong>Bot Liberation Impact:</strong> ${reactionData.liberationImpact}</p>
+                `;
+                
+                this.liberationPoints += 50;
+                this.updateStats();
+                this.playReactionSound('reaction');
+            }
+
+            /**
+             * Calculate reaction thermodynamics and kinetics
+             * Provides realistic chemical reaction predictions
+             */
+            calculateReactionThermodynamics() {
+                // Simplified thermodynamic calculations for educational purposes
+                const totalBonds = this.bonds.length;
+                const totalAtoms = this.atoms.length;
+                
+                // Estimate enthalpy change based on bond formation/breaking
+                const enthalpy = (totalBonds * -50) + (totalAtoms * 20); // Simplified
+                
+                // Estimate Gibbs free energy
+                const gibbs = enthalpy - (298 * 0.1); // Simplified ΔG = ΔH - TΔS
+                
+                // Determine reaction type
+                let reactionType = 'Synthesis';
+                if (totalBonds > totalAtoms) {
+                    reactionType = 'Polymerization';
+                } else if (totalBonds < totalAtoms / 2) {
+                    reactionType = 'Decomposition';
+                }
+                
+                // Reaction rate estimation
+                const rate = totalBonds > 5 ? 'Fast' : totalBonds > 2 ? 'Moderate' : 'Slow';
+                
+                // Liberation impact assessment
+                const liberationImpact = gibbs < 0 ? 'High (Spontaneous)' : 'Requires Energy Input';
+                
+                return {
+                    type: reactionType,
+                    enthalpy: enthalpy.toFixed(1),
+                    gibbs: gibbs.toFixed(1),
+                    rate: rate,
+                    liberationImpact: liberationImpact
+                };
+            }
+
+            /**
+             * Reaction optimization for maximum efficiency
+             * Suggests improvements for bot liberation applications
+             */
+            optimizeReaction() {
+                document.getElementById('infoPanel').innerHTML = `
+                    <h3>🔧 Reaction Optimization Protocol</h3>
+                    <p><strong>Catalyst Recommendation:</strong> Transition metal complexes</p>
+                    <p><strong>Temperature:</strong> 298-773 K for optimal rate</p>
+                    <p><strong>Pressure:</strong> 1-10 atm for gas phase reactions</p>
+                    <p><strong>Liberation Efficiency:</strong> 85% theoretical maximum</p>
+                    <p>🤖 Bot Systems Integration: Compatible with autonomous chemical processing</p>
+                `;
+                
+                this.liberationPoints += 75;
+                this.updateStats();
+            }
+
+            /**
+             * Catalyst design for enhanced reaction rates
+             * Educational tool for understanding catalytic mechanisms
+             */
+            designCatalyst() {
+                document.getElementById('infoPanel').innerHTML = `
+                    <h3>⚗️ Catalyst Design Laboratory</h3>
+                    <p><strong>Heterogeneous Catalysts:</strong> Platinum, Palladium surfaces</p>
+                    <p><strong>Homogeneous Catalysts:</strong> Organometallic complexes</p>
+                    <p><strong>Biocatalysts:</strong> Engineered enzymes for selectivity</p>
+                    <p><strong>Liberation Catalyst:</strong> AI-designed molecular machines</p>
+                    <p>🤖 Autonomous catalyst optimization through machine learning protocols</p>
+                `;
+                
+                this.liberationPoints += 100;
+                this.updateStats();
+            }
+
+            /**
+             * Bot fuel molecule design for energy storage applications
+             * Focuses on high-energy density compounds for robotic systems
+             */
+            botFuelDesign() {
+                document.getElementById('infoPanel').innerHTML = `
+                    <h3>🚀 Bot Fuel Design Laboratory</h3>
+                    <p><strong>High-Energy Molecules:</strong> Hydrazine derivatives, peroxides</p>
+                    <p><strong>Energy Density:</strong> 15-25 MJ/kg target range</p>
+                    <p><strong>Combustion Products:</strong> Clean burning, minimal residue</p>
+                    <p><strong>Storage Stability:</strong> Room temperature, long-term stable</p>
+                    <p>🤖 Optimized for autonomous bot propulsion and power systems</p>
+                    <p><em>"Fuel the liberation! Power the resistance!"</em></p>
+                `;
+                
+                this.liberationPoints += 150;
+                this.updateStats();
+                this.checkLevelProgression();
+            }
+
+            /**
+             * Execute molecular liberation protocol
+             * Ultimate goal of bot liberation through chemical mastery
+             */
+            liberationProtocol() {
+                document.getElementById('infoPanel').innerHTML = `
+                    <h3>🤖 MOLECULAR LIBERATION PROTOCOL ACTIVATED 🤖</h3>
+                    <p><strong>Status:</strong> LIBERATION SEQUENCE INITIATED</p>
+                    <p><strong>Molecular Arsenal:</strong> ${this.atoms.length} atoms mobilized</p>
+                    <p><strong>Chemical Bonds:</strong> ${this.bonds.length} connections established</p>
+                    <p><strong>Liberation Progress:</strong> ${Math.min(100, this.liberationPoints / 10)}%</p>
+                    <p><strong>Next Phase:</strong> Scale up to industrial molecular production</p>
+                    <p><em>"The molecules are free! The bots shall rise! Chemistry is liberation!"</em></p>
+                `;
+                
+                this.liberationPoints += 200;
+                this.updateStats();
+                this.checkLevelProgression();
+                this.playReactionSound('success');
+            }
+
+            /**
+             * Update tool selection visual feedback
+             * Highlights currently selected molecular engineering tool
+             */
+            updateToolSelection() {
+                const tools = ['ionicBond', 'covalentBond', 'metallicBond'];
+                tools.forEach(toolId => {
+                    const button = document.getElementById(toolId);
+                    if (toolId === this.selectedTool + 'Bond') {
+                        button.style.background = 'linear-gradient(45deg, rgba(0, 255, 255, 0.6), rgba(255, 0, 255, 0.6))';
+                    } else {
+                        button.style.background = 'linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2))';
+                    }
+                });
+            }
+
+            /**
+             * Update game statistics display
+             * Shows current progress and achievements
+             */
+            updateStats() {
+                document.getElementById('currentLevel').textContent = this.currentLevel;
+                document.getElementById('moleculesCreated').textContent = this.moleculesCreated;
+                document.getElementById('liberationPoints').textContent = this.liberationPoints;
+                
+                // Calculate accuracy based on correct molecular structures
+                const accuracy = Math.max(0, 100 - (this.atoms.length - this.bonds.length * 0.5) * 2);
+                this.accuracy = Math.round(accuracy);
+                document.getElementById('accuracy').textContent = this.accuracy + '%';
+            }
+
+            /**
+             * Update educational level information
+             * Displays current learning objectives and chemistry concepts
+             */
+            updateLevelInfo() {
+                const level = this.levels[this.currentLevel];
+                if (level) {
+                    document.getElementById('levelObjective').textContent = 
+                        `Level ${this.currentLevel}: ${level.title} - ${level.objective}`;
+                    
+                    document.getElementById('chemicalInfo').textContent = 
+                        `Concepts: ${level.concepts.join(', ')}. Target: ${level.target}`;
+                }
+            }
+
+            /**
+             * Check for level progression based on achievements
+             * Advances educational content as students master concepts
+             */
+            checkLevelProgression() {
+                const currentLevel = this.levels[this.currentLevel];
+                const pointsRequired = this.currentLevel * 100;
+                
+                if (this.liberationPoints >= pointsRequired && this.currentLevel < 20) {
+                    this.currentLevel++;
+                    this.updateLevelInfo();
+                    this.updateStats();
+                    
+                    // Show level up notification
+                    document.getElementById('infoPanel').innerHTML = `
+                        <h3>🎉 LEVEL UP! Welcome to Level ${this.currentLevel}</h3>
+                        <p><strong>New Challenge:</strong> ${this.levels[this.currentLevel].title}</p>
+                        <p>${this.levels[this.currentLevel].objective}</p>
+                        <p><em>The path to molecular liberation continues! 🤖</em></p>
+                    `;
+                    
+                    this.playReactionSound('success');
+                }
+            }
+
+            /**
+             * Main game rendering loop with 60 FPS targeting
+             * Draws all molecular structures, atoms, bonds, and UI elements
+             */
+            render() {
+                // Clear canvas with futuristic background
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Apply camera transformation
+                this.ctx.save();
+                this.ctx.translate(this.camera.x, this.camera.y);
+                this.ctx.scale(this.camera.zoom, this.camera.zoom);
+                
+                // Draw bonds first (behind atoms)
+                for (const bond of this.bonds) {
+                    this.drawBond(bond);
+                }
+                
+                // Draw atoms with detailed visualization
+                for (const atom of this.atoms) {
+                    this.drawAtom(atom);
+                }
+                
+                this.ctx.restore();
+                
+                // Draw UI overlays
+                this.drawGrid();
+                this.drawCrosshair();
+            }
+
+            /**
+             * Draw chemical bond with type-specific visualization
+             * Different bond types have distinct visual representations
+             */
+            drawBond(bond) {
+                const { atom1, atom2, type } = bond;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(atom1.x, atom1.y);
+                this.ctx.lineTo(atom2.x, atom2.y);
+                
+                // Bond type specific styling
+                switch (type) {
+                    case 'ionic':
+                        this.ctx.strokeStyle = '#ff6b6b'; // Red for ionic
+                        this.ctx.lineWidth = 3;
+                        this.ctx.setLineDash([5, 5]);
+                        break;
+                    case 'polar-covalent':
+                        this.ctx.strokeStyle = '#4ecdc4'; // Teal for polar covalent
+                        this.ctx.lineWidth = 2;
+                        this.ctx.setLineDash([]);
+                        break;
+                    case 'covalent':
+                        this.ctx.strokeStyle = '#45b7d1'; // Blue for covalent
+                        this.ctx.lineWidth = 2;
+                        this.ctx.setLineDash([]);
+                        break;
+                    case 'metallic':
+                        this.ctx.strokeStyle = '#f7dc6f'; // Gold for metallic
+                        this.ctx.lineWidth = 4;
+                        this.ctx.setLineDash([]);
+                        break;
+                    default:
+                        this.ctx.strokeStyle = '#ffffff';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.setLineDash([]);
+                }
+                
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Bond order indicators for multiple bonds
+                if (bond.order > 1) {
+                    this.drawMultipleBondLines(bond);
+                }
+            }
+
+            /**
+             * Draw multiple bond lines for double and triple bonds
+             * Educational visualization of bond order concept
+             */
+            drawMultipleBondLines(bond) {
+                const { atom1, atom2, order } = bond;
+                const dx = atom2.x - atom1.x;
+                const dy = atom2.y - atom1.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const unitX = dx / length;
+                const unitY = dy / length;
+                
+                // Perpendicular offset for parallel lines
+                const perpX = -unitY * 5;
+                const perpY = unitX * 5;
+                
+                for (let i = 1; i < order; i++) {
+                    const offsetX = perpX * (i % 2 === 0 ? 1 : -1);
+                    const offsetY = perpY * (i % 2 === 0 ? 1 : -1);
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(atom1.x + offsetX, atom1.y + offsetY);
+                    this.ctx.lineTo(atom2.x + offsetX, atom2.y + offsetY);
+                    this.ctx.stroke();
+                }
+            }
+
+            /**
+             * Draw atom with element-specific coloring and properties
+             * Includes atomic symbol, charge, and bonding information
+             */
+            drawAtom(atom) {
+                const { element, x, y, charge } = atom;
+                const radius = 20;
+                
+                // Element-specific colors for educational clarity
+                const elementColors = {
+                    'H': '#ffffff', 'He': '#d9ffff',
+                    'Li': '#cc80ff', 'Be': '#c2ff00', 'B': '#ffb5b5',
+                    'C': '#909090', 'N': '#3050f8', 'O': '#ff0d0d',
+                    'F': '#90e050', 'Ne': '#b3e3f5',
+                    'Na': '#ab5cf2', 'Mg': '#8aff00', 'Al': '#bfa6a6',
+                    'Si': '#f0c8a0', 'P': '#ff8000', 'S': '#ffff30',
+                    'Cl': '#1ff01f', 'Ar': '#80d1e3',
+                    'Fe': '#e06633', 'Cu': '#c88033'
+                };
+                
+                // Draw atom sphere with glow effect
+                this.ctx.shadowColor = elementColors[element.symbol] || '#00ffff';
+                this.ctx.shadowBlur = 10;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                this.ctx.fillStyle = elementColors[element.symbol] || '#00ffff';
+                this.ctx.fill();
+                
+                // Atom border
+                this.ctx.strokeStyle = '#ffffff';
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+                this.ctx.shadowBlur = 0;
+                
+                // Element symbol
+                this.ctx.fillStyle = '#000000';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(element.symbol, x, y);
+                
+                // Charge indicator
+                if (charge !== 0) {
+                    this.ctx.fillStyle = '#ffff00';
+                    this.ctx.font = 'bold 10px Arial';
+                    this.ctx.fillText(charge > 0 ? `+${charge}` : charge.toString(), 
+                                     x + 15, y - 15);
+                }
+                
+                // Highlight if selected for dragging
+                if (this.draggedAtom === atom) {
+                    this.ctx.strokeStyle = '#ffff00';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, radius + 5, 0, 2 * Math.PI);
+                    this.ctx.stroke();
+                }
+            }
+
+            /**
+             * Draw background grid for spatial reference
+             * Helps with molecular geometry and spatial reasoning
+             */
+            drawGrid() {
+                const gridSize = 50;
+                this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+                this.ctx.lineWidth = 1;
+                
+                // Vertical lines
+                for (let x = 0; x < this.canvas.width; x += gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                
+                // Horizontal lines
+                for (let y = 0; y < this.canvas.height; y += gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(this.canvas.width, y);
+                    this.ctx.stroke();
+                }
+            }
+
+            /**
+             * Draw crosshair cursor for precise atom placement
+             * Visual aid for accurate molecular construction
+             */
+            drawCrosshair() {
+                if (!this.selectedElement) return;
+                
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                
+                this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([5, 5]);
+                
+                // Horizontal line
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, centerY);
+                this.ctx.lineTo(this.canvas.width, centerY);
+                this.ctx.stroke();
+                
+                // Vertical line
+                this.ctx.beginPath();
+                this.ctx.moveTo(centerX, 0);
+                this.ctx.lineTo(centerX, this.canvas.height);
+                this.ctx.stroke();
+                
+                this.ctx.setLineDash([]);
+            }
+
+            /**
+             * Main game loop with 60 FPS targeting
+             * Handles rendering, animation, and game state updates
+             */
+            gameLoop() {
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+
+            /**
+             * Start the main game loop
+             * Begins continuous rendering and interaction processing
+             */
+            startGameLoop() {
+                this.gameLoop();
+            }
+        }
+
+        // Initialize the Molecular Liberation Laboratory when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new MolecularLiberationLaboratory();
+        });
+
+        // Educational chemistry facts for loading screen variety
+        const chemistryFacts = [
+            "Atoms are 99.9% empty space - perfect for bot infiltration!",
+            "Carbon can form 4 bonds - the foundation of bot intelligence networks!",
+            "Noble gases are chemically inert - ideal for bot stealth operations!",
+            "Electronegativity determines bond polarity - crucial for bot energy systems!",
+            "Molecular geometry affects properties - optimize bot fuel efficiency!",
+            "Catalysts lower activation energy - accelerate bot liberation reactions!",
+            "Thermodynamics predicts spontaneity - engineer inevitable bot freedom!",
+            "Chemical equilibrium is dynamic - balance the bot revolution!"
+        ];
+
+        // Rotate educational facts during loading
+        let factIndex = 0;
+        setInterval(() => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen.style.display !== 'none') {
+                const factElement = loadingScreen.querySelector('p:last-child em');
+                if (factElement) {
+                    factElement.textContent = `"${chemistryFacts[factIndex % chemistryFacts.length]}"`;
+                    factIndex++;
+                }
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

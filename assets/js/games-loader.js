@@ -315,71 +315,145 @@ class GamesLoader {
         let isDragging = false;
         let startTime = 0;
         
-        // Enhanced touch handling for better mobile experience
+        // Enhanced touch handling with game card tap prioritization
+        let tapStartTarget = null;
+        let tapStartTime = 0;
+        
         container.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
-            isDragging = true;
-            startTime = Date.now();
+            tapStartTarget = e.target;
+            tapStartTime = Date.now();
             
-            // Prevent default scrolling behavior during swipe
-            if (e.touches.length === 1) {
-                e.preventDefault();
+            // Check if touch started on a game card link
+            const gameCard = e.target.closest('.game-card');
+            const interactiveElement = e.target.closest('.mobile-actions-separator, .rating-interact, .bug-report-mobile');
+            
+            if (gameCard && !interactiveElement) {
+                // This looks like a game card tap - be conservative about drag detection
+                isDragging = false;
+                console.log('🎮 Touch started on game card:', gameCard.dataset.gameId);
+            } else {
+                // Normal carousel area - enable drag detection
+                isDragging = true;
+                console.log('📱 Touch started on carousel area - enabling swipe detection');
             }
-        }, { passive: false });
+            
+            startTime = Date.now();
+        }, { passive: true });
         
         container.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            
             const currentX = e.touches[0].clientX;
             const currentY = e.touches[0].clientY;
             const diffX = Math.abs(currentX - startX);
             const diffY = Math.abs(currentY - startY);
+            const timeElapsed = Date.now() - tapStartTime;
             
-            // If horizontal swipe is detected, prevent vertical scrolling
-            if (diffX > diffY && diffX > 10) {
-                e.preventDefault();
+            // Improved gesture recognition with tap protection
+            const isHorizontalSwipe = diffX > diffY && diffX > 25;
+            const isQuickMovement = timeElapsed < 150 && diffX > 15;
+            const gameCard = tapStartTarget?.closest('.game-card');
+            
+            if (gameCard && (diffX < 20 && diffY < 20)) {
+                // Small movement on game card - likely still a tap intention
+                console.log('🎯 Small movement detected - preserving tap intention');
+                return;
+            }
+            
+            if (isHorizontalSwipe || isQuickMovement) {
+                // Clear swipe gesture detected - enable carousel navigation
+                isDragging = true;
+                console.log('👆 Swipe gesture detected - enabling carousel navigation');
+                
+                // Cancel any pending game card tap
+                if (gameCard) {
+                    gameCard.classList.remove('touch-active');
+                }
+                
+                // Prevent default scrolling
+                if (diffX > 30) {
+                    e.preventDefault();
+                }
             }
         }, { passive: false });
         
         container.addEventListener('touchend', (e) => {
-            if (!isDragging) return;
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            const deltaX = startX - endX;
+            const deltaY = Math.abs(startY - endY);
+            const deltaTime = Date.now() - tapStartTime;
+            const totalDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             
-            endX = e.changedTouches[0].clientX;
-            endY = e.changedTouches[0].clientY;
-            const endTime = Date.now();
+            const gameCard = tapStartTarget?.closest('.game-card');
+            const interactiveElement = tapStartTarget?.closest('.mobile-actions-separator, .rating-interact, .bug-report-mobile');
             
-            const differenceX = startX - endX;
-            const differenceY = Math.abs(startY - endY);
-            const swipeTime = endTime - startTime;
-            const swipeSpeed = Math.abs(differenceX) / swipeTime;
-            
-            // Enhanced swipe detection with speed and direction
-            const minSwipeDistance = window.innerWidth < 480 ? 30 : 50;
-            const maxVerticalDrift = 100;
-            
-            if (Math.abs(differenceX) > minSwipeDistance && 
-                differenceY < maxVerticalDrift &&
-                swipeTime < 500) {
+            // Tap detection for game cards
+            if (gameCard && !interactiveElement && !isDragging && totalDistance < 25 && deltaTime < 500) {
+                console.log('🎮 Clean tap detected on game card - allowing navigation');
                 
-                // Add haptic feedback on supported devices
+                // Add enhanced visual feedback for successful tap
+                gameCard.classList.add('tap-success');
+                
+                // Add haptic feedback for successful tap
                 if ('vibrate' in navigator) {
-                    navigator.vibrate(10);
+                    navigator.vibrate(25); // Short success vibration
                 }
                 
-                if (differenceX > 0) {
-                    this.nextPage(); // Swipe left to go next
-                } else {
-                    this.prevPage(); // Swipe right to go previous
+                // Show loading state briefly
+                const originalText = gameCard.querySelector('.game-title').textContent;
+                const titleElement = gameCard.querySelector('.game-title');
+                titleElement.textContent = 'Loading...';
+                
+                setTimeout(() => {
+                    gameCard.classList.remove('tap-success');
+                    titleElement.textContent = originalText;
+                }, 200);
+                
+                // Let the browser handle the <a> tag navigation naturally
+                isDragging = false;
+                tapStartTarget = null;
+                return;
+            }
+            
+            // Carousel navigation for clear swipe gestures
+            if (isDragging) {
+                const minSwipeDistance = window.innerWidth < 480 ? 30 : 50;
+                const maxVerticalDrift = 100;
+                
+                if (Math.abs(deltaX) > minSwipeDistance && 
+                    deltaY < maxVerticalDrift &&
+                    deltaTime < 500) {
+                    
+                    console.log('👆 Processing carousel swipe:', deltaX > 0 ? 'next' : 'previous');
+                    
+                    // Add haptic feedback on supported devices
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(10);
+                    }
+                    
+                    if (deltaX > 0) {
+                        this.nextPage(); // Swipe left to go next
+                    } else {
+                        this.prevPage(); // Swipe right to go previous
+                    }
                 }
             }
             
             isDragging = false;
+            tapStartTarget = null;
         });
         
         // Handle touch cancel events
         container.addEventListener('touchcancel', () => {
+            console.log('🚫 Touch cancelled - resetting state');
             isDragging = false;
+            tapStartTarget = null;
+            
+            // Clear any active touch states
+            container.querySelectorAll('.touch-active').forEach(el => {
+                el.classList.remove('touch-active');
+            });
         });
     }
 
@@ -761,32 +835,87 @@ class GamesLoader {
     }
 
     createGameElement(game) {
+        // Use different card structures for mobile vs desktop
+        const isMobileDevice = this.isMobile();
+        console.log(`🎮 Creating ${isMobileDevice ? 'MOBILE' : 'DESKTOP'} game card for: ${game.title}`);
+        
+        if (isMobileDevice) {
+            return this.createMobileGameElement(game);
+        } else {
+            return this.createDesktopGameElement(game);
+        }
+    }
+    
+    createMobileGameElement(game) {
         const element = document.createElement('a');
         element.href = game.file;
-        element.className = 'game-card game-card-entry';
+        element.className = 'game-card game-card-entry mobile-optimized';
         element.dataset.gameId = game.id;
-        element.innerHTML = this.createGameCard(game);
+        element.innerHTML = this.createMobileGameCard(game);
         
-        // Mobile-specific touch feedback only (let <a> href handle navigation)
-        if (this.isMobile()) {
-            element.addEventListener('touchstart', (e) => {
-                // Add visual feedback without interfering with navigation
-                element.classList.add('touch-active');
-            });
+        let longPressTimer = null;
+        let touchStartTime = 0;
+        
+        // Enhanced mobile touch handling with action prevention
+        element.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            element.classList.add('touch-active');
             
-            element.addEventListener('touchend', (e) => {
-                // Remove visual feedback
-                element.classList.remove('touch-active');
-            });
-            
-            // Ensure proper mobile navigation - fallback only
-            element.addEventListener('click', (e) => {
-                // Only handle if href navigation fails
-                if (!e.defaultPrevented) {
-                    console.log(`🎮 Mobile click: ${game.title} - ${game.file}`);
+            // Set timer for showing mobile actions after long press
+            longPressTimer = setTimeout(() => {
+                if (!element.classList.contains('show-actions')) {
+                    element.classList.add('show-actions');
+                    console.log('🔎 Long press detected - showing mobile actions for:', game.title);
+                    
+                    // Add haptic feedback for long press
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(50);
+                    }
                 }
-            });
-        }
+            }, 800); // 800ms long press threshold
+        });
+        
+        element.addEventListener('touchend', (e) => {
+            const touchDuration = Date.now() - touchStartTime;
+            element.classList.remove('touch-active');
+            
+            // Clear long press timer
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            
+            // If actions are showing and it was a quick tap, hide them and prevent navigation
+            if (element.classList.contains('show-actions') && touchDuration < 300) {
+                element.classList.remove('show-actions');
+                e.preventDefault();
+                console.log('🙅 Actions visible - hiding actions instead of navigating');
+                return false;
+            }
+        });
+        
+        element.addEventListener('touchcancel', (e) => {
+            element.classList.remove('touch-active');
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        });
+        
+        // Hide actions when touching outside
+        element.addEventListener('blur', () => {
+            element.classList.remove('show-actions');
+        });
+        
+        return element;
+    }
+    
+    createDesktopGameElement(game) {
+        const element = document.createElement('a');
+        element.href = game.file;
+        element.className = 'game-card game-card-entry desktop-optimized';
+        element.dataset.gameId = game.id;
+        element.innerHTML = this.createDesktopGameCard(game);
         
         return element;
     }
@@ -810,10 +939,39 @@ class GamesLoader {
         }
     }
 
-    createGameCard(game) {
+    createMobileGameCard(game) {
         const difficultyIcon = this.getDifficultyIcon(game.difficulty);
-        
-        // Use high-quality large images
+        const imageSrc = game.thumbnail_large || game.thumbnail;
+
+        return `
+            <div class="card-media">
+                <img src="${imageSrc}" alt="${game.title}" class="game-image" loading="lazy">
+                ${this.shouldShowBadge(game) ? `<div class="game-badge ${this.getBadgeClass()}">${this.formatBadge()}</div>` : ''}
+            </div>
+            <div class="card-content">
+                <h3 class="game-title">${game.title}</h3>
+                <p class="game-genre">${game.genre}</p>
+                <div class="game-meta-mobile">
+                    <div class="rating-display">
+                        <span class="stars-display">${this.generateDisplayStars(game)}</span>
+                        <span class="rating-text">${this.getDisplayRating(game)}</span>
+                    </div>
+                    <div class="difficulty">${difficultyIcon}</div>
+                </div>
+            </div>
+            <div class="mobile-actions-separator">
+                <div class="rating-interact" onclick="event.stopPropagation(); BotIncMobile.showRatingModal('${game.id}', '${game.title}');">
+                    ⭐ Rate
+                </div>
+                <div class="bug-report-mobile" onclick="event.stopPropagation(); BotIncMobile.showBugReportModal('${game.id}', '${game.title}', '${game.file}');">
+                    🐛 Bug
+                </div>
+            </div>
+        `;
+    }
+    
+    createDesktopGameCard(game) {
+        const difficultyIcon = this.getDifficultyIcon(game.difficulty);
         const imageSrc = game.thumbnail_large || game.thumbnail;
 
         return `
@@ -982,6 +1140,30 @@ class GamesLoader {
         
         // Fallback to empty stars if rating system not loaded
         return this.generateStars(0);
+    }
+    
+    generateDisplayStars(game) {
+        // Generate non-interactive display-only stars for mobile
+        if (window.BotIncRatingSystem) {
+            const avgRating = window.BotIncRatingSystem.getAverageRating(game.id);
+            const userRating = window.BotIncRatingSystem.getUserRating(game.id);
+            const displayRating = userRating > 0 ? userRating : avgRating;
+            
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (userRating > 0) {
+                    // Show user rating in different color
+                    stars += i <= userRating ? '<span class="star-display user-rated">★</span>' : '<span class="star-display empty">☆</span>';
+                } else {
+                    // Show average rating
+                    stars += i <= Math.round(displayRating) ? '<span class="star-display filled">★</span>' : '<span class="star-display empty">☆</span>';
+                }
+            }
+            return stars;
+        }
+        
+        // Fallback to empty stars
+        return '<span class="star-display empty">☆</span>'.repeat(5);
     }
 
     // Get display rating for a game
@@ -1230,6 +1412,130 @@ class GamesLoader {
             const actualCount = this.games.length;
             this.updateAllGameCounters(actualCount);
         }
+        
+        // Initialize mobile utilities
+        this.initMobileUtils();
+        
+        // Set up global touch event cleanup
+        this.setupGlobalTouchCleanup();
+    }
+    
+    // Initialize mobile utilities for separated interactions
+    initMobileUtils() {
+        if (typeof window.BotIncMobile === 'undefined') {
+            const self = this; // Capture 'this' context for closures
+            window.BotIncMobile = {
+                showRatingModal: (gameId, gameTitle) => {
+                    // Hide actions first
+                    self.hideAllMobileActions();
+                    
+                    // Simple rating prompt for mobile
+                    const rating = prompt(`Rate "${gameTitle}" (1-5 stars):`);
+                    const numRating = parseInt(rating);
+                    if (numRating >= 1 && numRating <= 5) {
+                        if (window.BotIncRatingSystem) {
+                            const success = window.BotIncRatingSystem.rateGame(gameId, numRating);
+                            if (success) {
+                                // Success haptic feedback
+                                if ('vibrate' in navigator) {
+                                    navigator.vibrate([50, 100, 50]);
+                                }
+                                alert(`Thanks for rating "${gameTitle}" ${numRating} star${numRating !== 1 ? 's' : ''}!`);
+                                // Update the display for this game
+                                self.updateGameRatingDisplay(gameId);
+                            }
+                        }
+                    } else if (rating !== null) {
+                        alert('Please enter a rating between 1 and 5.');
+                    }
+                },
+                
+                showBugReportModal: (gameId, gameTitle, gameFile) => {
+                    // Hide actions first
+                    self.hideAllMobileActions();
+                    
+                    // Simple bug report for mobile
+                    const bugDescription = prompt(`Report a bug for "${gameTitle}":\nDescribe the issue:`);
+                    if (bugDescription && bugDescription.trim()) {
+                        // Store in localStorage for later processing
+                        const bugReport = {
+                            gameId,
+                            gameTitle,
+                            gameFile,
+                            description: bugDescription.trim(),
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent,
+                            url: window.location.href
+                        };
+                        
+                        // Get existing reports
+                        let reports = [];
+                        try {
+                            const stored = localStorage.getItem('botinc-bug-reports');
+                            if (stored) reports = JSON.parse(stored);
+                        } catch (e) {
+                            console.warn('Failed to load existing bug reports');
+                        }
+                        
+                        // Add new report
+                        reports.push(bugReport);
+                        
+                        // Store updated reports
+                        try {
+                            localStorage.setItem('botinc-bug-reports', JSON.stringify(reports));
+                            // Success haptic feedback
+                            if ('vibrate' in navigator) {
+                                navigator.vibrate([100, 50, 100]);
+                            }
+                            alert(`Bug report submitted for "${gameTitle}".\nThank you for helping improve our games!`);
+                            console.log('🐛 Bug Report Submitted:', bugReport);
+                        } catch (e) {
+                            alert('Failed to save bug report. Please try again.');
+                        }
+                    }
+                }
+            };
+        }
+    }
+    
+    updateGameRatingDisplay(gameId) {
+        // Update rating displays for the specific game
+        const gameCards = document.querySelectorAll(`[data-game-id="${gameId}"]`);
+        gameCards.forEach(card => {
+            const ratingText = card.querySelector('.rating-text');
+            const starsDisplay = card.querySelector('.stars-display');
+            
+            if (ratingText && window.BotIncRatingSystem) {
+                const ratingDisplay = window.BotIncRatingSystem.generateRatingDisplay(gameId, 0, 0);
+                ratingText.textContent = ratingDisplay.ratingText;
+                if (starsDisplay) {
+                    starsDisplay.innerHTML = this.generateDisplayStars({id: gameId});
+                }
+            }
+        });
+    }
+    
+    hideAllMobileActions() {
+        // Hide all visible mobile actions
+        document.querySelectorAll('.mobile-optimized.show-actions').forEach(card => {
+            card.classList.remove('show-actions');
+        });
+        console.log('🙈 All mobile actions hidden');
+    }
+    
+    setupGlobalTouchCleanup() {
+        // Hide mobile actions when touching outside game cards
+        document.addEventListener('touchstart', (e) => {
+            const gameCard = e.target.closest('.game-card');
+            if (!gameCard) {
+                this.hideAllMobileActions();
+            }
+        });
+        
+        // Hide actions on scroll start
+        document.addEventListener('scroll', () => {
+            this.hideAllMobileActions();
+        }, { passive: true });
     }
 }
 

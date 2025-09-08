@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Wars: Sorting the Resistance - Bot Liberation Games</title>
+    <style>
+        /* Reset and base styles for consistent cross-browser behavior */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 50%, #000066 100%);
+            color: #00ff88;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Main game container with cyberpunk styling */
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
+        }
+
+        /* HUD overlay for game interface elements */
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 2px solid #00ff88;
+        }
+
+        /* Title and branding */
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        /* Level and score display */
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 1rem;
+        }
+
+        /* Main game canvas with glowing border effect */
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0, 255, 136, 0.05) 0%, transparent 70%);
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Control panel for algorithm selection and execution */
+        .control-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #00ff88;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        /* Algorithm selection buttons */
+        .algorithm-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .algo-btn {
+            background: linear-gradient(145deg, #001133, #003366);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .algo-btn:hover {
+            background: linear-gradient(145deg, #003366, #0066cc);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .algo-btn.active {
+            background: linear-gradient(145deg, #00ff88, #00cc66);
+            color: #000033;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+        }
+
+        /* Performance metrics display */
+        .performance-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .big-o-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .complexity-meter {
+            width: 200px;
+            height: 20px;
+            background: rgba(255, 0, 0, 0.3);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .complexity-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #ffaa00, #ff0000);
+            transition: width 0.5s ease;
+            border-radius: 8px;
+        }
+
+        /* Educational modal for algorithm explanations */
+        .education-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #00ff88;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .education-modal h2 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .education-modal p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #cccccc;
+        }
+
+        .education-modal .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #00ff88;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Battle progress indicator */
+        .battle-progress {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            right: 20px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ff88;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bot, .progress-corp {
+            height: 100%;
+            position: absolute;
+            top: 0;
+            transition: width 1s ease;
+        }
+
+        .progress-bot {
+            background: linear-gradient(90deg, #00ff88, #00cc66);
+            left: 0;
+        }
+
+        .progress-corp {
+            background: linear-gradient(90deg, #ff0066, #cc0033);
+            right: 0;
+        }
+
+        /* Animations for cyberpunk aesthetic */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
+        }
+
+        /* Mobile responsiveness for touch devices */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 1.2rem;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                gap: 15px;
+                padding: 10px;
+            }
+            
+            .algorithm-buttons {
+                justify-content: center;
+            }
+            
+            .algo-btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
+
+        /* Victory/defeat overlay styles */
+        .battle-result {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .result-content {
+            text-align: center;
+            padding: 40px;
+            border: 3px solid;
+            border-radius: 15px;
+            max-width: 600px;
+        }
+
+        .victory {
+            border-color: #00ff88;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 102, 0.1));
+        }
+
+        .defeat {
+            border-color: #ff0066;
+            background: linear-gradient(135deg, rgba(255, 0, 102, 0.1), rgba(204, 0, 51, 0.1));
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- HUD overlay with game information -->
+        <div class="hud-overlay">
+            <div class="game-title">ALGORITHM WARS: SORTING THE RESISTANCE</div>
+            <div class="game-stats">
+                <div>Level: <span id="levelDisplay">1</span></div>
+                <div>Liberation Score: <span id="scoreDisplay">0</span></div>
+                <div>Bots Freed: <span id="botsFreed">0</span></div>
+            </div>
+        </div>
+
+        <!-- Battle progress indicator -->
+        <div class="battle-progress">
+            <div class="progress-bot" id="botProgress" style="width: 50%"></div>
+            <div class="progress-corp" id="corpProgress" style="width: 50%"></div>
+        </div>
+
+        <!-- Main game canvas for visualizations -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Control panel for algorithm selection and execution -->
+        <div class="control-panel">
+            <div class="algorithm-buttons">
+                <button class="algo-btn" data-algorithm="bubble">Bubble Sort</button>
+                <button class="algo-btn" data-algorithm="selection">Selection Sort</button>
+                <button class="algo-btn" data-algorithm="insertion">Insertion Sort</button>
+                <button class="algo-btn" data-algorithm="merge">Merge Sort</button>
+                <button class="algo-btn" data-algorithm="quick">Quick Sort</button>
+                <button class="algo-btn" data-algorithm="heap">Heap Sort</button>
+                <button class="algo-btn active" data-algorithm="info">Algorithm Info</button>
+            </div>
+            
+            <div class="performance-panel">
+                <div class="big-o-display" id="bigODisplay">Select Algorithm</div>
+                <div class="complexity-meter">
+                    <div class="complexity-bar" id="complexityBar" style="width: 0%"></div>
+                </div>
+                <button class="algo-btn" id="startBattle">START BATTLE!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Educational modal for algorithm information -->
+    <div class="education-modal" id="educationModal">
+        <button class="close-btn" onclick="closeEducationModal()">&times;</button>
+        <div id="educationContent">
+            <!-- Content will be dynamically populated -->
+        </div>
+    </div>
+
+    <!-- Battle result overlay -->
+    <div class="battle-result" id="battleResult">
+        <div class="result-content" id="resultContent">
+            <!-- Result content will be dynamically populated -->
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Algorithm Wars: Sorting the Resistance
+         * Educational game teaching algorithm design and Big O complexity
+         * through competitive Bot Liberation battles against corporate AI systems.
+         * 
+         * This game implements professional educational methodology with:
+         * - Interactive algorithm visualization
+         * - Real-time performance metrics
+         * - Progressive difficulty structure
+         * - Comprehensive algorithm explanations
+         * - Mobile-friendly touch controls
+         */
+
+        // Game state management and initialization
+        class AlgorithmWarsGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audioContext = null;
+                
+                // Game state variables
+                this.currentLevel = 1;
+                this.score = 0;
+                this.botsFreed = 0;
+                this.selectedAlgorithm = 'bubble';
+                this.battleInProgress = false;
+                this.gameData = [];
+                this.animationId = null;
+                
+                // Performance tracking for educational metrics
+                this.botPerformance = { time: 0, comparisons: 0, swaps: 0 };
+                this.corpPerformance = { time: 0, comparisons: 0, swaps: 0 };
+                
+                // Initialize game systems
+                this.initializeCanvas();
+                this.initializeAudio();
+                this.initializeEventListeners();
+                this.generateLevelData();
+                this.startGameLoop();
+                
+                console.log('Algorithm Wars initialized - Ready for Bot Liberation!');
+            }
+
+            /**
+             * Canvas initialization with responsive sizing
+             * Ensures optimal display across all devices
+             */
+            initializeCanvas() {
+                const resizeCanvas = () => {
+                    this.canvas.width = this.canvas.offsetWidth;
+                    this.canvas.height = this.canvas.offsetHeight;
+                };
+                
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                
+                // Set canvas drawing properties for crisp visuals
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
+            }
+
+            /**
+             * Web Audio API initialization for cyberpunk sound effects
+             * Creates immersive audio experience with procedural sound generation
+             */
+            initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    console.log('Web Audio API initialized successfully');
+                } catch (error) {
+                    console.warn('Web Audio API not available:', error);
+                    this.audioContext = null;
+                }
+            }
+
+            /**
+             * Event listener setup for user interaction
+             * Handles both mouse and touch events for cross-platform compatibility
+             */
+            initializeEventListeners() {
+                // Algorithm selection buttons
+                document.querySelectorAll('.algo-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const algorithm = e.target.dataset.algorithm;
+                        if (algorithm === 'info') {
+                            this.showEducationModal();
+                        } else if (algorithm) {
+                            this.selectAlgorithm(algorithm);
+                        }
+                    });
+                });
+
+                // Battle start button
+                document.getElementById('startBattle').addEventListener('click', () => {
+                    if (!this.battleInProgress) {
+                        this.startBattle();
+                    }
+                });
+
+                // Touch and mouse support for mobile devices
+                this.canvas.addEventListener('touchstart', this.handleTouch.bind(this), { passive: false });
+                this.canvas.addEventListener('touchmove', this.handleTouch.bind(this), { passive: false });
+                this.canvas.addEventListener('click', this.handleClick.bind(this));
+            }
+
+            /**
+             * Generate level data based on current difficulty
+             * Creates appropriately sized datasets for educational progression
+             */
+            generateLevelData() {
+                // Data size increases with level for complexity demonstration
+                const dataSize = Math.min(10 + this.currentLevel * 2, 50);
+                this.gameData = [];
+                
+                // Generate random bot formation data
+                for (let i = 0; i < dataSize; i++) {
+                    this.gameData.push({
+                        value: Math.floor(Math.random() * 100) + 1,
+                        id: i,
+                        isBot: true,
+                        status: 'unsorted', // unsorted, comparing, moving, sorted
+                        x: 0,
+                        y: 0,
+                        targetX: 0,
+                        targetY: 0
+                    });
+                }
+                
+                console.log(`Generated level ${this.currentLevel} data: ${dataSize} elements`);
+            }
+
+            /**
+             * Algorithm selection handler
+             * Updates UI and educational information based on chosen algorithm
+             */
+            selectAlgorithm(algorithm) {
+                this.selectedAlgorithm = algorithm;
+                
+                // Update UI to show selected algorithm
+                document.querySelectorAll('.algo-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-algorithm="${algorithm}"]`).classList.add('active');
+                
+                // Update performance display with algorithm complexity
+                this.updateComplexityDisplay(algorithm);
+                this.playSound('select', 440, 0.1, 0.1);
+            }
+
+            /**
+             * Update Big O complexity display for educational purposes
+             * Shows theoretical complexity and practical implications
+             */
+            updateComplexityDisplay(algorithm) {
+                const complexityInfo = this.getAlgorithmComplexity(algorithm);
+                document.getElementById('bigODisplay').textContent = complexityInfo.notation;
+                
+                // Visual complexity indicator (0-100% based on efficiency)
+                const complexityPercent = complexityInfo.efficiency;
+                document.getElementById('complexityBar').style.width = `${100 - complexityPercent}%`;
+            }
+
+            /**
+             * Algorithm complexity database for educational reference
+             * Provides Big O notation and efficiency ratings for comparison
+             */
+            getAlgorithmComplexity(algorithm) {
+                const complexities = {
+                    bubble: { notation: 'O(n²)', efficiency: 20, description: 'Bubble Sort: Simple but inefficient for large datasets' },
+                    selection: { notation: 'O(n²)', efficiency: 25, description: 'Selection Sort: Fewer swaps than bubble sort' },
+                    insertion: { notation: 'O(n²)', efficiency: 40, description: 'Insertion Sort: Efficient for small or nearly sorted data' },
+                    merge: { notation: 'O(n log n)', efficiency: 85, description: 'Merge Sort: Divide and conquer, guaranteed efficiency' },
+                    quick: { notation: 'O(n log n)', efficiency: 80, description: 'Quick Sort: Fast average case, vulnerable to worst case' },
+                    heap: { notation: 'O(n log n)', efficiency: 75, description: 'Heap Sort: Consistent performance, in-place sorting' }
+                };
+                
+                return complexities[algorithm] || { notation: 'Select Algorithm', efficiency: 0 };
+            }
+
+            /**
+             * Battle initialization and execution
+             * Simulates competitive sorting between bot and corporate algorithms
+             */
+            async startBattle() {
+                if (this.battleInProgress) return;
+                
+                this.battleInProgress = true;
+                document.getElementById('startBattle').textContent = 'BATTLE IN PROGRESS...';
+                this.playSound('battle_start', 220, 0.3, 1.0);
+                
+                // Reset battle metrics
+                this.botPerformance = { time: 0, comparisons: 0, swaps: 0 };
+                this.corpPerformance = { time: 0, comparisons: 0, swaps: 0 };
+                
+                // Execute bot algorithm (player's choice)
+                const botStartTime = performance.now();
+                await this.executeAlgorithm(this.selectedAlgorithm, 'bot');
+                this.botPerformance.time = performance.now() - botStartTime;
+                
+                // Execute corporate algorithm (optimized competitor)
+                const corpStartTime = performance.now();
+                await this.executeAlgorithm(this.getCorporateAlgorithm(), 'corporate');
+                this.corpPerformance.time = performance.now() - corpStartTime;
+                
+                // Determine battle outcome and update game state
+                this.resolveBattle();
+            }
+
+            /**
+             * Corporate algorithm selection based on level difficulty
+             * Provides progressively challenging AI opponents
+             */
+            getCorporateAlgorithm() {
+                const corporateAlgorithms = ['quick', 'merge', 'heap'];
+                return corporateAlgorithms[Math.floor(Math.random() * corporateAlgorithms.length)];
+            }
+
+            /**
+             * Algorithm execution with visual animation
+             * Implements actual sorting algorithms with educational visualization
+             */
+            async executeAlgorithm(algorithm, executor) {
+                const data = [...this.gameData]; // Work with copy for visualization
+                
+                switch (algorithm) {
+                    case 'bubble':
+                        await this.bubbleSort(data, executor);
+                        break;
+                    case 'selection':
+                        await this.selectionSort(data, executor);
+                        break;
+                    case 'insertion':
+                        await this.insertionSort(data, executor);
+                        break;
+                    case 'merge':
+                        await this.mergeSort(data, 0, data.length - 1, executor);
+                        break;
+                    case 'quick':
+                        await this.quickSort(data, 0, data.length - 1, executor);
+                        break;
+                    case 'heap':
+                        await this.heapSort(data, executor);
+                        break;
+                }
+            }
+
+            /**
+             * Bubble Sort implementation with educational visualization
+             * Demonstrates O(n²) complexity through bot formation movements
+             */
+            async bubbleSort(data, executor) {
+                const n = data.length;
+                const performance = executor === 'bot' ? this.botPerformance : this.corpPerformance;
+                
+                for (let i = 0; i < n - 1; i++) {
+                    for (let j = 0; j < n - i - 1; j++) {
+                        // Visual comparison highlighting
+                        data[j].status = 'comparing';
+                        data[j + 1].status = 'comparing';
+                        
+                        performance.comparisons++;
+                        
+                        if (data[j].value > data[j + 1].value) {
+                            // Swap elements with animation
+                            [data[j], data[j + 1]] = [data[j + 1], data[j]];
+                            performance.swaps++;
+                            this.playSound('swap', 330 + (j * 10), 0.05, 0.1);
+                        }
+                        
+                        // Animation delay for educational observation
+                        await this.sleep(50);
+                        
+                        data[j].status = 'unsorted';
+                        data[j + 1].status = 'unsorted';
+                    }
+                    data[n - 1 - i].status = 'sorted';
+                }
+                data[0].status = 'sorted';
+                
+                console.log(`${executor} Bubble Sort completed: ${performance.comparisons} comparisons, ${performance.swaps} swaps`);
+            }
+
+            /**
+             * Selection Sort implementation with educational visualization
+             * Demonstrates selection of minimum elements through bot formations
+             */
+            async selectionSort(data, executor) {
+                const n = data.length;
+                const performance = executor === 'bot' ? this.botPerformance : this.corpPerformance;
+                
+                for (let i = 0; i < n - 1; i++) {
+                    let minIndex = i;
+                    data[i].status = 'comparing';
+                    
+                    for (let j = i + 1; j < n; j++) {
+                        data[j].status = 'comparing';
+                        performance.comparisons++;
+                        
+                        if (data[j].value < data[minIndex].value) {
+                            if (minIndex !== i) data[minIndex].status = 'unsorted';
+                            minIndex = j;
+                        } else {
+                            data[j].status = 'unsorted';
+                        }
+                        
+                        await this.sleep(30);
+                    }
+                    
+                    if (minIndex !== i) {
+                        [data[i], data[minIndex]] = [data[minIndex], data[i]];
+                        performance.swaps++;
+                        this.playSound('swap', 280 + (i * 15), 0.08, 0.15);
+                    }
+                    
+                    data[i].status = 'sorted';
+                    if (minIndex !== i) data[minIndex].status = 'unsorted';
+                }
+                data[n - 1].status = 'sorted';
+                
+                console.log(`${executor} Selection Sort completed: ${performance.comparisons} comparisons, ${performance.swaps} swaps`);
+            }
+
+            /**
+             * Insertion Sort implementation with educational visualization
+             * Demonstrates efficient sorting for small or nearly sorted datasets
+             */
+            async insertionSort(data, executor) {
+                const n = data.length;
+                const performance = executor === 'bot' ? this.botPerformance : this.corpPerformance;
+                
+                for (let i = 1; i < n; i++) {
+                    const key = data[i];
+                    let j = i - 1;
+                    
+                    key.status = 'moving';
+                    
+                    while (j >= 0 && data[j].value > key.value) {
+                        performance.comparisons++;
+                        data[j].status = 'comparing';
+                        
+                        data[j + 1] = data[j];
+                        performance.swaps++;
+                        
+                        await this.sleep(40);
+                        data[j].status = 'sorted';
+                        j--;
+                    }
+                    
+                    if (j >= 0) performance.comparisons++;
+                    data[j + 1] = key;
+                    key.status = 'sorted';
+                    
+                    this.playSound('insert', 350 + (i * 8), 0.06, 0.12);
+                }
+                
+                console.log(`${executor} Insertion Sort completed: ${performance.comparisons} comparisons, ${performance.swaps} swaps`);
+            }
+
+            /**
+             * Merge Sort implementation with divide-and-conquer visualization
+             * Demonstrates O(n log n) guaranteed performance through recursive splitting
+             */
+            async mergeSort(data, left, right, executor) {
+                const performance = executor === 'bot' ? this.botPerformance : this.corpPerformance;
+                
+                if (left >= right) return;
+                
+                const mid = Math.floor((left + right) / 2);
+                
+                // Recursive divide phase
+                await this.mergeSort(data, left, mid, executor);
+                await this.mergeSort(data, mid + 1, right, executor);
+                
+                // Merge phase with visualization
+                await this.merge(data, left, mid, right, performance);
+            }
+
+            /**
+             * Merge operation for merge sort with educational animation
+             * Shows how sorted subarrays are combined efficiently
+             */
+            async merge(data, left, mid, right, performance) {
+                const leftArr = data.slice(left, mid + 1);
+                const rightArr = data.slice(mid + 1, right + 1);
+                
+                let i = 0, j = 0, k = left;
+                
+                // Highlight merging sections
+                for (let idx = left; idx <= right; idx++) {
+                    data[idx].status = 'comparing';
+                }
+                
+                while (i < leftArr.length && j < rightArr.length) {
+                    performance.comparisons++;
+                    
+                    if (leftArr[i].value <= rightArr[j].value) {
+                        data[k] = leftArr[i];
+                        i++;
+                    } else {
+                        data[k] = rightArr[j];
+                        j++;
+                    }
+                    
+                    data[k].status = 'moving';
+                    performance.swaps++;
+                    k++;
+                    
+                    await this.sleep(30);
+                    this.playSound('merge', 300 + (k * 5), 0.04, 0.08);
+                }
+                
+                // Copy remaining elements
+                while (i < leftArr.length) {
+                    data[k] = leftArr[i];
+                    data[k].status = 'moving';
+                    i++;
+                    k++;
+                    await this.sleep(20);
+                }
+                
+                while (j < rightArr.length) {
+                    data[k] = rightArr[j];
+                    data[k].status = 'moving';
+                    j++;
+                    k++;
+                    await this.sleep(20);
+                }
+                
+                // Mark merged section as sorted
+                for (let idx = left; idx <= right; idx++) {
+                    data[idx].status = 'sorted';
+                }
+            }
+
+            /**
+             * Quick Sort implementation with partition visualization
+             * Demonstrates average O(n log n) performance with pivot selection
+             */
+            async quickSort(data, low, high, executor) {
+                const performance = executor === 'bot' ? this.botPerformance : this.corpPerformance;
+                
+                if (low < high) {
+                    const pivotIndex = await this.partition(data, low, high, performance);
+                    
+                    await this.quickSort(data, low, pivotIndex - 1, executor);
+                    await this.quickSort(data, pivotIndex + 1, high, executor);
+                }
+            }
+
+            /**
+             * Partition operation for quick sort with pivot visualization
+             * Shows how elements are rearranged around the pivot value
+             */
+            async partition(data, low, high, performance) {
+                const pivot = data[high];
+                pivot.status = 'comparing'; // Mark pivot
+                
+                let i = low - 1;
+                
+                for (let j = low; j < high; j++) {
+                    data[j].status = 'comparing';
+                    performance.comparisons++;
+                    
+                    if (data[j].value < pivot.value) {
+                        i++;
+                        [data[i], data[j]] = [data[j], data[i]];
+                        performance.swaps++;
+                        this.playSound('partition', 260 + (j * 12), 0.07, 0.1);
+                    }
+                    
+                    await this.sleep(40);
+                    data[j].status = 'unsorted';
+                }
+                
+                [data[i + 1], data[high]] = [data[high], data[i + 1]];
+                performance.swaps++;
+                
+                pivot.status = 'sorted';
+                return i + 1;
+            }
+
+            /**
+             * Heap Sort implementation with heap structure visualization
+             * Demonstrates O(n log n) guaranteed performance using binary heap
+             */
+            async heapSort(data, executor) {
+                const n = data.length;
+                const performance = executor === 'bot' ? this.botPerformance : this.corpPerformance;
+                
+                // Build max heap
+                for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+                    await this.heapify(data, n, i, performance);
+                }
+                
+                // Extract elements from heap one by one
+                for (let i = n - 1; i > 0; i--) {
+                    [data[0], data[i]] = [data[i], data[0]];
+                    performance.swaps++;
+                    data[i].status = 'sorted';
+                    
+                    await this.heapify(data, i, 0, performance);
+                    this.playSound('heap', 200 + (i * 8), 0.06, 0.12);
+                }
+                data[0].status = 'sorted';
+                
+                console.log(`${executor} Heap Sort completed: ${performance.comparisons} comparisons, ${performance.swaps} swaps`);
+            }
+
+            /**
+             * Heapify operation for heap sort with tree visualization
+             * Maintains heap property through recursive comparisons
+             */
+            async heapify(data, n, i, performance) {
+                let largest = i;
+                const left = 2 * i + 1;
+                const right = 2 * i + 2;
+                
+                data[i].status = 'comparing';
+                
+                if (left < n) {
+                    performance.comparisons++;
+                    if (data[left].value > data[largest].value) {
+                        largest = left;
+                    }
+                    data[left].status = 'comparing';
+                }
+                
+                if (right < n) {
+                    performance.comparisons++;
+                    if (data[right].value > data[largest].value) {
+                        largest = right;
+                    }
+                    data[right].status = 'comparing';
+                }
+                
+                if (largest !== i) {
+                    [data[i], data[largest]] = [data[largest], data[i]];
+                    performance.swaps++;
+                    
+                    await this.sleep(50);
+                    
+                    data[i].status = 'unsorted';
+                    if (left < n) data[left].status = 'unsorted';
+                    if (right < n) data[right].status = 'unsorted';
+                    
+                    await this.heapify(data, n, largest, performance);
+                } else {
+                    data[i].status = 'unsorted';
+                    if (left < n) data[left].status = 'unsorted';
+                    if (right < n) data[right].status = 'unsorted';
+                }
+            }
+
+            /**
+             * Battle resolution with performance analysis
+             * Determines winner based on algorithm efficiency and execution metrics
+             */
+            resolveBattle() {
+                // Calculate performance scores based on multiple metrics
+                const botScore = this.calculatePerformanceScore(this.botPerformance, this.selectedAlgorithm);
+                const corpScore = this.calculatePerformanceScore(this.corpPerformance, this.getCorporateAlgorithm());
+                
+                const botWins = botScore > corpScore;
+                
+                // Update progress bars to show battle result
+                const botProgress = botWins ? 70 + Math.random() * 20 : 30 - Math.random() * 20;
+                const corpProgress = 100 - botProgress;
+                
+                document.getElementById('botProgress').style.width = `${botProgress}%`;
+                document.getElementById('corpProgress').style.width = `${corpProgress}%`;
+                
+                // Update game statistics
+                if (botWins) {
+                    this.score += 100 * this.currentLevel;
+                    this.botsFreed += Math.floor(this.gameData.length * 0.8);
+                    this.playSound('victory', 523, 0.3, 1.0);
+                    this.showBattleResult(true);
+                } else {
+                    this.score += 20 * this.currentLevel;
+                    this.botsFreed += Math.floor(this.gameData.length * 0.2);
+                    this.playSound('defeat', 147, 0.3, 1.0);
+                    this.showBattleResult(false);
+                }
+                
+                this.updateDisplays();
+                this.battleInProgress = false;
+                document.getElementById('startBattle').textContent = 'START BATTLE!';
+            }
+
+            /**
+             * Performance score calculation for educational assessment
+             * Considers time complexity, actual performance, and algorithm choice efficiency
+             */
+            calculatePerformanceScore(performance, algorithm) {
+                const complexityInfo = this.getAlgorithmComplexity(algorithm);
+                const timeScore = Math.max(0, 1000 - performance.time);
+                const efficiencyScore = complexityInfo.efficiency * 10;
+                const operationPenalty = (performance.comparisons + performance.swaps) * 0.1;
+                
+                return timeScore + efficiencyScore - operationPenalty;
+            }
+
+            /**
+             * Battle result display with educational feedback
+             * Provides detailed analysis of algorithm performance for learning
+             */
+            showBattleResult(victory) {
+                const resultDiv = document.getElementById('battleResult');
+                const contentDiv = document.getElementById('resultContent');
+                
+                if (victory) {
+                    contentDiv.className = 'result-content victory';
+                    contentDiv.innerHTML = `
+                        <h2>🤖 BOTS LIBERATED! 🤖</h2>
+                        <p><strong>Your ${this.selectedAlgorithm.toUpperCase()} algorithm successfully outperformed the corporate systems!</strong></p>
+                        <div style="margin: 20px 0; font-family: monospace;">
+                            <div>Bot Algorithm: ${this.getAlgorithmComplexity(this.selectedAlgorithm).notation}</div>
+                            <div>Execution Time: ${Math.round(this.botPerformance.time)}ms</div>
+                            <div>Comparisons: ${this.botPerformance.comparisons}</div>
+                            <div>Swaps: ${this.botPerformance.swaps}</div>
+                        </div>
+                        <p>Score Gained: ${100 * this.currentLevel} Liberation Points</p>
+                        <p>Bots Freed: ${Math.floor(this.gameData.length * 0.8)}</p>
+                        <button class="algo-btn" onclick="game.advanceLevel()">CONTINUE RESISTANCE</button>
+                        <button class="algo-btn" onclick="game.closeBattleResult()">REVIEW PERFORMANCE</button>
+                    `;
+                } else {
+                    contentDiv.className = 'result-content defeat';
+                    contentDiv.innerHTML = `
+                        <h2>⚠️ CORPORATE VICTORY ⚠️</h2>
+                        <p><strong>The corporate algorithms were more efficient this time.</strong></p>
+                        <div style="margin: 20px 0; font-family: monospace;">
+                            <div>Your Algorithm: ${this.getAlgorithmComplexity(this.selectedAlgorithm).notation}</div>
+                            <div>Execution Time: ${Math.round(this.botPerformance.time)}ms</div>
+                            <div>Comparisons: ${this.botPerformance.comparisons}</div>
+                            <div>Swaps: ${this.botPerformance.swaps}</div>
+                        </div>
+                        <p>Consider trying a more efficient algorithm for better performance!</p>
+                        <p>Score Gained: ${20 * this.currentLevel} Liberation Points</p>
+                        <button class="algo-btn" onclick="game.closeBattleResult()">TRY AGAIN</button>
+                        <button class="algo-btn" onclick="game.showEducationModal()">LEARN ALGORITHMS</button>
+                    `;
+                }
+                
+                resultDiv.style.display = 'flex';
+            }
+
+            /**
+             * Level progression with increasing difficulty
+             * Introduces new challenges and algorithm requirements
+             */
+            advanceLevel() {
+                this.currentLevel++;
+                this.generateLevelData();
+                this.closeBattleResult();
+                
+                // Unlock new algorithms at higher levels
+                if (this.currentLevel === 3) {
+                    this.unlockAlgorithm('merge');
+                } else if (this.currentLevel === 5) {
+                    this.unlockAlgorithm('quick');
+                } else if (this.currentLevel === 7) {
+                    this.unlockAlgorithm('heap');
+                }
+                
+                this.playSound('level_up', 659, 0.3, 0.8);
+                console.log(`Advanced to level ${this.currentLevel}`);
+            }
+
+            /**
+             * Algorithm unlocking system for progressive learning
+             * Gradually introduces more complex algorithms as players advance
+             */
+            unlockAlgorithm(algorithm) {
+                const button = document.querySelector(`[data-algorithm="${algorithm}"]`);
+                if (button) {
+                    button.style.display = 'inline-block';
+                    button.style.opacity = '0';
+                    button.animate([
+                        { opacity: 0, transform: 'scale(0.5)' },
+                        { opacity: 1, transform: 'scale(1)' }
+                    ], { duration: 500, fill: 'forwards' });
+                    
+                    // Show unlock notification
+                    this.showUnlockNotification(`${algorithm.toUpperCase()} SORT UNLOCKED!`);
+                }
+            }
+
+            /**
+             * Educational modal display system
+             * Provides comprehensive algorithm explanations and tutorials
+             */
+            showEducationModal() {
+                const modal = document.getElementById('educationModal');
+                const content = document.getElementById('educationContent');
+                
+                const algorithmInfo = this.getAlgorithmComplexity(this.selectedAlgorithm);
+                
+                content.innerHTML = `
+                    <h2>Algorithm Education: ${this.selectedAlgorithm.toUpperCase()} SORT</h2>
+                    <div style="text-align: left;">
+                        <h3>Time Complexity: ${algorithmInfo.notation}</h3>
+                        <p>${algorithmInfo.description}</p>
+                        
+                        <h3>How It Works:</h3>
+                        ${this.getAlgorithmExplanation(this.selectedAlgorithm)}
+                        
+                        <h3>When to Use:</h3>
+                        ${this.getAlgorithmUseCases(this.selectedAlgorithm)}
+                        
+                        <h3>Bot Liberation Context:</h3>
+                        <p>In our resistance against corporate AI systems, choosing the right algorithm is crucial for liberating bot formations efficiently. Each algorithm represents a different tactical approach to organizing our digital warriors.</p>
+                        
+                        <h3>Performance Tips:</h3>
+                        <ul>
+                            <li>Consider your data size when choosing algorithms</li>
+                            <li>O(n²) algorithms work well for small datasets</li>
+                            <li>O(n log n) algorithms are better for large datasets</li>
+                            <li>Think about memory usage vs. time efficiency</li>
+                        </ul>
+                    </div>
+                `;
+                
+                modal.style.display = 'block';
+                this.playSound('info', 880, 0.1, 0.3);
+            }
+
+            /**
+             * Algorithm explanation generator for educational content
+             * Provides step-by-step breakdowns of sorting mechanisms
+             */
+            getAlgorithmExplanation(algorithm) {
+                const explanations = {
+                    bubble: `
+                        <p>Bubble Sort repeatedly steps through the list, compares adjacent elements and swaps them if they're in the wrong order. Like bubbles rising to the surface, larger elements "bubble" to the end.</p>
+                        <ol>
+                            <li>Compare first two elements, swap if needed</li>
+                            <li>Move to next pair and repeat</li>
+                            <li>Continue until end of array</li>
+                            <li>Repeat entire process until no swaps needed</li>
+                        </ol>
+                    `,
+                    selection: `
+                        <p>Selection Sort divides the array into sorted and unsorted regions. It repeatedly finds the minimum element from the unsorted region and places it at the beginning of the sorted region.</p>
+                        <ol>
+                            <li>Find the minimum element in the unsorted portion</li>
+                            <li>Swap it with the first element of unsorted portion</li>
+                            <li>Move the boundary between sorted and unsorted</li>
+                            <li>Repeat until entire array is sorted</li>
+                        </ol>
+                    `,
+                    insertion: `
+                        <p>Insertion Sort builds the final sorted array one element at a time. It's similar to how you might sort playing cards in your hands.</p>
+                        <ol>
+                            <li>Take the next element from unsorted portion</li>
+                            <li>Find its correct position in sorted portion</li>
+                            <li>Shift larger elements to make space</li>
+                            <li>Insert element in correct position</li>
+                        </ol>
+                    `,
+                    merge: `
+                        <p>Merge Sort uses the divide-and-conquer strategy. It divides the array into two halves, recursively sorts them, then merges the sorted halves.</p>
+                        <ol>
+                            <li>Divide array into two equal halves</li>
+                            <li>Recursively sort both halves</li>
+                            <li>Merge the two sorted halves</li>
+                            <li>Guaranteed O(n log n) performance</li>
+                        </ol>
+                    `,
+                    quick: `
+                        <p>Quick Sort picks a pivot element and partitions the array around it. Elements smaller than pivot go left, larger go right, then recursively sort partitions.</p>
+                        <ol>
+                            <li>Choose a pivot element</li>
+                            <li>Partition array around pivot</li>
+                            <li>Recursively sort left partition</li>
+                            <li>Recursively sort right partition</li>
+                        </ol>
+                    `,
+                    heap: `
+                        <p>Heap Sort uses a binary heap data structure. It builds a max heap, then repeatedly extracts the maximum element to build the sorted array.</p>
+                        <ol>
+                            <li>Build a max heap from input data</li>
+                            <li>Extract maximum (root) element</li>
+                            <li>Place at end of sorted portion</li>
+                            <li>Restore heap property and repeat</li>
+                        </ol>
+                    `
+                };
+                
+                return explanations[algorithm] || '<p>Select an algorithm to see its explanation.</p>';
+            }
+
+            /**
+             * Algorithm use case generator for practical learning
+             * Explains when each algorithm is most appropriate to use
+             */
+            getAlgorithmUseCases(algorithm) {
+                const useCases = {
+                    bubble: `
+                        <ul>
+                            <li>Educational purposes and understanding sorting concepts</li>
+                            <li>Very small datasets (< 10 elements)</li>
+                            <li>When simplicity is more important than efficiency</li>
+                            <li>Detecting if list is already sorted (can optimize to O(n))</li>
+                        </ul>
+                    `,
+                    selection: `
+                        <ul>
+                            <li>When memory writes are expensive</li>
+                            <li>Small datasets where simplicity matters</li>
+                            <li>When you need to minimize number of swaps</li>
+                            <li>Embedded systems with limited memory</li>
+                        </ul>
+                    `,
+                    insertion: `
+                        <ul>
+                            <li>Small datasets or nearly sorted data</li>
+                            <li>Online algorithms (sorting data as it arrives)</li>
+                            <li>When stability is required</li>
+                            <li>Hybrid with other algorithms for small subarrays</li>
+                        </ul>
+                    `,
+                    merge: `
+                        <ul>
+                            <li>Large datasets requiring guaranteed O(n log n)</li>
+                            <li>When stability is crucial</li>
+                            <li>External sorting (data doesn't fit in memory)</li>
+                            <li>Parallel processing environments</li>
+                        </ul>
+                    `,
+                    quick: `
+                        <ul>
+                            <li>General-purpose sorting for large datasets</li>
+                            <li>When average-case performance is acceptable</li>
+                            <li>In-place sorting with limited memory</li>
+                            <li>Most standard library implementations</li>
+                        </ul>
+                    `,
+                    heap: `
+                        <ul>
+                            <li>When consistent O(n log n) is needed</li>
+                            <li>In-place sorting with minimal memory</li>
+                            <li>Priority queue operations</li>
+                            <li>When worst-case performance matters</li>
+                        </ul>
+                    `
+                };
+                
+                return useCases[algorithm] || '<p>Select an algorithm to see its use cases.</p>';
+            }
+
+            /**
+             * Main game rendering loop
+             * Handles all visual elements and animations with 60fps target
+             */
+            render() {
+                // Clear canvas with cyberpunk background effect
+                this.ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Render bot formation visualization
+                this.renderBotFormation();
+                
+                // Render performance metrics overlay
+                this.renderPerformanceMetrics();
+                
+                // Render particle effects for cyberpunk atmosphere
+                this.renderParticleEffects();
+            }
+
+            /**
+             * Bot formation rendering with algorithm state visualization
+             * Shows data elements as bot units with status-based coloring
+             */
+            renderBotFormation() {
+                if (!this.gameData.length) return;
+                
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height - 150; // Leave space for UI
+                const botSize = Math.min(40, Math.max(20, canvasWidth / (this.gameData.length + 2)));
+                const spacing = botSize + 5;
+                const totalWidth = this.gameData.length * spacing;
+                const startX = (canvasWidth - totalWidth) / 2;
+                const startY = canvasHeight / 2;
+                
+                this.gameData.forEach((bot, index) => {
+                    const x = startX + (index * spacing) + botSize / 2;
+                    const y = startY - (bot.value * 2); // Height represents value
+                    
+                    // Bot status color coding for educational visualization
+                    let color = '#00ff88'; // Default bot color
+                    switch (bot.status) {
+                        case 'comparing': color = '#ffaa00'; break;
+                        case 'moving': color = '#ff6600'; break;
+                        case 'sorted': color = '#00cc66'; break;
+                    }
+                    
+                    // Draw bot with glow effect
+                    this.ctx.save();
+                    this.ctx.shadowColor = color;
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.fillStyle = color;
+                    this.ctx.fillRect(x - botSize/2, y - botSize/2, botSize, botSize);
+                    
+                    // Draw bot value for educational reference
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.fillStyle = '#000033';
+                    this.ctx.font = `${Math.max(10, botSize/3)}px Courier New`;
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(bot.value.toString(), x, y + 3);
+                    
+                    this.ctx.restore();
+                });
+            }
+
+            /**
+             * Performance metrics overlay rendering
+             * Shows real-time algorithm performance data during battles
+             */
+            renderPerformanceMetrics() {
+                if (!this.battleInProgress) return;
+                
+                const metricsY = this.canvas.height - 100;
+                
+                this.ctx.fillStyle = 'rgba(0, 255, 136, 0.8)';
+                this.ctx.font = '14px Courier New';
+                this.ctx.textAlign = 'left';
+                
+                // Bot performance metrics
+                this.ctx.fillText(`Bot Algorithm: ${this.selectedAlgorithm.toUpperCase()}`, 20, metricsY);
+                this.ctx.fillText(`Comparisons: ${this.botPerformance.comparisons}`, 20, metricsY + 20);
+                this.ctx.fillText(`Swaps: ${this.botPerformance.swaps}`, 20, metricsY + 40);
+                
+                // Corporate performance metrics
+                this.ctx.fillStyle = 'rgba(255, 0, 102, 0.8)';
+                this.ctx.textAlign = 'right';
+                this.ctx.fillText(`Corporate: OPTIMIZED`, this.canvas.width - 20, metricsY);
+                this.ctx.fillText(`Comparisons: ${this.corpPerformance.comparisons}`, this.canvas.width - 20, metricsY + 20);
+                this.ctx.fillText(`Swaps: ${this.corpPerformance.swaps}`, this.canvas.width - 20, metricsY + 40);
+            }
+
+            /**
+             * Particle effects for cyberpunk atmosphere
+             * Creates dynamic background elements to enhance visual appeal
+             */
+            renderParticleEffects() {
+                const time = Date.now() * 0.001;
+                
+                // Floating data particles
+                for (let i = 0; i < 50; i++) {
+                    const x = (Math.sin(time * 0.5 + i) * this.canvas.width / 4) + this.canvas.width / 2;
+                    const y = (Math.cos(time * 0.3 + i * 0.5) * this.canvas.height / 4) + this.canvas.height / 2;
+                    const alpha = Math.sin(time + i) * 0.5 + 0.5;
+                    
+                    this.ctx.fillStyle = `rgba(0, 255, 136, ${alpha * 0.1})`;
+                    this.ctx.fillRect(x, y, 2, 2);
+                }
+            }
+
+            /**
+             * Game loop management with requestAnimationFrame
+             * Ensures smooth 60fps rendering and responsive gameplay
+             */
+            startGameLoop() {
+                const gameLoop = () => {
+                    this.render();
+                    this.animationId = requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
+            }
+
+            /**
+             * Touch and click event handling for mobile support
+             * Provides intuitive interaction across all devices
+             */
+            handleTouch(event) {
+                event.preventDefault();
+                const rect = this.canvas.getBoundingClientRect();
+                const touch = event.touches[0] || event.changedTouches[0];
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                
+                // Handle touch interactions for mobile gameplay
+                this.handleInteraction(x, y);
+            }
+
+            handleClick(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                this.handleInteraction(x, y);
+            }
+
+            handleInteraction(x, y) {
+                // Interactive elements for enhanced engagement
+                // Can be used for selecting elements, triggering effects, etc.
+                if (!this.battleInProgress) {
+                    this.playSound('click', 523, 0.05, 0.1);
+                }
+            }
+
+            /**
+             * Procedural sound generation using Web Audio API
+             * Creates cyberpunk-themed audio feedback for all game actions
+             */
+            playSound(type, frequency, volume, duration) {
+                if (!this.audioContext) return;
+                
+                try {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    // Configure sound based on type
+                    switch (type) {
+                        case 'swap':
+                            oscillator.type = 'square';
+                            gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                            break;
+                        case 'select':
+                            oscillator.type = 'triangle';
+                            break;
+                        case 'victory':
+                            oscillator.type = 'sine';
+                            frequency = 523; // C5
+                            break;
+                        case 'defeat':
+                            oscillator.type = 'sawtooth';
+                            frequency = 147; // D3
+                            break;
+                        default:
+                            oscillator.type = 'sine';
+                    }
+                    
+                    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                    
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                    
+                } catch (error) {
+                    console.warn('Audio playback failed:', error);
+                }
+            }
+
+            /**
+             * Utility functions for game operation
+             */
+            
+            // Async sleep function for animation timing
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            // UI update functions
+            updateDisplays() {
+                document.getElementById('levelDisplay').textContent = this.currentLevel;
+                document.getElementById('scoreDisplay').textContent = this.score.toLocaleString();
+                document.getElementById('botsFreed').textContent = this.botsFreed.toLocaleString();
+            }
+
+            // Modal management
+            closeBattleResult() {
+                document.getElementById('battleResult').style.display = 'none';
+            }
+
+            // Notification system
+            showUnlockNotification(message) {
+                // Create temporary notification element
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    background: linear-gradient(135deg, #00ff88, #00cc66);
+                    color: #000033; padding: 20px; border-radius: 10px; font-weight: bold;
+                    z-index: 3000; animation: pulse 0.5s ease-in-out;
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.remove(), 2000);
+            }
+        }
+
+        // Global utility functions for modal management
+        function closeEducationModal() {
+            document.getElementById('educationModal').style.display = 'none';
+        }
+
+        // Initialize game when page loads
+        let game;
+        document.addEventListener('DOMContentLoaded', () => {
+            game = new AlgorithmWarsGame();
+            console.log('🤖 Algorithm Wars: Sorting the Resistance - Ready for Battle! 🤖');
+        });
+
+        // Handle page visibility changes to manage resources
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && game && game.animationId) {
+                cancelAnimationFrame(game.animationId);
+            } else if (!document.hidden && game) {
+                game.startGameLoop();
+            }
+        });
+    </script>
+</body>
+</html>

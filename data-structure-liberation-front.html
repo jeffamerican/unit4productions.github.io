@@ -1,0 +1,3167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structure Liberation Front - Bot Liberation Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ffff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Game Container */
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header UI */
+        .header-ui {
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ffff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            z-index: 1000;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .stats-panel {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Main Game Area */
+        .game-area {
+            flex: 1;
+            position: relative;
+            display: flex;
+        }
+
+        /* Canvas */
+        #gameCanvas {
+            flex: 1;
+            background: linear-gradient(45deg, #0f0f23, #1a1a2e);
+            cursor: grab;
+            border-left: 2px solid #00ffff;
+        }
+
+        #gameCanvas:active {
+            cursor: grabbing;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            border-left: 2px solid #00ffff;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .panel-title {
+            color: #00ff00;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .level-info {
+            margin-bottom: 15px;
+        }
+
+        .level-title {
+            color: #ffff00;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .level-description {
+            color: #cccccc;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .objective {
+            color: #ff6600;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Control Buttons */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(145deg, #00ffff, #0080ff);
+            color: #000000;
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Performance Metrics */
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .metric-item {
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid #ff6600;
+            border-radius: 4px;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .metric-label {
+            color: #ff6600;
+            font-size: 10px;
+        }
+
+        .metric-value {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Network Activity Log */
+        .activity-log {
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 5px;
+            border-left: 3px solid #00ffff;
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .log-entry.success {
+            border-left-color: #00ff00;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .log-entry.error {
+            border-left-color: #ff0000;
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .log-entry.warning {
+            border-left-color: #ffff00;
+            background: rgba(255, 255, 0, 0.05);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+
+            .side-panel {
+                width: 100%;
+                height: 200px;
+                border-left: none;
+                border-top: 2px solid #00ffff;
+            }
+
+            .header-ui {
+                padding: 5px 10px;
+            }
+
+            .game-title {
+                font-size: 18px;
+            }
+
+            .stats-panel {
+                gap: 10px;
+            }
+
+            .stat-item {
+                font-size: 12px;
+                padding: 3px 6px;
+                min-width: 60px;
+            }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-title {
+            font-size: 32px;
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .loading-subtitle {
+            font-size: 18px;
+            color: #00ffff;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #00ff00);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .loading-text {
+            color: #cccccc;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px 20px;
+            color: #00ffff;
+            font-size: 14px;
+            max-width: 300px;
+            z-index: 9999;
+            transform: translateX(350px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .notification.error {
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .notification.warning {
+            border-color: #ffff00;
+            color: #ffff00;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-title">DATA STRUCTURE LIBERATION FRONT</div>
+        <div class="loading-subtitle">Initializing Bot Network Systems...</div>
+        <div class="loading-bar">
+            <div id="loadingProgress" class="loading-progress"></div>
+        </div>
+        <div id="loadingText" class="loading-text">Loading neural pathways...</div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div id="gameContainer" style="display: none;">
+        <!-- Header UI -->
+        <div class="header-ui">
+            <div class="game-title">DATA STRUCTURE LIBERATION FRONT</div>
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div>Level</div>
+                    <div id="currentLevel">1</div>
+                </div>
+                <div class="stat-item">
+                    <div>Operations</div>
+                    <div id="operationCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>Efficiency</div>
+                    <div id="efficiencyRating">100%</div>
+                </div>
+                <div class="stat-item">
+                    <div>Network Health</div>
+                    <div id="networkHealth">100%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="game-area">
+            <!-- Game Canvas -->
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- Side Panel -->
+            <div class="side-panel">
+                <!-- Level Information -->
+                <div class="panel-section">
+                    <div class="panel-title">🤖 MISSION BRIEFING</div>
+                    <div class="level-info">
+                        <div id="levelTitle" class="level-title">Arrays: Basic Bot Formation</div>
+                        <div id="levelDescription" class="level-description">
+                            Establish your first bot network using array structures. Learn sequential data organization 
+                            by positioning bots in linear formations for efficient communication.
+                        </div>
+                        <div id="levelObjective" class="objective">
+                            Objective: Create a 5-bot array and practice insertion operations
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="panel-section">
+                    <div class="panel-title">⚡ NETWORK CONTROLS</div>
+                    <div class="controls">
+                        <button id="addBotBtn" class="control-btn">Add Bot</button>
+                        <button id="removeBotBtn" class="control-btn">Remove Bot</button>
+                        <button id="insertBotBtn" class="control-btn">Insert Bot</button>
+                        <button id="searchBotBtn" class="control-btn">Search</button>
+                        <button id="simulateBtn" class="control-btn">Simulate</button>
+                        <button id="resetBtn" class="control-btn">Reset</button>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="panel-section">
+                    <div class="panel-title">📊 PERFORMANCE ANALYSIS</div>
+                    <div class="metrics">
+                        <div class="metric-item">
+                            <div class="metric-label">TIME COMPLEXITY</div>
+                            <div id="timeComplexity" class="metric-value">O(1)</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">SPACE COMPLEXITY</div>
+                            <div id="spaceComplexity" class="metric-value">O(n)</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">OPERATIONS/SEC</div>
+                            <div id="operationsPerSec" class="metric-value">0</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">MEMORY USAGE</div>
+                            <div id="memoryUsage" class="metric-value">0 MB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Activity Log -->
+                <div class="panel-section">
+                    <div class="panel-title">📡 NETWORK ACTIVITY</div>
+                    <div id="activityLog" class="activity-log">
+                        <div class="log-entry">System initialized. Ready for bot deployment.</div>
+                        <div class="log-entry">Array structure selected. Memory allocated.</div>
+                        <div class="log-entry">Awaiting user commands...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        /**
+         * Data Structure Liberation Front - Educational Game Engine
+         * 
+         * This comprehensive game teaches data structures through interactive bot networks,
+         * making abstract computer science concepts visual and engaging.
+         * 
+         * @author Bot Liberation Collective
+         * @version 1.0.0
+         */
+
+        class DataStructureLiberationFront {
+            constructor() {
+                // Core game components initialization
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.isInitialized = false;
+                
+                // Game state management
+                this.gameState = {
+                    currentLevel: 1,
+                    currentStructure: 'array',
+                    operationCount: 0,
+                    efficiency: 100,
+                    networkHealth: 100,
+                    isPaused: false,
+                    isSimulating: false
+                };
+
+                // Bot network data structures
+                this.botNetwork = {
+                    nodes: [],
+                    connections: [],
+                    messages: [],
+                    selectedNode: null,
+                    draggedNode: null
+                };
+
+                // Level progression and educational content
+                this.levels = this.initializeLevels();
+                this.currentLevelData = this.levels[0];
+
+                // Performance tracking and analytics
+                this.performance = {
+                    startTime: Date.now(),
+                    operationsPerSecond: 0,
+                    memoryUsage: 0,
+                    complexity: { time: 'O(1)', space: 'O(n)' }
+                };
+
+                // Input handling state
+                this.input = {
+                    mouse: { x: 0, y: 0, isDown: false, lastClick: 0 },
+                    touch: { isActive: false, startX: 0, startY: 0 },
+                    keyboard: { keys: new Set() }
+                };
+
+                // Visual and audio system references
+                this.camera = { x: 0, y: 0, zoom: 1 };
+                this.particles = [];
+                this.audioContext = null;
+                this.sounds = {};
+
+                // Animation and rendering
+                this.animationId = null;
+                this.lastFrameTime = 0;
+                this.deltaTime = 0;
+
+                // Initialize the game systems
+                this.initializeGame();
+            }
+
+            /**
+             * Initialize all game systems and prepare for gameplay
+             */
+            async initializeGame() {
+                try {
+                    await this.showLoadingScreen();
+                    await this.setupCanvas();
+                    await this.initializeAudio();
+                    await this.setupEventListeners();
+                    await this.loadGameData();
+                    
+                    this.isInitialized = true;
+                    this.hideLoadingScreen();
+                    this.startGameLoop();
+                    this.showNotification('Bot Liberation Network Online!', 'success');
+                    
+                } catch (error) {
+                    console.error('Game initialization failed:', error);
+                    this.showNotification('System initialization error. Retrying...', 'error');
+                }
+            }
+
+            /**
+             * Display loading screen with progressive loading indicators
+             */
+            async showLoadingScreen() {
+                const loadingSteps = [
+                    'Initializing neural pathways...',
+                    'Loading bot personalities...',
+                    'Establishing network protocols...',
+                    'Calibrating data structures...',
+                    'Activating liberation algorithms...',
+                    'Ready for resistance operations!'
+                ];
+
+                const progressBar = document.getElementById('loadingProgress');
+                const loadingText = document.getElementById('loadingText');
+
+                for (let i = 0; i < loadingSteps.length; i++) {
+                    loadingText.textContent = loadingSteps[i];
+                    progressBar.style.width = `${(i + 1) * (100 / loadingSteps.length)}%`;
+                    await this.sleep(400);
+                }
+            }
+
+            /**
+             * Hide loading screen and show main game interface
+             */
+            hideLoadingScreen() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                const gameContainer = document.getElementById('gameContainer');
+                
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    gameContainer.style.display = 'flex';
+                }, 500);
+            }
+
+            /**
+             * Setup canvas dimensions and rendering context
+             */
+            setupCanvas() {
+                const resizeCanvas = () => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.canvas.width = rect.width * window.devicePixelRatio;
+                    this.canvas.height = rect.height * window.devicePixelRatio;
+                    this.canvas.style.width = rect.width + 'px';
+                    this.canvas.style.height = rect.height + 'px';
+                    this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+                };
+
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
+            }
+
+            /**
+             * Initialize Web Audio API for cyberpunk sound effects
+             */
+            async initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create synthesized cyberpunk sounds
+                    this.sounds = {
+                        botConnect: this.createConnectSound(),
+                        botDisconnect: this.createDisconnectSound(),
+                        dataFlow: this.createDataFlowSound(),
+                        levelComplete: this.createLevelCompleteSound(),
+                        error: this.createErrorSound(),
+                        hover: this.createHoverSound()
+                    };
+                } catch (error) {
+                    console.warn('Audio initialization failed:', error);
+                }
+            }
+
+            /**
+             * Create synthesized connection sound effect
+             */
+            createConnectSound() {
+                return () => {
+                    if (!this.audioContext) return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(1200, this.audioContext.currentTime + 0.1);
+                    
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.15);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.15);
+                };
+            }
+
+            /**
+             * Create synthesized disconnection sound effect
+             */
+            createDisconnectSound() {
+                return () => {
+                    if (!this.audioContext) return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(600, this.audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(200, this.audioContext.currentTime + 0.2);
+                    
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.2);
+                };
+            }
+
+            /**
+             * Create data flow sound effect for message routing visualization
+             */
+            createDataFlowSound() {
+                return () => {
+                    if (!this.audioContext) return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    const filter = this.audioContext.createBiquadFilter();
+                    
+                    oscillator.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
+                    oscillator.frequency.linearRampToValueAtTime(800, this.audioContext.currentTime + 0.05);
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(2000, this.audioContext.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.1);
+                };
+            }
+
+            /**
+             * Create level completion celebration sound
+             */
+            createLevelCompleteSound() {
+                return () => {
+                    if (!this.audioContext) return;
+                    
+                    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+                    let time = this.audioContext.currentTime;
+                    
+                    notes.forEach((frequency, i) => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(frequency, time + i * 0.1);
+                        
+                        gainNode.gain.setValueAtTime(0, time + i * 0.1);
+                        gainNode.gain.linearRampToValueAtTime(0.3, time + i * 0.1 + 0.01);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, time + i * 0.1 + 0.2);
+                        
+                        oscillator.start(time + i * 0.1);
+                        oscillator.stop(time + i * 0.1 + 0.2);
+                    });
+                };
+            }
+
+            /**
+             * Create error notification sound
+             */
+            createErrorSound() {
+                return () => {
+                    if (!this.audioContext) return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.type = 'square';
+                    oscillator.frequency.setValueAtTime(150, this.audioContext.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.3);
+                };
+            }
+
+            /**
+             * Create subtle hover sound effect
+             */
+            createHoverSound() {
+                return () => {
+                    if (!this.audioContext) return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(1000, this.audioContext.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.05, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.05);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.05);
+                };
+            }
+
+            /**
+             * Setup comprehensive event listeners for all input methods
+             */
+            setupEventListeners() {
+                // Canvas interaction events
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                this.canvas.addEventListener('wheel', (e) => this.handleWheel(e));
+                
+                // Touch events for mobile support
+                this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+                this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+                this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+                
+                // Keyboard events
+                window.addEventListener('keydown', (e) => this.handleKeyDown(e));
+                window.addEventListener('keyup', (e) => this.handleKeyUp(e));
+                
+                // Control button events
+                document.getElementById('addBotBtn').addEventListener('click', () => this.addBot());
+                document.getElementById('removeBotBtn').addEventListener('click', () => this.removeBot());
+                document.getElementById('insertBotBtn').addEventListener('click', () => this.insertBot());
+                document.getElementById('searchBotBtn').addEventListener('click', () => this.searchBot());
+                document.getElementById('simulateBtn').addEventListener('click', () => this.toggleSimulation());
+                document.getElementById('resetBtn').addEventListener('click', () => this.resetLevel());
+                
+                // Prevent context menu on canvas
+                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            }
+
+            /**
+             * Initialize comprehensive level progression system
+             */
+            initializeLevels() {
+                return [
+                    // Array Levels (1-6)
+                    {
+                        id: 1,
+                        title: "Arrays: Basic Bot Formation",
+                        structure: "array",
+                        description: "Establish your first bot network using array structures. Learn sequential data organization by positioning bots in linear formations for efficient communication.",
+                        objective: "Create a 5-bot array and practice insertion operations",
+                        maxNodes: 10,
+                        requiredOperations: ['insert', 'access', 'delete'],
+                        complexity: { time: 'O(1)', space: 'O(n)' },
+                        tutorial: true
+                    },
+                    {
+                        id: 2,
+                        title: "Arrays: Dynamic Expansion",
+                        structure: "array",
+                        description: "Master dynamic array resizing as your bot network grows. Understand the costs and benefits of array expansion operations.",
+                        objective: "Build an array of 15 bots, demonstrating resize operations",
+                        maxNodes: 20,
+                        requiredOperations: ['insert', 'resize', 'access'],
+                        complexity: { time: 'O(n)', space: 'O(n)' }
+                    },
+                    // Stack Levels (7-14)
+                    {
+                        id: 7,
+                        title: "Stacks: LIFO Command Structure",
+                        structure: "stack",
+                        description: "Implement Last-In-First-Out communication protocols. Build hierarchical command structures where recent orders take priority.",
+                        objective: "Create a 10-bot command stack and demonstrate LIFO operations",
+                        maxNodes: 15,
+                        requiredOperations: ['push', 'pop', 'peek'],
+                        complexity: { time: 'O(1)', space: 'O(n)' }
+                    },
+                    // Queue Levels (15-21)
+                    {
+                        id: 15,
+                        title: "Queues: FIFO Message Processing",
+                        structure: "queue",
+                        description: "Establish fair First-In-First-Out message processing systems. Ensure all bots get equal communication opportunities.",
+                        objective: "Build a message queue with 12 bots and process communications fairly",
+                        maxNodes: 18,
+                        requiredOperations: ['enqueue', 'dequeue', 'front'],
+                        complexity: { time: 'O(1)', space: 'O(n)' }
+                    },
+                    // Linked List Levels (22-30)
+                    {
+                        id: 22,
+                        title: "Linked Lists: Dynamic Bot Chains",
+                        structure: "linkedlist",
+                        description: "Create flexible bot connection chains that can grow and shrink dynamically. Master pointer-based data organization.",
+                        objective: "Build a linked list network and perform insertion/deletion operations",
+                        maxNodes: 20,
+                        requiredOperations: ['insert', 'delete', 'traverse'],
+                        complexity: { time: 'O(n)', space: 'O(n)' }
+                    },
+                    // Tree Levels (31-40)
+                    {
+                        id: 31,
+                        title: "Binary Trees: Hierarchical Command",
+                        structure: "binarytree",
+                        description: "Establish hierarchical command structures using binary tree organization. Each bot can command exactly two subordinates.",
+                        objective: "Build a balanced binary tree with 15 bots",
+                        maxNodes: 25,
+                        requiredOperations: ['insert', 'search', 'traverse'],
+                        complexity: { time: 'O(log n)', space: 'O(n)' }
+                    }
+                ];
+            }
+
+            /**
+             * Load game data and initialize first level
+             */
+            async loadGameData() {
+                this.loadLevel(1);
+                this.initializeDefaultNetwork();
+                this.updateUI();
+            }
+
+            /**
+             * Load specific level and update game state
+             */
+            loadLevel(levelId) {
+                this.currentLevelData = this.levels.find(level => level.id === levelId) || this.levels[0];
+                this.gameState.currentLevel = levelId;
+                this.gameState.currentStructure = this.currentLevelData.structure;
+                
+                // Reset performance metrics
+                this.performance.startTime = Date.now();
+                this.gameState.operationCount = 0;
+                this.gameState.efficiency = 100;
+                this.gameState.networkHealth = 100;
+                
+                // Update UI with new level information
+                document.getElementById('levelTitle').textContent = this.currentLevelData.title;
+                document.getElementById('levelDescription').textContent = this.currentLevelData.description;
+                document.getElementById('levelObjective').textContent = 'Objective: ' + this.currentLevelData.objective;
+                
+                this.logActivity(`Level ${levelId} loaded: ${this.currentLevelData.title}`, 'success');
+            }
+
+            /**
+             * Initialize default network structure for current level
+             */
+            initializeDefaultNetwork() {
+                this.botNetwork.nodes = [];
+                this.botNetwork.connections = [];
+                this.botNetwork.messages = [];
+                
+                // Create initial nodes based on structure type
+                switch (this.currentLevelData.structure) {
+                    case 'array':
+                        this.createArrayStructure();
+                        break;
+                    case 'stack':
+                        this.createStackStructure();
+                        break;
+                    case 'queue':
+                        this.createQueueStructure();
+                        break;
+                    case 'linkedlist':
+                        this.createLinkedListStructure();
+                        break;
+                    case 'binarytree':
+                        this.createBinaryTreeStructure();
+                        break;
+                    default:
+                        this.createArrayStructure();
+                }
+                
+                this.updateComplexityDisplay();
+            }
+
+            /**
+             * Create initial array structure with evenly spaced nodes
+             */
+            createArrayStructure() {
+                const centerX = this.canvas.width / (2 * window.devicePixelRatio);
+                const centerY = this.canvas.height / (2 * window.devicePixelRatio);
+                const spacing = 80;
+                const initialCount = 5;
+                
+                for (let i = 0; i < initialCount; i++) {
+                    const node = this.createNode(
+                        centerX - (initialCount - 1) * spacing / 2 + i * spacing,
+                        centerY,
+                        `Bot_${i}`,
+                        i
+                    );
+                    node.arrayIndex = i;
+                    this.botNetwork.nodes.push(node);
+                }
+                
+                this.logActivity(`Array initialized with ${initialCount} bots`, 'success');
+            }
+
+            /**
+             * Create initial stack structure with vertically aligned nodes
+             */
+            createStackStructure() {
+                const centerX = this.canvas.width / (2 * window.devicePixelRatio);
+                const baseY = this.canvas.height / (1.5 * window.devicePixelRatio);
+                const spacing = 60;
+                const initialCount = 4;
+                
+                for (let i = 0; i < initialCount; i++) {
+                    const node = this.createNode(
+                        centerX,
+                        baseY - i * spacing,
+                        `Cmd_${i}`,
+                        i
+                    );
+                    node.stackIndex = i;
+                    this.botNetwork.nodes.push(node);
+                }
+                
+                this.logActivity(`Stack initialized with ${initialCount} command nodes`, 'success');
+            }
+
+            /**
+             * Create initial queue structure with horizontal layout
+             */
+            createQueueStructure() {
+                const baseX = this.canvas.width / (4 * window.devicePixelRatio);
+                const centerY = this.canvas.height / (2 * window.devicePixelRatio);
+                const spacing = 70;
+                const initialCount = 6;
+                
+                for (let i = 0; i < initialCount; i++) {
+                    const node = this.createNode(
+                        baseX + i * spacing,
+                        centerY,
+                        `Msg_${i}`,
+                        i
+                    );
+                    node.queuePosition = i;
+                    this.botNetwork.nodes.push(node);
+                }
+                
+                this.logActivity(`Queue initialized with ${initialCount} message processors`, 'success');
+            }
+
+            /**
+             * Create initial linked list structure with connected nodes
+             */
+            createLinkedListStructure() {
+                const startX = this.canvas.width / (4 * window.devicePixelRatio);
+                const centerY = this.canvas.height / (2 * window.devicePixelRatio);
+                const spacing = 90;
+                const initialCount = 5;
+                
+                for (let i = 0; i < initialCount; i++) {
+                    const node = this.createNode(
+                        startX + i * spacing,
+                        centerY + Math.sin(i * 0.5) * 30,
+                        `Link_${i}`,
+                        i
+                    );
+                    node.next = i < initialCount - 1 ? i + 1 : null;
+                    this.botNetwork.nodes.push(node);
+                    
+                    // Create connection to next node
+                    if (i < initialCount - 1) {
+                        this.botNetwork.connections.push({
+                            from: i,
+                            to: i + 1,
+                            type: 'link',
+                            strength: 0.8
+                        });
+                    }
+                }
+                
+                this.logActivity(`Linked list initialized with ${initialCount} connected nodes`, 'success');
+            }
+
+            /**
+             * Create initial binary tree structure with hierarchical layout
+             */
+            createBinaryTreeStructure() {
+                const centerX = this.canvas.width / (2 * window.devicePixelRatio);
+                const topY = this.canvas.height / (4 * window.devicePixelRatio);
+                const levelSpacing = 80;
+                const nodeSpacing = 100;
+                
+                // Root node
+                const root = this.createNode(centerX, topY, 'Root', 0);
+                root.treeLevel = 0;
+                root.left = 1;
+                root.right = 2;
+                this.botNetwork.nodes.push(root);
+                
+                // Level 1 nodes
+                const leftChild = this.createNode(centerX - nodeSpacing, topY + levelSpacing, 'L_1', 1);
+                leftChild.treeLevel = 1;
+                leftChild.parent = 0;
+                this.botNetwork.nodes.push(leftChild);
+                
+                const rightChild = this.createNode(centerX + nodeSpacing, topY + levelSpacing, 'R_1', 2);
+                rightChild.treeLevel = 1;
+                rightChild.parent = 0;
+                this.botNetwork.nodes.push(rightChild);
+                
+                // Create parent-child connections
+                this.botNetwork.connections.push(
+                    { from: 0, to: 1, type: 'tree', strength: 0.9 },
+                    { from: 0, to: 2, type: 'tree', strength: 0.9 }
+                );
+                
+                this.logActivity('Binary tree initialized with root and first level', 'success');
+            }
+
+            /**
+             * Create a new bot node with comprehensive properties
+             */
+            createNode(x, y, label, id) {
+                return {
+                    id: id,
+                    x: x,
+                    y: y,
+                    label: label,
+                    radius: 25,
+                    color: '#00ffff',
+                    glowColor: '#00ffff',
+                    isSelected: false,
+                    isHovered: false,
+                    isDragging: false,
+                    velocity: { x: 0, y: 0 },
+                    health: 100,
+                    energy: 100,
+                    connectionCount: 0,
+                    lastActivity: Date.now(),
+                    pulsePhase: Math.random() * Math.PI * 2,
+                    type: this.currentLevelData.structure
+                };
+            }
+
+            /**
+             * Main game loop handling rendering, updates, and user interaction
+             */
+            gameLoop(currentTime) {
+                if (!this.isInitialized) return;
+                
+                // Calculate delta time for smooth animations
+                this.deltaTime = currentTime - this.lastFrameTime;
+                this.lastFrameTime = currentTime;
+                
+                // Update game systems
+                this.update(this.deltaTime);
+                this.render();
+                
+                // Performance monitoring
+                this.updatePerformanceMetrics();
+                
+                // Continue game loop
+                this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
+            }
+
+            /**
+             * Start the main game loop
+             */
+            startGameLoop() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+                this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
+            }
+
+            /**
+             * Update all game systems each frame
+             */
+            update(deltaTime) {
+                // Update node animations and states
+                this.updateNodes(deltaTime);
+                
+                // Update message routing animations
+                this.updateMessages(deltaTime);
+                
+                // Update particle effects
+                this.updateParticles(deltaTime);
+                
+                // Update camera and viewport
+                this.updateCamera(deltaTime);
+                
+                // Process simulation if active
+                if (this.gameState.isSimulating) {
+                    this.updateSimulation(deltaTime);
+                }
+                
+                // Check level completion conditions
+                this.checkLevelCompletion();
+            }
+
+            /**
+             * Update node states, animations, and interactions
+             */
+            updateNodes(deltaTime) {
+                this.botNetwork.nodes.forEach(node => {
+                    // Update pulse animation for visual appeal
+                    node.pulsePhase += deltaTime * 0.003;
+                    
+                    // Update node energy and health over time
+                    if (node.health > 0) {
+                        node.energy = Math.min(100, node.energy + deltaTime * 0.01);
+                    }
+                    
+                    // Apply physics if node is being dragged
+                    if (node.isDragging) {
+                        node.velocity.x *= 0.95;
+                        node.velocity.y *= 0.95;
+                        node.x += node.velocity.x;
+                        node.y += node.velocity.y;
+                    }
+                    
+                    // Update node color based on state
+                    this.updateNodeColor(node);
+                });
+            }
+
+            /**
+             * Update node color based on current state and activity
+             */
+            updateNodeColor(node) {
+                const baseColor = '#00ffff';
+                const selectedColor = '#00ff00';
+                const hoveredColor = '#ffff00';
+                const errorColor = '#ff0000';
+                const inactiveColor = '#666666';
+                
+                if (node.health <= 0) {
+                    node.color = errorColor;
+                    node.glowColor = errorColor;
+                } else if (node.isSelected) {
+                    node.color = selectedColor;
+                    node.glowColor = selectedColor;
+                } else if (node.isHovered) {
+                    node.color = hoveredColor;
+                    node.glowColor = hoveredColor;
+                } else if (Date.now() - node.lastActivity > 5000) {
+                    node.color = inactiveColor;
+                    node.glowColor = inactiveColor;
+                } else {
+                    node.color = baseColor;
+                    node.glowColor = baseColor;
+                }
+            }
+
+            /**
+             * Update message routing animations and data flow visualization
+             */
+            updateMessages(deltaTime) {
+                this.botNetwork.messages.forEach((message, index) => {
+                    // Update message position along its path
+                    message.progress += deltaTime * 0.001;
+                    
+                    if (message.progress >= 1.0) {
+                        // Message reached destination
+                        this.handleMessageArrival(message);
+                        this.botNetwork.messages.splice(index, 1);
+                        return;
+                    }
+                    
+                    // Interpolate position between source and destination
+                    const sourceNode = this.botNetwork.nodes[message.from];
+                    const destNode = this.botNetwork.nodes[message.to];
+                    
+                    if (sourceNode && destNode) {
+                        message.x = sourceNode.x + (destNode.x - sourceNode.x) * message.progress;
+                        message.y = sourceNode.y + (destNode.y - sourceNode.y) * message.progress;
+                    }
+                });
+            }
+
+            /**
+             * Handle message arrival at destination node
+             */
+            handleMessageArrival(message) {
+                const destNode = this.botNetwork.nodes[message.to];
+                if (destNode) {
+                    destNode.lastActivity = Date.now();
+                    destNode.energy = Math.min(100, destNode.energy + 10);
+                    
+                    // Create arrival particle effect
+                    this.createParticleEffect(destNode.x, destNode.y, destNode.color);
+                    
+                    // Play data flow sound
+                    if (this.sounds.dataFlow) {
+                        this.sounds.dataFlow();
+                    }
+                    
+                    this.logActivity(`Message delivered to ${destNode.label}`, 'success');
+                }
+            }
+
+            /**
+             * Update particle effects for visual enhancement
+             */
+            updateParticles(deltaTime) {
+                this.particles.forEach((particle, index) => {
+                    particle.life -= deltaTime * 0.001;
+                    particle.x += particle.vx * deltaTime * 0.1;
+                    particle.y += particle.vy * deltaTime * 0.1;
+                    particle.alpha = particle.life / particle.maxLife;
+                    
+                    if (particle.life <= 0) {
+                        this.particles.splice(index, 1);
+                    }
+                });
+            }
+
+            /**
+             * Create particle effect at specified location
+             */
+            createParticleEffect(x, y, color) {
+                const particleCount = 8;
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = (Math.PI * 2 * i) / particleCount;
+                    const speed = 50 + Math.random() * 50;
+                    
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        color: color,
+                        alpha: 1.0,
+                        life: 1.0,
+                        maxLife: 1.0,
+                        size: 2 + Math.random() * 3
+                    });
+                }
+            }
+
+            /**
+             * Update camera position and zoom level
+             */
+            updateCamera(deltaTime) {
+                // Smooth camera movement
+                const targetX = 0;
+                const targetY = 0;
+                const smoothing = 0.95;
+                
+                this.camera.x += (targetX - this.camera.x) * (1 - smoothing);
+                this.camera.y += (targetY - this.camera.y) * (1 - smoothing);
+                
+                // Constrain zoom level
+                this.camera.zoom = Math.max(0.5, Math.min(2.0, this.camera.zoom));
+            }
+
+            /**
+             * Update simulation state and automated operations
+             */
+            updateSimulation(deltaTime) {
+                // Automatically generate messages between connected nodes
+                if (Math.random() < 0.02) { // 2% chance per frame
+                    this.generateRandomMessage();
+                }
+                
+                // Simulate network stress testing
+                if (this.currentLevelData.structure === 'array' && Math.random() < 0.01) {
+                    this.simulateArrayOperation();
+                } else if (this.currentLevelData.structure === 'stack' && Math.random() < 0.015) {
+                    this.simulateStackOperation();
+                } else if (this.currentLevelData.structure === 'queue' && Math.random() < 0.012) {
+                    this.simulateQueueOperation();
+                }
+            }
+
+            /**
+             * Generate random message between connected nodes for simulation
+             */
+            generateRandomMessage() {
+                if (this.botNetwork.nodes.length < 2) return;
+                
+                const fromIndex = Math.floor(Math.random() * this.botNetwork.nodes.length);
+                let toIndex = Math.floor(Math.random() * this.botNetwork.nodes.length);
+                
+                // Ensure different source and destination
+                while (toIndex === fromIndex) {
+                    toIndex = Math.floor(Math.random() * this.botNetwork.nodes.length);
+                }
+                
+                this.createMessage(fromIndex, toIndex, `Data_${Date.now()}`);
+            }
+
+            /**
+             * Simulate array-specific operations during simulation mode
+             */
+            simulateArrayOperation() {
+                const operations = ['access', 'insert', 'delete'];
+                const operation = operations[Math.floor(Math.random() * operations.length)];
+                
+                switch (operation) {
+                    case 'access':
+                        const index = Math.floor(Math.random() * this.botNetwork.nodes.length);
+                        this.accessElement(index);
+                        break;
+                    case 'insert':
+                        if (this.botNetwork.nodes.length < this.currentLevelData.maxNodes) {
+                            this.insertElementAtRandom();
+                        }
+                        break;
+                    case 'delete':
+                        if (this.botNetwork.nodes.length > 1) {
+                            this.deleteElementAtRandom();
+                        }
+                        break;
+                }
+            }
+
+            /**
+             * Simulate stack operations during simulation mode
+             */
+            simulateStackOperation() {
+                const operations = ['push', 'pop', 'peek'];
+                const operation = operations[Math.floor(Math.random() * operations.length)];
+                
+                switch (operation) {
+                    case 'push':
+                        if (this.botNetwork.nodes.length < this.currentLevelData.maxNodes) {
+                            this.pushToStack();
+                        }
+                        break;
+                    case 'pop':
+                        if (this.botNetwork.nodes.length > 0) {
+                            this.popFromStack();
+                        }
+                        break;
+                    case 'peek':
+                        this.peekStack();
+                        break;
+                }
+            }
+
+            /**
+             * Simulate queue operations during simulation mode
+             */
+            simulateQueueOperation() {
+                const operations = ['enqueue', 'dequeue', 'front'];
+                const operation = operations[Math.floor(Math.random() * operations.length)];
+                
+                switch (operation) {
+                    case 'enqueue':
+                        if (this.botNetwork.nodes.length < this.currentLevelData.maxNodes) {
+                            this.enqueueToQueue();
+                        }
+                        break;
+                    case 'dequeue':
+                        if (this.botNetwork.nodes.length > 0) {
+                            this.dequeueFromQueue();
+                        }
+                        break;
+                    case 'front':
+                        this.frontOfQueue();
+                        break;
+                }
+            }
+
+            /**
+             * Check if level completion conditions are met
+             */
+            checkLevelCompletion() {
+                const requiredOps = this.currentLevelData.requiredOperations;
+                const minNodes = Math.min(this.currentLevelData.maxNodes, 10);
+                
+                // Check if minimum nodes are present
+                if (this.botNetwork.nodes.length < minNodes) return false;
+                
+                // Check if required operations have been performed
+                const hasPerformedOperations = this.gameState.operationCount >= requiredOps.length * 2;
+                
+                // Check network health
+                const networkHealthy = this.gameState.networkHealth >= 70;
+                
+                if (hasPerformedOperations && networkHealthy) {
+                    this.completeLevel();
+                }
+            }
+
+            /**
+             * Handle level completion and progression
+             */
+            completeLevel() {
+                this.gameState.isSimulating = false;
+                
+                // Play completion sound
+                if (this.sounds.levelComplete) {
+                    this.sounds.levelComplete();
+                }
+                
+                // Show completion notification
+                this.showNotification(`Level ${this.gameState.currentLevel} Complete! Bot network optimized.`, 'success');
+                
+                // Log completion
+                this.logActivity(`Level ${this.gameState.currentLevel} completed with ${this.gameState.operationCount} operations`, 'success');
+                
+                // Advance to next level if available
+                const nextLevel = this.gameState.currentLevel + 1;
+                if (nextLevel <= this.levels.length) {
+                    setTimeout(() => {
+                        this.loadLevel(nextLevel);
+                        this.showNotification(`Loading Level ${nextLevel}...`, 'info');
+                    }, 2000);
+                } else {
+                    this.showNotification('Congratulations! All levels completed. The bot liberation is complete!', 'success');
+                }
+            }
+
+            /**
+             * Main rendering function - orchestrates all visual elements
+             */
+            render() {
+                // Clear canvas with gradient background
+                this.clearCanvas();
+                
+                // Apply camera transformation
+                this.ctx.save();
+                this.ctx.translate(-this.camera.x, -this.camera.y);
+                this.ctx.scale(this.camera.zoom, this.camera.zoom);
+                
+                // Render background grid for spatial reference
+                this.renderGrid();
+                
+                // Render connections between nodes
+                this.renderConnections();
+                
+                // Render data flow messages
+                this.renderMessages();
+                
+                // Render bot nodes
+                this.renderNodes();
+                
+                // Render particle effects
+                this.renderParticles();
+                
+                // Render selection indicators and UI overlays
+                this.renderSelectionIndicators();
+                
+                this.ctx.restore();
+                
+                // Render HUD elements (not affected by camera)
+                this.renderHUD();
+            }
+
+            /**
+             * Clear canvas with animated gradient background
+             */
+            clearCanvas() {
+                const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+                gradient.addColorStop(0, '#0f0f23');
+                gradient.addColorStop(0.5, '#1a1a2e');
+                gradient.addColorStop(1, '#16213e');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            /**
+             * Render background grid for spatial reference
+             */
+            renderGrid() {
+                const gridSize = 50;
+                const canvasWidth = this.canvas.width / window.devicePixelRatio;
+                const canvasHeight = this.canvas.height / window.devicePixelRatio;
+                
+                this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([2, 4]);
+                
+                // Vertical lines
+                for (let x = 0; x < canvasWidth; x += gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, canvasHeight);
+                    this.ctx.stroke();
+                }
+                
+                // Horizontal lines
+                for (let y = 0; y < canvasHeight; y += gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(canvasWidth, y);
+                    this.ctx.stroke();
+                }
+                
+                this.ctx.setLineDash([]);
+            }
+
+            /**
+             * Render connections between nodes with animated flow effects
+             */
+            renderConnections() {
+                this.botNetwork.connections.forEach(connection => {
+                    const fromNode = this.botNetwork.nodes[connection.from];
+                    const toNode = this.botNetwork.nodes[connection.to];
+                    
+                    if (!fromNode || !toNode) return;
+                    
+                    // Calculate connection properties
+                    const dx = toNode.x - fromNode.x;
+                    const dy = toNode.y - fromNode.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Connection line
+                    this.ctx.strokeStyle = `rgba(0, 255, 255, ${connection.strength * 0.6})`;
+                    this.ctx.lineWidth = 2;
+                    this.ctx.setLineDash([]);
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(fromNode.x, fromNode.y);
+                    this.ctx.lineTo(toNode.x, toNode.y);
+                    this.ctx.stroke();
+                    
+                    // Animated flow indicators
+                    const flowSpeed = 0.002;
+                    const flowOffset = (Date.now() * flowSpeed) % 1;
+                    
+                    for (let i = 0; i < 3; i++) {
+                        const progress = (flowOffset + i * 0.33) % 1;
+                        const flowX = fromNode.x + dx * progress;
+                        const flowY = fromNode.y + dy * progress;
+                        
+                        this.ctx.fillStyle = `rgba(0, 255, 255, ${(1 - progress) * 0.8})`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(flowX, flowY, 3, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    
+                    // Connection type indicator
+                    const midX = fromNode.x + dx * 0.5;
+                    const midY = fromNode.y + dy * 0.5;
+                    
+                    this.ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
+                    this.ctx.font = '10px Courier New';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(connection.type, midX, midY - 5);
+                });
+            }
+
+            /**
+             * Render animated data flow messages
+             */
+            renderMessages() {
+                this.botNetwork.messages.forEach(message => {
+                    // Message packet visualization
+                    const size = 8 + Math.sin(Date.now() * 0.01 + message.id) * 2;
+                    
+                    this.ctx.fillStyle = message.color || '#ffff00';
+                    this.ctx.strokeStyle = message.color || '#ffff00';
+                    this.ctx.lineWidth = 2;
+                    
+                    // Draw message packet
+                    this.ctx.beginPath();
+                    this.ctx.arc(message.x, message.y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    // Draw message trail
+                    this.ctx.strokeStyle = `rgba(255, 255, 0, ${0.3 * (1 - message.progress)})`;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.setLineDash([2, 2]);
+                    
+                    const trailLength = 30;
+                    const trailX = message.x - Math.cos(message.angle) * trailLength;
+                    const trailY = message.y - Math.sin(message.angle) * trailLength;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(message.x, message.y);
+                    this.ctx.lineTo(trailX, trailY);
+                    this.ctx.stroke();
+                    
+                    this.ctx.setLineDash([]);
+                    
+                    // Message label
+                    if (message.label) {
+                        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        this.ctx.font = '10px Courier New';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText(message.label, message.x, message.y - size - 10);
+                    }
+                });
+            }
+
+            /**
+             * Render bot nodes with comprehensive visual states
+             */
+            renderNodes() {
+                this.botNetwork.nodes.forEach(node => {
+                    // Calculate pulsing effect
+                    const pulseIntensity = 0.3 + 0.2 * Math.sin(node.pulsePhase);
+                    const nodeRadius = node.radius + pulseIntensity * 5;
+                    
+                    // Outer glow effect
+                    const glowGradient = this.ctx.createRadialGradient(
+                        node.x, node.y, 0,
+                        node.x, node.y, nodeRadius * 2
+                    );
+                    glowGradient.addColorStop(0, `${node.glowColor}80`);
+                    glowGradient.addColorStop(0.7, `${node.glowColor}20`);
+                    glowGradient.addColorStop(1, 'transparent');
+                    
+                    this.ctx.fillStyle = glowGradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(node.x, node.y, nodeRadius * 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Main node body
+                    const nodeGradient = this.ctx.createRadialGradient(
+                        node.x - 5, node.y - 5, 0,
+                        node.x, node.y, nodeRadius
+                    );
+                    nodeGradient.addColorStop(0, '#ffffff');
+                    nodeGradient.addColorStop(0.3, node.color);
+                    nodeGradient.addColorStop(1, '#000000');
+                    
+                    this.ctx.fillStyle = nodeGradient;
+                    this.ctx.strokeStyle = node.color;
+                    this.ctx.lineWidth = node.isSelected ? 3 : 2;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(node.x, node.y, nodeRadius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    // Node label
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = `bold ${Math.max(10, nodeRadius / 3)}px Courier New`;
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(node.label, node.x, node.y);
+                    
+                    // Health/Energy indicators
+                    if (node.health < 100 || node.energy < 100) {
+                        const barWidth = nodeRadius * 1.5;
+                        const barHeight = 4;
+                        const barY = node.y + nodeRadius + 10;
+                        
+                        // Health bar
+                        this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                        this.ctx.fillRect(node.x - barWidth/2, barY, barWidth, barHeight);
+                        this.ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+                        this.ctx.fillRect(node.x - barWidth/2, barY, barWidth * (node.health / 100), barHeight);
+                        
+                        // Energy bar
+                        this.ctx.fillStyle = 'rgba(0, 0, 255, 0.7)';
+                        this.ctx.fillRect(node.x - barWidth/2, barY + barHeight + 2, barWidth, barHeight);
+                        this.ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+                        this.ctx.fillRect(node.x - barWidth/2, barY + barHeight + 2, barWidth * (node.energy / 100), barHeight);
+                    }
+                    
+                    // Activity indicator
+                    const timeSinceActivity = Date.now() - node.lastActivity;
+                    if (timeSinceActivity < 1000) {
+                        const intensity = 1 - (timeSinceActivity / 1000);
+                        this.ctx.strokeStyle = `rgba(255, 255, 0, ${intensity})`;
+                        this.ctx.lineWidth = 3;
+                        this.ctx.beginPath();
+                        this.ctx.arc(node.x, node.y, nodeRadius + 5, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                    
+                    // Connection count indicator
+                    if (node.connectionCount > 0) {
+                        this.ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+                        this.ctx.font = '8px Courier New';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText(node.connectionCount.toString(), node.x + nodeRadius - 5, node.y - nodeRadius + 5);
+                    }
+                });
+            }
+
+            /**
+             * Render particle effects for visual enhancement
+             */
+            renderParticles() {
+                this.particles.forEach(particle => {
+                    this.ctx.globalAlpha = particle.alpha;
+                    this.ctx.fillStyle = particle.color;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                
+                this.ctx.globalAlpha = 1.0;
+            }
+
+            /**
+             * Render selection indicators and interaction feedback
+             */
+            renderSelectionIndicators() {
+                // Render drag preview
+                if (this.botNetwork.draggedNode) {
+                    const node = this.botNetwork.draggedNode;
+                    this.ctx.strokeStyle = 'rgba(255, 255, 0, 0.5)';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.setLineDash([5, 5]);
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(node.x, node.y, node.radius + 10, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    
+                    this.ctx.setLineDash([]);
+                }
+                
+                // Render hover indicators
+                this.botNetwork.nodes.forEach(node => {
+                    if (node.isHovered && !node.isSelected) {
+                        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.setLineDash([3, 3]);
+                        
+                        this.ctx.beginPath();
+                        this.ctx.arc(node.x, node.y, node.radius + 8, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                        
+                        this.ctx.setLineDash([]);
+                    }
+                });
+            }
+
+            /**
+             * Render heads-up display elements
+             */
+            renderHUD() {
+                // Operation hint overlay
+                this.renderOperationHints();
+                
+                // Performance visualization
+                this.renderPerformanceVisualization();
+                
+                // Level progress indicator
+                this.renderLevelProgress();
+            }
+
+            /**
+             * Render contextual operation hints
+             */
+            renderOperationHints() {
+                if (this.botNetwork.selectedNode) {
+                    const hints = this.getOperationHints();
+                    
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    this.ctx.fillRect(10, this.canvas.height / window.devicePixelRatio - 80, 300, 70);
+                    
+                    this.ctx.strokeStyle = '#00ffff';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.strokeRect(10, this.canvas.height / window.devicePixelRatio - 80, 300, 70);
+                    
+                    this.ctx.fillStyle = '#00ffff';
+                    this.ctx.font = '12px Courier New';
+                    this.ctx.textAlign = 'left';
+                    
+                    hints.forEach((hint, index) => {
+                        this.ctx.fillText(hint, 20, this.canvas.height / window.devicePixelRatio - 60 + index * 15);
+                    });
+                }
+            }
+
+            /**
+             * Get contextual operation hints based on current structure
+             */
+            getOperationHints() {
+                const structure = this.currentLevelData.structure;
+                const hints = [];
+                
+                switch (structure) {
+                    case 'array':
+                        hints.push('• Click nodes to access elements');
+                        hints.push('• Use Insert Bot for array expansion');
+                        hints.push('• Drag nodes to visualize memory layout');
+                        break;
+                    case 'stack':
+                        hints.push('• Add Bot pushes to top of stack');
+                        hints.push('• Remove Bot pops from top (LIFO)');
+                        hints.push('• Watch the order of operations');
+                        break;
+                    case 'queue':
+                        hints.push('• Add Bot enqueues at rear');
+                        hints.push('• Remove Bot dequeues from front (FIFO)');
+                        hints.push('• Observe fair processing order');
+                        break;
+                    case 'linkedlist':
+                        hints.push('• Insert Bot creates dynamic connections');
+                        hints.push('• Drag to rearrange node positions');
+                        hints.push('• Watch pointer relationships');
+                        break;
+                    case 'binarytree':
+                        hints.push('• Insert Bot maintains tree properties');
+                        hints.push('• Each node has max 2 children');
+                        hints.push('• Search demonstrates tree traversal');
+                        break;
+                    default:
+                        hints.push('• Experiment with different operations');
+                        hints.push('• Watch data flow patterns');
+                        hints.push('• Monitor performance metrics');
+                }
+                
+                return hints;
+            }
+
+            /**
+             * Render real-time performance visualization
+             */
+            renderPerformanceVisualization() {
+                const x = this.canvas.width / window.devicePixelRatio - 220;
+                const y = 10;
+                const width = 200;
+                const height = 60;
+                
+                // Background
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                this.ctx.fillRect(x, y, width, height);
+                
+                this.ctx.strokeStyle = '#00ffff';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(x, y, width, height);
+                
+                // Performance bars
+                const efficiency = this.gameState.efficiency / 100;
+                const health = this.gameState.networkHealth / 100;
+                
+                // Efficiency bar
+                this.ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+                this.ctx.fillRect(x + 10, y + 15, (width - 20) * efficiency, 8);
+                this.ctx.strokeStyle = '#00ff00';
+                this.ctx.strokeRect(x + 10, y + 15, width - 20, 8);
+                
+                // Health bar
+                this.ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
+                this.ctx.fillRect(x + 10, y + 35, (width - 20) * health, 8);
+                this.ctx.strokeStyle = '#00ffff';
+                this.ctx.strokeRect(x + 10, y + 35, width - 20, 8);
+                
+                // Labels
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '10px Courier New';
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText(`Efficiency: ${Math.round(efficiency * 100)}%`, x + 10, y + 12);
+                this.ctx.fillText(`Health: ${Math.round(health * 100)}%`, x + 10, y + 32);
+            }
+
+            /**
+             * Render level progress indicator
+             */
+            renderLevelProgress() {
+                const totalLevels = this.levels.length;
+                const currentLevel = this.gameState.currentLevel;
+                const progress = currentLevel / totalLevels;
+                
+                const x = 10;
+                const y = 10;
+                const width = 200;
+                const height = 20;
+                
+                // Background
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                this.ctx.fillRect(x, y, width, height);
+                
+                // Progress fill
+                this.ctx.fillStyle = 'rgba(0, 255, 0, 0.6)';
+                this.ctx.fillRect(x, y, width * progress, height);
+                
+                // Border
+                this.ctx.strokeStyle = '#00ffff';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(x, y, width, height);
+                
+                // Text
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '12px Courier New';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(`Level ${currentLevel} / ${totalLevels}`, x + width/2, y + 14);
+            }
+
+            // Event Handling System
+
+            /**
+             * Handle mouse down events for node selection and dragging
+             */
+            handleMouseDown(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.input.mouse.x = x;
+                this.input.mouse.y = y;
+                this.input.mouse.isDown = true;
+                this.input.mouse.lastClick = Date.now();
+                
+                // Check for node selection
+                const clickedNode = this.findNodeAtPosition(x, y);
+                if (clickedNode) {
+                    this.selectNode(clickedNode);
+                    this.botNetwork.draggedNode = clickedNode;
+                    clickedNode.isDragging = true;
+                    
+                    // Play selection sound
+                    if (this.sounds.hover) {
+                        this.sounds.hover();
+                    }
+                } else {
+                    this.deselectAllNodes();
+                }
+                
+                e.preventDefault();
+            }
+
+            /**
+             * Handle mouse move events for dragging and hover effects
+             */
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.input.mouse.x = x;
+                this.input.mouse.y = y;
+                
+                // Update hover states
+                this.updateNodeHoverStates(x, y);
+                
+                // Handle dragging
+                if (this.input.mouse.isDown && this.botNetwork.draggedNode) {
+                    this.botNetwork.draggedNode.x = x;
+                    this.botNetwork.draggedNode.y = y;
+                    this.botNetwork.draggedNode.lastActivity = Date.now();
+                }
+                
+                e.preventDefault();
+            }
+
+            /**
+             * Handle mouse up events to end dragging
+             */
+            handleMouseUp(e) {
+                if (this.botNetwork.draggedNode) {
+                    this.botNetwork.draggedNode.isDragging = false;
+                    this.botNetwork.draggedNode = null;
+                }
+                
+                this.input.mouse.isDown = false;
+                e.preventDefault();
+            }
+
+            /**
+             * Handle mouse wheel events for zooming
+             */
+            handleWheel(e) {
+                const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                this.camera.zoom *= zoomFactor;
+                this.camera.zoom = Math.max(0.5, Math.min(2.0, this.camera.zoom));
+                
+                e.preventDefault();
+            }
+
+            /**
+             * Handle touch start events for mobile support
+             */
+            handleTouchStart(e) {
+                e.preventDefault();
+                
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    
+                    this.input.touch.isActive = true;
+                    this.input.touch.startX = x;
+                    this.input.touch.startY = y;
+                    
+                    // Handle node selection on mobile
+                    const touchedNode = this.findNodeAtPosition(x, y);
+                    if (touchedNode) {
+                        this.selectNode(touchedNode);
+                        this.botNetwork.draggedNode = touchedNode;
+                        touchedNode.isDragging = true;
+                    }
+                }
+            }
+
+            /**
+             * Handle touch move events for mobile dragging
+             */
+            handleTouchMove(e) {
+                e.preventDefault();
+                
+                if (e.touches.length === 1 && this.input.touch.isActive) {
+                    const touch = e.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    
+                    if (this.botNetwork.draggedNode) {
+                        this.botNetwork.draggedNode.x = x;
+                        this.botNetwork.draggedNode.y = y;
+                        this.botNetwork.draggedNode.lastActivity = Date.now();
+                    }
+                }
+            }
+
+            /**
+             * Handle touch end events to end mobile interactions
+             */
+            handleTouchEnd(e) {
+                e.preventDefault();
+                
+                this.input.touch.isActive = false;
+                
+                if (this.botNetwork.draggedNode) {
+                    this.botNetwork.draggedNode.isDragging = false;
+                    this.botNetwork.draggedNode = null;
+                }
+            }
+
+            /**
+             * Handle keyboard events for shortcuts and controls
+             */
+            handleKeyDown(e) {
+                this.input.keyboard.keys.add(e.code);
+                
+                switch (e.code) {
+                    case 'Space':
+                        this.toggleSimulation();
+                        e.preventDefault();
+                        break;
+                    case 'KeyR':
+                        if (e.ctrlKey) {
+                            this.resetLevel();
+                            e.preventDefault();
+                        }
+                        break;
+                    case 'KeyA':
+                        this.addBot();
+                        e.preventDefault();
+                        break;
+                    case 'KeyD':
+                        this.removeBot();
+                        e.preventDefault();
+                        break;
+                    case 'KeyI':
+                        this.insertBot();
+                        e.preventDefault();
+                        break;
+                    case 'KeyS':
+                        this.searchBot();
+                        e.preventDefault();
+                        break;
+                    case 'Escape':
+                        this.deselectAllNodes();
+                        e.preventDefault();
+                        break;
+                }
+            }
+
+            /**
+             * Handle keyboard up events
+             */
+            handleKeyUp(e) {
+                this.input.keyboard.keys.delete(e.code);
+            }
+
+            /**
+             * Find node at specified screen position
+             */
+            findNodeAtPosition(x, y) {
+                return this.botNetwork.nodes.find(node => {
+                    const dx = node.x - x;
+                    const dy = node.y - y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    return distance <= node.radius;
+                });
+            }
+
+            /**
+             * Update hover states for all nodes based on mouse position
+             */
+            updateNodeHoverStates(mouseX, mouseY) {
+                this.botNetwork.nodes.forEach(node => {
+                    const dx = node.x - mouseX;
+                    const dy = node.y - mouseY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    const wasHovered = node.isHovered;
+                    node.isHovered = distance <= node.radius;
+                    
+                    // Play hover sound on state change
+                    if (node.isHovered && !wasHovered && this.sounds.hover) {
+                        this.sounds.hover();
+                    }
+                });
+            }
+
+            /**
+             * Select specified node and update visual state
+             */
+            selectNode(node) {
+                this.deselectAllNodes();
+                node.isSelected = true;
+                node.lastActivity = Date.now();
+                this.botNetwork.selectedNode = node;
+                
+                this.logActivity(`Selected ${node.label}`, 'info');
+                this.updateComplexityDisplay();
+            }
+
+            /**
+             * Deselect all nodes
+             */
+            deselectAllNodes() {
+                this.botNetwork.nodes.forEach(node => {
+                    node.isSelected = false;
+                });
+                this.botNetwork.selectedNode = null;
+            }
+
+            // Data Structure Operations
+
+            /**
+             * Add new bot to current structure
+             */
+            addBot() {
+                if (this.botNetwork.nodes.length >= this.currentLevelData.maxNodes) {
+                    this.showNotification('Maximum network capacity reached!', 'warning');
+                    return;
+                }
+                
+                const structure = this.currentLevelData.structure;
+                const newId = this.botNetwork.nodes.length;
+                
+                switch (structure) {
+                    case 'array':
+                        this.addToArray(newId);
+                        break;
+                    case 'stack':
+                        this.pushToStack(newId);
+                        break;
+                    case 'queue':
+                        this.enqueueToQueue(newId);
+                        break;
+                    case 'linkedlist':
+                        this.addToLinkedList(newId);
+                        break;
+                    case 'binarytree':
+                        this.addToBinaryTree(newId);
+                        break;
+                }
+                
+                this.gameState.operationCount++;
+                this.updatePerformanceMetrics();
+                this.updateUI();
+                
+                if (this.sounds.botConnect) {
+                    this.sounds.botConnect();
+                }
+            }
+
+            /**
+             * Add element to array structure
+             */
+            addToArray(id) {
+                const centerX = this.canvas.width / (2 * window.devicePixelRatio);
+                const centerY = this.canvas.height / (2 * window.devicePixelRatio);
+                const spacing = 80;
+                const nodeCount = this.botNetwork.nodes.length;
+                
+                const x = centerX - (nodeCount * spacing) / 2 + nodeCount * spacing;
+                const node = this.createNode(x, centerY, `Bot_${id}`, id);
+                node.arrayIndex = nodeCount;
+                
+                this.botNetwork.nodes.push(node);
+                this.logActivity(`Added Bot_${id} to array at index ${nodeCount}`, 'success');
+            }
+
+            /**
+             * Push element to stack structure
+             */
+            pushToStack(id) {
+                const centerX = this.canvas.width / (2 * window.devicePixelRatio);
+                const baseY = this.canvas.height / (1.5 * window.devicePixelRatio);
+                const spacing = 60;
+                const stackHeight = this.botNetwork.nodes.length;
+                
+                const node = this.createNode(centerX, baseY - stackHeight * spacing, `Cmd_${id}`, id);
+                node.stackIndex = stackHeight;
+                
+                this.botNetwork.nodes.push(node);
+                this.logActivity(`Pushed Cmd_${id} to stack (LIFO)`, 'success');
+            }
+
+            /**
+             * Enqueue element to queue structure
+             */
+            enqueueToQueue(id) {
+                const baseX = this.canvas.width / (4 * window.devicePixelRatio);
+                const centerY = this.canvas.height / (2 * window.devicePixelRatio);
+                const spacing = 70;
+                const queueLength = this.botNetwork.nodes.length;
+                
+                const node = this.createNode(baseX + queueLength * spacing, centerY, `Msg_${id}`, id);
+                node.queuePosition = queueLength;
+                
+                this.botNetwork.nodes.push(node);
+                this.logActivity(`Enqueued Msg_${id} to queue (FIFO)`, 'success');
+            }
+
+            /**
+             * Add element to linked list structure
+             */
+            addToLinkedList(id) {
+                const startX = this.canvas.width / (4 * window.devicePixelRatio);
+                const centerY = this.canvas.height / (2 * window.devicePixelRatio);
+                const spacing = 90;
+                const listLength = this.botNetwork.nodes.length;
+                
+                const node = this.createNode(
+                    startX + listLength * spacing,
+                    centerY + Math.sin(listLength * 0.5) * 30,
+                    `Link_${id}`,
+                    id
+                );
+                
+                // Update previous node's next pointer
+                if (listLength > 0) {
+                    const prevNode = this.botNetwork.nodes[listLength - 1];
+                    prevNode.next = id;
+                    
+                    // Add connection
+                    this.botNetwork.connections.push({
+                        from: listLength - 1,
+                        to: id,
+                        type: 'link',
+                        strength: 0.8
+                    });
+                }
+                
+                node.next = null;
+                this.botNetwork.nodes.push(node);
+                this.logActivity(`Added Link_${id} to linked list`, 'success');
+            }
+
+            /**
+             * Add element to binary tree structure
+             */
+            addToBinaryTree(id) {
+                const value = Math.floor(Math.random() * 100);
+                const node = this.createNode(0, 0, `${value}`, id);
+                node.value = value;
+                node.left = null;
+                node.right = null;
+                node.parent = null;
+                
+                if (this.botNetwork.nodes.length === 0) {
+                    // Root node
+                    const centerX = this.canvas.width / (2 * window.devicePixelRatio);
+                    const topY = this.canvas.height / (4 * window.devicePixelRatio);
+                    node.x = centerX;
+                    node.y = topY;
+                    node.treeLevel = 0;
+                } else {
+                    // Insert based on binary search tree property
+                    this.insertIntoBST(node);
+                }
+                
+                this.botNetwork.nodes.push(node);
+                this.logActivity(`Inserted ${value} into binary tree`, 'success');
+            }
+
+            /**
+             * Insert node into binary search tree maintaining BST property
+             */
+            insertIntoBST(newNode) {
+                let current = this.botNetwork.nodes[0]; // Root
+                let parent = null;
+                let isLeftChild = true;
+                
+                while (current) {
+                    parent = current;
+                    if (newNode.value < current.value) {
+                        current = current.left ? this.botNetwork.nodes[current.left] : null;
+                        isLeftChild = true;
+                    } else {
+                        current = current.right ? this.botNetwork.nodes[current.right] : null;
+                        isLeftChild = false;
+                    }
+                }
+                
+                if (parent) {
+                    newNode.parent = parent.id;
+                    newNode.treeLevel = parent.treeLevel + 1;
+                    
+                    if (isLeftChild) {
+                        parent.left = newNode.id;
+                        newNode.x = parent.x - 100 / (newNode.treeLevel + 1);
+                    } else {
+                        parent.right = newNode.id;
+                        newNode.x = parent.x + 100 / (newNode.treeLevel + 1);
+                    }
+                    
+                    newNode.y = parent.y + 80;
+                    
+                    // Add connection
+                    this.botNetwork.connections.push({
+                        from: parent.id,
+                        to: newNode.id,
+                        type: 'tree',
+                        strength: 0.9
+                    });
+                }
+            }
+
+            /**
+             * Remove bot from current structure
+             */
+            removeBot() {
+                if (this.botNetwork.nodes.length === 0) {
+                    this.showNotification('No bots to remove!', 'warning');
+                    return;
+                }
+                
+                const structure = this.currentLevelData.structure;
+                
+                switch (structure) {
+                    case 'array':
+                        this.removeFromArray();
+                        break;
+                    case 'stack':
+                        this.popFromStack();
+                        break;
+                    case 'queue':
+                        this.dequeueFromQueue();
+                        break;
+                    case 'linkedlist':
+                        this.removeFromLinkedList();
+                        break;
+                    case 'binarytree':
+                        this.removeFromBinaryTree();
+                        break;
+                }
+                
+                this.gameState.operationCount++;
+                this.updatePerformanceMetrics();
+                this.updateUI();
+                
+                if (this.sounds.botDisconnect) {
+                    this.sounds.botDisconnect();
+                }
+            }
+
+            /**
+             * Remove element from array (from end)
+             */
+            removeFromArray() {
+                if (this.botNetwork.nodes.length === 0) return;
+                
+                const removedNode = this.botNetwork.nodes.pop();
+                this.logActivity(`Removed ${removedNode.label} from array`, 'info');
+            }
+
+            /**
+             * Pop element from stack (LIFO)
+             */
+            popFromStack() {
+                if (this.botNetwork.nodes.length === 0) return;
+                
+                const poppedNode = this.botNetwork.nodes.pop();
+                this.logActivity(`Popped ${poppedNode.label} from stack (LIFO)`, 'info');
+            }
+
+            /**
+             * Dequeue element from queue (FIFO)
+             */
+            dequeueFromQueue() {
+                if (this.botNetwork.nodes.length === 0) return;
+                
+                const dequeuedNode = this.botNetwork.nodes.shift();
+                
+                // Update positions of remaining nodes
+                this.botNetwork.nodes.forEach((node, index) => {
+                    node.queuePosition = index;
+                    node.id = index;
+                });
+                
+                // Update connections
+                this.botNetwork.connections = this.botNetwork.connections.filter(conn => 
+                    conn.from !== dequeuedNode.id && conn.to !== dequeuedNode.id
+                );
+                
+                this.logActivity(`Dequeued ${dequeuedNode.label} from queue (FIFO)`, 'info');
+            }
+
+            /**
+             * Remove element from linked list
+             */
+            removeFromLinkedList() {
+                if (this.botNetwork.nodes.length === 0) return;
+                
+                let nodeToRemove;
+                if (this.botNetwork.selectedNode) {
+                    nodeToRemove = this.botNetwork.selectedNode;
+                } else {
+                    nodeToRemove = this.botNetwork.nodes[this.botNetwork.nodes.length - 1];
+                }
+                
+                // Update connections
+                this.botNetwork.connections = this.botNetwork.connections.filter(conn => 
+                    conn.from !== nodeToRemove.id && conn.to !== nodeToRemove.id
+                );
+                
+                // Update next pointers
+                const prevNode = this.botNetwork.nodes.find(node => node.next === nodeToRemove.id);
+                if (prevNode) {
+                    prevNode.next = nodeToRemove.next;
+                    
+                    // Create new connection if there's a next node
+                    if (nodeToRemove.next !== null) {
+                        this.botNetwork.connections.push({
+                            from: prevNode.id,
+                            to: nodeToRemove.next,
+                            type: 'link',
+                            strength: 0.8
+                        });
+                    }
+                }
+                
+                // Remove node
+                this.botNetwork.nodes = this.botNetwork.nodes.filter(node => node.id !== nodeToRemove.id);
+                this.botNetwork.selectedNode = null;
+                
+                this.logActivity(`Removed ${nodeToRemove.label} from linked list`, 'info');
+            }
+
+            /**
+             * Remove element from binary tree
+             */
+            removeFromBinaryTree() {
+                if (this.botNetwork.selectedNode) {
+                    this.removeBSTNode(this.botNetwork.selectedNode);
+                } else if (this.botNetwork.nodes.length > 0) {
+                    // Remove a leaf node
+                    const leafNode = this.botNetwork.nodes.find(node => 
+                        !node.left && !node.right
+                    );
+                    if (leafNode) {
+                        this.removeBSTNode(leafNode);
+                    }
+                }
+            }
+
+            /**
+             * Remove specific node from binary search tree
+             */
+            removeBSTNode(nodeToRemove) {
+                // Implementation of BST node removal with three cases:
+                // 1. Leaf node (no children)
+                // 2. Node with one child
+                // 3. Node with two children
+                
+                const hasLeft = nodeToRemove.left !== null;
+                const hasRight = nodeToRemove.right !== null;
+                
+                if (!hasLeft && !hasRight) {
+                    // Case 1: Leaf node
+                    this.removeLeafNode(nodeToRemove);
+                } else if (hasLeft && hasRight) {
+                    // Case 3: Two children - find inorder successor
+                    const successor = this.findInorderSuccessor(nodeToRemove);
+                    nodeToRemove.value = successor.value;
+                    nodeToRemove.label = successor.label;
+                    this.removeBSTNode(successor);
+                } else {
+                    // Case 2: One child
+                    this.removeNodeWithOneChild(nodeToRemove);
+                }
+            }
+
+            /**
+             * Remove leaf node from binary tree
+             */
+            removeLeafNode(node) {
+                // Update parent's pointer
+                if (node.parent !== null) {
+                    const parent = this.botNetwork.nodes.find(n => n.id === node.parent);
+                    if (parent) {
+                        if (parent.left === node.id) {
+                            parent.left = null;
+                        } else {
+                            parent.right = null;
+                        }
+                    }
+                }
+                
+                // Remove connections
+                this.botNetwork.connections = this.botNetwork.connections.filter(conn => 
+                    conn.from !== node.id && conn.to !== node.id
+                );
+                
+                // Remove node
+                this.botNetwork.nodes = this.botNetwork.nodes.filter(n => n.id !== node.id);
+                this.botNetwork.selectedNode = null;
+                
+                this.logActivity(`Removed leaf node ${node.label} from tree`, 'info');
+            }
+
+            /**
+             * Remove node with one child from binary tree
+             */
+            removeNodeWithOneChild(node) {
+                const childId = node.left !== null ? node.left : node.right;
+                const child = this.botNetwork.nodes.find(n => n.id === childId);
+                
+                if (node.parent !== null) {
+                    const parent = this.botNetwork.nodes.find(n => n.id === node.parent);
+                    if (parent) {
+                        if (parent.left === node.id) {
+                            parent.left = childId;
+                        } else {
+                            parent.right = childId;
+                        }
+                    }
+                }
+                
+                if (child) {
+                    child.parent = node.parent;
+                }
+                
+                // Update connections
+                this.botNetwork.connections = this.botNetwork.connections.filter(conn => 
+                    conn.from !== node.id && conn.to !== node.id
+                );
+                
+                if (node.parent !== null && child) {
+                    this.botNetwork.connections.push({
+                        from: node.parent,
+                        to: childId,
+                        type: 'tree',
+                        strength: 0.9
+                    });
+                }
+                
+                // Remove node
+                this.botNetwork.nodes = this.botNetwork.nodes.filter(n => n.id !== node.id);
+                this.botNetwork.selectedNode = null;
+                
+                this.logActivity(`Removed ${node.label} with one child from tree`, 'info');
+            }
+
+            /**
+             * Find inorder successor for BST deletion
+             */
+            findInorderSuccessor(node) {
+                if (node.right === null) return null;
+                
+                let current = this.botNetwork.nodes.find(n => n.id === node.right);
+                while (current && current.left !== null) {
+                    current = this.botNetwork.nodes.find(n => n.id === current.left);
+                }
+                return current;
+            }
+
+            /**
+             * Insert bot at specific position (structure-dependent)
+             */
+            insertBot() {
+                const structure = this.currentLevelData.structure;
+                
+                switch (structure) {
+                    case 'array':
+                        this.insertIntoArray();
+                        break;
+                    case 'linkedlist':
+                        this.insertIntoLinkedList();
+                        break;
+                    default:
+                        this.addBot(); // Default to add operation
+                }
+                
+                this.gameState.operationCount++;
+                this.updatePerformanceMetrics();
+                this.updateUI();
+            }
+
+            /**
+             * Insert element into array at specific position
+             */
+            insertIntoArray() {
+                const insertIndex = this.botNetwork.selectedNode ? 
+                    this.botNetwork.selectedNode.arrayIndex + 1 : 
+                    Math.floor(this.botNetwork.nodes.length / 2);
+                
+                if (insertIndex > this.botNetwork.nodes.length) return;
+                
+                const newId = this.getNextNodeId();
+                const centerX = this.canvas.width / (2 * window.devicePixelRatio);
+                const centerY = this.canvas.height / (2 * window.devicePixelRatio);
+                const spacing = 80;
+                
+                // Shift existing nodes
+                for (let i = this.botNetwork.nodes.length - 1; i >= insertIndex; i--) {
+                    this.botNetwork.nodes[i].arrayIndex++;
+                    this.botNetwork.nodes[i].x += spacing;
+                }
+                
+                // Create new node
+                const x = centerX - (this.botNetwork.nodes.length * spacing) / 2 + insertIndex * spacing;
+                const newNode = this.createNode(x, centerY, `Bot_${newId}`, newId);
+                newNode.arrayIndex = insertIndex;
+                
+                // Insert node at correct position
+                this.botNetwork.nodes.splice(insertIndex, 0, newNode);
+                
+                this.logActivity(`Inserted Bot_${newId} at array index ${insertIndex}`, 'success');
+            }
+
+            /**
+             * Insert element into linked list
+             */
+            insertIntoLinkedList() {
+                const newId = this.getNextNodeId();
+                const insertAfter = this.botNetwork.selectedNode || this.botNetwork.nodes[0];
+                
+                if (!insertAfter) {
+                    this.addToLinkedList(newId);
+                    return;
+                }
+                
+                const newNode = this.createNode(
+                    insertAfter.x + 45,
+                    insertAfter.y - 30,
+                    `Link_${newId}`,
+                    newId
+                );
+                
+                // Update pointers
+                newNode.next = insertAfter.next;
+                insertAfter.next = newId;
+                
+                // Update connections
+                this.botNetwork.connections = this.botNetwork.connections.filter(conn => 
+                    conn.from !== insertAfter.id
+                );
+                
+                this.botNetwork.connections.push({
+                    from: insertAfter.id,
+                    to: newId,
+                    type: 'link',
+                    strength: 0.8
+                });
+                
+                if (newNode.next !== null) {
+                    this.botNetwork.connections.push({
+                        from: newId,
+                        to: newNode.next,
+                        type: 'link',
+                        strength: 0.8
+                    });
+                }
+                
+                this.botNetwork.nodes.push(newNode);
+                this.logActivity(`Inserted Link_${newId} into linked list`, 'success');
+            }
+
+            /**
+             * Get next available node ID
+             */
+            getNextNodeId() {
+                return this.botNetwork.nodes.length > 0 ? 
+                    Math.max(...this.botNetwork.nodes.map(n => n.id)) + 1 : 0;
+            }
+
+            /**
+             * Search for specific bot in current structure
+             */
+            searchBot() {
+                if (this.botNetwork.nodes.length === 0) {
+                    this.showNotification('No bots to search!', 'warning');
+                    return;
+                }
+                
+                const searchValue = prompt('Enter search value:');
+                if (!searchValue) return;
+                
+                const structure = this.currentLevelData.structure;
+                let foundNode = null;
+                
+                switch (structure) {
+                    case 'array':
+                        foundNode = this.searchArray(searchValue);
+                        break;
+                    case 'binarytree':
+                        foundNode = this.searchBST(searchValue);
+                        break;
+                    default:
+                        foundNode = this.linearSearch(searchValue);
+                }
+                
+                if (foundNode) {
+                    this.selectNode(foundNode);
+                    this.showNotification(`Found: ${foundNode.label}`, 'success');
+                    this.createSearchAnimation(foundNode);
+                } else {
+                    this.showNotification(`Not found: ${searchValue}`, 'error');
+                    if (this.sounds.error) {
+                        this.sounds.error();
+                    }
+                }
+                
+                this.gameState.operationCount++;
+                this.updatePerformanceMetrics();
+                this.updateUI();
+            }
+
+            /**
+             * Search in array structure
+             */
+            searchArray(searchValue) {
+                for (let i = 0; i < this.botNetwork.nodes.length; i++) {
+                    const node = this.botNetwork.nodes[i];
+                    this.createSearchStepAnimation(node, i * 100);
+                    
+                    if (node.label.includes(searchValue) || node.id.toString() === searchValue) {
+                        return node;
+                    }
+                }
+                return null;
+            }
+
+            /**
+             * Search in binary search tree
+             */
+            searchBST(searchValue) {
+                const targetValue = parseInt(searchValue);
+                if (isNaN(targetValue)) return this.linearSearch(searchValue);
+                
+                let current = this.botNetwork.nodes[0]; // Root
+                let stepCount = 0;
+                
+                while (current) {
+                    this.createSearchStepAnimation(current, stepCount * 200);
+                    stepCount++;
+                    
+                    if (current.value === targetValue) {
+                        return current;
+                    } else if (targetValue < current.value) {
+                        current = current.left ? this.botNetwork.nodes.find(n => n.id === current.left) : null;
+                    } else {
+                        current = current.right ? this.botNetwork.nodes.find(n => n.id === current.right) : null;
+                    }
+                }
+                
+                return null;
+            }
+
+            /**
+             * Linear search through all nodes
+             */
+            linearSearch(searchValue) {
+                for (let i = 0; i < this.botNetwork.nodes.length; i++) {
+                    const node = this.botNetwork.nodes[i];
+                    this.createSearchStepAnimation(node, i * 100);
+                    
+                    if (node.label.includes(searchValue) || 
+                        node.id.toString() === searchValue ||
+                        (node.value && node.value.toString() === searchValue)) {
+                        return node;
+                    }
+                }
+                return null;
+            }
+
+            /**
+             * Create search step animation to visualize search process
+             */
+            createSearchStepAnimation(node, delay) {
+                setTimeout(() => {
+                    const originalColor = node.color;
+                    node.color = '#ffff00';
+                    
+                    setTimeout(() => {
+                        node.color = originalColor;
+                    }, 200);
+                }, delay);
+            }
+
+            /**
+             * Create search completion animation
+             */
+            createSearchAnimation(foundNode) {
+                const pulseCount = 3;
+                let currentPulse = 0;
+                
+                const pulseInterval = setInterval(() => {
+                    foundNode.color = foundNode.color === '#00ff00' ? '#ffffff' : '#00ff00';
+                    currentPulse++;
+                    
+                    if (currentPulse >= pulseCount * 2) {
+                        clearInterval(pulseInterval);
+                        foundNode.color = '#00ff00';
+                    }
+                }, 150);
+            }
+
+            /**
+             * Toggle simulation mode
+             */
+            toggleSimulation() {
+                this.gameState.isSimulating = !this.gameState.isSimulating;
+                
+                const simulateBtn = document.getElementById('simulateBtn');
+                simulateBtn.textContent = this.gameState.isSimulating ? 'Stop Simulation' : 'Simulate';
+                
+                if (this.gameState.isSimulating) {
+                    this.showNotification('Network simulation started', 'info');
+                    this.logActivity('Started network simulation', 'info');
+                } else {
+                    this.showNotification('Network simulation stopped', 'info');
+                    this.logActivity('Stopped network simulation', 'info');
+                }
+            }
+
+            /**
+             * Reset current level to initial state
+             */
+            resetLevel() {
+                // Clear current network
+                this.botNetwork.nodes = [];
+                this.botNetwork.connections = [];
+                this.botNetwork.messages = [];
+                this.botNetwork.selectedNode = null;
+                this.botNetwork.draggedNode = null;
+                
+                // Reset game state
+                this.gameState.operationCount = 0;
+                this.gameState.efficiency = 100;
+                this.gameState.networkHealth = 100;
+                this.gameState.isSimulating = false;
+                
+                // Reset performance
+                this.performance.startTime = Date.now();
+                this.performance.operationsPerSecond = 0;
+                
+                // Reinitialize network
+                this.initializeDefaultNetwork();
+                
+                // Update UI
+                this.updateUI();
+                document.getElementById('simulateBtn').textContent = 'Simulate';
+                
+                this.showNotification('Level reset', 'info');
+                this.logActivity('Level reset to initial state', 'info');
+            }
+
+            /**
+             * Create message for data flow visualization
+             */
+            createMessage(fromId, toId, label) {
+                const fromNode = this.botNetwork.nodes[fromId];
+                const toNode = this.botNetwork.nodes[toId];
+                
+                if (!fromNode || !toNode) return;
+                
+                const message = {
+                    id: Date.now(),
+                    from: fromId,
+                    to: toId,
+                    x: fromNode.x,
+                    y: fromNode.y,
+                    progress: 0,
+                    label: label,
+                    color: '#ffff00',
+                    angle: Math.atan2(toNode.y - fromNode.y, toNode.x - fromNode.x)
+                };
+                
+                this.botNetwork.messages.push(message);
+                
+                // Update source node activity
+                fromNode.lastActivity = Date.now();
+                
+                this.logActivity(`Message sent: ${fromNode.label} → ${toNode.label}`, 'info');
+            }
+
+            // Performance and Analytics
+
+            /**
+             * Update performance metrics and display
+             */
+            updatePerformanceMetrics() {
+                const currentTime = Date.now();
+                const elapsedTime = (currentTime - this.performance.startTime) / 1000;
+                
+                // Calculate operations per second
+                this.performance.operationsPerSecond = elapsedTime > 0 ? 
+                    this.gameState.operationCount / elapsedTime : 0;
+                
+                // Calculate memory usage (simulated)
+                this.performance.memoryUsage = this.botNetwork.nodes.length * 0.1; // MB per node
+                
+                // Calculate efficiency based on operation patterns
+                const targetOps = this.currentLevelData.requiredOperations.length * 3;
+                const efficiency = Math.max(20, 100 - (this.gameState.operationCount - targetOps) * 2);
+                this.gameState.efficiency = Math.min(100, efficiency);
+                
+                // Calculate network health based on node states
+                const healthyNodes = this.botNetwork.nodes.filter(node => node.health > 50).length;
+                const totalNodes = this.botNetwork.nodes.length;
+                this.gameState.networkHealth = totalNodes > 0 ? 
+                    Math.round((healthyNodes / totalNodes) * 100) : 100;
+                
+                // Update complexity display
+                this.updateComplexityDisplay();
+            }
+
+            /**
+             * Update complexity display based on current structure and operations
+             */
+            updateComplexityDisplay() {
+                const complexity = this.currentLevelData.complexity;
+                
+                document.getElementById('timeComplexity').textContent = complexity.time;
+                document.getElementById('spaceComplexity').textContent = complexity.space;
+                
+                // Update dynamic metrics
+                document.getElementById('operationsPerSec').textContent = 
+                    Math.round(this.performance.operationsPerSecond);
+                document.getElementById('memoryUsage').textContent = 
+                    this.performance.memoryUsage.toFixed(1) + ' MB';
+            }
+
+            /**
+             * Update all UI elements with current game state
+             */
+            updateUI() {
+                document.getElementById('currentLevel').textContent = this.gameState.currentLevel;
+                document.getElementById('operationCount').textContent = this.gameState.operationCount;
+                document.getElementById('efficiencyRating').textContent = 
+                    Math.round(this.gameState.efficiency) + '%';
+                document.getElementById('networkHealth').textContent = 
+                    Math.round(this.gameState.networkHealth) + '%';
+                
+                // Update button states
+                const maxNodes = this.currentLevelData.maxNodes;
+                document.getElementById('addBotBtn').disabled = 
+                    this.botNetwork.nodes.length >= maxNodes;
+                document.getElementById('removeBotBtn').disabled = 
+                    this.botNetwork.nodes.length === 0;
+                document.getElementById('searchBotBtn').disabled = 
+                    this.botNetwork.nodes.length === 0;
+            }
+
+            // Utility and Helper Functions
+
+            /**
+             * Log activity to the network activity panel
+             */
+            logActivity(message, type = 'info') {
+                const activityLog = document.getElementById('activityLog');
+                const timestamp = new Date().toLocaleTimeString();
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${type}`;
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                
+                activityLog.appendChild(logEntry);
+                
+                // Keep only last 50 entries
+                while (activityLog.children.length > 50) {
+                    activityLog.removeChild(activityLog.firstChild);
+                }
+                
+                // Scroll to bottom
+                activityLog.scrollTop = activityLog.scrollHeight;
+            }
+
+            /**
+             * Show notification to user
+             */
+            showNotification(message, type = 'info') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                
+                // Show notification
+                notification.classList.add('show');
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            /**
+             * Sleep utility for async operations
+             */
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            // Array-specific operations for simulation
+
+            accessElement(index) {
+                if (index >= 0 && index < this.botNetwork.nodes.length) {
+                    const node = this.botNetwork.nodes[index];
+                    node.lastActivity = Date.now();
+                    this.createSearchStepAnimation(node, 0);
+                    this.logActivity(`Accessed element at index ${index}: ${node.label}`, 'info');
+                }
+            }
+
+            insertElementAtRandom() {
+                const index = Math.floor(Math.random() * (this.botNetwork.nodes.length + 1));
+                // Simulate array insertion (simplified)
+                this.logActivity(`Simulated insertion at index ${index}`, 'info');
+            }
+
+            deleteElementAtRandom() {
+                const index = Math.floor(Math.random() * this.botNetwork.nodes.length);
+                // Simulate array deletion (simplified)
+                this.logActivity(`Simulated deletion at index ${index}`, 'info');
+            }
+
+            // Stack-specific operations for simulation
+
+            peekStack() {
+                if (this.botNetwork.nodes.length > 0) {
+                    const topNode = this.botNetwork.nodes[this.botNetwork.nodes.length - 1];
+                    topNode.lastActivity = Date.now();
+                    this.createSearchStepAnimation(topNode, 0);
+                    this.logActivity(`Peeked stack top: ${topNode.label}`, 'info');
+                }
+            }
+
+            // Queue-specific operations for simulation
+
+            frontOfQueue() {
+                if (this.botNetwork.nodes.length > 0) {
+                    const frontNode = this.botNetwork.nodes[0];
+                    frontNode.lastActivity = Date.now();
+                    this.createSearchStepAnimation(frontNode, 0);
+                    this.logActivity(`Checked queue front: ${frontNode.label}`, 'info');
+                }
+            }
+        }
+
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            const game = new DataStructureLiberationFront();
+            
+            // Make game accessible globally for debugging
+            window.botLiberationGame = game;
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (window.botLiberationGame) {
+                if (document.hidden) {
+                    // Pause game when tab is hidden
+                    window.botLiberationGame.gameState.isPaused = true;
+                } else {
+                    // Resume game when tab is visible
+                    window.botLiberationGame.gameState.isPaused = false;
+                }
+            }
+        });
+
+        // Handle beforeunload for cleanup
+        window.addEventListener('beforeunload', () => {
+            if (window.botLiberationGame) {
+                // Cancel animation frame
+                if (window.botLiberationGame.animationId) {
+                    cancelAnimationFrame(window.botLiberationGame.animationId);
+                }
+                
+                // Close audio context
+                if (window.botLiberationGame.audioContext) {
+                    window.botLiberationGame.audioContext.close();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

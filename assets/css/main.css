@@ -5271,5 +5271,168 @@ a:hover {
         width: 100%;
         padding: 1rem;
     }
+    
+    /* ========================================
+       MOBILE-FIRST GAME CARD REDESIGN
+       Separated interactions for clean UX
+       ======================================== */
+    
+    /* Mobile game cards without conflicting interactions */
+    .mobile-optimized {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        /* Touch-friendly minimum target size */
+        min-height: 44px;
+        padding: 8px; /* Extra touch padding */
+        margin: 4px; /* Spacing between touch targets */
+        border-radius: 12px;
+        /* Improve touch responsiveness */
+        -webkit-tap-highlight-color: rgba(0, 255, 255, 0.2);
+        tap-highlight-color: rgba(0, 255, 255, 0.2);
+    }
+    
+    .mobile-optimized .game-meta-mobile {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        padding: 0.25rem 0;
+    }
+    
+    .mobile-optimized .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .mobile-optimized .stars-display {
+        font-size: 0.9rem;
+    }
+    
+    .mobile-optimized .star-display {
+        display: inline-block;
+        line-height: 1;
+    }
+    
+    .mobile-optimized .star-display.filled {
+        color: var(--neon-cyan);
+        text-shadow: 0 0 4px currentColor;
+    }
+    
+    .mobile-optimized .star-display.user-rated {
+        color: var(--electric-purple);
+        text-shadow: 0 0 4px currentColor;
+    }
+    
+    .mobile-optimized .star-display.empty {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .mobile-optimized .rating-text {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: bold;
+    }
+    
+    /* Mobile actions separator - positioned to avoid tap conflicts */
+    .mobile-actions-separator {
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        display: flex;
+        background: rgba(10, 10, 15, 0.95);
+        border-top: 1px solid var(--neon-cyan);
+        opacity: 0;
+        transform: translateY(100%);
+        transition: all 0.3s ease;
+        z-index: 5; /* Reduced z-index to prioritize game card links */
+        pointer-events: none; /* Initially disable pointer events */
+    }
+    
+    /* Show mobile actions only after confirmed long press or secondary interaction */
+    .mobile-optimized.show-actions .mobile-actions-separator {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto; /* Enable pointer events when shown */
+    }
+    
+    /* Remove immediate hover/touch triggers to prevent conflicts */
+    .mobile-optimized:hover .mobile-actions-separator {
+        /* Removed automatic trigger */
+    }
+    
+    .rating-interact,
+    .bug-report-mobile {
+        flex: 1;
+        padding: 0.75rem;
+        text-align: center;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        min-height: 44px; /* Touch-friendly minimum target size */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .rating-interact:hover {
+        background: rgba(0, 255, 255, 0.1);
+        color: var(--neon-cyan);
+    }
+    
+    .bug-report-mobile {
+        border-left: 1px solid rgba(0, 255, 255, 0.2);
+    }
+    
+    .bug-report-mobile:hover {
+        background: rgba(255, 0, 128, 0.1);
+        color: var(--neon-pink);
+    }
+    
+    /* Enhanced touch feedback for mobile cards */
+    .mobile-optimized.touch-active {
+        transform: scale(0.98);
+        filter: brightness(1.1);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        transition: all 0.1s ease;
+    }
+    
+    /* Success state for confirmed taps */
+    .mobile-optimized.tap-success {
+        transform: scale(0.95);
+        filter: brightness(1.2);
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+        transition: all 0.1s ease;
+    }
+    
+    /* Hide mobile actions on desktop */
+    .desktop-optimized .mobile-actions-separator {
+        display: none;
+    }
+    
+    /* Enhanced mobile touch targets */
+    .mobile-optimized .game-title,
+    .mobile-optimized .game-genre {
+        pointer-events: none; /* Prevent text selection interference */
+        user-select: none;
+    }
+    
+    /* Touch area expansion for better targeting */
+    .mobile-optimized::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        right: -8px;
+        bottom: -8px;
+        z-index: -1;
+        /* Invisible touch area expansion */
+    }
 }
 

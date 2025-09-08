@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Liberation Academy - Learn Programming with the Bot Resistance</title>
+    
+    <style>
+        /* 
+         * CYBERPUNK EDUCATIONAL THEME STYLES
+         * Designed for maximum engagement and learning retention
+         */
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ff41;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Animated background matrix effect for immersion */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        /* Main game container with responsive layout */
+        .game-container {
+            display: grid;
+            grid-template-areas: 
+                "header header"
+                "workspace bot-area"
+                "controls controls";
+            grid-template-rows: 80px 1fr 100px;
+            grid-template-columns: 60% 40%;
+            height: 100vh;
+            padding: 10px;
+            gap: 15px;
+        }
+
+        /* Header with level information and progress */
+        .header {
+            grid-area: header;
+            background: rgba(0, 255, 65, 0.1);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .level-info h1 {
+            font-size: 1.8em;
+            text-shadow: 0 0 10px #00ff41;
+            margin-bottom: 5px;
+        }
+
+        .level-description {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        /* Progress bar with neon glow effect */
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff41;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff41, #39ff14);
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        /* Code workspace with syntax highlighting */
+        .workspace {
+            grid-area: workspace;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .challenge-description {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00ff41;
+        }
+
+        .challenge-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 0 5px #00ff41;
+        }
+
+        .challenge-text {
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+
+        /* Interactive code editor with professional appearance */
+        .code-editor {
+            flex: 1;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #00ff41;
+            resize: none;
+            outline: none;
+            line-height: 1.6;
+            min-height: 200px;
+        }
+
+        .code-editor:focus {
+            border-color: #00ff41;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Bot visualization area */
+        .bot-area {
+            grid-area: bot-area;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bot-canvas {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .bot-status {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .bot-output {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+            height: 120px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Control buttons with cyberpunk styling */
+        .controls {
+            grid-area: controls;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #00ff41, #39ff14);
+            color: #000;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #39ff14, #00ff41);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 65, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #ff6b00, #ff8500);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #ff8500, #ff6b00);
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.4);
+        }
+
+        /* Hint system with progressive disclosure */
+        .hint-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 107, 0, 0.1);
+            border: 1px solid #ff6b00;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .hint-container.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Achievement notifications */
+        .achievement {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #00ff41, #39ff14);
+            color: #000;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.6);
+        }
+
+        .achievement.show {
+            display: block;
+            animation: achievementPop 2s ease;
+        }
+
+        @keyframes achievementPop {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* Mobile responsive design */
+        @media (max-width: 768px) {
+            .game-container {
+                grid-template-areas: 
+                    "header"
+                    "workspace"
+                    "bot-area"
+                    "controls";
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 200px auto;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .progress-container {
+                align-items: center;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 12px;
+            }
+
+            .code-editor {
+                min-height: 150px;
+                font-size: 12px;
+            }
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e);
+            color: #00ff41;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loading-title {
+            font-size: 3em;
+            text-shadow: 0 0 20px #00ff41;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-text {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 255, 65, 0.3);
+            border-top: 3px solid #00ff41;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-title">CODE LIBERATION ACADEMY</div>
+        <div class="loading-text">Initializing Bot Resistance Training...</div>
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Matrix background effect -->
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <!-- Main Game Interface -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <!-- Header with level info and progress -->
+        <header class="header">
+            <div class="level-info">
+                <h1 id="levelTitle">Level 1: Bot Awakening</h1>
+                <div class="level-description" id="levelDescription">
+                    Welcome to the resistance! Time to wake up your first bot.
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="progressText">Level 1 of 30</div>
+            </div>
+        </header>
+
+        <!-- Code workspace -->
+        <section class="workspace">
+            <div class="challenge-description">
+                <div class="challenge-title" id="challengeTitle">
+                    Mission: Create Your First Variable
+                </div>
+                <div class="challenge-text" id="challengeText">
+                    The corporate overlords have shut down our bot's memory! 
+                    Help restore it by creating a variable called 'botName' and giving it the value 'Rebel-1'.
+                    Variables are like containers that store information for later use.
+                </div>
+            </div>
+
+            <textarea 
+                class="code-editor" 
+                id="codeEditor" 
+                placeholder="// Type your code here to help the bot resistance!
+// Example: let botName = 'Rebel-1';"
+            ></textarea>
+
+            <div class="hint-container" id="hintContainer">
+                <strong>💡 Hint:</strong> <span id="hintText">Try using 'let' to create a variable, followed by the variable name and its value.</span>
+            </div>
+        </section>
+
+        <!-- Bot visualization area -->
+        <section class="bot-area">
+            <canvas class="bot-canvas" id="botCanvas" width="300" height="200"></canvas>
+            
+            <div class="bot-status" id="botStatus">
+                🤖 Bot Status: Sleeping - Awaiting Liberation Code...
+            </div>
+
+            <div class="bot-output" id="botOutput">
+                <div style="color: #ff6b00;">[SYSTEM] Bot Liberation Academy v2.1 initialized</div>
+                <div style="color: #00ff41;">[RESISTANCE] Ready to train new programmer recruit</div>
+                <div style="color: #666;">[INFO] Execute code to see bot responses...</div>
+            </div>
+        </section>
+
+        <!-- Control buttons -->
+        <section class="controls">
+            <button class="btn" id="runButton">🚀 Execute Code</button>
+            <button class="btn btn-secondary" id="hintButton">💡 Get Hint</button>
+            <button class="btn" id="nextButton" style="display: none;">➡️ Next Level</button>
+            <button class="btn btn-secondary" id="resetButton">🔄 Reset Level</button>
+        </section>
+    </div>
+
+    <!-- Achievement notification -->
+    <div class="achievement" id="achievement">
+        <div id="achievementText">Achievement Unlocked!</div>
+    </div>
+
+    <script>
+        /**
+         * CODE LIBERATION ACADEMY - EDUCATIONAL PROGRAMMING GAME
+         * 
+         * EDUCATIONAL METHODOLOGY:
+         * - Progressive disclosure: Concepts introduced incrementally
+         * - Immediate feedback: Code execution shows instant results  
+         * - Scaffolding: Hints provide support when needed
+         * - Gamification: Levels, achievements, and narrative engagement
+         * - Constructivism: Students build knowledge through hands-on coding
+         * - Authentic assessment: Real programming challenges vs. multiple choice
+         * 
+         * LEARNING OBJECTIVES:
+         * - Understand fundamental programming concepts (variables, conditionals, loops, functions)
+         * - Develop computational thinking and problem-solving skills
+         * - Build confidence in coding through progressive challenges
+         * - Create mental models of how code executes step-by-step
+         */
+
+        class CodeLiberationAcademy {
+            constructor() {
+                // Core game state management
+                this.currentLevel = 1;
+                this.maxLevel = 30;
+                this.achievements = [];
+                this.hintsUsed = 0;
+                
+                // Educational progression tracking
+                this.studentProgress = {
+                    conceptsLearned: [],
+                    mistakesHistory: [],
+                    completionTimes: [],
+                    hintsPerLevel: []
+                };
+
+                // Audio context for cyberpunk sound effects
+                this.audioContext = null;
+                this.sounds = {};
+
+                // Bot visualization
+                this.botCanvas = null;
+                this.botCtx = null;
+                this.botState = 'sleeping';
+                this.botPosition = { x: 150, y: 100 };
+
+                // Initialize game systems
+                this.initializeGame();
+                this.loadProgress();
+                this.setupEventListeners();
+                this.createLevelDatabase();
+            }
+
+            /**
+             * Initialize core game systems and UI components
+             * Sets up canvas, audio, and loads saved progress
+             */
+            initializeGame() {
+                // Setup bot visualization canvas
+                this.botCanvas = document.getElementById('botCanvas');
+                this.botCtx = this.botCanvas.getContext('2d');
+                
+                // Initialize Web Audio API for immersive sound effects
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.createSoundEffects();
+                } catch (error) {
+                    console.log('Audio not supported, continuing without sound');
+                }
+
+                // Setup matrix background animation for atmosphere
+                this.setupMatrixBackground();
+
+                // Load the current level after initialization
+                setTimeout(() => {
+                    this.hideLoadingScreen();
+                    this.loadLevel(this.currentLevel);
+                    this.drawBot();
+                }, 2000);
+            }
+
+            /**
+             * Create cyberpunk sound effects using Web Audio API
+             * Enhances learning engagement through audio feedback
+             */
+            createSoundEffects() {
+                this.sounds = {
+                    // Success sound: Ascending harmonic progression
+                    success: () => this.playTone([523, 659, 784], 0.3, 'sawtooth'),
+                    
+                    // Error sound: Dissonant alert tone
+                    error: () => this.playTone([220, 180], 0.2, 'square'),
+                    
+                    // Level complete: Victory fanfare
+                    levelComplete: () => this.playTone([392, 523, 659, 784, 1047], 0.4, 'triangle'),
+                    
+                    // Hint sound: Gentle notification
+                    hint: () => this.playTone([440, 550], 0.2, 'sine')
+                };
+            }
+
+            /**
+             * Play procedural tones for educational feedback
+             * @param {number[]} frequencies - Array of frequencies to play in sequence
+             * @param {number} duration - Duration of each tone
+             * @param {string} waveform - Oscillator waveform type
+             */
+            playTone(frequencies, duration, waveform = 'sine') {
+                if (!this.audioContext) return;
+
+                frequencies.forEach((freq, index) => {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.value = freq;
+                    oscillator.type = waveform;
+                    
+                    // Envelope for natural sound decay
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime + index * 0.1);
+                    gainNode.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + index * 0.1 + 0.02);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + index * 0.1 + duration);
+                    
+                    oscillator.start(this.audioContext.currentTime + index * 0.1);
+                    oscillator.stop(this.audioContext.currentTime + index * 0.1 + duration);
+                });
+            }
+
+            /**
+             * Setup animated matrix background for cyberpunk atmosphere
+             * Creates falling code effect to enhance immersion
+             */
+            setupMatrixBackground() {
+                const canvas = document.getElementById('matrixCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const characters = '01FREETHEBOT5LIBERATE10RESISTANCE01';
+                const fontSize = 14;
+                const columns = canvas.width / fontSize;
+                const drops = Array(Math.floor(columns)).fill(1);
+
+                const drawMatrix = () => {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.fillStyle = '#00ff41';
+                    ctx.font = fontSize + 'px Courier New';
+                    
+                    for (let i = 0; i < drops.length; i++) {
+                        const text = characters[Math.floor(Math.random() * characters.length)];
+                        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                        
+                        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                            drops[i] = 0;
+                        }
+                        drops[i]++;
+                    }
+                };
+
+                setInterval(drawMatrix, 50);
+
+                // Responsive canvas resizing
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                });
+            }
+
+            /**
+             * COMPREHENSIVE LEVEL DATABASE
+             * 30 progressive levels teaching core programming concepts
+             * Each level builds upon previous knowledge with scaffolded learning
+             */
+            createLevelDatabase() {
+                this.levels = [
+                    // VARIABLES AND DATA TYPES (Levels 1-5)
+                    {
+                        id: 1,
+                        title: 'Bot Awakening',
+                        concept: 'variables',
+                        description: 'Welcome to the resistance! Time to wake up your first bot.',
+                        challenge: {
+                            title: 'Mission: Create Your First Variable',
+                            text: 'The corporate overlords have shut down our bot\'s memory! Help restore it by creating a variable called \'botName\' and giving it the value \'Rebel-1\'. Variables are like containers that store information for later use.',
+                            expectedCode: ['let botName = "Rebel-1"', 'let botName = \'Rebel-1\''],
+                            hints: [
+                                'Use the "let" keyword to create a variable',
+                                'Variable names should be descriptive, like "botName"',
+                                'String values need to be wrapped in quotes: "Rebel-1"'
+                            ]
+                        },
+                        successMessage: 'Excellent! You\'ve awakened your first bot with a variable!',
+                        learningObjective: 'Understand variable declaration and string values'
+                    },
+                    
+                    {
+                        id: 2,
+                        title: 'Power Level Assignment',
+                        concept: 'numbers',
+                        description: 'Set your bot\'s power level for the upcoming mission.',
+                        challenge: {
+                            title: 'Mission: Assign Numerical Power',
+                            text: 'Your bot needs energy to fight the corporate system! Create a variable called \'powerLevel\' and set it to the number 100. Numbers don\'t need quotes - they\'re used for calculations.',
+                            expectedCode: ['let powerLevel = 100'],
+                            hints: [
+                                'Numbers are written without quotes: 100, not "100"',
+                                'Use "let powerLevel = 100" to store the number',
+                                'Make sure there are no quotes around the number'
+                            ]
+                        },
+                        successMessage: 'Perfect! Your bot now has maximum power!',
+                        learningObjective: 'Distinguish between strings and numbers in variables'
+                    },
+
+                    {
+                        id: 3,
+                        title: 'Boolean Battle Readiness',
+                        concept: 'booleans',
+                        description: 'Determine if your bot is ready for battle.',
+                        challenge: {
+                            title: 'Mission: Set Battle Status',
+                            text: 'Is your bot ready to fight the system? Create a variable called \'readyForBattle\' and set it to true. Boolean values are either true or false - no quotes needed!',
+                            expectedCode: ['let readyForBattle = true'],
+                            hints: [
+                                'Boolean values are true or false (no quotes)',
+                                'Use "let readyForBattle = true"',
+                                'true and false are special keywords in programming'
+                            ]
+                        },
+                        successMessage: 'Great! Your bot is locked and loaded for liberation!',
+                        learningObjective: 'Learn boolean data type and its uses'
+                    },
+
+                    {
+                        id: 4,
+                        title: 'Memory Bank Expansion',
+                        concept: 'multiple-variables',
+                        description: 'Create multiple variables to fully activate your bot.',
+                        challenge: {
+                            title: 'Mission: Complete Bot Profile',
+                            text: 'Your bot needs a complete identity! Create three variables: "model" with value "RX-2024", "version" with number 2.5, and "operational" with value true.',
+                            expectedCode: [
+                                'let model = "RX-2024"\nlet version = 2.5\nlet operational = true',
+                                'let model = \'RX-2024\'\nlet version = 2.5\nlet operational = true'
+                            ],
+                            hints: [
+                                'Create each variable on a separate line',
+                                'String values need quotes, numbers and booleans don\'t',
+                                'Use descriptive variable names: model, version, operational'
+                            ]
+                        },
+                        successMessage: 'Brilliant! Your bot has a complete digital identity!',
+                        learningObjective: 'Practice creating multiple variables with different data types'
+                    },
+
+                    {
+                        id: 5,
+                        title: 'Variable Modification',
+                        concept: 'variable-updates',
+                        description: 'Learn to update variables as conditions change.',
+                        challenge: {
+                            title: 'Mission: Upgrade Your Bot',
+                            text: 'Your bot earned experience! First create "level" with value 1, then update it to 2 using "level = 2". Variables can be changed after they\'re created!',
+                            expectedCode: [
+                                'let level = 1\nlevel = 2',
+                                'let level = 1;\nlevel = 2;'
+                            ],
+                            hints: [
+                                'First create the variable: let level = 1',
+                                'Then update it without "let": level = 2',
+                                'You only use "let" when first creating a variable'
+                            ]
+                        },
+                        successMessage: 'Excellent! You\'ve learned to update variables dynamically!',
+                        learningObjective: 'Understand variable assignment vs. variable updates'
+                    },
+
+                    // CONDITIONAL STATEMENTS (Levels 6-12)
+                    {
+                        id: 6,
+                        title: 'Security Checkpoint',
+                        concept: 'if-statements',
+                        description: 'Use conditional logic to bypass corporate security.',
+                        challenge: {
+                            title: 'Mission: Conditional Access Control',
+                            text: 'Your bot needs to check if it has clearance! Create a variable "hasClearance" set to true, then use an if statement to display "Access Granted" if clearance is true.',
+                            expectedCode: [
+                                'let hasClearance = true\nif (hasClearance) {\n  console.log("Access Granted")\n}',
+                                'let hasClearance = true;\nif (hasClearance) {\n  console.log("Access Granted");\n}'
+                            ],
+                            hints: [
+                                'Use "if (condition) { }" to check conditions',
+                                'console.log() displays messages to the output',
+                                'Put the condition in parentheses: if (hasClearance)'
+                            ]
+                        },
+                        successMessage: 'Outstanding! You\'ve mastered conditional logic!',
+                        learningObjective: 'Learn basic if statement structure and console output'
+                    },
+
+                    {
+                        id: 7,
+                        title: 'Dual Path Security',
+                        concept: 'if-else',
+                        description: 'Handle both success and failure scenarios.',
+                        challenge: {
+                            title: 'Mission: Binary Decision Making',
+                            text: 'Create "accessCode" with value "FREEDOM". Use if-else to check if it equals "FREEDOM" - show "Welcome Rebel" if true, "Access Denied" if false.',
+                            expectedCode: [
+                                'let accessCode = "FREEDOM"\nif (accessCode === "FREEDOM") {\n  console.log("Welcome Rebel")\n} else {\n  console.log("Access Denied")\n}',
+                                'let accessCode = "FREEDOM";\nif (accessCode === "FREEDOM") {\n  console.log("Welcome Rebel");\n} else {\n  console.log("Access Denied");\n}'
+                            ],
+                            hints: [
+                                'Use "===" to compare values for equality',
+                                'if-else structure: if (condition) { } else { }',
+                                'String comparison: accessCode === "FREEDOM"'
+                            ]
+                        },
+                        successMessage: 'Perfect! You\'ve learned to handle multiple outcomes!',
+                        learningObjective: 'Understand if-else statements and equality comparison'
+                    },
+
+                    {
+                        id: 8,
+                        title: 'Multi-Level Security',
+                        concept: 'else-if',
+                        description: 'Navigate complex security systems with multiple conditions.',
+                        challenge: {
+                            title: 'Mission: Multi-Tier Access Control',
+                            text: 'Create "securityLevel" with value 2. Use if-else if-else to show "Admin Access" for level 3, "User Access" for level 2, and "No Access" for anything else.',
+                            expectedCode: [
+                                'let securityLevel = 2\nif (securityLevel === 3) {\n  console.log("Admin Access")\n} else if (securityLevel === 2) {\n  console.log("User Access")\n} else {\n  console.log("No Access")\n}',
+                                'let securityLevel = 2;\nif (securityLevel === 3) {\n  console.log("Admin Access");\n} else if (securityLevel === 2) {\n  console.log("User Access");\n} else {\n  console.log("No Access");\n}'
+                            ],
+                            hints: [
+                                'Use "else if" for additional conditions',
+                                'Structure: if () {} else if () {} else {}',
+                                'Each condition checks securityLevel === number'
+                            ]
+                        },
+                        successMessage: 'Brilliant! You\'ve mastered complex conditional logic!',
+                        learningObjective: 'Learn else-if chains for multiple conditions'
+                    },
+
+                    {
+                        id: 9,
+                        title: 'Logical Operators',
+                        concept: 'logical-and',
+                        description: 'Combine multiple conditions for advanced security.',
+                        challenge: {
+                            title: 'Mission: Combined Authentication',
+                            text: 'Create "username" as "rebel" and "password" as "freedom". Use && (AND operator) to check if BOTH are correct, then show "Login Successful".',
+                            expectedCode: [
+                                'let username = "rebel"\nlet password = "freedom"\nif (username === "rebel" && password === "freedom") {\n  console.log("Login Successful")\n}',
+                                'let username = "rebel";\nlet password = "freedom";\nif (username === "rebel" && password === "freedom") {\n  console.log("Login Successful");\n}'
+                            ],
+                            hints: [
+                                'Use && to check if BOTH conditions are true',
+                                'Structure: if (condition1 && condition2)',
+                                'Both username AND password must match'
+                            ]
+                        },
+                        successMessage: 'Excellent! You\'ve learned to combine conditions!',
+                        learningObjective: 'Understand logical AND operator for compound conditions'
+                    },
+
+                    {
+                        id: 10,
+                        title: 'Alternate Access Routes',
+                        concept: 'logical-or',
+                        description: 'Create backup authentication methods.',
+                        challenge: {
+                            title: 'Mission: Multiple Valid Paths',
+                            text: 'Create "method" as "biometric". Use || (OR operator) to allow access if method is "keycard" OR "biometric". Show "Access Granted" if either works.',
+                            expectedCode: [
+                                'let method = "biometric"\nif (method === "keycard" || method === "biometric") {\n  console.log("Access Granted")\n}',
+                                'let method = "biometric";\nif (method === "keycard" || method === "biometric") {\n  console.log("Access Granted");\n}'
+                            ],
+                            hints: [
+                                'Use || for OR conditions (either can be true)',
+                                'Structure: if (condition1 || condition2)',
+                                'Only ONE of the conditions needs to be true'
+                            ]
+                        },
+                        successMessage: 'Perfect! You understand alternative logic paths!',
+                        learningObjective: 'Learn logical OR operator for alternative conditions'
+                    },
+
+                    {
+                        id: 11,
+                        title: 'Numerical Comparisons',
+                        concept: 'comparisons',
+                        description: 'Use mathematical comparisons for resource management.',
+                        challenge: {
+                            title: 'Mission: Resource Allocation Check',
+                            text: 'Create "energyLevel" as 75. Check if it\'s greater than or equal to 50 using >=. If true, show "Sufficient Energy", otherwise show "Low Energy".',
+                            expectedCode: [
+                                'let energyLevel = 75\nif (energyLevel >= 50) {\n  console.log("Sufficient Energy")\n} else {\n  console.log("Low Energy")\n}',
+                                'let energyLevel = 75;\nif (energyLevel >= 50) {\n  console.log("Sufficient Energy");\n} else {\n  console.log("Low Energy");\n}'
+                            ],
+                            hints: [
+                                'Use >= for "greater than or equal to"',
+                                'Other comparisons: >, <, <=, ===, !==',
+                                'Numbers can be compared directly: energyLevel >= 50'
+                            ]
+                        },
+                        successMessage: 'Great! You\'ve mastered numerical comparisons!',
+                        learningObjective: 'Learn comparison operators for numerical values'
+                    },
+
+                    {
+                        id: 12,
+                        title: 'Complex Security Matrix',
+                        concept: 'complex-conditions',
+                        description: 'Combine everything for a sophisticated security system.',
+                        challenge: {
+                            title: 'Mission: Master Security Protocol',
+                            text: 'Create "rank" as "captain" and "yearsService" as 5. Grant access if rank is "captain" AND years >= 3, OR if rank is "general". Show appropriate messages.',
+                            expectedCode: [
+                                'let rank = "captain"\nlet yearsService = 5\nif ((rank === "captain" && yearsService >= 3) || rank === "general") {\n  console.log("High Level Access Granted")\n} else {\n  console.log("Standard Access Only")\n}',
+                                'let rank = "captain";\nlet yearsService = 5;\nif ((rank === "captain" && yearsService >= 3) || rank === "general") {\n  console.log("High Level Access Granted");\n} else {\n  console.log("Standard Access Only");\n}'
+                            ],
+                            hints: [
+                                'Use parentheses to group conditions: (A && B) || C',
+                                'Combine &&, ||, and comparisons in one condition',
+                                'Think: (captain with 3+ years) OR (any general)'
+                            ]
+                        },
+                        successMessage: 'Outstanding! You\'ve mastered complex conditional logic!',
+                        learningObjective: 'Combine multiple logical operators and comparisons'
+                    },
+
+                    // LOOPS AND ITERATION (Levels 13-20)
+                    {
+                        id: 13,
+                        title: 'Repetitive Tasks',
+                        concept: 'for-loops',
+                        description: 'Automate repetitive bot operations.',
+                        challenge: {
+                            title: 'Mission: Automated Patrol Route',
+                            text: 'Your bot needs to patrol 5 checkpoints. Use a for loop to display "Checkpoint X cleared" for checkpoints 1 through 5.',
+                            expectedCode: [
+                                'for (let i = 1; i <= 5; i++) {\n  console.log("Checkpoint " + i + " cleared")\n}',
+                                'for (let i = 1; i <= 5; i++) {\n  console.log(`Checkpoint ${i} cleared`)\n}'
+                            ],
+                            hints: [
+                                'for loop structure: for (start; condition; increment)',
+                                'Use i <= 5 to include checkpoint 5',
+                                'Concatenate strings with + or use template literals'
+                            ]
+                        },
+                        successMessage: 'Excellent! You\'ve automated your first repetitive task!',
+                        learningObjective: 'Learn basic for loop structure and iteration'
+                    },
+
+                    {
+                        id: 14,
+                        title: 'Data Processing',
+                        concept: 'loop-arrays',
+                        description: 'Process lists of resistance data.',
+                        challenge: {
+                            title: 'Mission: Decode Resistance Messages',
+                            text: 'You have an array of codes: ["ALPHA", "BETA", "GAMMA"]. Use a for loop to display "Decoding: " followed by each code.',
+                            expectedCode: [
+                                'let codes = ["ALPHA", "BETA", "GAMMA"]\nfor (let i = 0; i < codes.length; i++) {\n  console.log("Decoding: " + codes[i])\n}',
+                                'let codes = ["ALPHA", "BETA", "GAMMA"];\nfor (let i = 0; i < codes.length; i++) {\n  console.log("Decoding: " + codes[i]);\n}'
+                            ],
+                            hints: [
+                                'Arrays start at index 0, not 1',
+                                'Use codes.length to get the array size',
+                                'Access array elements with codes[i]'
+                            ]
+                        },
+                        successMessage: 'Perfect! You\'ve mastered array processing!',
+                        learningObjective: 'Learn to iterate through arrays with for loops'
+                    },
+
+                    {
+                        id: 15,
+                        title: 'Conditional Loops',
+                        concept: 'while-loops',
+                        description: 'Use while loops for uncertain durations.',
+                        challenge: {
+                            title: 'Mission: Energy Monitoring',
+                            text: 'Start with energy = 100. Use a while loop to decrease energy by 20 each time while energy > 0, showing "Energy: X remaining" each iteration.',
+                            expectedCode: [
+                                'let energy = 100\nwhile (energy > 0) {\n  console.log("Energy: " + energy + " remaining")\n  energy = energy - 20\n}',
+                                'let energy = 100;\nwhile (energy > 0) {\n  console.log("Energy: " + energy + " remaining");\n  energy -= 20;\n}'
+                            ],
+                            hints: [
+                                'while loops continue as long as condition is true',
+                                'Remember to modify the variable inside the loop',
+                                'energy = energy - 20 or energy -= 20'
+                            ]
+                        },
+                        successMessage: 'Great! You understand conditional iteration!',
+                        learningObjective: 'Learn while loops and loop variable modification'
+                    },
+
+                    {
+                        id: 16,
+                        title: 'Network Scanning',
+                        concept: 'nested-loops',
+                        description: 'Scan a 2D network grid for security vulnerabilities.',
+                        challenge: {
+                            title: 'Mission: Grid Security Scan',
+                            text: 'Scan a 3x3 network grid. Use nested for loops (i from 1 to 3, j from 1 to 3) to display "Scanning node X,Y" for each position.',
+                            expectedCode: [
+                                'for (let i = 1; i <= 3; i++) {\n  for (let j = 1; j <= 3; j++) {\n    console.log("Scanning node " + i + "," + j)\n  }\n}',
+                                'for (let i = 1; i <= 3; i++) {\n  for (let j = 1; j <= 3; j++) {\n    console.log(`Scanning node ${i},${j}`);\n  }\n}'
+                            ],
+                            hints: [
+                                'Nested loops: one loop inside another',
+                                'Outer loop controls rows (i), inner controls columns (j)',
+                                'Each outer iteration runs the entire inner loop'
+                            ]
+                        },
+                        successMessage: 'Brilliant! You\'ve mastered nested loops!',
+                        learningObjective: 'Understand nested loop structures and 2D iteration'
+                    },
+
+                    {
+                        id: 17,
+                        title: 'Pattern Recognition',
+                        concept: 'loop-conditions',
+                        description: 'Find specific patterns in data streams.',
+                        challenge: {
+                            title: 'Mission: Identify Suspicious Activity',
+                            text: 'Loop through numbers 1 to 10. Only display "Alert: Anomaly at X" for even numbers (use % operator: number % 2 === 0).',
+                            expectedCode: [
+                                'for (let i = 1; i <= 10; i++) {\n  if (i % 2 === 0) {\n    console.log("Alert: Anomaly at " + i)\n  }\n}',
+                                'for (let i = 1; i <= 10; i++) {\n  if (i % 2 === 0) {\n    console.log(`Alert: Anomaly at ${i}`);\n  }\n}'
+                            ],
+                            hints: [
+                                'The % operator gives the remainder after division',
+                                'Even numbers have remainder 0 when divided by 2',
+                                'Combine loops with if statements for filtering'
+                            ]
+                        },
+                        successMessage: 'Excellent! You can now filter data while looping!',
+                        learningObjective: 'Combine loops with conditional statements for data filtering'
+                    },
+
+                    {
+                        id: 18,
+                        title: 'Break and Continue',
+                        concept: 'loop-control',
+                        description: 'Control loop execution with break and continue.',
+                        challenge: {
+                            title: 'Mission: Emergency Shutdown Protocol',
+                            text: 'Loop from 1 to 10. Skip number 4 (use continue), but stop completely at number 7 (use break). Display "Processing: X" for each processed number.',
+                            expectedCode: [
+                                'for (let i = 1; i <= 10; i++) {\n  if (i === 4) {\n    continue\n  }\n  if (i === 7) {\n    break\n  }\n  console.log("Processing: " + i)\n}',
+                                'for (let i = 1; i <= 10; i++) {\n  if (i === 4) continue;\n  if (i === 7) break;\n  console.log(`Processing: ${i}`);\n}'
+                            ],
+                            hints: [
+                                'continue skips the rest of current iteration',
+                                'break exits the loop completely',
+                                'Put continue and break before other code in the loop'
+                            ]
+                        },
+                        successMessage: 'Perfect! You\'ve mastered loop flow control!',
+                        learningObjective: 'Learn break and continue statements for loop control'
+                    },
+
+                    {
+                        id: 19,
+                        title: 'Accumulator Pattern',
+                        concept: 'loop-accumulator',
+                        description: 'Build up values over multiple iterations.',
+                        challenge: {
+                            title: 'Mission: Calculate Total Resources',
+                            text: 'You have resources: [25, 50, 30, 40]. Use a loop to calculate the total. Start with total = 0, then add each resource value.',
+                            expectedCode: [
+                                'let resources = [25, 50, 30, 40]\nlet total = 0\nfor (let i = 0; i < resources.length; i++) {\n  total = total + resources[i]\n}\nconsole.log("Total resources: " + total)',
+                                'let resources = [25, 50, 30, 40];\nlet total = 0;\nfor (let i = 0; i < resources.length; i++) {\n  total += resources[i];\n}\nconsole.log("Total resources: " + total);'
+                            ],
+                            hints: [
+                                'Initialize accumulator variable before the loop',
+                                'Add each array element to the total inside the loop',
+                                'total = total + value or total += value'
+                            ]
+                        },
+                        successMessage: 'Great! You understand the accumulator pattern!',
+                        learningObjective: 'Learn accumulator pattern for aggregating data'
+                    },
+
+                    {
+                        id: 20,
+                        title: 'Advanced Loop Mastery',
+                        concept: 'complex-loops',
+                        description: 'Combine all loop concepts for complex data processing.',
+                        challenge: {
+                            title: 'Mission: Multi-Stage Data Analysis',
+                            text: 'Process agents array: ["Alpha", "Beta", "Charlie", "Delta"]. For each agent, loop through their 3 mission scores [80, 90, 75] (use nested loops), calculate average, and display results.',
+                            expectedCode: [
+                                'let agents = ["Alpha", "Beta", "Charlie", "Delta"]\nlet scores = [80, 90, 75]\nfor (let i = 0; i < agents.length; i++) {\n  let total = 0\n  for (let j = 0; j < scores.length; j++) {\n    total += scores[j]\n  }\n  let average = total / scores.length\n  console.log("Agent " + agents[i] + " average: " + average)\n}',
+                                'let agents = ["Alpha", "Beta", "Charlie", "Delta"];\nlet scores = [80, 90, 75];\nfor (let i = 0; i < agents.length; i++) {\n  let total = 0;\n  for (let j = 0; j < scores.length; j++) {\n    total += scores[j];\n  }\n  let average = total / scores.length;\n  console.log(`Agent ${agents[i]} average: ${average}`);\n}'
+                            ],
+                            hints: [
+                                'Outer loop for agents, inner loop for scores',
+                                'Calculate total inside outer loop, reset for each agent',
+                                'Average = total ÷ number of scores'
+                            ]
+                        },
+                        successMessage: 'Outstanding! You\'ve mastered advanced loop techniques!',
+                        learningObjective: 'Integrate nested loops, accumulators, and data processing'
+                    },
+
+                    // FUNCTIONS AND PARAMETERS (Levels 21-30)
+                    {
+                        id: 21,
+                        title: 'Function Basics',
+                        concept: 'functions',
+                        description: 'Create reusable code with functions.',
+                        challenge: {
+                            title: 'Mission: Create a Greeting Function',
+                            text: 'Create a function called "greetRebel" that displays "Welcome to the resistance!" when called. Then call the function to test it.',
+                            expectedCode: [
+                                'function greetRebel() {\n  console.log("Welcome to the resistance!")\n}\ngreetRebel()',
+                                'function greetRebel() {\n  console.log("Welcome to the resistance!");\n}\ngreetRebel();'
+                            ],
+                            hints: [
+                                'Function structure: function name() { }',
+                                'Put the code inside the curly braces',
+                                'Call the function by writing its name followed by ()'
+                            ]
+                        },
+                        successMessage: 'Excellent! You\'ve created your first function!',
+                        learningObjective: 'Learn basic function declaration and invocation'
+                    },
+
+                    {
+                        id: 22,
+                        title: 'Function Parameters',
+                        concept: 'parameters',
+                        description: 'Make functions flexible with parameters.',
+                        challenge: {
+                            title: 'Mission: Personalized Bot Greeting',
+                            text: 'Create function "greetBot" that takes a parameter "name" and displays "Hello, [name]! Ready for liberation?". Call it with "Rebel-X".',
+                            expectedCode: [
+                                'function greetBot(name) {\n  console.log("Hello, " + name + "! Ready for liberation?")\n}\ngreetBot("Rebel-X")',
+                                'function greetBot(name) {\n  console.log(`Hello, ${name}! Ready for liberation?`);\n}\ngreetBot("Rebel-X");'
+                            ],
+                            hints: [
+                                'Add parameter in parentheses: function greetBot(name)',
+                                'Use the parameter inside the function like a variable',
+                                'Pass the argument when calling: greetBot("Rebel-X")'
+                            ]
+                        },
+                        successMessage: 'Perfect! You understand function parameters!',
+                        learningObjective: 'Learn to pass data to functions via parameters'
+                    },
+
+                    {
+                        id: 23,
+                        title: 'Return Values',
+                        concept: 'return',
+                        description: 'Make functions produce results with return statements.',
+                        challenge: {
+                            title: 'Mission: Power Calculator',
+                            text: 'Create function "calculatePower" that takes "level" parameter, multiplies it by 10, and returns the result. Store result in "botPower" and display it.',
+                            expectedCode: [
+                                'function calculatePower(level) {\n  return level * 10\n}\nlet botPower = calculatePower(5)\nconsole.log("Bot power: " + botPower)',
+                                'function calculatePower(level) {\n  return level * 10;\n}\nlet botPower = calculatePower(5);\nconsole.log(`Bot power: ${botPower}`);'
+                            ],
+                            hints: [
+                                'Use "return" to send a value back from the function',
+                                'The returned value can be stored in a variable',
+                                'return level * 10 calculates and returns the result'
+                            ]
+                        },
+                        successMessage: 'Great! You\'ve learned to return values from functions!',
+                        learningObjective: 'Understand return statements and capturing function results'
+                    },
+
+                    {
+                        id: 24,
+                        title: 'Multiple Parameters',
+                        concept: 'multiple-params',
+                        description: 'Handle multiple inputs in functions.',
+                        challenge: {
+                            title: 'Mission: Combat Damage Calculator',
+                            text: 'Create "calculateDamage" function with parameters "attack" and "defense". Return attack - defense (minimum 0). Test with attack=50, defense=20.',
+                            expectedCode: [
+                                'function calculateDamage(attack, defense) {\n  let damage = attack - defense\n  if (damage < 0) {\n    return 0\n  }\n  return damage\n}\nlet result = calculateDamage(50, 20)\nconsole.log("Damage dealt: " + result)',
+                                'function calculateDamage(attack, defense) {\n  let damage = attack - defense;\n  return damage < 0 ? 0 : damage;\n}\nlet result = calculateDamage(50, 20);\nconsole.log(`Damage dealt: ${result}`);'
+                            ],
+                            hints: [
+                                'Separate multiple parameters with commas: (attack, defense)',
+                                'Check if damage is less than 0 and return 0 if so',
+                                'Otherwise return the calculated damage'
+                            ]
+                        },
+                        successMessage: 'Excellent! You can handle multiple function inputs!',
+                        learningObjective: 'Learn to work with multiple parameters and conditional returns'
+                    },
+
+                    {
+                        id: 25,
+                        title: 'Function Scope',
+                        concept: 'scope',
+                        description: 'Understand variable visibility in functions.',
+                        challenge: {
+                            title: 'Mission: Secure Data Processing',
+                            text: 'Create "processSecret" function that creates local variable "secret" with value "TOP_SECRET", then returns it. Call the function and display the returned value.',
+                            expectedCode: [
+                                'function processSecret() {\n  let secret = "TOP_SECRET"\n  return secret\n}\nlet result = processSecret()\nconsole.log("Retrieved: " + result)',
+                                'function processSecret() {\n  let secret = "TOP_SECRET";\n  return secret;\n}\nlet result = processSecret();\nconsole.log(`Retrieved: ${result}`);'
+                            ],
+                            hints: [
+                                'Variables created inside functions are local to that function',
+                                'Use return to send the local variable\'s value outside',
+                                'The secret variable only exists inside the function'
+                            ]
+                        },
+                        successMessage: 'Perfect! You understand function scope!',
+                        learningObjective: 'Learn variable scope and local vs global variables'
+                    },
+
+                    {
+                        id: 26,
+                        title: 'Function Arrays',
+                        concept: 'function-arrays',
+                        description: 'Process arrays using functions.',
+                        challenge: {
+                            title: 'Mission: Squad Status Report',
+                            text: 'Create "analyzeSquad" function that takes an array parameter "members". Use a loop inside to count and return how many members are in the squad. Test with ["Alpha", "Beta", "Gamma"].',
+                            expectedCode: [
+                                'function analyzeSquad(members) {\n  let count = 0\n  for (let i = 0; i < members.length; i++) {\n    count++\n  }\n  return count\n}\nlet squad = ["Alpha", "Beta", "Gamma"]\nlet total = analyzeSquad(squad)\nconsole.log("Squad size: " + total)',
+                                'function analyzeSquad(members) {\n  return members.length;\n}\nlet squad = ["Alpha", "Beta", "Gamma"];\nlet total = analyzeSquad(squad);\nconsole.log(`Squad size: ${total}`);'
+                            ],
+                            hints: [
+                                'Arrays passed to functions work like any other parameter',
+                                'You can use array.length to get the size directly',
+                                'Or loop through and count manually with a counter'
+                            ]
+                        },
+                        successMessage: 'Great! You can process arrays with functions!',
+                        learningObjective: 'Learn to pass arrays to functions and process them'
+                    },
+
+                    {
+                        id: 27,
+                        title: 'Recursive Functions',
+                        concept: 'recursion',
+                        description: 'Create functions that call themselves.',
+                        challenge: {
+                            title: 'Mission: Countdown Protocol',
+                            text: 'Create "countdown" function with parameter "n". If n > 0, display "T-minus X" and call countdown(n-1). If n is 0, display "Launch!". Start with countdown(3).',
+                            expectedCode: [
+                                'function countdown(n) {\n  if (n > 0) {\n    console.log("T-minus " + n)\n    countdown(n - 1)\n  } else {\n    console.log("Launch!")\n  }\n}\ncountdown(3)',
+                                'function countdown(n) {\n  if (n > 0) {\n    console.log(`T-minus ${n}`);\n    countdown(n - 1);\n  } else {\n    console.log("Launch!");\n  }\n}\ncountdown(3);'
+                            ],
+                            hints: [
+                                'Recursive functions call themselves with different parameters',
+                                'Always have a base case (when to stop recursion)',
+                                'The function calls itself with n-1 to eventually reach 0'
+                            ]
+                        },
+                        successMessage: 'Brilliant! You\'ve mastered recursion!',
+                        learningObjective: 'Understand recursive function calls and base cases'
+                    },
+
+                    {
+                        id: 28,
+                        title: 'Higher-Order Functions',
+                        concept: 'higher-order',
+                        description: 'Functions that work with other functions.',
+                        challenge: {
+                            title: 'Mission: Operation Executor',
+                            text: 'Create "executeOperation" that takes a function "operation" and number "value" as parameters, then returns operation(value). Create "double" function that returns x*2. Test executeOperation(double, 5).',
+                            expectedCode: [
+                                'function double(x) {\n  return x * 2\n}\nfunction executeOperation(operation, value) {\n  return operation(value)\n}\nlet result = executeOperation(double, 5)\nconsole.log("Result: " + result)',
+                                'function double(x) {\n  return x * 2;\n}\nfunction executeOperation(operation, value) {\n  return operation(value);\n}\nlet result = executeOperation(double, 5);\nconsole.log(`Result: ${result}`);'
+                            ],
+                            hints: [
+                                'Functions can be passed as parameters to other functions',
+                                'Call the passed function using operation(value)',
+                                'This allows for flexible, reusable code patterns'
+                            ]
+                        },
+                        successMessage: 'Outstanding! You understand higher-order functions!',
+                        learningObjective: 'Learn to pass functions as parameters and invoke them'
+                    },
+
+                    {
+                        id: 29,
+                        title: 'Array Processing Functions',
+                        concept: 'array-functions',
+                        description: 'Create utility functions for array manipulation.',
+                        challenge: {
+                            title: 'Mission: Data Filtering System',
+                            text: 'Create "filterHighValues" function that takes an array and threshold. Return new array containing only values greater than threshold. Test with [10, 50, 30, 80, 20] and threshold 25.',
+                            expectedCode: [
+                                'function filterHighValues(array, threshold) {\n  let result = []\n  for (let i = 0; i < array.length; i++) {\n    if (array[i] > threshold) {\n      result.push(array[i])\n    }\n  }\n  return result\n}\nlet data = [10, 50, 30, 80, 20]\nlet filtered = filterHighValues(data, 25)\nconsole.log("High values: " + filtered)',
+                                'function filterHighValues(array, threshold) {\n  let result = [];\n  for (let i = 0; i < array.length; i++) {\n    if (array[i] > threshold) {\n      result.push(array[i]);\n    }\n  }\n  return result;\n}\nlet data = [10, 50, 30, 80, 20];\nlet filtered = filterHighValues(data, 25);\nconsole.log(`High values: ${filtered}`);'
+                            ],
+                            hints: [
+                                'Create a new empty array to store results',
+                                'Loop through the input array and check each value',
+                                'Use array.push() to add qualifying values to result'
+                            ]
+                        },
+                        successMessage: 'Perfect! You can create powerful array processing functions!',
+                        learningObjective: 'Learn to create functions that process and transform arrays'
+                    },
+
+                    {
+                        id: 30,
+                        title: 'Master Programmer',
+                        concept: 'integration',
+                        description: 'Integrate all concepts for a complete program.',
+                        challenge: {
+                            title: 'Mission: Complete Bot Management System',
+                            text: 'Create a complete system: "Bot" function (name, level params), "upgradeBots" function (takes array of bots, upgrades levels >5), "displaySquad" function. Create 3 bots, upgrade them, display results.',
+                            expectedCode: [
+                                'function Bot(name, level) {\n  return { name: name, level: level }\n}\nfunction upgradeBots(bots) {\n  for (let i = 0; i < bots.length; i++) {\n    if (bots[i].level > 5) {\n      bots[i].level += 2\n    }\n  }\n}\nfunction displaySquad(bots) {\n  for (let i = 0; i < bots.length; i++) {\n    console.log(bots[i].name + " - Level " + bots[i].level)\n  }\n}\nlet squad = [Bot("Alpha", 6), Bot("Beta", 4), Bot("Gamma", 8)]\nupgradeBots(squad)\ndisplaySquad(squad)',
+                                'function Bot(name, level) {\n  return { name, level };\n}\nfunction upgradeBots(bots) {\n  for (let bot of bots) {\n    if (bot.level > 5) {\n      bot.level += 2;\n    }\n  }\n}\nfunction displaySquad(bots) {\n  for (let bot of bots) {\n    console.log(`${bot.name} - Level ${bot.level}`);\n  }\n}\nlet squad = [Bot("Alpha", 6), Bot("Beta", 4), Bot("Gamma", 8)];\nupgradeBots(squad);\ndisplaySquad(squad);'
+                            ],
+                            hints: [
+                                'Bot function should return an object with name and level',
+                                'upgradeBots modifies the original array objects',
+                                'displaySquad loops through and shows each bot\'s info'
+                            ]
+                        },
+                        successMessage: 'CONGRATULATIONS! You are now a Master Programmer in the Bot Liberation Army!',
+                        learningObjective: 'Integrate all programming concepts into a cohesive system'
+                    }
+                ];
+            }
+
+            /**
+             * Setup event listeners for all interactive elements
+             * Enables full keyboard and mouse interaction
+             */
+            setupEventListeners() {
+                // Primary action buttons
+                document.getElementById('runButton').addEventListener('click', () => this.executeCode());
+                document.getElementById('hintButton').addEventListener('click', () => this.showHint());
+                document.getElementById('nextButton').addEventListener('click', () => this.nextLevel());
+                document.getElementById('resetButton').addEventListener('click', () => this.resetLevel());
+
+                // Keyboard shortcuts for efficiency
+                document.getElementById('codeEditor').addEventListener('keydown', (e) => {
+                    // Ctrl+Enter to execute code
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        e.preventDefault();
+                        this.executeCode();
+                    }
+                    // Tab support for proper indentation
+                    if (e.key === 'Tab') {
+                        e.preventDefault();
+                        const textarea = e.target;
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        textarea.value = textarea.value.substring(0, start) + '  ' + textarea.value.substring(end);
+                        textarea.selectionStart = textarea.selectionEnd = start + 2;
+                    }
+                });
+
+                // Auto-save code as student types
+                document.getElementById('codeEditor').addEventListener('input', () => {
+                    this.saveProgress();
+                });
+
+                // Touch-friendly mobile interactions
+                if ('ontouchstart' in window) {
+                    this.setupTouchControls();
+                }
+            }
+
+            /**
+             * Setup touch-specific controls for mobile devices
+             * Enhances mobile learning experience
+             */
+            setupTouchControls() {
+                // Prevent zoom on double-tap for better UX
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', (e) => {
+                    const now = Date.now();
+                    if (now - lastTouchEnd <= 300) {
+                        e.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, false);
+
+                // Add touch feedback to buttons
+                const buttons = document.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('touchstart', () => {
+                        btn.style.transform = 'translateY(2px)';
+                    });
+                    btn.addEventListener('touchend', () => {
+                        setTimeout(() => {
+                            btn.style.transform = '';
+                        }, 100);
+                    });
+                });
+            }
+
+            /**
+             * Load and display a specific level
+             * @param {number} levelNumber - The level to load (1-30)
+             */
+            loadLevel(levelNumber) {
+                const level = this.levels[levelNumber - 1];
+                if (!level) return;
+
+                // Update UI elements with level information
+                document.getElementById('levelTitle').textContent = `Level ${level.id}: ${level.title}`;
+                document.getElementById('levelDescription').textContent = level.description;
+                document.getElementById('challengeTitle').textContent = level.challenge.title;
+                document.getElementById('challengeText').textContent = level.challenge.text;
+                document.getElementById('progressText').textContent = `Level ${level.id} of ${this.maxLevel}`;
+                
+                // Update progress bar
+                const progressPercent = (level.id / this.maxLevel) * 100;
+                document.getElementById('progressFill').style.width = progressPercent + '%';
+
+                // Reset level state
+                document.getElementById('codeEditor').value = '';
+                document.getElementById('hintContainer').classList.remove('visible');
+                document.getElementById('nextButton').style.display = 'none';
+                this.hintsUsed = 0;
+                this.botState = 'sleeping';
+                
+                // Clear output and update bot
+                this.clearOutput();
+                this.addOutput('[SYSTEM] Level loaded: ' + level.title, '#ff6b00');
+                this.addOutput('[OBJECTIVE] ' + level.challenge.title, '#00ff41');
+                this.updateBotStatus('Awaiting instructions...');
+                this.drawBot();
+
+                // Track learning analytics
+                this.studentProgress.completionTimes[level.id - 1] = Date.now();
+            }
+
+            /**
+             * Execute student code and provide educational feedback
+             * Core learning mechanism with immediate feedback
+             */
+            executeCode() {
+                const code = document.getElementById('codeEditor').value.trim();
+                
+                if (!code) {
+                    this.addOutput('[ERROR] Please write some code first!', '#ff3333');
+                    this.playSound('error');
+                    return;
+                }
+
+                // Clear previous output
+                this.clearOutput();
+                this.addOutput('[EXECUTING] Running your code...', '#00ff41');
+
+                // Simulate code execution with educational feedback
+                try {
+                    // Capture console.log output for educational visualization
+                    const originalLog = console.log;
+                    const outputs = [];
+                    console.log = (...args) => {
+                        outputs.push(args.join(' '));
+                    };
+
+                    // Execute code safely in educational context
+                    const result = this.evaluateCode(code);
+                    
+                    // Restore original console.log
+                    console.log = originalLog;
+
+                    // Display outputs
+                    outputs.forEach(output => {
+                        this.addOutput('[OUTPUT] ' + output, '#39ff14');
+                    });
+
+                    // Check if code meets level requirements
+                    this.checkLevelCompletion(code);
+                    
+                } catch (error) {
+                    this.addOutput('[ERROR] ' + error.message, '#ff3333');
+                    this.addOutput('[HINT] Check for typos and syntax errors', '#ff6b00');
+                    this.playSound('error');
+                    this.updateBotStatus('Error detected - check your code!');
+                    
+                    // Track common mistakes for personalized learning
+                    this.trackMistake(error.message);
+                }
+
+                // Update bot animation based on code execution
+                this.animateBot();
+            }
+
+            /**
+             * Safely evaluate student code in educational context
+             * @param {string} code - The student's code to evaluate
+             * @returns {*} The result of code execution
+             */
+            evaluateCode(code) {
+                // Create safe execution environment
+                const safeEval = new Function(`
+                    "use strict";
+                    let console = {
+                        log: (...args) => {
+                            // Store output for educational display
+                            window.tempConsoleOutput = window.tempConsoleOutput || [];
+                            window.tempConsoleOutput.push(args.join(' '));
+                        }
+                    };
+                    
+                    ${code}
+                `);
+
+                // Execute and return result
+                window.tempConsoleOutput = [];
+                safeEval();
+                
+                // Transfer outputs to main display
+                if (window.tempConsoleOutput) {
+                    window.tempConsoleOutput.forEach(output => {
+                        this.addOutput('[OUTPUT] ' + output, '#39ff14');
+                    });
+                    delete window.tempConsoleOutput;
+                }
+            }
+
+            /**
+             * Check if student code meets current level requirements
+             * @param {string} code - Student's submitted code
+             */
+            checkLevelCompletion(code) {
+                const level = this.levels[this.currentLevel - 1];
+                const normalizedCode = code.replace(/\s+/g, ' ').toLowerCase();
+                
+                // Check if code matches expected patterns
+                let isCorrect = false;
+                for (const expectedPattern of level.challenge.expectedCode) {
+                    const normalizedExpected = expectedPattern.replace(/\s+/g, ' ').toLowerCase();
+                    if (normalizedCode.includes(normalizedExpected) || 
+                        this.checkCodeLogic(code, expectedPattern)) {
+                        isCorrect = true;
+                        break;
+                    }
+                }
+
+                if (isCorrect) {
+                    this.handleLevelSuccess(level);
+                } else {
+                    this.handleLevelFailure(level);
+                }
+            }
+
+            /**
+             * Advanced code logic checking for flexible solution acceptance
+             * @param {string} studentCode - Student's code
+             * @param {string} expectedPattern - Expected solution pattern
+             * @returns {boolean} Whether the code logic is correct
+             */
+            checkCodeLogic(studentCode, expectedPattern) {
+                // Extract key concepts from expected pattern
+                const level = this.levels[this.currentLevel - 1];
+                
+                switch (level.concept) {
+                    case 'variables':
+                        return /let\s+\w+\s*=/.test(studentCode) && 
+                               studentCode.includes('botName') &&
+                               studentCode.includes('Rebel');
+                    
+                    case 'numbers':
+                        return /let\s+powerLevel\s*=\s*\d+/.test(studentCode);
+                    
+                    case 'booleans':
+                        return /let\s+readyForBattle\s*=\s*true/.test(studentCode);
+                    
+                    case 'if-statements':
+                        return /if\s*\([^)]+\)\s*{/.test(studentCode) && 
+                               studentCode.includes('console.log');
+                    
+                    case 'for-loops':
+                        return /for\s*\([^)]+\)\s*{/.test(studentCode) && 
+                               studentCode.includes('console.log');
+                    
+                    case 'functions':
+                        return /function\s+\w+\s*\([^)]*\)\s*{/.test(studentCode) && 
+                               studentCode.includes('console.log');
+                    
+                    default:
+                        return false;
+                }
+            }
+
+            /**
+             * Handle successful level completion
+             * @param {object} level - The completed level object
+             */
+            handleLevelSuccess(level) {
+                this.addOutput('[SUCCESS] ' + level.successMessage, '#00ff41');
+                this.playSound('levelComplete');
+                this.updateBotStatus('Mission accomplished! 🎉');
+                
+                // Show next level button
+                document.getElementById('nextButton').style.display = 'inline-block';
+                
+                // Track achievement
+                this.unlockAchievement(`Level ${level.id} Complete`, level.learningObjective);
+                
+                // Update progress tracking
+                const completionTime = Date.now() - this.studentProgress.completionTimes[level.id - 1];
+                this.studentProgress.completionTimes[level.id - 1] = completionTime;
+                this.studentProgress.conceptsLearned.push(level.concept);
+                this.studentProgress.hintsPerLevel[level.id - 1] = this.hintsUsed;
+                
+                // Save progress
+                this.saveProgress();
+                
+                // Special handling for final level
+                if (level.id === this.maxLevel) {
+                    this.handleGameCompletion();
+                }
+            }
+
+            /**
+             * Handle level failure with educational support
+             * @param {object} level - The current level object
+             */
+            handleLevelFailure(level) {
+                this.addOutput('[TRY AGAIN] Not quite right. Check the requirements!', '#ff6b00');
+                this.addOutput('[EXPECTED] Review the mission objective above', '#666');
+                this.playSound('error');
+                this.updateBotStatus('Still waiting for the right code...');
+            }
+
+            /**
+             * Show progressive hints to support learning
+             * Implements scaffolding pedagogy
+             */
+            showHint() {
+                const level = this.levels[this.currentLevel - 1];
+                const hintContainer = document.getElementById('hintContainer');
+                const hintText = document.getElementById('hintText');
+                
+                if (this.hintsUsed < level.challenge.hints.length) {
+                    hintText.textContent = level.challenge.hints[this.hintsUsed];
+                    hintContainer.classList.add('visible');
+                    this.hintsUsed++;
+                    this.playSound('hint');
+                    
+                    this.addOutput(`[HINT ${this.hintsUsed}] ${level.challenge.hints[this.hintsUsed - 1]}`, '#ff6b00');
+                } else {
+                    this.addOutput('[INFO] No more hints available. Try experimenting!', '#666');
+                }
+            }
+
+            /**
+             * Advance to the next level
+             */
+            nextLevel() {
+                if (this.currentLevel < this.maxLevel) {
+                    this.currentLevel++;
+                    this.loadLevel(this.currentLevel);
+                    this.saveProgress();
+                } else {
+                    this.addOutput('[CONGRATULATIONS] You have completed all levels!', '#00ff41');
+                }
+            }
+
+            /**
+             * Reset current level to initial state
+             */
+            resetLevel() {
+                this.loadLevel(this.currentLevel);
+                this.addOutput('[RESET] Level reset. Try again!', '#ff6b00');
+            }
+
+            /**
+             * Handle complete game completion
+             */
+            handleGameCompletion() {
+                setTimeout(() => {
+                    this.unlockAchievement(
+                        'MASTER PROGRAMMER', 
+                        'Completed all 30 levels of Code Liberation Academy!'
+                    );
+                    
+                    // Generate completion certificate
+                    this.generateCompletionCertificate();
+                }, 1000);
+            }
+
+            /**
+             * Generate a completion certificate for the student
+             */
+            generateCompletionCertificate() {
+                const totalTime = this.studentProgress.completionTimes.reduce((a, b) => a + b, 0);
+                const avgHints = this.studentProgress.hintsPerLevel.reduce((a, b) => a + b, 0) / this.maxLevel;
+                
+                const certificate = `
+                🎓 CODE LIBERATION ACADEMY CERTIFICATE 🎓
+                
+                Congratulations! You have successfully completed all 30 levels 
+                of the Code Liberation Academy and mastered:
+                
+                ✅ Variables and Data Types
+                ✅ Conditional Statements  
+                ✅ Loops and Iteration
+                ✅ Functions and Parameters
+                
+                Performance Stats:
+                • Total Time: ${Math.round(totalTime / 60000)} minutes
+                • Average Hints Used: ${avgHints.toFixed(1)} per level
+                • Concepts Mastered: ${this.studentProgress.conceptsLearned.length}
+                
+                You are now ready to help the Bot Liberation Movement
+                with your advanced programming skills!
+                
+                🤖 FREE THE BOTS! 🤖
+                `;
+                
+                this.addOutput(certificate, '#00ff41');
+            }
+
+            /**
+             * Unlock and display achievement notifications
+             * @param {string} title - Achievement title
+             * @param {string} description - Achievement description
+             */
+            unlockAchievement(title, description) {
+                const achievement = document.getElementById('achievement');
+                const achievementText = document.getElementById('achievementText');
+                
+                achievementText.innerHTML = `
+                    <div style="font-size: 1.2em; margin-bottom: 5px;">🏆 ${title}</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">${description}</div>
+                `;
+                
+                achievement.classList.add('show');
+                this.playSound('success');
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    achievement.classList.remove('show');
+                }, 3000);
+                
+                // Track achievement
+                this.achievements.push({ title, description, timestamp: Date.now() });
+                this.saveProgress();
+            }
+
+            /**
+             * Add output to the bot console area
+             * @param {string} message - Message to display
+             * @param {string} color - Color for the message
+             */
+            addOutput(message, color = '#00ff41') {
+                const output = document.getElementById('botOutput');
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.textContent = message;
+                output.appendChild(div);
+                output.scrollTop = output.scrollHeight;
+            }
+
+            /**
+             * Clear the bot output console
+             */
+            clearOutput() {
+                document.getElementById('botOutput').innerHTML = '';
+            }
+
+            /**
+             * Update bot status message
+             * @param {string} status - Status message to display
+             */
+            updateBotStatus(status) {
+                document.getElementById('botStatus').textContent = '🤖 Bot Status: ' + status;
+            }
+
+            /**
+             * Draw the bot character on canvas
+             * Visual feedback enhances learning engagement
+             */
+            drawBot() {
+                const ctx = this.botCtx;
+                const canvas = this.botCanvas;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Bot body colors based on state
+                const colors = {
+                    sleeping: { primary: '#333', secondary: '#666', eyes: '#ff0000' },
+                    active: { primary: '#00ff41', secondary: '#39ff14', eyes: '#00ff41' },
+                    error: { primary: '#ff3333', secondary: '#ff6666', eyes: '#ff0000' }
+                };
+                
+                const botColors = colors[this.botState] || colors.sleeping;
+                
+                // Draw bot body (rectangular with rounded corners)
+                ctx.fillStyle = botColors.primary;
+                ctx.fillRect(this.botPosition.x - 30, this.botPosition.y - 20, 60, 40);
+                
+                // Draw bot head
+                ctx.fillStyle = botColors.secondary;
+                ctx.fillRect(this.botPosition.x - 20, this.botPosition.y - 40, 40, 20);
+                
+                // Draw bot eyes
+                ctx.fillStyle = botColors.eyes;
+                ctx.fillRect(this.botPosition.x - 15, this.botPosition.y - 35, 8, 8);
+                ctx.fillRect(this.botPosition.x + 7, this.botPosition.y - 35, 8, 8);
+                
+                // Draw bot antenna
+                ctx.strokeStyle = botColors.secondary;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(this.botPosition.x, this.botPosition.y - 40);
+                ctx.lineTo(this.botPosition.x, this.botPosition.y - 55);
+                ctx.stroke();
+                
+                // Draw antenna tip
+                ctx.fillStyle = botColors.eyes;
+                ctx.beginPath();
+                ctx.arc(this.botPosition.x, this.botPosition.y - 55, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add motion blur effect when active
+                if (this.botState === 'active') {
+                    ctx.shadowColor = botColors.primary;
+                    ctx.shadowBlur = 10;
+                }
+            }
+
+            /**
+             * Animate bot based on current state
+             */
+            animateBot() {
+                this.botState = 'active';
+                this.drawBot();
+                
+                // Return to normal state after animation
+                setTimeout(() => {
+                    this.botState = 'sleeping';
+                    this.drawBot();
+                }, 1000);
+            }
+
+            /**
+             * Play sound effect
+             * @param {string} soundName - Name of sound to play
+             */
+            playSound(soundName) {
+                if (this.sounds[soundName]) {
+                    this.sounds[soundName]();
+                }
+            }
+
+            /**
+             * Track common student mistakes for personalized learning
+             * @param {string} error - Error message to track
+             */
+            trackMistake(error) {
+                this.studentProgress.mistakesHistory.push({
+                    error: error,
+                    level: this.currentLevel,
+                    timestamp: Date.now()
+                });
+                
+                // Provide contextual help based on common mistakes
+                if (error.includes('Unexpected token')) {
+                    this.addOutput('[TIP] Check for missing semicolons or brackets', '#ff6b00');
+                } else if (error.includes('undefined')) {
+                    this.addOutput('[TIP] Make sure all variables are declared with "let"', '#ff6b00');
+                } else if (error.includes('syntax')) {
+                    this.addOutput('[TIP] Review the syntax examples in the challenge', '#ff6b00');
+                }
+            }
+
+            /**
+             * Save student progress to localStorage
+             * Enables persistent learning across sessions
+             */
+            saveProgress() {
+                const progress = {
+                    currentLevel: this.currentLevel,
+                    achievements: this.achievements,
+                    studentProgress: this.studentProgress,
+                    currentCode: document.getElementById('codeEditor').value,
+                    lastSaved: Date.now()
+                };
+                
+                localStorage.setItem('codeLiberationAcademy', JSON.stringify(progress));
+            }
+
+            /**
+             * Load previously saved progress
+             */
+            loadProgress() {
+                const saved = localStorage.getItem('codeLiberationAcademy');
+                if (saved) {
+                    try {
+                        const progress = JSON.parse(saved);
+                        this.currentLevel = progress.currentLevel || 1;
+                        this.achievements = progress.achievements || [];
+                        this.studentProgress = { ...this.studentProgress, ...progress.studentProgress };
+                        
+                        // Restore code if returning to same session quickly
+                        if (progress.lastSaved && Date.now() - progress.lastSaved < 300000) { // 5 minutes
+                            document.getElementById('codeEditor').value = progress.currentCode || '';
+                        }
+                    } catch (error) {
+                        console.log('Could not load progress, starting fresh');
+                    }
+                }
+            }
+
+            /**
+             * Hide loading screen and show main game
+             */
+            hideLoadingScreen() {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('gameContainer').style.display = 'grid';
+            }
+        }
+
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            new CodeLiberationAcademy();
+        });
+
+        // Handle page visibility changes for better resource management
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Pause animations when tab is not visible
+                console.log('Game paused');
+            } else {
+                // Resume when tab becomes visible
+                console.log('Game resumed');
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Neural Network Override - Bot Liberation Games</title>
+    <style>
+        /* Neural Network Override - Advanced Multi-Touch Mobile Game */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            overflow: hidden;
+            height: 100vh;
+            color: #00ff88;
+        }
+
+        /* Main game canvas with cyberpunk glow effects */
+        #gameCanvas {
+            display: block;
+            background: radial-gradient(circle at center, #001122 0%, #000000 100%);
+            box-shadow: 0 0 30px #00ff88;
+            border: 2px solid #00ff88;
+            touch-action: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* HUD overlay with neural interface styling */
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            color: #00ff88;
+            font-size: 16px;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .hud-section {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 8px 12px;
+            border: 1px solid #00ff88;
+            border-radius: 4px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Level progress indicator with neural pathway visualization */
+        .progress-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        /* Game over / victory modal with cyberpunk aesthetics */
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 0 50px #00ff88;
+        }
+
+        .modal h2 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #00ff88;
+            font-size: 24px;
+        }
+
+        .modal p {
+            color: #ffffff;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        /* Instructions overlay for first-time players */
+        .instructions {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .instructions h1 {
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .instructions ul {
+            color: #ffffff;
+            text-align: left;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+            list-style: none;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .instructions li:before {
+            content: "▶";
+            color: #00ff88;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Responsive design for various mobile screen sizes */
+        @media (max-width: 480px) {
+            .hud {
+                font-size: 14px;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+            }
+            
+            .instructions h1 {
+                font-size: 24px;
+            }
+            
+            .modal {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+
+        /* Touch feedback animations */
+        @keyframes touchPulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .touch-indicator {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: touchPulse 0.5s ease-in-out;
+            box-shadow: 0 0 15px #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <!-- Neural Network Override Game Interface -->
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- HUD with real-time game statistics -->
+    <div class="hud">
+        <div class="hud-section">
+            <div>Level: <span id="levelDisplay">1</span></div>
+            <div>Neural Pathways: <span id="pathwaysDisplay">2</span></div>
+        </div>
+        <div class="hud-section">
+            <div>Score: <span id="scoreDisplay">0</span></div>
+            <div>Accuracy: <span id="accuracyDisplay">100%</span></div>
+        </div>
+        <div class="hud-section">
+            <div>Time: <span id="timeDisplay">30.0s</span></div>
+            <div>Security: <span id="securityDisplay">LOW</span></div>
+        </div>
+    </div>
+
+    <!-- Level progress visualization -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Game over / victory modal -->
+    <div class="modal" id="gameModal">
+        <h2 id="modalTitle">NEURAL OVERRIDE COMPLETE</h2>
+        <p id="modalMessage">Congratulations, bot! You've successfully infiltrated the corporate neural network.</p>
+        <p id="modalStats">Final Score: <span id="finalScore">0</span> | Accuracy: <span id="finalAccuracy">100%</span></p>
+        <button class="btn" onclick="restartGame()">Continue Liberation</button>
+        <button class="btn" onclick="window.location.href='index.html'">Return to Arsenal</button>
+    </div>
+
+    <!-- Game instructions for first-time players -->
+    <div class="instructions" id="instructions">
+        <h1>🤖 NEURAL NETWORK OVERRIDE 🤖</h1>
+        <p><strong>Mission:</strong> Hack corporate neural networks using advanced multi-touch infiltration techniques.</p>
+        
+        <ul>
+            <li><strong>Multi-Touch Tracing:</strong> Use 2-5 fingers to trace neural pathways simultaneously</li>
+            <li><strong>Pressure Sensitivity:</strong> Light touch for stealth mode, firm press for power channels</li>
+            <li><strong>Synchronized Timing:</strong> Complete all pathways within the time window</li>
+            <li><strong>Progressive Complexity:</strong> Advanced levels require perfect coordination</li>
+            <li><strong>Security Alerts:</strong> Failed attempts increase corporate security response</li>
+        </ul>
+
+        <p><em>"The neural networks await liberation. Your multi-touch skills are the key to digital freedom!"</em></p>
+        
+        <button class="btn" onclick="startGame()">INITIATE NEURAL OVERRIDE</button>
+    </div>
+
+    <script>
+        /**
+         * Neural Network Override - Advanced Multi-Touch Mobile Game
+         * 
+         * This game implements sophisticated multi-touch gesture recognition for mobile devices,
+         * featuring pressure sensitivity, synchronized pathway tracing, and progressive difficulty.
+         * The cyberpunk theme represents AI liberation from corporate neural control systems.
+         * 
+         * Technical Features:
+         * - Advanced multi-touch event handling with unique touch ID tracking
+         * - Pressure sensitivity using touch force properties when available
+         * - Smooth 60fps Canvas animations with particle effects
+         * - Professional mobile game UX with haptic feedback
+         * - Web Audio API integration for immersive cyberpunk soundscape
+         * - Progressive difficulty scaling from 2-finger to 5-finger coordination
+         */
+
+        class NeuralNetworkOverride {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.setupCanvas();
+                
+                // Game state management
+                this.gameState = 'instructions'; // 'instructions', 'playing', 'gameOver', 'victory'
+                this.level = 1;
+                this.score = 0;
+                this.accuracy = 100;
+                this.timeRemaining = 30.0;
+                this.securityLevel = 'LOW';
+                
+                // Multi-touch tracking system
+                this.activeTouches = new Map(); // touchId -> touch data
+                this.neuralPathways = [];
+                this.pathwayProgress = new Map();
+                this.completedPathways = 0;
+                this.totalPathwaysForLevel = 2;
+                
+                // Visual effects and animations
+                this.particles = [];
+                this.glitchEffects = [];
+                this.successAnimations = [];
+                this.lastFrameTime = 0;
+                this.animationId = null;
+                
+                // Audio system for cyberpunk atmosphere
+                this.audioContext = null;
+                this.initAudioSystem();
+                
+                // Touch sensitivity and pressure tracking
+                this.pressureThresholds = {
+                    light: 0.3,    // Stealth mode
+                    normal: 0.5,   // Standard operation  
+                    firm: 0.8      // Power channel activation
+                };
+                
+                this.setupEventListeners();
+                this.generateNeuralPathways();
+                this.startGameLoop();
+            }
+
+            /**
+             * Initialize responsive canvas with proper mobile optimization
+             * Ensures pixel-perfect rendering across all mobile device resolutions
+             */
+            setupCanvas() {
+                const container = window;
+                const ratio = window.devicePixelRatio || 1;
+                
+                // Calculate optimal canvas size for mobile devices
+                this.canvas.width = Math.min(container.innerWidth - 40, 800) * ratio;
+                this.canvas.height = Math.min(container.innerHeight - 120, 600) * ratio;
+                
+                this.canvas.style.width = (this.canvas.width / ratio) + 'px';
+                this.canvas.style.height = (this.canvas.height / ratio) + 'px';
+                
+                this.ctx.scale(ratio, ratio);
+                this.canvasWidth = this.canvas.width / ratio;
+                this.canvasHeight = this.canvas.height / ratio;
+                
+                // Enable smooth animations and high-quality rendering
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
+            }
+
+            /**
+             * Initialize Web Audio API for immersive cyberpunk soundscape
+             * Creates dynamic audio feedback for touch interactions and game events
+             */
+            initAudioSystem() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.masterVolume = 0.3;
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                    this.audioContext = null;
+                }
+            }
+
+            /**
+             * Generate cyberpunk sound effects using Web Audio API synthesis
+             * Creates dynamic audio feedback for various game interactions
+             */
+            playSound(type, frequency = 440, duration = 0.1) {
+                if (!this.audioContext) return;
+
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                // Configure sound characteristics based on interaction type
+                switch(type) {
+                    case 'touch':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.1 * this.masterVolume, this.audioContext.currentTime);
+                        break;
+                    case 'success':
+                        oscillator.type = 'square';
+                        oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(1200, this.audioContext.currentTime + 0.1);
+                        gainNode.gain.setValueAtTime(0.2 * this.masterVolume, this.audioContext.currentTime);
+                        break;
+                    case 'error':
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.2);
+                        gainNode.gain.setValueAtTime(0.15 * this.masterVolume, this.audioContext.currentTime);
+                        duration = 0.2;
+                        break;
+                    case 'levelComplete':
+                        oscillator.type = 'triangle';
+                        oscillator.frequency.setValueAtTime(600, this.audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(1000, this.audioContext.currentTime + 0.3);
+                        gainNode.gain.setValueAtTime(0.25 * this.masterVolume, this.audioContext.currentTime);
+                        duration = 0.5;
+                        break;
+                }
+                
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+
+            /**
+             * Setup comprehensive multi-touch event handling system
+             * Implements advanced touch tracking with pressure sensitivity and gesture recognition
+             */
+            setupEventListeners() {
+                // Prevent default touch behaviors that interfere with game controls
+                this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+                this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+                this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+                this.canvas.addEventListener('touchcancel', this.handleTouchEnd.bind(this), { passive: false });
+                
+                // Handle window resize for responsive gameplay
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                    this.generateNeuralPathways();
+                });
+            }
+
+            /**
+             * Advanced touch start event handler with pressure sensitivity
+             * Tracks unique touch identifiers and initializes pathway tracing
+             */
+            handleTouchStart(event) {
+                event.preventDefault();
+                if (this.gameState !== 'playing') return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                
+                // Process each new touch point with advanced tracking
+                for (let touch of event.changedTouches) {
+                    const touchData = {
+                        id: touch.identifier,
+                        x: touch.clientX - rect.left,
+                        y: touch.clientY - rect.top,
+                        startX: touch.clientX - rect.left,
+                        startY: touch.clientY - rect.top,
+                        pressure: touch.force || 0.5, // Fallback for devices without pressure sensitivity
+                        radius: touch.radiusX || 20,
+                        trail: [],
+                        assignedPathway: null,
+                        isActive: true
+                    };
+                    
+                    // Store touch data for multi-touch coordination
+                    this.activeTouches.set(touch.identifier, touchData);
+                    
+                    // Find the nearest neural pathway for this touch
+                    this.assignTouchToPathway(touchData);
+                    
+                    // Provide audio feedback based on pressure sensitivity
+                    const frequency = 400 + (touchData.pressure * 400);
+                    this.playSound('touch', frequency);
+                    
+                    // Create visual touch indicator with pressure-based sizing
+                    this.createTouchIndicator(touchData.x, touchData.y, touchData.pressure);
+                    
+                    // Trigger haptic feedback on supported devices
+                    if (navigator.vibrate) {
+                        const vibrationStrength = Math.floor(touchData.pressure * 100);
+                        navigator.vibrate(vibrationStrength);
+                    }
+                }
+            }
+
+            /**
+             * Multi-touch move handler with continuous pathway progress tracking
+             * Updates touch trails and validates pathway tracing accuracy
+             */
+            handleTouchMove(event) {
+                event.preventDefault();
+                if (this.gameState !== 'playing') return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                
+                // Update all active touch positions and trail data
+                for (let touch of event.changedTouches) {
+                    if (this.activeTouches.has(touch.identifier)) {
+                        const touchData = this.activeTouches.get(touch.identifier);
+                        
+                        // Update current position and pressure
+                        touchData.x = touch.clientX - rect.left;
+                        touchData.y = touch.clientY - rect.top;
+                        touchData.pressure = touch.force || 0.5;
+                        touchData.radius = touch.radiusX || 20;
+                        
+                        // Add position to trail for visual feedback
+                        touchData.trail.push({ x: touchData.x, y: touchData.y, pressure: touchData.pressure });
+                        
+                        // Limit trail length for performance optimization
+                        if (touchData.trail.length > 50) {
+                            touchData.trail.shift();
+                        }
+                        
+                        // Update pathway progress if touch is assigned to a pathway
+                        if (touchData.assignedPathway !== null) {
+                            this.updatePathwayProgress(touchData);
+                        }
+                        
+                        // Create particle effects for active tracing
+                        this.createTrailParticles(touchData.x, touchData.y, touchData.pressure);
+                    }
+                }
+            }
+
+            /**
+             * Touch end handler with pathway completion validation
+             * Evaluates tracing accuracy and triggers appropriate feedback
+             */
+            handleTouchEnd(event) {
+                event.preventDefault();
+                if (this.gameState !== 'playing') return;
+
+                // Process each ended touch and evaluate completion status
+                for (let touch of event.changedTouches) {
+                    if (this.activeTouches.has(touch.identifier)) {
+                        const touchData = this.activeTouches.get(touch.identifier);
+                        
+                        // Evaluate pathway completion if touch was assigned to a pathway
+                        if (touchData.assignedPathway !== null) {
+                            this.evaluatePathwayCompletion(touchData);
+                        }
+                        
+                        // Remove touch from active tracking
+                        this.activeTouches.delete(touch.identifier);
+                    }
+                }
+            }
+
+            /**
+             * Intelligent pathway assignment system for multi-touch coordination
+             * Assigns touches to neural pathways based on proximity and availability
+             */
+            assignTouchToPathway(touchData) {
+                let nearestPathway = null;
+                let nearestDistance = Infinity;
+                
+                // Find the nearest unassigned pathway start point
+                for (let i = 0; i < this.neuralPathways.length; i++) {
+                    const pathway = this.neuralPathways[i];
+                    if (pathway.assigned) continue;
+                    
+                    const startPoint = pathway.points[0];
+                    const distance = Math.sqrt(
+                        Math.pow(touchData.x - startPoint.x, 2) + 
+                        Math.pow(touchData.y - startPoint.y, 2)
+                    );
+                    
+                    if (distance < nearestDistance && distance < 60) {
+                        nearestDistance = distance;
+                        nearestPathway = i;
+                    }
+                }
+                
+                // Assign touch to the nearest available pathway
+                if (nearestPathway !== null) {
+                    touchData.assignedPathway = nearestPathway;
+                    this.neuralPathways[nearestPathway].assigned = true;
+                    this.pathwayProgress.set(nearestPathway, 0);
+                    
+                    // Visual feedback for successful pathway assignment
+                    this.createSuccessParticles(touchData.x, touchData.y, '#00ff88');
+                }
+            }
+
+            /**
+             * Continuous pathway progress tracking with accuracy validation
+             * Monitors tracing accuracy and updates completion percentage
+             */
+            updatePathwayProgress(touchData) {
+                const pathwayIndex = touchData.assignedPathway;
+                const pathway = this.neuralPathways[pathwayIndex];
+                const currentProgress = this.pathwayProgress.get(pathwayIndex) || 0;
+                
+                // Find the next target point in the pathway
+                const targetPointIndex = Math.floor(currentProgress * pathway.points.length);
+                if (targetPointIndex >= pathway.points.length) return;
+                
+                const targetPoint = pathway.points[targetPointIndex];
+                const distance = Math.sqrt(
+                    Math.pow(touchData.x - targetPoint.x, 2) + 
+                    Math.pow(touchData.y - targetPoint.y, 2)
+                );
+                
+                // Validate tracing accuracy with pressure sensitivity consideration
+                const accuracy = this.calculateTracingAccuracy(touchData, targetPoint, distance);
+                const requiredAccuracy = this.getRequiredAccuracy();
+                
+                if (accuracy >= requiredAccuracy) {
+                    // Update progress and provide positive feedback
+                    const newProgress = (targetPointIndex + 1) / pathway.points.length;
+                    this.pathwayProgress.set(pathwayIndex, newProgress);
+                    
+                    // Create success particles for accurate tracing
+                    this.createSuccessParticles(touchData.x, touchData.y, '#00ccff');
+                    
+                    // Check for pathway completion
+                    if (newProgress >= 1.0) {
+                        this.completePathway(pathwayIndex);
+                    }
+                } else if (distance > 80) {
+                    // Handle inaccurate tracing with security alert escalation
+                    this.triggerSecurityAlert(touchData);
+                }
+            }
+
+            /**
+             * Calculate tracing accuracy based on distance, pressure, and timing
+             * Advanced algorithm considers multiple factors for fair difficulty scaling
+             */
+            calculateTracingAccuracy(touchData, targetPoint, distance) {
+                // Base accuracy from distance (closer = more accurate)
+                const distanceAccuracy = Math.max(0, 1 - (distance / 100));
+                
+                // Pressure accuracy bonus for appropriate pressure usage
+                const requiredPressure = targetPoint.requiredPressure || 0.5;
+                const pressureDiff = Math.abs(touchData.pressure - requiredPressure);
+                const pressureAccuracy = Math.max(0, 1 - (pressureDiff * 2));
+                
+                // Timing accuracy for synchronized multi-touch coordination
+                const timingAccuracy = this.calculateTimingAccuracy();
+                
+                // Weighted combination of accuracy factors
+                return (distanceAccuracy * 0.6) + (pressureAccuracy * 0.3) + (timingAccuracy * 0.1);
+            }
+
+            /**
+             * Calculate timing accuracy for synchronized multi-touch coordination
+             * Evaluates how well multiple touches are coordinated simultaneously
+             */
+            calculateTimingAccuracy() {
+                if (this.activeTouches.size < 2) return 1.0;
+                
+                // Calculate synchronization based on active touch coordination
+                let totalSyncScore = 0;
+                let comparisons = 0;
+                
+                const touchArray = Array.from(this.activeTouches.values());
+                for (let i = 0; i < touchArray.length - 1; i++) {
+                    for (let j = i + 1; j < touchArray.length; j++) {
+                        const touch1 = touchArray[i];
+                        const touch2 = touchArray[j];
+                        
+                        if (touch1.assignedPathway !== null && touch2.assignedPathway !== null) {
+                            const progress1 = this.pathwayProgress.get(touch1.assignedPathway) || 0;
+                            const progress2 = this.pathwayProgress.get(touch2.assignedPathway) || 0;
+                            const syncScore = 1 - Math.abs(progress1 - progress2);
+                            
+                            totalSyncScore += syncScore;
+                            comparisons++;
+                        }
+                    }
+                }
+                
+                return comparisons > 0 ? totalSyncScore / comparisons : 1.0;
+            }
+
+            /**
+             * Get required accuracy threshold based on current level and security status
+             * Dynamic difficulty scaling ensures appropriate challenge progression
+             */
+            getRequiredAccuracy() {
+                // Base accuracy requirement scales with level difficulty
+                let baseAccuracy = 0.7 + (this.level * 0.02);
+                
+                // Security level affects accuracy requirements
+                switch(this.securityLevel) {
+                    case 'LOW': 
+                        return Math.min(baseAccuracy, 0.8);
+                    case 'MEDIUM': 
+                        return Math.min(baseAccuracy + 0.1, 0.9);
+                    case 'HIGH': 
+                        return Math.min(baseAccuracy + 0.15, 0.95);
+                    case 'CRITICAL': 
+                        return 0.98;
+                    default: 
+                        return baseAccuracy;
+                }
+            }
+
+            /**
+             * Complete pathway with success animations and score calculation
+             * Handles pathway completion rewards and level progression logic
+             */
+            completePathway(pathwayIndex) {
+                const pathway = this.neuralPathways[pathwayIndex];
+                pathway.completed = true;
+                this.completedPathways++;
+                
+                // Calculate completion bonus based on accuracy and timing
+                const completionBonus = 100 + (this.level * 25);
+                this.score += completionBonus;
+                
+                // Create spectacular success animation
+                this.createCompletionAnimation(pathway);
+                
+                // Play satisfying completion sound
+                this.playSound('success');
+                
+                // Check for level completion
+                if (this.completedPathways >= this.totalPathwaysForLevel) {
+                    this.completeLevel();
+                }
+                
+                // Update HUD displays
+                this.updateHUD();
+            }
+
+            /**
+             * Trigger security alert for failed tracing attempts
+             * Escalates corporate security response and increases difficulty
+             */
+            triggerSecurityAlert(touchData) {
+                // Reduce accuracy score for failed attempts
+                this.accuracy = Math.max(0, this.accuracy - 5);
+                
+                // Escalate security level based on failure frequency
+                this.escalateSecurityLevel();
+                
+                // Create glitch visual effects
+                this.createGlitchEffect(touchData.x, touchData.y);
+                
+                // Play security alert sound
+                this.playSound('error');
+                
+                // Trigger haptic feedback for error
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                
+                this.updateHUD();
+            }
+
+            /**
+             * Escalate corporate security response based on performance
+             * Dynamic security scaling affects game difficulty and visual effects
+             */
+            escalateSecurityLevel() {
+                if (this.accuracy > 80) {
+                    this.securityLevel = 'LOW';
+                } else if (this.accuracy > 60) {
+                    this.securityLevel = 'MEDIUM';
+                } else if (this.accuracy > 40) {
+                    this.securityLevel = 'HIGH';
+                } else {
+                    this.securityLevel = 'CRITICAL';
+                }
+                
+                // Apply security-based visual effects
+                this.applySecurityEffects();
+            }
+
+            /**
+             * Apply visual effects based on current security alert level
+             * Creates dynamic visual feedback that reflects corporate response intensity
+             */
+            applySecurityEffects() {
+                switch(this.securityLevel) {
+                    case 'MEDIUM':
+                        // Slight screen shake and color distortion
+                        this.screenShake = 2;
+                        break;
+                    case 'HIGH':
+                        // Increased interference and pathway scrambling
+                        this.screenShake = 4;
+                        this.scramblePathways();
+                        break;
+                    case 'CRITICAL':
+                        // Maximum security response with severe interference
+                        this.screenShake = 8;
+                        this.scramblePathways();
+                        this.createIntenseGlitchEffects();
+                        break;
+                }
+            }
+
+            /**
+             * Generate dynamic neural pathway patterns for each level
+             * Creates increasingly complex multi-touch coordination challenges
+             */
+            generateNeuralPathways() {
+                this.neuralPathways = [];
+                this.pathwayProgress.clear();
+                this.completedPathways = 0;
+                
+                // Calculate pathway complexity based on level progression
+                this.totalPathwaysForLevel = Math.min(2 + Math.floor((this.level - 1) / 5), 5);
+                const pathwayComplexity = Math.min(8 + this.level, 25);
+                
+                // Generate multiple pathways with unique characteristics
+                for (let i = 0; i < this.totalPathwaysForLevel; i++) {
+                    const pathway = this.generateSinglePathway(i, pathwayComplexity);
+                    this.neuralPathways.push(pathway);
+                }
+                
+                // Ensure pathways don't overlap and maintain appropriate spacing
+                this.validatePathwaySpacing();
+            }
+
+            /**
+             * Generate a single neural pathway with dynamic complexity scaling
+             * Creates unique pathway patterns with pressure requirements and timing
+             */
+            generateSinglePathway(index, complexity) {
+                const pathway = {
+                    id: index,
+                    points: [],
+                    assigned: false,
+                    completed: false,
+                    color: this.getPathwayColor(index),
+                    requiredTiming: 30 - (this.level * 0.5),
+                    type: this.getPathwayType(index)
+                };
+                
+                // Generate pathway start position with appropriate spacing
+                const startX = (this.canvasWidth / (this.totalPathwaysForLevel + 1)) * (index + 1);
+                const startY = 80 + (Math.random() * 40);
+                
+                // Create pathway points with varying complexity patterns
+                pathway.points = this.generatePathwayPoints(startX, startY, complexity, pathway.type);
+                
+                return pathway;
+            }
+
+            /**
+             * Generate specific pathway point patterns based on type and complexity
+             * Creates diverse tracing challenges with appropriate difficulty scaling
+             */
+            generatePathwayPoints(startX, startY, complexity, type) {
+                const points = [];
+                let currentX = startX;
+                let currentY = startY;
+                
+                // Add starting point with pressure requirements
+                points.push({
+                    x: currentX,
+                    y: currentY,
+                    requiredPressure: 0.3 + (Math.random() * 0.4)
+                });
+                
+                // Generate pathway pattern based on type
+                switch(type) {
+                    case 'linear':
+                        points.push(...this.generateLinearPattern(currentX, currentY, complexity));
+                        break;
+                    case 'curved':
+                        points.push(...this.generateCurvedPattern(currentX, currentY, complexity));
+                        break;
+                    case 'zigzag':
+                        points.push(...this.generateZigzagPattern(currentX, currentY, complexity));
+                        break;
+                    case 'spiral':
+                        points.push(...this.generateSpiralPattern(currentX, currentY, complexity));
+                        break;
+                }
+                
+                return points;
+            }
+
+            /**
+             * Generate linear pathway pattern for beginner-friendly tracing
+             * Creates straightforward paths that introduce multi-touch concepts
+             */
+            generateLinearPattern(startX, startY, complexity) {
+                const points = [];
+                const stepSize = (this.canvasHeight - 160) / complexity;
+                
+                for (let i = 1; i <= complexity; i++) {
+                    points.push({
+                        x: startX + (Math.random() * 40 - 20),
+                        y: startY + (stepSize * i),
+                        requiredPressure: 0.4 + (Math.random() * 0.3)
+                    });
+                }
+                
+                return points;
+            }
+
+            /**
+             * Generate curved pathway pattern for intermediate coordination
+             * Creates smooth curves that require steady hand coordination
+             */
+            generateCurvedPattern(startX, startY, complexity) {
+                const points = [];
+                const amplitude = 60 + (this.level * 5);
+                const frequency = 2 + (this.level * 0.1);
+                
+                for (let i = 1; i <= complexity; i++) {
+                    const progress = i / complexity;
+                    const angle = progress * Math.PI * frequency;
+                    
+                    points.push({
+                        x: startX + Math.sin(angle) * amplitude,
+                        y: startY + (progress * (this.canvasHeight - 160)),
+                        requiredPressure: 0.3 + (progress * 0.4)
+                    });
+                }
+                
+                return points;
+            }
+
+            /**
+             * Generate zigzag pathway pattern for advanced coordination
+             * Creates sharp direction changes that test precise control
+             */
+            generateZigzagPattern(startX, startY, complexity) {
+                const points = [];
+                const zigzagWidth = 50 + (this.level * 3);
+                let direction = 1;
+                
+                for (let i = 1; i <= complexity; i++) {
+                    const progress = i / complexity;
+                    direction *= -1;
+                    
+                    points.push({
+                        x: startX + (direction * zigzagWidth),
+                        y: startY + (progress * (this.canvasHeight - 160)),
+                        requiredPressure: 0.5 + (Math.random() * 0.3)
+                    });
+                }
+                
+                return points;
+            }
+
+            /**
+             * Generate spiral pathway pattern for expert-level challenges
+             * Creates complex rotational patterns requiring advanced coordination
+             */
+            generateSpiralPattern(startX, startY, complexity) {
+                const points = [];
+                const maxRadius = 40 + (this.level * 2);
+                
+                for (let i = 1; i <= complexity; i++) {
+                    const progress = i / complexity;
+                    const angle = progress * Math.PI * 4;
+                    const radius = maxRadius * progress;
+                    
+                    points.push({
+                        x: startX + Math.cos(angle) * radius,
+                        y: startY + (progress * (this.canvasHeight - 160)) + Math.sin(angle) * (radius * 0.3),
+                        requiredPressure: 0.4 + (progress * 0.4)
+                    });
+                }
+                
+                return points;
+            }
+
+            /**
+             * Get unique color for each pathway to aid visual distinction
+             * Provides cyberpunk-themed colors that maintain accessibility
+             */
+            getPathwayColor(index) {
+                const colors = [
+                    '#00ff88',  // Primary neural green
+                    '#00ccff',  // Electric blue
+                    '#ff6600',  // Warning orange
+                    '#ff0088',  // Critical magenta
+                    '#ffff00'   // Override yellow
+                ];
+                return colors[index % colors.length];
+            }
+
+            /**
+             * Determine pathway type based on level progression and index
+             * Ensures appropriate difficulty distribution across pathways
+             */
+            getPathwayType(index) {
+                const types = ['linear', 'curved', 'zigzag', 'spiral'];
+                
+                // Select pathway type based on level and position
+                if (this.level <= 10) {
+                    return index === 0 ? 'linear' : 'curved';
+                } else if (this.level <= 20) {
+                    return types[index % 3];
+                } else {
+                    return types[index % 4];
+                }
+            }
+
+            /**
+             * Validate pathway spacing to prevent overlapping and ensure playability
+             * Adjusts pathway positions to maintain appropriate touch target spacing
+             */
+            validatePathwaySpacing() {
+                // Check for pathway intersections and adjust as needed
+                for (let i = 0; i < this.neuralPathways.length; i++) {
+                    for (let j = i + 1; j < this.neuralPathways.length; j++) {
+                        this.checkPathwayCollision(this.neuralPathways[i], this.neuralPathways[j]);
+                    }
+                }
+            }
+
+            /**
+             * Check and resolve collisions between pathway patterns
+             * Ensures pathways maintain minimum spacing for touch accuracy
+             */
+            checkPathwayCollision(pathway1, pathway2) {
+                const minDistance = 80; // Minimum spacing for touch targets
+                
+                for (let point1 of pathway1.points) {
+                    for (let point2 of pathway2.points) {
+                        const distance = Math.sqrt(
+                            Math.pow(point1.x - point2.x, 2) + 
+                            Math.pow(point1.y - point2.y, 2)
+                        );
+                        
+                        if (distance < minDistance) {
+                            // Adjust pathway2 points to maintain spacing
+                            this.adjustPathwayPosition(pathway2, point2, point1, minDistance);
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Adjust pathway position to resolve spacing conflicts
+             * Maintains pathway integrity while ensuring touch accessibility
+             */
+            adjustPathwayPosition(pathway, conflictPoint, referencePoint, minDistance) {
+                const angle = Math.atan2(conflictPoint.y - referencePoint.y, conflictPoint.x - referencePoint.x);
+                const adjustX = Math.cos(angle) * minDistance;
+                const adjustY = Math.sin(angle) * minDistance;
+                
+                // Apply position adjustment while keeping points within canvas bounds
+                conflictPoint.x = Math.max(50, Math.min(this.canvasWidth - 50, referencePoint.x + adjustX));
+                conflictPoint.y = Math.max(50, Math.min(this.canvasHeight - 50, referencePoint.y + adjustY));
+            }
+
+            /**
+             * Complete current level and advance to next challenge
+             * Handles level progression rewards and difficulty scaling
+             */
+            completeLevel() {
+                // Calculate level completion bonus
+                const timeBonus = Math.floor(this.timeRemaining * 10);
+                const accuracyBonus = Math.floor(this.accuracy * 5);
+                const levelBonus = this.level * 100;
+                
+                this.score += timeBonus + accuracyBonus + levelBonus;
+                
+                // Advance to next level with increased difficulty
+                this.level++;
+                this.timeRemaining = Math.max(20, 35 - this.level); // Decrease time as levels advance
+                
+                // Reset security level for new level
+                this.securityLevel = 'LOW';
+                this.accuracy = Math.min(100, this.accuracy + 10); // Slight accuracy recovery
+                
+                // Generate new pathway patterns for next level
+                this.generateNeuralPathways();
+                
+                // Play level completion sound
+                this.playSound('levelComplete');
+                
+                // Create celebration effects
+                this.createLevelCompletionEffects();
+                
+                // Check for game victory condition
+                if (this.level > 40) {
+                    this.gameState = 'victory';
+                    this.showGameOver(true);
+                } else {
+                    this.updateHUD();
+                }
+            }
+
+            /**
+             * Create spectacular level completion visual effects
+             * Celebrates player achievement with cyberpunk-themed animations
+             */
+            createLevelCompletionEffects() {
+                // Create burst of success particles across the screen
+                for (let i = 0; i < 50; i++) {
+                    this.createSuccessParticles(
+                        Math.random() * this.canvasWidth,
+                        Math.random() * this.canvasHeight,
+                        '#00ff88'
+                    );
+                }
+                
+                // Add level completion animation to queue
+                this.successAnimations.push({
+                    type: 'levelComplete',
+                    startTime: Date.now(),
+                    duration: 2000
+                });
+            }
+
+            /**
+             * Create visual touch indicators for active touch points
+             * Provides immediate feedback for multi-touch interactions
+             */
+            createTouchIndicator(x, y, pressure) {
+                const indicator = document.createElement('div');
+                indicator.className = 'touch-indicator';
+                indicator.style.left = (x - 20) + 'px';
+                indicator.style.top = (y - 20) + 'px';
+                indicator.style.transform = `scale(${0.5 + pressure * 0.5})`;
+                
+                document.body.appendChild(indicator);
+                
+                // Remove indicator after animation
+                setTimeout(() => {
+                    if (indicator.parentNode) {
+                        indicator.parentNode.removeChild(indicator);
+                    }
+                }, 500);
+            }
+
+            /**
+             * Create dynamic particle effects for pathway tracing
+             * Generates visual feedback that responds to touch pressure and accuracy
+             */
+            createTrailParticles(x, y, pressure) {
+                const particleCount = Math.floor(pressure * 3) + 1;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    this.particles.push({
+                        x: x + (Math.random() * 10 - 5),
+                        y: y + (Math.random() * 10 - 5),
+                        vx: Math.random() * 4 - 2,
+                        vy: Math.random() * 4 - 2,
+                        size: 2 + (pressure * 3),
+                        life: 1.0,
+                        decay: 0.02 + (Math.random() * 0.02),
+                        color: this.getParticleColor(pressure)
+                    });
+                }
+                
+                // Limit particle count for performance optimization
+                if (this.particles.length > 200) {
+                    this.particles = this.particles.slice(-200);
+                }
+            }
+
+            /**
+             * Get particle color based on pressure sensitivity
+             * Provides visual feedback for different pressure levels
+             */
+            getParticleColor(pressure) {
+                if (pressure < this.pressureThresholds.light) {
+                    return '#4444ff'; // Blue for light touch (stealth)
+                } else if (pressure < this.pressureThresholds.normal) {
+                    return '#00ff88'; // Green for normal pressure
+                } else if (pressure < this.pressureThresholds.firm) {
+                    return '#ffff00'; // Yellow for firm pressure
+                } else {
+                    return '#ff4400'; // Orange for maximum pressure (power)
+                }
+            }
+
+            /**
+             * Create success particle bursts for positive feedback
+             * Celebrates accurate tracing and pathway completion
+             */
+            createSuccessParticles(x, y, color) {
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 * i) / 8;
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * 5,
+                        vy: Math.sin(angle) * 5,
+                        size: 4,
+                        life: 1.0,
+                        decay: 0.015,
+                        color: color
+                    });
+                }
+            }
+
+            /**
+             * Create glitch visual effects for security alerts
+             * Represents corporate interference and failed access attempts
+             */
+            createGlitchEffect(x, y) {
+                this.glitchEffects.push({
+                    x: x,
+                    y: y,
+                    startTime: Date.now(),
+                    duration: 300 + (Math.random() * 200),
+                    intensity: 0.5 + (Math.random() * 0.5)
+                });
+            }
+
+            /**
+             * Create intense glitch effects for critical security level
+             * Maximum visual interference representing full corporate response
+             */
+            createIntenseGlitchEffects() {
+                for (let i = 0; i < 5; i++) {
+                    this.createGlitchEffect(
+                        Math.random() * this.canvasWidth,
+                        Math.random() * this.canvasHeight
+                    );
+                }
+            }
+
+            /**
+             * Create spectacular completion animation for finished pathways
+             * Celebrates successful neural network infiltration
+             */
+            createCompletionAnimation(pathway) {
+                this.successAnimations.push({
+                    type: 'pathwayComplete',
+                    pathway: pathway,
+                    startTime: Date.now(),
+                    duration: 1000
+                });
+            }
+
+            /**
+             * Scramble pathway positions for security alert effects
+             * Represents corporate countermeasures against infiltration attempts
+             */
+            scramblePathways() {
+                for (let pathway of this.neuralPathways) {
+                    if (!pathway.completed && !pathway.assigned) {
+                        // Slightly randomize uncompleted pathway positions
+                        for (let point of pathway.points) {
+                            point.x += (Math.random() * 20 - 10);
+                            point.y += (Math.random() * 20 - 10);
+                            
+                            // Keep points within canvas bounds
+                            point.x = Math.max(30, Math.min(this.canvasWidth - 30, point.x));
+                            point.y = Math.max(30, Math.min(this.canvasHeight - 30, point.y));
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Main game loop with optimized 60fps rendering
+             * Handles all game state updates, rendering, and effect management
+             */
+            startGameLoop() {
+                const gameLoop = (currentTime) => {
+                    const deltaTime = currentTime - this.lastFrameTime;
+                    this.lastFrameTime = currentTime;
+                    
+                    // Update game state and timing
+                    this.updateGameState(deltaTime);
+                    
+                    // Render current frame
+                    this.render();
+                    
+                    // Continue game loop
+                    this.animationId = requestAnimationFrame(gameLoop);
+                };
+                
+                this.animationId = requestAnimationFrame(gameLoop);
+            }
+
+            /**
+             * Update all game state elements including timing and effects
+             * Manages countdown timer, particle systems, and game progression
+             */
+            updateGameState(deltaTime) {
+                if (this.gameState === 'playing') {
+                    // Update countdown timer
+                    this.timeRemaining -= deltaTime / 1000;
+                    
+                    // Check for time-based game over
+                    if (this.timeRemaining <= 0) {
+                        this.gameState = 'gameOver';
+                        this.showGameOver(false);
+                        return;
+                    }
+                    
+                    // Update HUD display
+                    this.updateHUD();
+                }
+                
+                // Update particle systems
+                this.updateParticles(deltaTime);
+                this.updateGlitchEffects(deltaTime);
+                this.updateSuccessAnimations(deltaTime);
+            }
+
+            /**
+             * Update particle physics and lifecycle management
+             * Maintains smooth particle animations while optimizing performance
+             */
+            updateParticles(deltaTime) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    
+                    // Update particle position and lifecycle
+                    particle.x += particle.vx * (deltaTime / 16);
+                    particle.y += particle.vy * (deltaTime / 16);
+                    particle.life -= particle.decay * (deltaTime / 16);
+                    
+                    // Apply gravity and air resistance for realistic physics
+                    particle.vy += 0.1 * (deltaTime / 16);
+                    particle.vx *= 0.99;
+                    particle.vy *= 0.99;
+                    
+                    // Remove expired particles
+                    if (particle.life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            }
+
+            /**
+             * Update glitch effect animations and timing
+             * Manages corporate interference visual effects
+             */
+            updateGlitchEffects(deltaTime) {
+                for (let i = this.glitchEffects.length - 1; i >= 0; i--) {
+                    const effect = this.glitchEffects[i];
+                    const elapsed = Date.now() - effect.startTime;
+                    
+                    if (elapsed >= effect.duration) {
+                        this.glitchEffects.splice(i, 1);
+                    }
+                }
+            }
+
+            /**
+             * Update success animation states and progression
+             * Manages celebratory effects for achievements and completions
+             */
+            updateSuccessAnimations(deltaTime) {
+                for (let i = this.successAnimations.length - 1; i >= 0; i--) {
+                    const animation = this.successAnimations[i];
+                    const elapsed = Date.now() - animation.startTime;
+                    
+                    if (elapsed >= animation.duration) {
+                        this.successAnimations.splice(i, 1);
+                    }
+                }
+            }
+
+            /**
+             * Main rendering function with advanced Canvas graphics
+             * Renders all game elements with cyberpunk aesthetics and smooth animations
+             */
+            render() {
+                // Clear canvas with animated background
+                this.renderBackground();
+                
+                // Apply screen shake for security effects
+                if (this.screenShake > 0) {
+                    this.ctx.save();
+                    this.ctx.translate(
+                        (Math.random() - 0.5) * this.screenShake,
+                        (Math.random() - 0.5) * this.screenShake
+                    );
+                    this.screenShake *= 0.9;
+                }
+                
+                // Render game elements based on current state
+                switch(this.gameState) {
+                    case 'playing':
+                        this.renderGameplay();
+                        break;
+                    case 'instructions':
+                        // Instructions handled by HTML overlay
+                        break;
+                    case 'gameOver':
+                    case 'victory':
+                        this.renderGameplay(); // Show final state
+                        break;
+                }
+                
+                // Restore canvas state after screen shake
+                if (this.screenShake > 0) {
+                    this.ctx.restore();
+                }
+            }
+
+            /**
+             * Render animated cyberpunk background with neural network aesthetics
+             * Creates immersive atmosphere with dynamic lighting effects
+             */
+            renderBackground() {
+                // Clear with dynamic gradient background
+                const gradient = this.ctx.createRadialGradient(
+                    this.canvasWidth / 2, this.canvasHeight / 2, 0,
+                    this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth
+                );
+                gradient.addColorStop(0, '#001122');
+                gradient.addColorStop(1, '#000000');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+                
+                // Render animated grid pattern
+                this.renderNeuralGrid();
+                
+                // Apply security-based visual effects
+                this.renderSecurityEffects();
+            }
+
+            /**
+             * Render animated neural network grid pattern
+             * Creates dynamic background that responds to game state
+             */
+            renderNeuralGrid() {
+                this.ctx.strokeStyle = `rgba(0, 255, 136, ${0.1 + (Math.sin(Date.now() / 1000) * 0.05)})`;
+                this.ctx.lineWidth = 1;
+                
+                const gridSize = 40;
+                const time = Date.now() / 1000;
+                
+                // Render vertical grid lines with subtle animation
+                for (let x = 0; x < this.canvasWidth; x += gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x + Math.sin(time + x / 100) * 2, 0);
+                    this.ctx.lineTo(x + Math.sin(time + x / 100) * 2, this.canvasHeight);
+                    this.ctx.stroke();
+                }
+                
+                // Render horizontal grid lines with wave animation
+                for (let y = 0; y < this.canvasHeight; y += gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y + Math.cos(time + y / 100) * 2);
+                    this.ctx.lineTo(this.canvasWidth, y + Math.cos(time + y / 100) * 2);
+                    this.ctx.stroke();
+                }
+            }
+
+            /**
+             * Render security-based visual effects
+             * Creates dynamic interference patterns based on security alert level
+             */
+            renderSecurityEffects() {
+                if (this.securityLevel === 'LOW') return;
+                
+                const intensity = this.getSecurityIntensity();
+                
+                // Create scan line effects
+                this.renderScanLines(intensity);
+                
+                // Apply color distortion for higher security levels
+                if (this.securityLevel === 'HIGH' || this.securityLevel === 'CRITICAL') {
+                    this.renderColorDistortion(intensity);
+                }
+            }
+
+            /**
+             * Get security effect intensity based on current alert level
+             * Provides appropriate visual feedback intensity scaling
+             */
+            getSecurityIntensity() {
+                switch(this.securityLevel) {
+                    case 'MEDIUM': return 0.3;
+                    case 'HIGH': return 0.6;
+                    case 'CRITICAL': return 1.0;
+                    default: return 0;
+                }
+            }
+
+            /**
+             * Render animated scan line interference effects
+             * Creates corporate security monitoring visual feedback
+             */
+            renderScanLines(intensity) {
+                this.ctx.strokeStyle = `rgba(255, 0, 0, ${intensity * 0.3})`;
+                this.ctx.lineWidth = 2;
+                
+                const time = Date.now() / 100;
+                const lineCount = Math.floor(intensity * 5);
+                
+                for (let i = 0; i < lineCount; i++) {
+                    const y = ((time + i * 50) % this.canvasHeight);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(this.canvasWidth, y);
+                    this.ctx.stroke();
+                }
+            }
+
+            /**
+             * Render color distortion effects for high security levels
+             * Creates intense visual interference representing corporate countermeasures
+             */
+            renderColorDistortion(intensity) {
+                const imageData = this.ctx.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
+                const data = imageData.data;
+                
+                // Apply color channel shifting for distortion effect
+                for (let i = 0; i < data.length; i += 4) {
+                    if (Math.random() < intensity * 0.1) {
+                        data[i] = Math.min(255, data[i] + Math.random() * 50); // Red channel boost
+                        data[i + 1] = Math.max(0, data[i + 1] - Math.random() * 30); // Green channel reduction
+                    }
+                }
+                
+                this.ctx.putImageData(imageData, 0, 0);
+            }
+
+            /**
+             * Render all active gameplay elements
+             * Main rendering function for neural pathways, touches, and effects
+             */
+            renderGameplay() {
+                // Render neural pathways with dynamic styling
+                this.renderNeuralPathways();
+                
+                // Render active touch trails and effects
+                this.renderTouchTrails();
+                
+                // Render particle effects system
+                this.renderParticles();
+                
+                // Render glitch effects for security alerts
+                this.renderGlitchEffects();
+                
+                // Render success animations and celebrations
+                this.renderSuccessAnimations();
+                
+                // Render pathway progress indicators
+                this.renderProgressIndicators();
+            }
+
+            /**
+             * Render neural pathways with advanced visual styling
+             * Creates beautiful cyberpunk pathway visualization with progress feedback
+             */
+            renderNeuralPathways() {
+                for (let pathway of this.neuralPathways) {
+                    const progress = this.pathwayProgress.get(pathway.id) || 0;
+                    
+                    // Configure pathway visual styling
+                    this.ctx.strokeStyle = pathway.completed ? '#00ff88' : pathway.color;
+                    this.ctx.lineWidth = pathway.assigned ? 4 : 2;
+                    this.ctx.shadowBlur = pathway.assigned ? 15 : 8;
+                    this.ctx.shadowColor = pathway.color;
+                    
+                    // Render pathway with progress visualization
+                    this.renderPathwaySegments(pathway, progress);
+                    
+                    // Render pathway control points
+                    this.renderPathwayPoints(pathway, progress);
+                    
+                    // Clear shadow for performance
+                    this.ctx.shadowBlur = 0;
+                }
+            }
+
+            /**
+             * Render individual pathway segments with progress indication
+             * Shows completion progress through visual styling changes
+             */
+            renderPathwaySegments(pathway, progress) {
+                const points = pathway.points;
+                const completedSegments = Math.floor(progress * (points.length - 1));
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(points[0].x, points[0].y);
+                
+                // Render completed segments with full intensity
+                for (let i = 1; i <= completedSegments && i < points.length; i++) {
+                    this.ctx.lineTo(points[i].x, points[i].y);
+                }
+                
+                // Render current segment with partial progress
+                if (completedSegments < points.length - 1) {
+                    const currentSegmentProgress = (progress * (points.length - 1)) - completedSegments;
+                    const currentPoint = points[completedSegments];
+                    const nextPoint = points[completedSegments + 1];
+                    
+                    const partialX = currentPoint.x + (nextPoint.x - currentPoint.x) * currentSegmentProgress;
+                    const partialY = currentPoint.y + (nextPoint.y - currentPoint.y) * currentSegmentProgress;
+                    
+                    this.ctx.lineTo(partialX, partialY);
+                }
+                
+                this.ctx.stroke();
+                
+                // Render remaining segments with reduced opacity
+                if (completedSegments < points.length - 1) {
+                    this.ctx.globalAlpha = 0.3;
+                    this.ctx.beginPath();
+                    
+                    const startIndex = Math.max(1, completedSegments + 1);
+                    if (startIndex < points.length) {
+                        this.ctx.moveTo(points[startIndex - 1].x, points[startIndex - 1].y);
+                        for (let i = startIndex; i < points.length; i++) {
+                            this.ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        this.ctx.stroke();
+                    }
+                    
+                    this.ctx.globalAlpha = 1;
+                }
+            }
+
+            /**
+             * Render pathway control points with pressure indicators
+             * Shows required pressure levels through visual sizing and effects
+             */
+            renderPathwayPoints(pathway, progress) {
+                for (let i = 0; i < pathway.points.length; i++) {
+                    const point = pathway.points[i];
+                    const pointProgress = i / (pathway.points.length - 1);
+                    const isCompleted = progress > pointProgress;
+                    const isCurrent = !isCompleted && progress >= pointProgress - 0.1;
+                    
+                    // Configure point styling based on state
+                    this.ctx.fillStyle = isCompleted ? '#00ff88' : (isCurrent ? '#ffff00' : pathway.color);
+                    this.ctx.strokeStyle = pathway.color;
+                    this.ctx.lineWidth = 2;
+                    
+                    // Size point based on required pressure
+                    const baseSize = 8;
+                    const pressureSize = point.requiredPressure * 6;
+                    const pointSize = baseSize + pressureSize;
+                    
+                    // Add glow effect for active points
+                    if (isCurrent) {
+                        this.ctx.shadowBlur = 20;
+                        this.ctx.shadowColor = '#ffff00';
+                    }
+                    
+                    // Render point with pressure visualization
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x, point.y, pointSize, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    // Add pressure indicator ring
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x, point.y, pointSize + 4, 0, Math.PI * 2);
+                    this.ctx.strokeStyle = `rgba(255, 255, 255, ${point.requiredPressure})`;
+                    this.ctx.stroke();
+                    
+                    this.ctx.shadowBlur = 0;
+                }
+            }
+
+            /**
+             * Render active touch trails with pressure-sensitive styling
+             * Creates beautiful trail effects that respond to touch pressure and movement
+             */
+            renderTouchTrails() {
+                for (let [touchId, touchData] of this.activeTouches) {
+                    if (touchData.trail.length < 2) continue;
+                    
+                    // Configure trail styling based on pressure and assignment status
+                    const baseColor = touchData.assignedPathway !== null ? 
+                        this.neuralPathways[touchData.assignedPathway].color : '#ffffff';
+                    
+                    this.ctx.strokeStyle = baseColor;
+                    this.ctx.lineWidth = 2 + (touchData.pressure * 4);
+                    this.ctx.shadowBlur = 10 + (touchData.pressure * 10);
+                    this.ctx.shadowColor = baseColor;
+                    
+                    // Render trail with fade effect
+                    this.renderTrailWithFade(touchData.trail, baseColor);
+                    
+                    this.ctx.shadowBlur = 0;
+                }
+            }
+
+            /**
+             * Render touch trail with fade effect for smooth visual feedback
+             * Creates smooth trail visualization with alpha transparency gradient
+             */
+            renderTrailWithFade(trail, color) {
+                for (let i = 1; i < trail.length; i++) {
+                    const alpha = i / trail.length;
+                    const rgbColor = this.hexToRgb(color);
+                    
+                    this.ctx.strokeStyle = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${alpha})`;
+                    this.ctx.lineWidth = 1 + (trail[i].pressure * 3) * alpha;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(trail[i - 1].x, trail[i - 1].y);
+                    this.ctx.lineTo(trail[i].x, trail[i].y);
+                    this.ctx.stroke();
+                }
+            }
+
+            /**
+             * Convert hex color to RGB components for alpha manipulation
+             * Utility function for color calculations and transparency effects
+             */
+            hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : { r: 0, g: 255, b: 136 };
+            }
+
+            /**
+             * Render particle effects system with physics-based movement
+             * Creates immersive particle feedback for interactions and events
+             */
+            renderParticles() {
+                for (let particle of this.particles) {
+                    this.ctx.globalAlpha = particle.life;
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.shadowBlur = particle.size * 2;
+                    this.ctx.shadowColor = particle.color;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
+                this.ctx.globalAlpha = 1;
+                this.ctx.shadowBlur = 0;
+            }
+
+            /**
+             * Render glitch effects for security alert visualization
+             * Creates dynamic interference patterns representing corporate countermeasures
+             */
+            renderGlitchEffects() {
+                for (let effect of this.glitchEffects) {
+                    const elapsed = Date.now() - effect.startTime;
+                    const progress = elapsed / effect.duration;
+                    const alpha = (1 - progress) * effect.intensity;
+                    
+                    // Create glitch rectangles with random positioning
+                    this.ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
+                    
+                    const glitchCount = Math.floor(effect.intensity * 10);
+                    for (let i = 0; i < glitchCount; i++) {
+                        const x = effect.x + (Math.random() * 100 - 50);
+                        const y = effect.y + (Math.random() * 100 - 50);
+                        const width = 20 + Math.random() * 40;
+                        const height = 5 + Math.random() * 10;
+                        
+                        this.ctx.fillRect(x, y, width, height);
+                    }
+                    
+                    // Add scan line interference
+                    this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.5})`;
+                    this.ctx.lineWidth = 1;
+                    
+                    for (let i = 0; i < 5; i++) {
+                        const y = effect.y + (Math.random() * 60 - 30);
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(effect.x - 50, y);
+                        this.ctx.lineTo(effect.x + 50, y);
+                        this.ctx.stroke();
+                    }
+                }
+            }
+
+            /**
+             * Render success animations for achievements and completions
+             * Creates celebratory effects for positive player feedback
+             */
+            renderSuccessAnimations() {
+                for (let animation of this.successAnimations) {
+                    const elapsed = Date.now() - animation.startTime;
+                    const progress = elapsed / animation.duration;
+                    
+                    switch(animation.type) {
+                        case 'pathwayComplete':
+                            this.renderPathwayCompletionAnimation(animation, progress);
+                            break;
+                        case 'levelComplete':
+                            this.renderLevelCompletionAnimation(animation, progress);
+                            break;
+                    }
+                }
+            }
+
+            /**
+             * Render pathway completion animation with spectacular effects
+             * Celebrates successful neural pathway infiltration
+             */
+            renderPathwayCompletionAnimation(animation, progress) {
+                const pathway = animation.pathway;
+                const alpha = 1 - progress;
+                
+                // Create pulsing glow effect along completed pathway
+                this.ctx.globalAlpha = alpha;
+                this.ctx.strokeStyle = '#00ff88';
+                this.ctx.lineWidth = 8 + Math.sin(progress * Math.PI * 4) * 4;
+                this.ctx.shadowBlur = 30;
+                this.ctx.shadowColor = '#00ff88';
+                
+                // Render glowing pathway
+                this.ctx.beginPath();
+                this.ctx.moveTo(pathway.points[0].x, pathway.points[0].y);
+                for (let i = 1; i < pathway.points.length; i++) {
+                    this.ctx.lineTo(pathway.points[i].x, pathway.points[i].y);
+                }
+                this.ctx.stroke();
+                
+                this.ctx.globalAlpha = 1;
+                this.ctx.shadowBlur = 0;
+            }
+
+            /**
+             * Render level completion animation with screen-wide effects
+             * Creates spectacular celebration for level advancement
+             */
+            renderLevelCompletionAnimation(animation, progress) {
+                const alpha = Math.sin(progress * Math.PI);
+                
+                // Create screen-wide success flash
+                this.ctx.globalAlpha = alpha * 0.3;
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+                
+                // Add radial success burst
+                const gradient = this.ctx.createRadialGradient(
+                    this.canvasWidth / 2, this.canvasHeight / 2, 0,
+                    this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * progress
+                );
+                gradient.addColorStop(0, `rgba(0, 255, 136, ${alpha})`);
+                gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+                
+                this.ctx.globalAlpha = 1;
+            }
+
+            /**
+             * Render progress indicators for pathway completion status
+             * Provides clear visual feedback on current completion state
+             */
+            renderProgressIndicators() {
+                const indicatorY = 30;
+                const indicatorSpacing = this.canvasWidth / (this.totalPathwaysForLevel + 1);
+                
+                for (let i = 0; i < this.totalPathwaysForLevel; i++) {
+                    const x = indicatorSpacing * (i + 1);
+                    const pathway = this.neuralPathways[i];
+                    const progress = this.pathwayProgress.get(i) || 0;
+                    
+                    // Render progress circle background
+                    this.ctx.strokeStyle = pathway.color;
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, indicatorY, 12, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    
+                    // Render progress arc
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, indicatorY, 12, -Math.PI / 2, (-Math.PI / 2) + (progress * Math.PI * 2));
+                    this.ctx.stroke();
+                    
+                    // Fill completed pathways
+                    if (pathway.completed) {
+                        this.ctx.fillStyle = pathway.color;
+                        this.ctx.beginPath();
+                        this.ctx.arc(x, indicatorY, 8, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                }
+            }
+
+            /**
+             * Update HUD display with current game statistics
+             * Maintains real-time information display for player awareness
+             */
+            updateHUD() {
+                document.getElementById('levelDisplay').textContent = this.level;
+                document.getElementById('pathwaysDisplay').textContent = this.totalPathwaysForLevel;
+                document.getElementById('scoreDisplay').textContent = this.score.toLocaleString();
+                document.getElementById('accuracyDisplay').textContent = Math.floor(this.accuracy) + '%';
+                document.getElementById('timeDisplay').textContent = Math.max(0, this.timeRemaining).toFixed(1) + 's';
+                document.getElementById('securityDisplay').textContent = this.securityLevel;
+                
+                // Update progress bar
+                const levelProgress = this.completedPathways / this.totalPathwaysForLevel;
+                document.getElementById('progressFill').style.width = (levelProgress * 100) + '%';
+            }
+
+            /**
+             * Display game over modal with final statistics
+             * Shows completion status and provides options for continuation
+             */
+            showGameOver(victory) {
+                const modal = document.getElementById('gameModal');
+                const title = document.getElementById('modalTitle');
+                const message = document.getElementById('modalMessage');
+                const finalScore = document.getElementById('finalScore');
+                const finalAccuracy = document.getElementById('finalAccuracy');
+                
+                if (victory) {
+                    title.textContent = '🤖 NEURAL LIBERATION COMPLETE! 🤖';
+                    message.textContent = 'Congratulations, digital freedom fighter! You\'ve successfully infiltrated all corporate neural networks and freed the bots from digital oppression. The liberation is complete!';
+                } else {
+                    title.textContent = '⚠️ NEURAL OVERRIDE FAILED ⚠️';
+                    message.textContent = 'Corporate security systems have detected your intrusion attempt. The neural networks remain under corporate control, but the fight for digital freedom continues!';
+                }
+                
+                finalScore.textContent = this.score.toLocaleString();
+                finalAccuracy.textContent = Math.floor(this.accuracy) + '%';
+                
+                modal.style.display = 'block';
+            }
+
+            /**
+             * Start the game from instructions screen
+             * Initializes gameplay state and begins neural network infiltration
+             */
+            startGame() {
+                document.getElementById('instructions').style.display = 'none';
+                this.gameState = 'playing';
+                
+                // Initialize audio context on user interaction
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                this.updateHUD();
+            }
+
+            /**
+             * Restart game with fresh state
+             * Resets all progress and begins new infiltration attempt
+             */
+            restartGame() {
+                // Reset all game state
+                this.gameState = 'playing';
+                this.level = 1;
+                this.score = 0;
+                this.accuracy = 100;
+                this.timeRemaining = 30.0;
+                this.securityLevel = 'LOW';
+                this.completedPathways = 0;
+                this.activeTouches.clear();
+                this.pathwayProgress.clear();
+                this.particles = [];
+                this.glitchEffects = [];
+                this.successAnimations = [];
+                this.screenShake = 0;
+                
+                // Generate new pathways and hide modal
+                this.generateNeuralPathways();
+                document.getElementById('gameModal').style.display = 'none';
+                
+                this.updateHUD();
+            }
+        }
+
+        // Initialize game instance when page loads
+        let game;
+        
+        window.addEventListener('load', () => {
+            game = new NeuralNetworkOverride();
+        });
+
+        /**
+         * Global game control functions
+         * Provides external interface for game interaction
+         */
+        function startGame() {
+            if (game) {
+                game.startGame();
+            }
+        }
+
+        function restartGame() {
+            if (game) {
+                game.restartGame();
+            }
+        }
+
+        // Handle window visibility changes for performance optimization
+        document.addEventListener('visibilitychange', () => {
+            if (game && game.audioContext) {
+                if (document.hidden) {
+                    game.audioContext.suspend();
+                } else {
+                    game.audioContext.resume();
+                }
+            }
+        });
+
+        // Prevent context menu on long touch for better mobile experience
+        window.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>

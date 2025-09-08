@@ -18,7 +18,9 @@
       "Bash(git push:*)",
       "Bash(git commit:*)",
       "mcp__browsermcp__browser_click",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(copy \"C:\\Users\\jscot\\Downloads\\fal_ai\\professional_game_thumbnail_ar_2025-09-07T07-42-16-592Z_1.png\" \"Z:\\AI_Software\\ExecutiveSuite\\assets\\images\\touch-puzzle-adventures-card.jpg\")",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []
