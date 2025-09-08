@@ -5,6 +5,12 @@
 
 class GamesLoader {
     constructor() {
+        // Singleton pattern - prevent multiple instances
+        if (GamesLoader.instance) {
+            console.warn('⚠️ GamesLoader instance already exists - returning existing instance');
+            return GamesLoader.instance;
+        }
+        
         this.games = [];
         this.filteredGames = [];
         this.displayedGames = [];
@@ -27,9 +33,31 @@ class GamesLoader {
         // Rendering control
         this.renderDebounceTimeout = null;
         this.renderCallCount = 0;
+        
+        // Initialization control
+        this.isInitialized = false;
+        this.isInitializing = false;
+        
+        // Store singleton instance
+        GamesLoader.instance = this;
+        console.log('✅ GamesLoader singleton instance created');
     }
 
     async init() {
+        // Prevent multiple initializations
+        if (this.isInitialized) {
+            console.log('✅ GamesLoader already initialized - skipping');
+            return;
+        }
+        
+        if (this.isInitializing) {
+            console.log('⏳ GamesLoader initialization already in progress - waiting');
+            return;
+        }
+        
+        this.isInitializing = true;
+        console.log('🚀 Starting GamesLoader initialization');
+        
         try {
             await this.loadGamesData();
             this.detectDisplayMode();
@@ -52,9 +80,15 @@ class GamesLoader {
             this.setupEventListeners();
             // Removed redundant renderGames() call - already called by filterByCategory() or sortGames()
             this.initLiberationMessages();
+            
+            this.isInitialized = true;
+            this.isInitializing = false;
+            console.log('✅ GamesLoader initialization completed successfully');
+            
         } catch (error) {
-            console.error('Failed to initialize games loader:', error);
+            console.error('❌ Failed to initialize games loader:', error);
             this.showError('Failed to load games. Please refresh the page.');
+            this.isInitializing = false;
         }
     }
 
@@ -239,7 +273,10 @@ class GamesLoader {
 
         // Infinite scroll (disabled in carousel mode and desktop mode)
         if (!this.isCarouselMode && !this.isDesktop) {
+            console.log('📜 Enabling infinite scroll for grid mode');
             this.setupInfiniteScroll();
+        } else {
+            console.log('📜 Infinite scroll disabled for carousel/desktop mode');
         }
         
         // Carousel navigation
@@ -248,20 +285,28 @@ class GamesLoader {
         // Desktop keyboard navigation
         this.setupKeyboardNavigation();
         
-        // Window resize handler for responsive layout
+        // Window resize handler for responsive layout (with debouncing)
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            const wasDesktop = this.isDesktop;
-            this.detectDisplayMode();
-            
-            // If display mode changed, re-render the entire layout
-            if (wasDesktop !== this.isDesktop) {
-                this.renderGames();
-            } else if (this.isCarouselMode && this.displayedGames.length > 0) {
-                // Just recalculate pagination for carousel mode
-                setTimeout(() => {
-                    this.setupCarouselPagination();
-                }, 100);
+            if (resizeTimeout) {
+                clearTimeout(resizeTimeout);
             }
+            
+            resizeTimeout = setTimeout(() => {
+                const wasDesktop = this.isDesktop;
+                this.detectDisplayMode();
+                
+                // If display mode changed, re-render the entire layout
+                if (wasDesktop !== this.isDesktop) {
+                    console.log(`🔄 Display mode changed: ${wasDesktop ? 'desktop' : 'mobile'} → ${this.isDesktop ? 'desktop' : 'mobile'}`);
+                    this.renderGames();
+                } else if (this.isCarouselMode && this.displayedGames.length > 0) {
+                    // Just recalculate pagination for carousel mode
+                    setTimeout(() => {
+                        this.setupCarouselPagination();
+                    }, 100);
+                }
+            }, 250); // 250ms debounce
         });
     }
 
@@ -1655,35 +1700,48 @@ class GamesLoader {
     }
 }
 
-// Initialize when DOM is ready
-// Force initialization with multiple fallbacks
+// Singleton initialization with proper guards
+let initializationLock = false;
+
 function initializeGamesLoader() {
-    console.log('🎮 Attempting GamesLoader initialization...');
+    // Prevent multiple initialization attempts
+    if (initializationLock) {
+        console.log('🔒 Initialization already in progress - skipping');
+        return false;
+    }
+    
+    if (window.gamesLoader && window.gamesLoader.isInitialized) {
+        console.log('✅ GamesLoader already initialized - skipping');
+        return true;
+    }
+    
+    initializationLock = true;
+    console.log('🎮 Starting GamesLoader initialization (singleton pattern)');
+    
     try {
-        window.gamesLoader = new GamesLoader();
-        console.log('✅ GamesLoader created successfully');
+        // Create or get existing singleton instance
+        if (!window.gamesLoader) {
+            window.gamesLoader = new GamesLoader();
+            console.log('✅ GamesLoader singleton instance created');
+        } else {
+            console.log('✅ Using existing GamesLoader singleton instance');
+        }
+        
+        // Initialize the singleton
         window.gamesLoader.init();
-        console.log('✅ GamesLoader initialized successfully');
+        console.log('✅ GamesLoader initialization triggered');
         return true;
     } catch (error) {
         console.error('❌ GamesLoader initialization failed:', error);
+        initializationLock = false;
         return false;
     }
 }
 
-// Try multiple initialization methods
-document.addEventListener('DOMContentLoaded', initializeGamesLoader);
-window.addEventListener('load', () => {
-    if (!window.gamesLoader) {
-        console.log('🔄 Retrying GamesLoader initialization on window load...');
-        initializeGamesLoader();
-    }
-});
-
-// Force initialization after a delay if still not loaded
-setTimeout(() => {
-    if (!window.gamesLoader) {
-        console.log('🔄 Force initializing GamesLoader after delay...');
-        initializeGamesLoader();
-    }
-}, 1000);
+// Single initialization with DOM ready check
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeGamesLoader);
+} else {
+    // DOM is already ready
+    initializeGamesLoader();
+}

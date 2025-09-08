@@ -1,9 +1,9 @@
 // Service Worker for BotInc Gaming Platform
-// Version: 5.0.0 - Mobile Full-Screen Game Preview Modal Implementation
+// Version: 6.0.0 - Singleton Pattern Fix for Multiple GamesLoader Instances
 
-const CACHE_NAME = 'botinc-v5.0.0';
-const STATIC_CACHE = 'botinc-static-v5.0.0';
-const DYNAMIC_CACHE = 'botinc-dynamic-v5.0.0';
+const CACHE_NAME = 'botinc-v6.0.0';
+const STATIC_CACHE = 'botinc-static-v6.0.0';
+const DYNAMIC_CACHE = 'botinc-dynamic-v6.0.0';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
