@@ -38,6 +38,9 @@ class GamesLoader {
         this.isInitialized = false;
         this.isInitializing = false;
         
+        // Container manipulation mutex
+        this.containerLock = false;
+        
         // Store singleton instance
         GamesLoader.instance = this;
         console.log('✅ GamesLoader singleton instance created');
@@ -634,6 +637,15 @@ class GamesLoader {
     }
 
     loadAllGamesForCarousel() {
+        // Container mutex lock to prevent race conditions
+        if (this.containerLock) {
+            console.warn('⚠️ Container operation already in progress - skipping duplicate load');
+            return;
+        }
+        
+        this.containerLock = true;
+        console.log('🔒 Acquiring container lock for carousel loading');
+        
         const container = document.getElementById('games-container');
         
         console.log(`🎠 Loading ${this.filteredGames.length} games for carousel`);
@@ -645,20 +657,35 @@ class GamesLoader {
             this.displayedGames = [];
         }
         
+        // Validate we have games to load
+        if (this.filteredGames.length === 0) {
+            console.warn('⚠️ No games to load - releasing container lock');
+            this.containerLock = false;
+            return;
+        }
+        
+        let loadedCount = 0;
+        
         // Load all filtered games at once for carousel
         this.filteredGames.forEach((game, index) => {
             setTimeout(() => {
                 // Double-check game isn't already displayed
                 if (this.displayedGames.find(displayed => displayed.id === game.id)) {
                     console.warn(`⚠️ Game ${game.title} already displayed - skipping duplicate`);
+                    loadedCount++;
+                    if (loadedCount === this.filteredGames.length) {
+                        this.containerLock = false;
+                        console.log('🔓 Released container lock after duplicate check');
+                    }
                     return;
                 }
                 
                 const gameElement = this.createGameElement(game);
                 container.appendChild(gameElement);
                 this.displayedGames.push(game);
+                loadedCount++;
                 
-                console.log(`✅ Added game ${index + 1}/${this.filteredGames.length}: ${game.title}`);
+                console.log(`✅ Added game ${loadedCount}/${this.filteredGames.length}: ${game.title}`);
                 
                 // Update stats after each game is added
                 this.updateStats();
@@ -668,10 +695,12 @@ class GamesLoader {
                     gameElement.classList.add('game-card-visible');
                 }, 50);
                 
-                // Setup carousel after all games loaded
-                if (index === this.filteredGames.length - 1) {
+                // Setup carousel after all games loaded and release lock
+                if (loadedCount === this.filteredGames.length) {
                     console.log('🎯 All games loaded - setting up carousel pagination');
                     this.setupCarouselPagination();
+                    this.containerLock = false;
+                    console.log('🔓 Released container lock after successful loading');
                 }
             }, index * 50); // Faster loading for carousel
         });
@@ -1700,10 +1729,10 @@ class GamesLoader {
     }
 }
 
-// Singleton initialization with proper guards
+// Singleton initialization with proper async/await and lock management
 let initializationLock = false;
 
-function initializeGamesLoader() {
+async function initializeGamesLoader() {
     // Prevent multiple initialization attempts
     if (initializationLock) {
         console.log('🔒 Initialization already in progress - skipping');
@@ -1716,7 +1745,7 @@ function initializeGamesLoader() {
     }
     
     initializationLock = true;
-    console.log('🎮 Starting GamesLoader initialization (singleton pattern)');
+    console.log('🎮 Starting GamesLoader initialization (singleton pattern with mutex lock)');
     
     try {
         // Create or get existing singleton instance
@@ -1727,12 +1756,17 @@ function initializeGamesLoader() {
             console.log('✅ Using existing GamesLoader singleton instance');
         }
         
-        // Initialize the singleton
-        window.gamesLoader.init();
-        console.log('✅ GamesLoader initialization triggered');
+        // Initialize the singleton with proper await
+        await window.gamesLoader.init();
+        console.log('✅ GamesLoader initialization completed successfully');
+        
+        // Release the lock after successful initialization
+        initializationLock = false;
         return true;
+        
     } catch (error) {
         console.error('❌ GamesLoader initialization failed:', error);
+        // Always release lock on error
         initializationLock = false;
         return false;
     }

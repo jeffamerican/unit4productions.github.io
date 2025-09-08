@@ -1,9 +1,9 @@
 // Service Worker for BotInc Gaming Platform
-// Version: 6.0.0 - Singleton Pattern Fix for Multiple GamesLoader Instances
+// Version: 7.0.0 - Complete Duplicate Cards Fix with Async Initialization & Mutex Locks
 
-const CACHE_NAME = 'botinc-v6.0.0';
-const STATIC_CACHE = 'botinc-static-v6.0.0';
-const DYNAMIC_CACHE = 'botinc-dynamic-v6.0.0';
+const CACHE_NAME = 'botinc-v7.0.0';
+const STATIC_CACHE = 'botinc-static-v7.0.0';
+const DYNAMIC_CACHE = 'botinc-dynamic-v7.0.0';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
